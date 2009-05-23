@@ -1,0 +1,69 @@
+#*********************************************************
+# Makefile for cmlib Tensor B-spline
+# G. Kenway May 21, 2009
+#*********************************************************
+
+RM  	        = /bin/rm -rf
+
+TENSBS_LIB = libtensbs.a
+
+OBJ =   bspline/bintk.o\
+	bspline/bnfac.o\
+	bspline/bnslv.o\
+	bspline/bspvn.o\
+	bspline/bvalu.o\
+	bspline/intrv.o\
+	machcon/i1mach.o\
+	tensbs/b2ink.o\
+	tensbs/b2val.o\
+	tensbs/b3ink.o\
+	tensbs/b3val.o\
+	tensbs/bknot.o\
+	tensbs/btpcf.o\
+	xerror/fdump.o\
+	xerror/j4save.o\
+	xerror/xerabt.o\
+	xerror/xerctl.o\
+	xerror/xerprt.o\
+	xerror/xerror.o\
+	xerror/xerrwv.o\
+	xerror/xersav.o\
+	xerror/xgetua.o
+
+###================================================
+###  Default compilers and flags
+
+### Intel Fortran Compiler
+FC = ifort
+
+FFLAGS = -O2 -r8 
+
+AR       = ar
+AR_FLAGS = -rvs
+
+default: libtensbs
+
+clean:
+	@echo "Removing .o files in bspline"
+	$(RM) bspline/*.o
+	@echo "Removing .o files in machcon"
+	$(RM) machcon/*.o
+	@echo "Removing .o files in tensbs"
+	$(RM) tensbs/*.o
+	@echo "Removing .o files in xerror"
+	$(RM) xerror/*.o
+	@echo "Removing library"
+	$(RM) libtensbs.a
+
+libtensbs: $(OBJ) 
+	$(AR) $(AR_FLAGS) $(TENSBS_LIB) $(OBJ)
+
+
+.SUFFIXES: .o .f
+
+
+.f.o:	
+	$(FC) $(FFLAGS) -c $< -o $*.o
+	@echo
+	@echo "        --- Compiled $*.f successfully ---"
+	@echo	
