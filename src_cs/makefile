@@ -8,7 +8,6 @@ RM  	        = /bin/rm -rf
 TENSBS_LIB = libtensbs_cs.a
 
 OBJ = 	complexify.o \
-	complexify.mod\
 	bspline/c_bintk.o\
 	bspline/c_bnfac.o\
 	bspline/c_bnslv.o\
@@ -66,7 +65,7 @@ libtensbs_cs: $(OBJ)
 	$(AR) $(AR_FLAGS) $(TENSBS_LIB) $(OBJ)
 
 
-.SUFFIXES: .o .f .f90
+.SUFFIXES: .o .f .f90 .mod
 
 
 .f.o:	
