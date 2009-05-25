@@ -12,12 +12,9 @@ import sys,os,string,time
 from numpy import array,zeros,sin,cos,array,linspace,pi,meshgrid,ones,where,\
     interp, append, hstack,sqrt,mat
 
-import scipy.linalg
-
 #pySpline
 sys.path.append("../")
-import pyspline as spline
-import pyspline_cs as spline_cs
+import pySpline 
 
 #Function to load airfoil file (precomp format)
 
@@ -37,7 +34,7 @@ def load_af(filename):
 
     for i in xrange(naf):
 
-        new_aux = string.split(f.readline()) # you can use also other separaters,
+        new_aux = string.split(f.readline())
 
         xnodes[i] = float(new_aux[0])
         ynodes[i] = float(new_aux[1])
@@ -70,21 +67,24 @@ sloc = [0.0000,0.1141,\
 le_loc = [0.5000,0.3300,\
           0.2500,0.2500,0.2500,0.2500,0.2500,0.2500,0.2500,0.2500,0.2500]
 
-airfoil_list = ['af1-6.inp','af-07.inp',\
-                    'af8-9.inp','af8-9.inp','af-10.inp','af-11.inp','af-12.inp',\
-                    'af-13.inp', 'af-14.inp','af15-16.inp','af15-16.inp']
+airfoil_list = ['af1-6.inp','af-07.inp','af8-9.inp','af8-9.inp','af-10.inp',\
+                    'af-11.inp','af-12.inp','af-13.inp', 'af-14.inp',\
+                    'af15-16.inp','af15-16.inp']
 
+n_nodes = zeros((naf,2),int) #number of nodes read in 
 
-n_nodes = zeros((naf,2),int)
-N = 15;
-x = zeros((naf,N*2-1,2),float)
-y = zeros((naf,N*2-1,2),float)
-z = zeros((naf,N*2-1,2),float)
+N = 10; #Numer of interpolation points for upper and lower surfaces
+x = zeros((naf,N*2-1),float)
+y = zeros((naf,N*2-1),float)
+z = zeros((naf,N*2-1),float)
 
 # This is the standard cosine distribution in x (one sided)
 x_interp = 0.5*(1-cos(linspace(0,pi,N)))
 #x_interp = linspace(0,1,N)
 
+# This section reads in the coordinates, find the te and reorders
+# the points so that it starts at the upper surface of the te 
+# goes around the le and ends at the lower surface te.
 for i in xrange(naf):
     n_temp,temp_x,temp_y = load_af(airfoil_list[i])
     
@@ -108,7 +108,7 @@ for i in xrange(naf):
     # lower Surface
     
     n_nodes[i,0] = te_index+1   # number of nodes on upper surface
-    n_nodes[i,1] = n_temp-te_index # number of nodes on lower surface Add extra 1 for extra le
+    n_nodes[i,1] = n_temp-te_index # number of nodes on lower surface
     
     x_l = temp_x[te_index:n_temp]
     y_l = temp_y[te_index:n_temp]
@@ -127,46 +127,22 @@ for i in xrange(naf):
     y_cor_full = hstack([y_interp_u,y_interp_l])
     
     # Finally Set the Coordinates
-    x[i,:,0] = x_cor_full*chord[i] - le_loc[i]*chord[i]
-    y[i,:,0] = y_cor_full*chord[i] 
-    z[i,:,0] = sloc[i]*bl_length
+    x[i,:] = x_cor_full*chord[i] - le_loc[i]*chord[i]
+    y[i,:] = y_cor_full*chord[i] 
+    z[i,:] = sloc[i]*bl_length
 
 #end for
 
+# create the surface object
+
 u = linspace(-1,1,naf)
-#v = -1+(1-cos(linspace(0,pi,N)))
 v = linspace(-1,1,2*N-1)
-
-ku = 4
-kv = 4
-print 'Going to do the interpolation'
-
-tu_x =[]; tv_x = []; bcoef_x = []
-tu_y =[]; tv_y = []; bcoef_y = []
-tu_z =[]; tv_z = []; bcoef_z = []
-for isurf in xrange(1):
-    tu,tv,bcoef = spline.b2ink(u,v,x[:,:,isurf],ku,kv)
-    tu_x.append(tu)
-    tv_x.append(tv)
-    bcoef_x.append(bcoef)
-
-    tu,tv,bcoef = spline.b2ink(u,v,y[:,:,isurf],ku,kv)
-    tu_y.append(tu)
-    tv_y.append(tv)
-    bcoef_y.append(bcoef)
-
-    tu,tv,bcoef = spline.b2ink(u,v,z[:,:,isurf],ku,kv)
-    tu_z.append(tu)
-    tv_z.append(tv)
-    bcoef_z.append(bcoef)
-#end for 
+surface = pySpline.spline(u,v,x,y,z)
 
 #Now re-interpolate for the tecplot output
 
 u_plot = 150
 v_plot = 31
-
-#v = -1+(1-cos(linspace(0,2*pi,v_plot)))
 
 u = linspace(-1,1,u_plot)
 v = linspace(-1,1,v_plot)
@@ -176,114 +152,47 @@ nodes_total = u_plot*v_plot
 elements_total = (u_plot-1)*(v_plot-1) 
 
 f = open("output.dat",'w')
-points = zeros((u_plot,v_plot,2,3),float) # section, nodes,isurf, [x,y,z]
+points = zeros((u_plot,v_plot,3),float) # section, nodes, [x,y,z]
 
 f.write ('\"Blade Data\"\n')
 f.write ('VARIABLES = "X", "Y","Z"\n')
-
-for isurf in xrange(1):
-    f.write('Zone N=%d, E=%d\n'%(nodes_total,elements_total))
-    f.write('DATAPACKING=POINT,ZONETYPE=FEQUADRILATERAL\n')
-    for i in xrange(u_plot):
-        for j in xrange(v_plot):
-            points[i,j,isurf,0] = spline.b2val(u[i],v[j],0,0,tu_x[isurf],tv_x[isurf],ku,kv,bcoef_x[isurf])
-            points[i,j,isurf,1] = spline.b2val(u[i],v[j],0,0,tu_y[isurf],tv_y[isurf],ku,kv,bcoef_y[isurf])
-            points[i,j,isurf,2] = spline.b2val(u[i],v[j],0,0,tu_z[isurf],tv_z[isurf],ku,kv,bcoef_z[isurf])
-        # end for
+f.write('Zone N=%d, E=%d\n'%(nodes_total,elements_total))
+f.write('DATAPACKING=POINT,ZONETYPE=FEQUADRILATERAL\n')
+for i in xrange(u_plot):
+    for j in xrange(v_plot):
+        points[i,j,:] = surface.getValue(u[i],v[j])
     # end for
-
-    # The next step will be to output all the x-y-z Data
-    for i in xrange(u_plot):
-        for j in xrange(v_plot):
-            f.write("%f %f %f\n"%(points[i,j,isurf,0],points[i,j,isurf,1],points[i,j,isurf,2]))
-        # end for
-    # end for
-                                 
-           
-    # now write out the connectivity
-    for i in xrange(u_plot-1):
-        for j in xrange(v_plot-1):
-            f.write( '%d %d %d %d\n'%(i*v_plot + (j+1), i*v_plot+(j+2), (i+1)*v_plot+(j+2),(i+1)*v_plot + (j+1)))
-        # end for
-    #end for
 # end for
+
+# The next step will be to output all the x-y-z Data
+for i in xrange(u_plot):
+    for j in xrange(v_plot):
+        f.write("%f %f %f\n"%(points[i,j,0],points[i,j,1],points[i,j,2]))
+    # end for
+# end for
+                                 
+# now write out the connectivity
+for i in xrange(u_plot-1):
+    for j in xrange(v_plot-1):
+        f.write( '%d %d %d %d\n'%(i*v_plot + (j+1), i*v_plot+(j+2), \
+                                (i+1)*v_plot+(j+2),(i+1)*v_plot + (j+1)))
+    # end for
+#end for
 
 # Also dump out the control points
-
-for isurf in xrange(1):
-    f.write('Zone I=%d, J=%d\n'%(naf,N*2-1))
-    f.write('DATAPACKING=POINT\n')
-    for j in xrange(2*N-1):
-        for i in xrange(naf):
-            f.write("%f %f %f \n"%(bcoef_x[isurf][i,j],\
-                                   bcoef_y[isurf][i,j],\
-                                   bcoef_z[isurf][i,j]))
-        # end for
-    # end for 
-# end for
+f.write('Zone I=%d, J=%d\n'%(naf,N*2-1))
+f.write('DATAPACKING=POINT\n')
+for j in xrange(2*N-1):
+    for i in xrange(naf):
+        f.write("%f %f %f \n"%(surface.bcoef_x[i,j],\
+                                   surface.bcoef_y[i,j],\
+                                   surface.bcoef_z[i,j]))
+    # end for
+# end for 
 f.close()
  
+# Test of a newton iteration to find a location on the surface
+# given the gloabl x-z coordiante
+u,v=surface.findUV(0,10,-.10,0.3)
+print 'u,v are:',u,v
 
-
-
-
-# Test of a newton iteration to find a location on the surface given the gloabl x-z coordiante
-
-# For example, find the u-v coordinates for the upper and lower surfaces for x=0,z=10
-
-x_o = 0
-z_o = 10
-# Note
-# te = -1, le =0, te = 1
-
-# We *should* always get a good guess 
-
-u_o = (z_o/bl_length)*2 -1 #This should be excellent
-v_o = .8  # should be ok
-
-
-print 'u_o:',u_o
-print 'v_o:',v_o
-
-#eval
-isurf = 0
-x = spline.b2val(u_o,v_o,0,0,tu_x[isurf],tv_x[isurf],ku,kv,bcoef_x[isurf])
-y = spline.b2val(u_o,v_o,0,0,tu_y[isurf],tv_y[isurf],ku,kv,bcoef_y[isurf])
-z = spline.b2val(u_o,v_o,0,0,tu_z[isurf],tv_z[isurf],ku,kv,bcoef_z[isurf])
-
-print 'x,y,z:',x,y,z
-
-u = u_o
-v = v_o
-
-for iter in xrange(12):
-
-
-    x_iter = spline.b2val(u,v,0,0,tu_x[isurf],tv_x[isurf],ku,kv,bcoef_x[isurf])
-    y_iter = spline.b2val(u,v,0,0,tu_y[isurf],tv_y[isurf],ku,kv,bcoef_y[isurf])
-    z_iter = spline.b2val(u,v,0,0,tu_z[isurf],tv_z[isurf],ku,kv,bcoef_z[isurf])
-
-    f = mat([x_iter-x_o,z_iter-z_o])
-
-    #now get the derivative
-
-    dxdu = spline.b2val(u,v,1,0,tu_x[isurf],tv_x[isurf],ku,kv,bcoef_x[isurf])
-    dxdv = spline.b2val(u,v,0,1,tu_x[isurf],tv_x[isurf],ku,kv,bcoef_x[isurf])
-
-    dzdu = spline.b2val(u,v,1,0,tu_z[isurf],tv_z[isurf],ku,kv,bcoef_z[isurf])
-    dzdv = spline.b2val(u,v,0,1,tu_z[isurf],tv_z[isurf],ku,kv,bcoef_z[isurf])
-
-    
-    J = mat([[dxdu,dxdv],[dzdu,dzdv]])
-    print 'J:',J
-    J_inv = scipy.linalg.inv(mat(J))
-    #Now update the u and v
-    
-    x_up = J_inv*f.T
-
-    u = u - 0.75*x_up[0]
-    v = v - 0.75*x_up[1]
-    print 'f:',f
-    print "Itertion %d, u=%f,v=%f\n"%(iter,u,v)
-
-print x_iter,y_iter,z_iter
