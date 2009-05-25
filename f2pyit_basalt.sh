@@ -9,7 +9,7 @@ make
 cd ../
 
 #Now f2py just the two functions we need
-f2py  --fcompiler=intele --f90flags=-r8 -c -m pyspline src/tensbs/b2ink.f src/tensbs/b2val.f src/libtensbs.a
+f2py  --fcompiler=intele --f90flags=-r8 -c -m pyspline src/pyspline.pyf src/libtensbs.a
 
 #Now make the source files for the complex version
 
@@ -21,6 +21,6 @@ make
 
 cd ../
 
-f2py  -c --fcompiler=intele  --f90flags=-r8 -I./src_cs -m pyspline_cs src_cs/tensbs/c_b2ink.f src_cs/tensbs/c_b2val.f src_cs/libtensbs_cs.a
+f2py  --fcompiler=intele --f90flags=-r8 -I./src_cs -c -m pyspline_cs src_cs/pyspline_cs.pyf src_cs/libtensbs_cs.a
 
 mv pyspline_cs.so ./python

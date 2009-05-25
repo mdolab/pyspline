@@ -1,0 +1,40 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module pyspline ! in 
+    interface  ! in :pyspline
+        subroutine b2ink(x,nx,y,ny,fcn,ldf,kx,ky,tx,ty,bcoef,work,iflag) ! in :pyspline:b2ink.f
+            real*8, intent(in), dimension(nx) :: x
+            integer optional,check(len(x)>=nx),depend(x) :: nx=len(x)
+            real*8, intent(in),dimension(ny) :: y
+            integer optional,check(len(y)>=ny),depend(y) :: ny=len(y)
+            real*8, intent(in), dimension(ldf,ny),depend(ny) :: fcn
+            integer optional,check(shape(fcn,0)==ldf),depend(fcn) :: ldf=shape(fcn,0)
+            integer, intent(in) :: kx
+            integer, intent(in) :: ky
+            real*8, intent(out),dimension(nx+kx) :: tx
+            real*8, intent(out),dimension(ny+ky) :: ty
+            real*8, intent(out), dimension(nx,ny),depend(nx,ny) :: bcoef
+            real*8, optional, dimension(nx*ny + MAX(2*kx*(nx+1),2*ky*(ny+1))) ::work
+            integer,optional,intent(in) :: iflag=0
+        end subroutine b2ink
+        function b2val(xval,yval,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,work) ! in :pyspline:b2val.f
+            real*8,intent(in) :: xval
+            real*8,intent(in) :: yval
+            integer,intent(in) :: idx
+            integer,intent(in) :: idy
+            real*8,intent(in), dimension(nx+kx) :: tx
+            real*8,intent(in), dimension(ny+ky) :: ty
+            integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
+            integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
+            integer,intent(in) :: kx
+            integer,intent(in) :: ky
+            real*8,intent(in), dimension(nx,ny) :: bcoef
+            real*8,optional, dimension(3*MAX(kx,ky)+ky) :: work
+            real*8,intent(out) :: b2val
+        end function b2val
+    end interface 
+end python module pyspline
+
+! This file was auto-generated with f2py (version:2_4422).
+! See http://cens.ioc.ee/projects/f2py2e/
