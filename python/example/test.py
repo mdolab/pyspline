@@ -167,7 +167,7 @@ for i in xrange(u_plot):
 # The next step will be to output all the x-y-z Data
 for i in xrange(u_plot):
     for j in xrange(v_plot):
-        f.write("%f %f %f\n"%(points[i,j,0],points[i,j,1],points[i,j,2]))
+        f.write("%5g %5g %5g\n"%(points[i,j,0],points[i,j,1],points[i,j,2]))
     # end for
 # end for
                                  
@@ -184,7 +184,7 @@ f.write('Zone I=%d, J=%d\n'%(naf,N*2-1))
 f.write('DATAPACKING=POINT\n')
 for j in xrange(2*N-1):
     for i in xrange(naf):
-        f.write("%f %f %f \n"%(surface.bcoef_x[i,j],\
+        f.write("%5g %5g %5g \n"%(surface.bcoef_x[i,j],\
                                    surface.bcoef_y[i,j],\
                                    surface.bcoef_z[i,j]))
     # end for
