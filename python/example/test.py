@@ -135,7 +135,7 @@ for i in xrange(naf):
 
 # create the surface object
 
-u = linspace(-1,1,naf)
+u = array(sloc)*2-1 #These are the spanwise normalized coordinates 
 v = linspace(-1,1,2*N-1)
 surface = pySpline.spline(u,v,x,y,z)
 
