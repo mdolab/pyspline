@@ -117,7 +117,7 @@ class spline():
 
         '''
 
-        maxIter = 15 
+        maxIter = 50
 
         u = u0
         v = v0
