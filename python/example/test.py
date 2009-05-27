@@ -193,6 +193,6 @@ f.close()
  
 # Test of a newton iteration to find a location on the surface
 # given the gloabl x-z coordiante
-u,v=surface.findUV(0,10,-.10,0.3)
-print 'u,v are:',u,v
-
+timeA = time.time()
+u,v,x = surface.findUV([0,0,10],[1,1,1],.1,-0.3)
+print 'u,v,x:',u,v,x
