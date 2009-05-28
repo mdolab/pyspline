@@ -178,6 +178,7 @@ if __name__ == '__main__':
 	
     # Run a Simple Test Case
     print 'Testing pySpline...\n'
+    print 'There is an example in the ./example directory'
 
 
 
