@@ -33,7 +33,33 @@ python module pyspline ! in
             real*8,optional, dimension(3*MAX(kx,ky)+ky) :: work
             real*8,intent(out) :: b2val
         end function b2val
-    end interface 
+
+        subroutine bintk(x,y,t,n,k,bcoef,q,work) ! in bintk.f
+          real*8,intent(in), dimension(n) :: x
+          real*8,intent(in), dimension(n),depend(n) :: y
+          real*8,intent(in), dimension(n+k) :: t
+          integer optional,check(len(x)>=n),depend(x) :: n=len(x)
+          integer,intent(in) :: k
+          real*8,intent(out), dimension(n),depend(n) :: bcoef
+          real*8,optional, dimension((2*k-1)*n) :: q
+          real*8,optional, dimension(2*k),depend(k) :: work
+        end subroutine bintk
+
+
+        function bvalu(t,a,n,k,ideriv,x,inbv,work) ! in bvalu.f
+          real*8,intent(in), dimension(n+k),depend(k) :: t
+          real*8,intent(in), dimension(n) :: a
+          integer optional,check(len(a)>=n),depend(a) :: n=len(a)
+          integer ,intent(in):: k
+          integer ,intent(in):: ideriv
+          real*8 ,intent(in):: x
+          integer,optional,intent(out) :: inbv
+          real*8,optional, dimension(3*k),depend(k) :: work
+          real*8, intent(out):: bvalu
+        end function bvalu
+
+
+     end interface
 end python module pyspline
 
 ! This file was auto-generated with f2py (version:2_4422).
