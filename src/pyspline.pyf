@@ -18,6 +18,7 @@ python module pyspline ! in
             real*8, optional, dimension(nx*ny + MAX(2*kx*(nx+1),2*ky*(ny+1))) ::work
             integer,optional,intent(in) :: iflag=0
         end subroutine b2ink
+        
         function b2val(xval,yval,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,work) ! in :pyspline:b2val.f
             real*8,intent(in) :: xval
             real*8,intent(in) :: yval
@@ -57,6 +58,22 @@ python module pyspline ! in
           real*8,optional, dimension(3*k),depend(k) :: work
           real*8, intent(out):: bvalu
         end function bvalu
+
+        subroutine bint4(x,y,ndata,ibcl,ibcr,fbcl,fbcr,kntopt,t,bcoef,n,k,w) ! in bint4.f
+          real*8,intent(in), dimension(ndata) :: x
+          real*8,intent(in), dimension(ndata) :: y
+          integer,optional,check(len(x)>=ndata),depend(x) :: ndata=len(x)
+          integer,intent(in) :: ibcl
+          integer,intent(in) :: ibcr
+          real*8,intent(in) :: fbcl
+          real*8,intent(in) :: fbcr
+          integer,intent(in) :: kntopt
+          real*8,intent(out), dimension(ndata+6) :: t
+          real*8,intent(out), dimension(ndata+2) :: bcoef
+          integer,intent(out) :: n
+          integer,intent(out) :: k
+          real*8,optional, dimension(5*(ndata+2)) :: w
+        end subroutine bint4
 
 
      end interface
