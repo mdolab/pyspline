@@ -73,8 +73,8 @@ C                           = 2 sets a symmetric placement of knots
 C                               about T(4) and T(N+1)
 C                           = 3 sets TNP)=WNP) and T(N+1+I)=w(3+I),I=1,3
 C                               where WNP),I=1,6 is supplied by the user
-C           W      - work array of dimension at least 5*(NDATA+2)
-C                    if KNTOPT=3, then W(1),W(2),W(3) are knot values to
+C           W      - array workl of dimension at least 5*(NDATA+2)
+C     if KNTOPT=3, then W(1),W(2),W(3) are knot values to
 C                    the left of X(1) and W(4),W(5),W(6) are knot
 C                    values to the right of X(NDATA) in increasing
 C                    order to be supplied by the user

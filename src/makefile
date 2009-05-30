@@ -7,13 +7,26 @@ RM  	        = /bin/rm -rf
 
 TENSBS_LIB = libtensbs.a
 
-OBJ =   bspline/bintk.o\
+OBJ =   bspline/bfqad.o\
+	bspline/bint4.o\
+	bspline/bintk.o\
 	bspline/bnfac.o\
 	bspline/bnslv.o\
+	bspline/bsgq8.o\
+	bspline/bspdr.o\
+	bspline/bspev.o\
+	bspline/bsppp.o\
+	bspline/bspvd.o\
 	bspline/bspvn.o\
+	bspline/bsqad.o\
 	bspline/bvalu.o\
 	bspline/intrv.o\
+	bspline/pfqad.o\
+	bspline/ppgq8.o\
+	bspline/ppqad.o\
+	bspline/ppval.o\
 	machcon/i1mach.o\
+	machcon/r1mach.o\
 	tensbs/b2ink.o\
 	tensbs/b2val.o\
 	tensbs/b3ink.o\
