@@ -28,11 +28,13 @@ OBJ =   bspline/bfqad.o\
 	machcon/i1mach.o\
 	machcon/r1mach.o\
 	tensbs/b2ink.o\
+	tensbs/b2ink_mod.o\
 	tensbs/b2val.o\
 	tensbs/b3ink.o\
 	tensbs/b3val.o\
 	tensbs/bknot.o\
 	tensbs/btpcf.o\
+	tensbs/btpcf_mod.o\
 	xerror/fdump.o\
 	xerror/j4save.o\
 	xerror/xerabt.o\
