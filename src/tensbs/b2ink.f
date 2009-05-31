@@ -206,7 +206,23 @@ C
       IFLAG = 1
       IW = NX*NY + 1
       CALL BTPCF(X,NX,FCN,LDF,NY,TX,KX,WORK,WORK(IW))
+c      print *,'b2ink between:'
+c      do i = 1,NY
+c         do j =1,NX
+c            print *,'i,j,coef:',i,j,work((i-1)*NX + j)
+c         end do
+c      end do
+
+
       CALL BTPCF(Y,NY,WORK,NY,NX,TY,KY,BCOEF,WORK(IW))
+
+c      print *,'b2ink after:'
+c      do i = 1,NY
+c         do j =1,NX
+c           print *,'i,j,coef:',i,j,work((i-1)*NX + j)
+c         end do
+c      end do
+
       GO TO 9999
 C
 C  -----

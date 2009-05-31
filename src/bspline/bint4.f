@@ -106,6 +106,12 @@ C
       REAL R1MACH
       DIMENSION X(1), Y(1), T(1), BCOEF(1), W(5,1), VNIKX(4,4), WORK(15)
 C***FIRST EXECUTABLE STATEMENT  BINT4
+!      print *,'weclome to bint4.f:'
+!      do i=1,ndata
+!         print *,'x,y:',x(i),y(i)
+!      end do
+
+
       WDTOL = R1MACH(4)
       TOL = SQRT(WDTOL)
       IF (NDATA.LT.2) GO TO 200

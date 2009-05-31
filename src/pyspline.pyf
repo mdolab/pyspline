@@ -19,6 +19,23 @@ python module pyspline ! in
             integer,optional,intent(in) :: iflag=0
         end subroutine b2ink
         
+        subroutine b2ink_mod(x,nxdata,y,nydata,fcn,ldf,kx,ky,tx,ty,bcoef,work,iflag) ! in :pyspline:b2ink.f
+            real*8, intent(in), dimension(nxdata) :: x
+            integer optional,check(len(x)>=nxdata),depend(x) :: nxdata=len(x)
+            real*8, intent(in),dimension(nydata) :: y
+            integer optional,check(len(y)>=nydata),depend(y) :: nydata=len(y)
+            real*8, intent(in), dimension(ldf,nydata),depend(nydata) :: fcn
+            integer optional,check(shape(fcn,0)==ldf),depend(fcn) :: ldf=shape(fcn,0)
+            integer, intent(in) :: kx
+            integer, intent(in) :: ky
+            real*8, intent(out),dimension(nxdata+2+kx) :: tx
+            real*8, intent(out),dimension(nydata+2+ky) :: ty
+            real*8, intent(out), dimension(nxdata+2,nydata+2),depend(nxdata,nydata) :: bcoef
+!            real*8, optional, dimension((nxdata+2)*(nydata+2) + MAX(2*kx*(nxdata+2+1),2*ky*(nydata+2+1))) ::work
+            real*8, optional, dimension(100000) :: work
+            integer,optional,intent(in) :: iflag=0
+          end subroutine b2ink_mod
+        
         function b2val(xval,yval,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,work) ! in :pyspline:b2val.f
             real*8,intent(in) :: xval
             real*8,intent(in) :: yval
@@ -45,7 +62,6 @@ python module pyspline ! in
           real*8,optional, dimension((2*k-1)*n) :: q
           real*8,optional, dimension(2*k),depend(k) :: work
         end subroutine bintk
-
 
         function bvalu(t,a,n,k,ideriv,x,inbv,work) ! in bvalu.f
           real*8,intent(in), dimension(n+k),depend(k) :: t
