@@ -4,72 +4,79 @@ from matplotlib.pylab import plot,show
 from pyspline import *
 
 #Debugging script for testing derivative  constrained 2D b-spline surfaces
-Nu = 6
-Nv = 12
-x0 = array([0,0.000001,0.0325,0.05,0.1,0.2,0.35,0.5,0.65,0.85,0.925,1])
-#x0 = linspace(0,1,Nv)
+N = 34
+x0 = 0.5*(1-cos(linspace(0,pi,N)))
+x0 = array([0.00000,0.00018,0.00255,0.00954,0.02090,0.03650,0.05640,0.08030,0.10801,0.13934,0.17395,0.21146,0.25149,0.29361,0.33736,0.38228,0.42820,0.47526,0.52324,0.57161,0.61980,0.66724,0.71333,0.75749,0.79915,0.83778,0.87287,0.90391,0.93072,0.95355,0.97251,0.98719,0.99668,1.00000])
+y0 = array([0.00000,0.00159,0.00748,0.01640,0.02600,0.03580,0.04560,0.05520,0.06430,0.07290,0.08070,0.08760,0.09340,0.09810,0.10133,0.10294,0.10249,0.10005,0.09610,0.09090,0.08490,0.07820,0.07100,0.06340,0.05570,0.04800,0.04030,0.03260,0.02480,0.01700,0.00982,0.00431,0.00103,0.00000])
+
 #Top surface of a naca0012 airfoil
 y0= 0.12/0.2*(0.2969*x0**0.5-0.1260*x0-0.3516*x0**2 + 0.2843*x0**3-0.1015*x0**4)
 
-#create v
-v = zeros(Nv)
+#create s
+s = zeros(N)
 
-for i in xrange(Nv-1):
-    v[i+1] = v[i] + sqrt((x0[i+1]-x0[i])**2 + (y0[i+1]-y0[i])**2)
+for i in xrange(N-1):
+    s[i+1] = s[i] + sqrt((x0[i+1]-x0[i])**2 + (y0[i+1]-y0[i])**2)
 
-v = v/v[-1] #Normalize s
+s = s/s[-1] #Normalize s
 
-#Create u 
-print 'v:',v
-u = linspace(0,1,Nu)  #Just do a straight wing
+iopt = 0
+w = ones(N)
+w[0] = 1e8
+w[-1]= 1e8
+k = 3
+n0 = 11
+smooth = 5e-7
+nest = len(x0)+k+1
+print 'input:'
+print 'smooth:',smooth
 
-#Create the surface points
-ku = 4
-kv = 4
+# do a uniform knot vector
+t = zeros(nest)
+t[0:k+1] = s[0]
+t[n0-k-1:n0] = s[-1]
+t[k:n0-k] = 0.5*(1-cos(linspace(0,pi,n0-2*k)))
+print 't',t 
+t[k:n0-k] = linspace(0,1,n0-2*k)
 
-x = zeros((Nu,Nv))
-y = zeros((Nu,Nv))
-z = zeros((Nu,Nv))
+print 't_before:',t[0:n0]
 
-for i in xrange(Nu):
-    x[i,:] = x0
-    y[i,:] = y0
-    z[i,:] = 5*u[i]
+n,tx,cx,fp,ier = curfit(iopt,s,x0,w,s[0],s[-1],k,smooth,n0,t)
+n,ty,cy,fp,ier = curfit(iopt,s,y0,w,s[0],s[-1],k,smooth,n0,t)
 
-print 'x:',x
-print 'y:',y
-print 'z:',z
+print 'n:',n
+print 't:',t[0:n]
+print 'cx:',cx[0:n-k-1]
+print 'cy:',cy[0:n-k-1]
 
-print 'calling b2ink'
-tu_x,tv_x,bcoef_x = b2ink(u,v,x,ku,kv)
-tu_y,tv_y,bcoef_y = b2ink(u,v,y,ku,kv)
-tu_z,tv_z,bcoef_z = b2ink(u,v,z,ku,kv)
-print 'bcoef_x:',bcoef_x
-bcoef_x[:,1] = 0
-print 'bcoef_x:',bcoef_x
-#print 'bcoef_y:',bcoef_y
-#print 'bcoef_z:',bcoef_z
+print 'fp:',fp
+print 'ier:',ier
 
+cx[0] = x0[0]
+cy[0] = y0[0]
+cx[-1] = x0[-1]
+cy[-1] = y0[-1]
 
 
-#val= b2val(0.5,0.5,0,0,tu_x,tv_x,4,4,bcoef_x)
 
-#print 'calling b2ink_mod:'
-#tu_x,tv_x,bcoef_x = b2ink_mod(v,u,x.T,ku,kv)
+# n,tx,cx,fp,ier = curfit(1,s,x0,w,s[0],s[-1],k,smooth/2,n,tx)
+# n,ty,cy,fp,ier = curfit(1,s,y0,w,s[0],s[-1],k,smooth/2,n,ty)
 
-#Very quick tecplot output
-Nu = 10
-Nv = 1000
-u = linspace(0,1,Nu)
-v = linspace(0,1,Nv)
-f = open('output.dat','w')
-f.write ('VARIABLES = "X", "Y","Z"\n')
-f.write('Zone I=%d J = %d\n'%(Nu,Nv))
-f.write('DATAPACKING=POINT\n')
-for j in xrange(Nv):
-    for i in xrange(Nu):
-        f.write('%f %f %f \n'%(b2val(u[i],v[j],0,0,tu_x,tv_x,4,4,bcoef_x),
-                               b2val(u[i],v[j],0,0,tu_y,tv_y,4,4,bcoef_y),
-                               b2val(u[i],v[j],0,0,tu_z,tv_z,4,4,bcoef_z)))
-        #f.write('%f %f %f \n'%(x[i,j],y[i,j],z[i,j]))
-f.close()
+# n,tx,cx,fp,ier = curfit(1,s,x0,w,s[0],s[-1],k,smooth/4,n,tx)
+# n,ty,cy,fp,ier = curfit(1,s,y0,w,s[0],s[-1],k,smooth/4,n,ty)
+
+
+# n,t,c,fp,ier = curfit(iopt,x,y,w,xb,xe,k,s,m=len(x),nest=m+k+1,wrk=,lwrk=len(wrk),iwrk=)
+
+plot(x0,y0,'k-')
+plot(cx[0:n-k-1],cy[0:n-k-1],'s')
+
+
+#Check interpolation
+x_interp,ier = splev(tx[0:n],cx[0:n],k,s)
+y_interp,ier = splev(ty[0:n],cy[0:n],k,s)
+
+
+plot(x_interp,y_interp,'-')
+
+show()

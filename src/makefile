@@ -28,13 +28,11 @@ OBJ =   bspline/bfqad.o\
 	machcon/i1mach.o\
 	machcon/r1mach.o\
 	tensbs/b2ink.o\
-	tensbs/b2ink_mod.o\
 	tensbs/b2val.o\
 	tensbs/b3ink.o\
 	tensbs/b3val.o\
 	tensbs/bknot.o\
 	tensbs/btpcf.o\
-	tensbs/btpcf_mod.o\
 	xerror/fdump.o\
 	xerror/j4save.o\
 	xerror/xerabt.o\
@@ -43,7 +41,29 @@ OBJ =   bspline/bfqad.o\
 	xerror/xerror.o\
 	xerror/xerrwv.o\
 	xerror/xersav.o\
-	xerror/xgetua.o
+	xerror/xgetua.o\
+	fitpack/curfit.o\
+	fitpack/fpbspl.o\
+	fitpack/fpcurf.o\
+	fitpack/fpgivs.o\
+	fitpack/fprati.o\
+	fitpack/fpback.o\
+	fitpack/fpchec.o\
+	fitpack/fpdisc.o\
+	fitpack/fpknot.o\
+	fitpack/fprota.o\
+	fitpack/splev.o\
+	fitpack/fpbacp.o\
+	fitpack/fpchep.o\
+	fitpack/fpgrpa.o\
+	fitpack/fppasu.o\
+	fitpack/fptrnp.o\
+	fitpack/fptrpe.o\
+	fitpack/parsur.o\
+	fitpack/fpsuev.o\
+	fitpack/surev.o
+
+
 
 ###================================================
 ###  Default compilers and flags
@@ -67,6 +87,8 @@ clean:
 	$(RM) tensbs/*.o
 	@echo "Removing .o files in xerror"
 	$(RM) xerror/*.o
+	@echo "Removign .o files in fitpack"
+	$(RM) fitpack/*.o
 	@echo "Removing library"
 	$(RM) libtensbs.a
 
