@@ -19,22 +19,22 @@ python module pyspline ! in
             integer,optional,intent(in) :: iflag=0
         end subroutine b2ink
         
-        subroutine b2ink_mod(x,nxdata,y,nydata,fcn,ldf,kx,ky,tx,ty,bcoef,work,iflag) ! in :pyspline:b2ink.f
-            real*8, intent(in), dimension(nxdata) :: x
-            integer optional,check(len(x)>=nxdata),depend(x) :: nxdata=len(x)
-            real*8, intent(in),dimension(nydata) :: y
-            integer optional,check(len(y)>=nydata),depend(y) :: nydata=len(y)
-            real*8, intent(in), dimension(ldf,nydata),depend(nydata) :: fcn
-            integer optional,check(shape(fcn,0)==ldf),depend(fcn) :: ldf=shape(fcn,0)
-            integer, intent(in) :: kx
-            integer, intent(in) :: ky
-            real*8, intent(out),dimension(nxdata+2+kx) :: tx
-            real*8, intent(out),dimension(nydata+2+ky) :: ty
-            real*8, intent(out), dimension(nxdata+2,nydata+2),depend(nxdata,nydata) :: bcoef
-!            real*8, optional, dimension((nxdata+2)*(nydata+2) + MAX(2*kx*(nxdata+2+1),2*ky*(nydata+2+1))) ::work
-            real*8, optional, dimension(100000) :: work
-            integer,optional,intent(in) :: iflag=0
-          end subroutine b2ink_mod
+!         subroutine b2ink_mod(x,nxdata,y,nydata,fcn,ldf,kx,ky,tx,ty,bcoef,work,iflag) ! in :pyspline:b2ink.f
+!             real*8, intent(in), dimension(nxdata) :: x
+!             integer optional,check(len(x)>=nxdata),depend(x) :: nxdata=len(x)
+!             real*8, intent(in),dimension(nydata) :: y
+!             integer optional,check(len(y)>=nydata),depend(y) :: nydata=len(y)
+!             real*8, intent(in), dimension(ldf,nydata),depend(nydata) :: fcn
+!             integer optional,check(shape(fcn,0)==ldf),depend(fcn) :: ldf=shape(fcn,0)
+!             integer, intent(in) :: kx
+!             integer, intent(in) :: ky
+!             real*8, intent(out),dimension(nxdata+2+kx) :: tx
+!             real*8, intent(out),dimension(nydata+2+ky) :: ty
+!             real*8, intent(out), dimension(nxdata+2,nydata+2),depend(nxdata,nydata) :: bcoef
+! !            real*8, optional, dimension((nxdata+2)*(nydata+2) + MAX(2*kx*(nxdata+2+1),2*ky*(nydata+2+1))) ::work
+!             real*8, optional, dimension(100000) :: work
+!             integer,optional,intent(in) :: iflag=0
+!           end subroutine b2ink_mod
         
         function b2val(xval,yval,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,work) ! in :pyspline:b2val.f
             real*8,intent(in) :: xval
@@ -91,6 +91,83 @@ python module pyspline ! in
           real*8,optional, dimension(5*(ndata+2)) :: w
         end subroutine bint4
 
+        subroutine curfit(iopt,m,x,y,w,xb,xe,k,s,nest,n,t,c,fp,wrk,lwrk,iwrk,ier) ! in curfit.f
+          integer,intent(in) :: iopt
+          integer optional,check(len(x)>=m),depend(x) :: m=len(x)
+          real*8,intent(in), dimension(m) :: x
+          real*8,intent(in), dimension(m),depend(m) :: y
+          real*8,intent(in), dimension(m),depend(m) :: w
+          real*8,intent(in):: xb
+          real*8,intent(in) :: xe
+          integer,intent(in) :: k
+          real*8,intent(in) :: s
+          integer optional,depend(m),depend(k):: nest=m+k+1
+          integer,intent(in,out) :: n
+          real*8,intent(in,out),dimension(nest) :: t
+          real*8,intent(out), dimension(nest),depend(nest) :: c
+          real*8,intent(out) :: fp
+          real*8,optional, dimension((m*(k+1)+nest*(7+3*k))),depend(m),depend(k),depend(nest) :: wrk
+          integer, optional,check(len(wrk)>=lwrk),depend(wrk) :: lwrk=len(wrk)
+          integer, optional,dimension(nest),depend(nest) :: iwrk
+          integer,intent(out) :: ier
+        end subroutine curfit
+
+        subroutine splev(t,n,c,k,x,y,m,ier) ! in splev.f
+          real*8,intent(in), dimension(n) :: t
+          integer, optional,check(len(t)>=n),depend(t) :: n=len(t)
+          real*8,intent(in), dimension(n),depend(n) :: c
+          integer,intent(in) :: k
+          real*8,intent(in), dimension(m) :: x
+          real*8,intent(out), dimension(m),depend(m) :: y
+          integer, optional,check(len(x)>=m),depend(x) :: m=len(x)
+          integer,intent(out) :: ier
+        end subroutine splev
+
+        subroutine parsur(iopt,ipar,idim,mu,u,mv,v,f,s,nuest,nvest,nu,tu,nv,tv,c,fp,wrk,lwrk,iwrk,kwrk,ier) ! in parsur.f
+          integer,intent(in) :: iopt
+          integer,intent(in), dimension(2) :: ipar
+          integer,intent(in) :: idim
+          integer optional,check(len(u)>=mu),depend(u) :: mu=len(u)
+          real*8,intent(in), dimension(mu) :: u
+          integer optional,check(len(v)>=mv),depend(v) :: mv=len(v)
+          real*8,intent(in), dimension(mv) :: v
+          real*8,intent(in), dimension(mu*mv*idim),depend(idim,mu,mv) :: f
+          real*8,intent(in) :: s
+          integer optional,depend(mu) :: nuest = mu + 6
+          integer optional,depend(mv) :: nvest = mv + 6
+          integer, intent(in,out) :: nu
+          real*8, intent(in,out), dimension(nuest) :: tu
+          integer,intent(in,out) :: nv
+          real*8, intent(in,out),dimension(nvest) :: tv
+          real*8,intent(out), dimension((nuest-4)*(nvest-4)*idim),depend(idim,nuest,nvest) :: c
+          real*8,intent(out) :: fp
+          real*8,optional, dimension(4+nuest*(mv*idim+11+4*1)+nvest*(11+4*1)+4*(mu+mv)+MAX(nuest,mv)*idim),depend(nuest,idim,nvest,mu,mv) :: wrk
+          integer optional,check(len(wrk)>=lwrk),depend(wrk) :: lwrk=len(wrk)
+          integer optional,dimension(3+mu+mv+nuest+nvest),depend(mu,mv,nuest,nvest) :: iwrk
+          integer optional,check(len(iwrk)>=kwrk),depend(iwrk) :: kwrk=len(iwrk)
+          integer,intent(out) :: ier
+        end subroutine parsur
+
+
+        subroutine surev(idim,tu,nu,tv,nv,c,u,mu,v,mv,f,mf,wrk,lwrk,iwrk,kwrk,ier) ! in surev.f
+          integer,intent(in) :: idim
+          real*8,intent(in), dimension(nu) :: tu
+          integer optional,check(len(tu)>=nu),depend(tu) :: nu=len(tu)
+          real*8,intent(in), dimension(nv) :: tv
+          integer optional,check(len(tv)>=nv),depend(tv) :: nv=len(tv)
+          real*8,intent(in), dimension((nu-4)*(nv-4)*idim),depend(idim,nu,nv) :: c
+          real*8,intent(in), dimension(mu) :: u
+          integer optional,check(len(u)>=mu),depend(u) :: mu=len(u)
+          real*8,intent(in), dimension(mv) :: v
+          integer optional,check(len(v)>=mv),depend(v) :: mv=len(v)
+          real*8,intent(out), dimension(mu*mv*idim),depend(mu,mv,idim) :: f
+          integer optional,check(len(f)>=mf),depend(f) :: mf=len(f)
+          real*8 optional,dimension(4*(mu+mv)),depend(mu,mv) :: wrk
+          integer optional,check(len(wrk)>=lwrk),depend(wrk) :: lwrk=len(wrk)
+          integer optional,dimension(mu+mv),depend(mu,mv) :: iwrk
+          integer optional,check(len(iwrk)>=kwrk),depend(iwrk) :: kwrk=len(iwrk)
+          integer,intent(out) :: ier
+        end subroutine surev
 
      end interface
 end python module pyspline

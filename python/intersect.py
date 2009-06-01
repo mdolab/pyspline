@@ -69,11 +69,11 @@ tu_z,tv_z,bcoef_z = b2ink(u,v,z,ku,kv)
 
 
 
-#bcoef_z[5:15,0] += 0.08
+#bcoef_z[:,0] += 0.08
 #bcoef_y[5:15,0] += 0.03
 
 Nu_plot= 26
-Nv_plot = 25
+Nv_plot = 75
 
 u = linspace(0,1,Nu_plot)
 u = 0.5*(1-cos(linspace(0,pi,Nu_plot)))
@@ -119,7 +119,7 @@ for j in xrange(Nv):
     #end for
 #end for
 
-#Find the u parameter
+#Find the u parameter : Must be (and is) Identical to one above
 
 x0=x[:,0];y0=y[:,0];z0=z[:,0] 
 u = zeros(Nu)
@@ -150,11 +150,13 @@ tu_z,tv_z,bcoef_z = b2ink(u,v,z,ku,kv)
 # print bcoef_y[:,0]
 # print bcoef_z[:,0]
 
-# bcoef_z[5:15,0] += 0.08
-# bcoef_y[5:15,0] += 0.03
+#bcoef_z[:,0] += 0.08
+#bcoef_z[5:15,1] += 0.03
+
+#bcoef_y[:,1] = bcoef_y[:,0]
 
 Nu_plot= 26
-Nv_plot = 26
+Nv_plot = 50
 u = linspace(0,1,Nu_plot)
 u = 0.5*(1-cos(linspace(0,pi,Nu_plot)))
 v = linspace(0,1,Nv_plot)
