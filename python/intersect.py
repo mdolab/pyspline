@@ -87,9 +87,12 @@ for j in xrange(Nv_plot):
         f.write('%f %f %f \n'%(b2val(u[i],v[j],0,0,tu_x,tv_x,4,4,bcoef_x),
                                b2val(u[i],v[j],0,0,tu_y,tv_y,4,4,bcoef_y),
                                b2val(u[i],v[j],0,0,tu_z,tv_z,4,4,bcoef_z)))
-        
+        if j==0:
+            print '%20.15f\t%20.15f\t%20.15f'%(1e6*b2val(u[i],v[j],0,0,tu_x,tv_x,4,4,bcoef_x),
+                                               1e6*b2val(u[i],v[j],0,0,tu_y,tv_y,4,4,bcoef_y),
+                                               1e6*b2val(u[i],v[j],0,0,tu_z,tv_z,4,4,bcoef_z))
         #f.write('%f %f %f \n'%(x[i,j],y[i,j],z[i,j]))
-
+print
  # Also dump out the control points
 f.write('Zone I=%d, J=%d\n'%(Nu,Nv))
 f.write('DATAPACKING=POINT\n')
@@ -156,7 +159,7 @@ tu_z,tv_z,bcoef_z = b2ink(u,v,z,ku,kv)
 #bcoef_y[:,1] = bcoef_y[:,0]
 
 Nu_plot= 26
-Nv_plot = 50
+Nv_plot = 75
 u = linspace(0,1,Nu_plot)
 u = 0.5*(1-cos(linspace(0,pi,Nu_plot)))
 v = linspace(0,1,Nv_plot)
@@ -169,9 +172,13 @@ for j in xrange(Nv_plot):
                                b2val(u[i],v[j],0,0,tu_y,tv_y,4,4,bcoef_y),
                                b2val(u[i],v[j],0,0,tu_z,tv_z,4,4,bcoef_z)))
                 #        f.write('%f %f %f \n'%(x[i,j],y[i,j],z[i,j]))
-                                     
+        
+        if j==0:
+            print '%20.15f\t%20.15f\t%20.15f'%(1e6*b2val(u[i],v[j],0,0,tu_x,tv_x,4,4,bcoef_x),
+                                               1e6*b2val(u[i],v[j],0,0,tu_y,tv_y,4,4,bcoef_y),
+                                               1e6*b2val(u[i],v[j],0,0,tu_z,tv_z,4,4,bcoef_z))
 
- # Also dump out the control points
+# Also dump out the control points
 f.write('Zone I=%d, J=%d\n'%(Nu,Nv))
 f.write('DATAPACKING=POINT\n')
 for j in xrange(Nv):
