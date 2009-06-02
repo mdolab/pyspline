@@ -61,7 +61,13 @@ OBJ =   bspline/bfqad.o\
 	fitpack/fptrpe.o\
 	fitpack/parsur.o\
 	fitpack/fpsuev.o\
-	fitpack/surev.o
+	fitpack/surev.o\
+	fitpack/fporde.o\
+	fitpack/fprank.o\
+	fitpack/fpsurf.o\
+	fitpack/surfit.o\
+	fitpack/bispev.o\
+	fitpack/fpbisp.o
 
 
 

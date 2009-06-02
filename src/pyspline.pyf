@@ -133,8 +133,8 @@ python module pyspline ! in
           real*8,intent(in), dimension(mv) :: v
           real*8,intent(in), dimension(mu*mv*idim),depend(idim,mu,mv) :: f
           real*8,intent(in) :: s
-          integer optional,depend(mu) :: nuest = mu + 6
-          integer optional,depend(mv) :: nvest = mv + 6
+          integer optional,depend(mu) :: nuest = mu+6
+          integer optional,depend(mv) :: nvest = mv+6
           integer, intent(in,out) :: nu
           real*8, intent(in,out), dimension(nuest) :: tu
           integer,intent(in,out) :: nv
@@ -147,7 +147,6 @@ python module pyspline ! in
           integer optional,check(len(iwrk)>=kwrk),depend(iwrk) :: kwrk=len(iwrk)
           integer,intent(out) :: ier
         end subroutine parsur
-
 
         subroutine surev(idim,tu,nu,tv,nv,c,u,mu,v,mv,f,mf,wrk,lwrk,iwrk,kwrk,ier) ! in surev.f
           integer,intent(in) :: idim
@@ -168,6 +167,62 @@ python module pyspline ! in
           integer optional,check(len(iwrk)>=kwrk),depend(iwrk) :: kwrk=len(iwrk)
           integer,intent(out) :: ier
         end subroutine surev
+
+        subroutine surfit(iopt,m,x,y,z,w,xb,xe,yb,ye,kx,ky,s,nxest,nyest,nmax,eps,nx,tx,ny,ty,c,fp,wrk1,lwrk1,wrk2,lwrk2,iwrk,kwrk,ier) ! in surfit.f
+          integer,intent(in) :: iopt
+          integer optional,check(len(x)>=m),depend(x) :: m=len(x)
+          real*8,intent(in), dimension(m) :: x
+          real*8,intent(in), dimension(m),depend(m) :: y
+          real*8,intent(in), dimension(m),depend(m) :: z
+          real*8,intent(in), dimension(m),depend(m) :: w
+          real*8,intent(in) :: xb
+          real*8,intent(in) :: xe
+          real*8,intent(in) :: yb
+          real*8,intent(in) :: ye
+          integer,intent(in) :: kx
+          integer,intent(in) :: ky
+          real*8,intent(in) :: s
+          integer,intent(in) :: nxest
+          integer,intent(in) :: nyest
+          integer optional,check(len(tx)>=nmax),depend(tx) :: nmax=len(tx)
+          real*8,optional :: eps=1.0e-16
+          integer,intent(in,out) :: nx
+          real*8,intent(in,out), dimension(nmax) :: tx
+          integer,intent(in,out) :: ny
+          real*8,intent(in,out), dimension(nmax),depend(nmax) :: ty
+          real*8,intent(out), dimension((nxest-kx-1)*(nyest-ky-1)),depend(kx,ky,nxest,nyest) :: c
+          real*8,intent(out) :: fp
+          !real*8,optional, dimension(nxest*nyest*(2+kx*nyest+2*ky*nxest)+2*(nxest+nyest + 6*(m+MAX(nxest,nyest))+MAX(nxest,nyest))),depend(nxest,nyest,kx,kv,m) :: wrk1
+          real*8,optional,dimension(10e6) :: wrk1
+          integer, optional,check(len(wrk1)>=lwrk1),depend(wrk1) :: lwrk1=len(wrk1)
+          !real*8,optional, dimension(nxest*nyest*(kx*nyest+ky*nxest)+nxest+nyest),depend(kx,ky,nxest,nyest) :: wrk2
+          real*8, optional,dimension(1e6) :: wrk2
+          integer, optional,check(len(wrk2)>=lwrk2),depend(wrk2) :: lwrk2=len(wrk2)
+          integer,optional, dimension(m+(nxest-2*kx-1)*(nyest-2*ky-1)):: iwrk
+          integer optional,check(len(iwrk)>=kwrk),depend(iwrk) :: kwrk=len(iwrk)
+          integer,intent(out) :: ier
+        end subroutine surfit
+
+
+        subroutine bispev(tx,nx,ty,ny,c,kx,ky,x,mx,y,my,z,wrk,lwrk,iwrk,kwrk,ier) ! in bispev.f
+          real*8,intent(in), dimension(nx) :: tx
+          integer optional,check(len(tx)>=nx),depend(tx) :: nx=len(tx)
+          real*8,intent(in), dimension(ny) :: ty
+          integer optional,check(len(ty)>=ny),depend(ty) :: ny=len(ty)
+          real*8,intent(in), dimension((nx-kx-1)*(ny-ky-1)),depend(nx,ny,kx,ky) :: c
+          integer,intent(in) :: kx
+          integer,intent(in) :: ky
+          real*8,intent(in), dimension(mx) :: x
+          integer optional,check(len(x)>=mx),depend(x) :: mx=len(x)
+          real*8,intent(in), dimension(my) :: y
+          integer optional,check(len(y)>=my),depend(y) :: my=len(y)
+          real*8,intent(out), dimension(mx*my),depend(mx,my) :: z
+          real*8, optional,dimension(mx*(kx+1)+my*(ky+1)),depend(mx,my,kx,ky) :: wrk
+          integer optional,check(len(wrk)>=lwrk),depend(wrk) :: lwrk=len(wrk)
+          integer optional,dimension(mx+my),depend(mx,my) :: iwrk
+          integer optional,check(len(iwrk)>=kwrk),depend(iwrk) :: kwrk=len(iwrk)
+          integer,intent(out) :: ier
+        end subroutine bispev
 
      end interface
 end python module pyspline
