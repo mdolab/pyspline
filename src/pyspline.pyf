@@ -224,6 +224,14 @@ python module pyspline ! in
           integer,intent(out) :: ier
         end subroutine bispev
 
+        subroutine bknot(x,n,k,t) ! in bknot.f
+          real*8,intent(in), dimension(n) :: x
+          integer optional,check(len(x)>=n),depend(x) :: n=len(x)
+          integer,intent(in) :: k
+          real*8,intent(out), dimension(n+k),depend(n,k) :: t
+        end subroutine bknot
+
+
      end interface
 end python module pyspline
 
