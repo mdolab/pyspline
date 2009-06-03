@@ -23,7 +23,7 @@ v = linspace(-1,1,10)
 
 [U,V] = meshgrid(u,v)
 
-]
+
 
 
 # create the surface object
