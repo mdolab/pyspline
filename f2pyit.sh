@@ -9,7 +9,7 @@ make
 cd ../
 
 #Now f2py just the functions we need in the pyf
-f2py  --fcompiler=intel --f90flags=-r8 -c -m pyspline src/pyspline.pyf src/libtensbs.a
+f2py  --fcompiler=ifort --f90flags=-r8 -c -m pyspline src/pyspline.pyf src/libtensbs.a
 
 #Now make the source files for the complex version
 
