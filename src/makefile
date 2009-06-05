@@ -77,8 +77,7 @@ OBJ =   bspline/bfqad.o\
 ### Intel Fortran Compiler
 FC = ifort
 
-FFLAGS = -O2 -r8 
-
+FFLAGS = -O2 -r8
 AR       = ar
 AR_FLAGS = -rvs
 
