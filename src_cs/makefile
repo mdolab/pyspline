@@ -43,6 +43,7 @@ OBJ = 	complexify.o \
 	xerror/c_xerrwv.o\
 	xerror/c_xersav.o\
 	xerror/c_xgetua.o\
+	misc/c_bvaluV.o
 
 
 ###================================================
