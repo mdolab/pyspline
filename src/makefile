@@ -67,7 +67,8 @@ OBJ =   bspline/bfqad.o\
 	fitpack/fpsurf.o\
 	fitpack/surfit.o\
 	fitpack/bispev.o\
-	fitpack/fpbisp.o
+	fitpack/fpbisp.o\
+	misc/bvaluV.o
 
 
 
@@ -101,11 +102,17 @@ libtensbs: $(OBJ)
 	$(AR) $(AR_FLAGS) $(TENSBS_LIB) $(OBJ)
 
 
-.SUFFIXES: .o .f
+.SUFFIXES: .o .f .f90
 
 
 .f.o:	
 	$(FC) $(FFLAGS) -c $< -o $*.o
 	@echo
 	@echo "        --- Compiled $*.f successfully ---"
+	@echo	
+
+.f90.o:	
+	$(FC) $(FFLAGS) -c $< -o $*.o
+	@echo
+	@echo "        --- Compiled $*.f90 successfully ---"
 	@echo	

@@ -70,7 +70,7 @@ python module pyspline ! in
           integer ,intent(in):: k
           integer ,intent(in):: ideriv
           real*8 ,intent(in):: x
-          integer,optional,intent(out) :: inbv
+          integer,optional :: inbv
           real*8,optional, dimension(3*k),depend(k) :: work
           real*8, intent(out):: bvalu
         end function bvalu
@@ -230,6 +230,19 @@ python module pyspline ! in
           integer,intent(in) :: k
           real*8,intent(out), dimension(n+k),depend(n,k) :: t
         end subroutine bknot
+
+        subroutine bvaluv(t,a,n,k,ideriv,x,y,nx,inbv,work) ! in bvaluV.f
+          real*8,intent(in), dimension(n+k),depend(n,k) :: t
+          real*8,intent(in), dimension(n) :: a
+          integer optional,check(len(a)>=n),depend(a) :: n=len(a)
+          integer, intent(in) :: k
+          integer,intent(in) :: ideriv
+          real*8,intent(in), dimension(nx) :: x
+          real*8,intent(out), dimension(nx),depend(nx) :: y
+          integer optional,check(len(x)>=nx),depend(x) :: nx=len(x)
+          integer, optional :: inbv
+          real*8,optional, dimension(3 * k),depend(k) :: work
+        end subroutine bvaluv
 
 
      end interface

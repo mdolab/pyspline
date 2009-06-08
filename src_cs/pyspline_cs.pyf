@@ -52,7 +52,7 @@ python module pyspline_cs ! in
           integer ,intent(in):: k
           integer ,intent(in):: ideriv
           complex*16 ,intent(in):: x
-          integer,optional,intent(out) :: inbv
+          integer,optional :: inbv
           complex*16,optional, dimension(3*k),depend(k) :: work
           complex*16, intent(out):: bvalu
         end function bvalu
@@ -78,6 +78,20 @@ python module pyspline_cs ! in
           integer,intent(in) :: k
           complex*16,intent(out), dimension(n+k),depend(n,k) :: t
         end subroutine bknot
+        
+        subroutine bvaluv(t,a,n,k,ideriv,x,y,nx,inbv,work) ! in bvaluV.f
+          complex*16,intent(in), dimension(n+k),depend(n,k) :: t
+          complex*16,intent(in), dimension(n) :: a
+          integer optional,check(len(a)>=n),depend(a) :: n=len(a)
+          integer, intent(in) :: k
+          integer,intent(in) :: ideriv
+          complex*16,intent(in), dimension(nx) :: x
+          complex*16,intent(out), dimension(nx),depend(nx) :: y
+          integer optional,check(len(x)>=nx),depend(x) :: nx=len(x)
+          integer, optional :: inbv
+          complex*16,optional, dimension(3 * k),depend(k) :: work
+        end subroutine bvaluv
+
 
     end interface 
 end python module pyspline_cs
