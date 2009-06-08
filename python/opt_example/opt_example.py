@@ -26,6 +26,10 @@ from pyOpt_optimization import Optimization
 sys.path.append('../../../../pyACDT/pyACDT/Optimization/pyOpt/pySNOPT')
 from pySNOPT import SNOPT
 
+#pyNLPQL
+sys.path.append('../../../../pyACDT/pyACDT/Optimization/pyOpt/pyNLPQL')
+from pyNLPQL import NLPQL
+
 '''This script runs an example of fitting a cubic spline to a set of
 airfoil coordinates, specificially the upper surface of a naca 0012
 airfoil with a constraint on a vertical leading edge'''
@@ -72,10 +76,10 @@ def objcon(x):
 
     ctlx[-1] = 1
     ctly[-1] = y0[-1]
-#    t = zeros(Nctl+k)
-#    t[-4:] = 1
-#    t[k:Nctl] = x[2*Nctl-4:2*Nctl-4+Nctl-k]
-    t=t0
+    t = zeros(Nctl+k)
+    t[-4:] = 1
+    t[k:Nctl] = x[2*Nctl-4:2*Nctl-4+Nctl-k]
+    #t=t0
     #s = x[3*Nctl-k-4:]
     s = s0
     
@@ -136,9 +140,9 @@ def sens(x,f_obj,f_con):
 
         ctlx[-1] = 1
         ctly[-1] = y0[-1]
-#        t = zeros(Nctl+k,'complex')
-#        t[-4:] = 1
-#        t[k:Nctl] = x_deriv[2*Nctl-4:2*Nctl-4+Nctl-k]
+        t = zeros(Nctl+k,'complex')
+        t[-4:] = 1
+        t[k:Nctl] = x_deriv[2*Nctl-4:2*Nctl-4+Nctl-k]
 #        s = x_deriv[3*Nctl-k-4:]
         err = 0.0;
         
@@ -185,7 +189,7 @@ ctly_i = interp(ctlx_i,x0,y0)
 
 opt_prob.addVarGroup('CTLx',Nctl-2,'c',value=ctlx_i[1:Nctl-1],lower=-1,upper=1)
 opt_prob.addVarGroup('CTLy',Nctl-2,'c',value=ctly_i[1:Nctl-1],lower=-1,upper=1)
-#opt_prob.addVarGroup('Knot',Nctl-k,'c',value=t0[k:Nctl],lower=0,upper=1)
+opt_prob.addVarGroup('Knot',Nctl-k,'c',value=t0[k:Nctl],lower=0,upper=1)
 #opt_prob.addVarGroup('s:',N,'c',value=s0,lower=0,upper=1)
 # ===================
 #  Constraints
@@ -217,6 +221,7 @@ opt.setOption('Minor feasibility tolerance',1e-6)
 #  Run Optimization
 # ===================
 
+#opt = NLPQL()
 
 
 opt(opt_prob,sens)
