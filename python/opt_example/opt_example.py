@@ -1,12 +1,12 @@
 # =============================================================================
 # Standard Python modules
 # =============================================================================
-import os, sys, string
+import os, sys, string, pdb, copy
 
 # =============================================================================
 # External Python modules
 # =============================================================================
-from numpy import linspace,cos,pi,hstack,zeros,ones,sqrt
+from numpy import linspace,cos,pi,hstack,zeros,ones,sqrt,imag,interp
 from matplotlib.pylab import plot,show
 
 # =============================================================================
@@ -15,7 +15,8 @@ from matplotlib.pylab import plot,show
 
 # pySpline
 sys.path.append('../../python')
-from pyspline import *
+import pyspline
+import pyspline_cs
 
 #pyOPT
 sys.path.append('../../../../pyACDT/pyACDT/Optimization/pyOpt/')
@@ -29,8 +30,8 @@ from pySNOPT import SNOPT
 airfoil coordinates, specificially the upper surface of a naca 0012
 airfoil with a constraint on a vertical leading edge'''
 
-N = 131
-Nctl = 25
+N = 81
+Nctl = 13
 k = 4
 x0 = 0.5*(1-cos(linspace(0,pi,N)))
 #Top surface of a naca0012 airfoil
@@ -71,12 +72,12 @@ def objcon(x):
 
     ctlx[-1] = 1
     ctly[-1] = y0[-1]
-    t = zeros(Nctl+k)
-    t[-4:] = 1
-    t[k:Nctl] = x[2*Nctl-4:2*Nctl-4+Nctl-k]
-    #t=t0
-    s = x[3*Nctl-k-4:]
-    #s = s0
+#    t = zeros(Nctl+k)
+#    t[-4:] = 1
+#    t[k:Nctl] = x[2*Nctl-4:2*Nctl-4+Nctl-k]
+    t=t0
+    #s = x[3*Nctl-k-4:]
+    s = s0
     
     err = 0.0;
 
@@ -87,8 +88,8 @@ def objcon(x):
             s[i] = 0
         
         
-        interp_x,inbv = bvalu(t,ctlx,k,0,s[i])
-        interp_y,inbv = bvalu(t,ctly,k,0,s[i])
+        interp_x,inbv = pyspline.bvalu(t,ctlx,k,0,s[i])
+        interp_y,inbv = pyspline.bvalu(t,ctly,k,0,s[i])
         err = err + (interp_x-x0[i])**2  + (interp_y-y0[i])**2 
 
     f = sqrt(err/N)
@@ -97,10 +98,76 @@ def objcon(x):
         fcon[i] = t[i+k+1]-t[i+k]
 
     fail = False
+
+    print counter,f
     counter += 1
+
     return f,fcon,fail
 
+def sens(x,f_obj,f_con):
+    k=4
+    ndv = len(x)
+    ncon = Nctl-k
+    g_obj = zeros(ndv) #objective derivative vector
+    g_con = zeros([ncon, ndv]) #constraint jacobian
 
+    t=t0
+    s = s0
+
+    x_passed = copy.deepcopy(x)
+    h = 1.0e-40j #complex step size
+
+    for j in xrange(ndv):
+        x_deriv = zeros([ndv],'complex')
+
+        for i in range(ndv): #copy over design variables
+            x_deriv[i] = complex(x[i],0)
+
+        x_deriv[j] += h
+
+        ctlx = zeros(Nctl,'complex')
+        ctly = zeros(Nctl,'complex')
+
+        ctlx[1:Nctl-1] = x_deriv[0:Nctl-2] # These are the control points
+        ctly[1:Nctl-1] = x_deriv[Nctl-2:2*Nctl-4]
+    
+        # Fix the second ctrl pt to 0
+        ctlx[1] = 0
+
+        ctlx[-1] = 1
+        ctly[-1] = y0[-1]
+#        t = zeros(Nctl+k,'complex')
+#        t[-4:] = 1
+#        t[k:Nctl] = x_deriv[2*Nctl-4:2*Nctl-4+Nctl-k]
+#        s = x_deriv[3*Nctl-k-4:]
+        err = 0.0;
+        
+        for i in xrange(len(s)):
+            if s[i] > 1:
+                s[i] = 1
+            if s[i] < 0:
+                s[i] = 0
+                
+            interp_x,inbv = pyspline_cs.bvalu(t,ctlx,k,0,s[i])
+            interp_y,inbv = pyspline_cs.bvalu(t,ctly,k,0,s[i])
+            err = err + (interp_x-x0[i])**2  + (interp_y-y0[i])**2 
+            
+
+        f = sqrt(err/N)
+        g_obj[j] = imag(f)/imag(h)
+
+        fcon = zeros(Nctl-k)
+        for i in xrange(Nctl-k):
+            fcon[i] = t[i+k+1]-t[i+k]
+        # end for
+            
+        g_con[:,j] = imag(fcon)/imag(h)
+
+    #end for (dv loop
+    fail = False
+    return g_obj,g_con,fail
+
+        
 
 
 # =============================================================================
@@ -114,18 +181,17 @@ def objcon(x):
 opt_prob = Optimization('Cubic Spline Optimization Problem',objcon)
 
 ctlx_i = linspace(0,1,Nctl)
-ctly_i = 0.05*ones(Nctl)
+ctly_i = interp(ctlx_i,x0,y0)
 
-opt_prob.addVarGroup('CTLx',Nctl-2,'c',value=ctlx_i[1:Nctl-1], lower=-1, upper=1)
-opt_prob.addVarGroup('CTLy',Nctl-2,'c',value=ctly_i[1:Nctl-1], lower=-1, upper=1)
-opt_prob.addVarGroup('Knot',Nctl-k,'c',value=t0[k:Nctl],lower=0,upper=1)
-opt_prob.addVarGroup('s:',N,'c',value=s0,lower=0,upper=1)
+opt_prob.addVarGroup('CTLx',Nctl-2,'c',value=ctlx_i[1:Nctl-1],lower=-1,upper=1)
+opt_prob.addVarGroup('CTLy',Nctl-2,'c',value=ctly_i[1:Nctl-1],lower=-1,upper=1)
+#opt_prob.addVarGroup('Knot',Nctl-k,'c',value=t0[k:Nctl],lower=0,upper=1)
+#opt_prob.addVarGroup('s:',N,'c',value=s0,lower=0,upper=1)
 # ===================
 #  Constraints
 # ===================
 
 opt_prob.addConGroup('Knots', Nctl-k,type='i', lower=0.0, upper=10.0)
-
 
 # ===================
 #  Objective
@@ -141,20 +207,19 @@ opt = SNOPT()
 # ===================
 #  SNOPT Options
 # ===================
-#opt.setOption('Verify level',3)
-opt.setOption('Derivative level',0)
+opt.setOption('Derivative level',3)
 opt.setOption('Nonderivative linesearch')
 opt.setOption('Major optimality tolerance', 1e-6)
 opt.setOption('Major feasibility tolerance',1e-6)
 opt.setOption('Minor feasibility tolerance',1e-6)
-#opt.setOption('Major step limit',8e-3)
-#opt.setOption('Function precision',1.e-5)
 
 # ===================
 #  Run Optimization
 # ===================
 
-opt(opt_prob)
+
+
+opt(opt_prob,sens)
 
 # ===================
 #  Print Solution  

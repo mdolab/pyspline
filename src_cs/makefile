@@ -8,13 +8,26 @@ RM  	        = /bin/rm -rf
 TENSBS_LIB = libtensbs_cs.a
 
 OBJ = 	complexify.o \
+	bspline/c_bfqad.o\
+	bspline/c_bint4.o\
 	bspline/c_bintk.o\
 	bspline/c_bnfac.o\
 	bspline/c_bnslv.o\
+	bspline/c_bsgq8.o\
+	bspline/c_bspdr.o\
+	bspline/c_bspev.o\
+	bspline/c_bsppp.o\
+	bspline/c_bspvd.o\
 	bspline/c_bspvn.o\
+	bspline/c_bsqad.o\
 	bspline/c_bvalu.o\
 	bspline/c_intrv.o\
+	bspline/c_pfqad.o\
+	bspline/c_ppgq8.o\
+	bspline/c_ppqad.o\
+	bspline/c_ppval.o\
 	machcon/c_i1mach.o\
+	machcon/c_r1mach.o\
 	tensbs/c_b2ink.o\
 	tensbs/c_b2val.o\
 	tensbs/c_b3ink.o\
