@@ -43,7 +43,9 @@ OBJ = 	complexify.o \
 	xerror/c_xerrwv.o\
 	xerror/c_xersav.o\
 	xerror/c_xgetua.o\
-	misc/c_bvaluV.o
+	misc/c_bvaluV.o\
+	misc/c_b2valM.o\
+	misc/c_b2valV.o
 
 
 ###================================================
@@ -53,7 +55,6 @@ OBJ = 	complexify.o \
 FC = ifort
 
 FFLAGS = -O2 -r8 
-
 AR       = ar
 AR_FLAGS = -rvs
 
@@ -72,6 +73,8 @@ clean:
 	$(RM) tensbs/*.o
 	@echo "Removing .o files in xerror"
 	$(RM) xerror/*.o
+	@echo "Removing .o files in misc"
+	$(RM) misc/*.o
 	@echo "Removing library"
 	$(RM) libtensbs_cs.a
 
@@ -79,7 +82,7 @@ libtensbs_cs: $(OBJ)
 	$(AR) $(AR_FLAGS) $(TENSBS_LIB) $(OBJ)
 
 
-.SUFFIXES: .o .f .f90 .mod
+.SUFFIXES: .o .f .f90 
 
 
 .f.o:	
@@ -87,7 +90,6 @@ libtensbs_cs: $(OBJ)
 	@echo
 	@echo "        --- Compiled $*.f successfully ---"
 	@echo	
-
 
 .f90.o:	
 	$(FC) $(FFLAGS) -c $< -o $*.o

@@ -92,6 +92,41 @@ python module pyspline_cs ! in
           complex*16,optional, dimension(3 * k),depend(k) :: work
         end subroutine bvaluv
 
+        subroutine b2valm(x,y,n,m,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,z) ! in b2valM.f90
+          complex*16,intent(in),dimension(n,m) :: x
+          complex*16,intent(in),dimension(n,m),depend(n,m) :: y
+          integer optional,check(shape(x,0)==n),depend(x) :: n=shape(x,0)
+          integer optional,check(shape(x,1)==m),depend(x) :: m=shape(x,1)
+          integer,intent(in) :: idx
+          integer,intent(in) :: idy
+          complex*16,intent(in), dimension(nx+ky),depend(nx,ky) :: tx
+          complex*16,intent(in), dimension(ny+ky),depend(ny,ky) :: ty
+          integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
+          integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
+          integer,intent(in) :: kx
+          integer,intent(in) :: ky
+          complex*16,intent(in), dimension(nx,ny) :: bcoef
+          complex*16, intent(out), dimension(n,m),depend(n,m) :: z
+        end subroutine b2valm
+
+        subroutine b2valv(x,y,n,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,z) ! in c_b2valV.f90
+          use complexify
+          complex*16,intent(in), dimension(n) :: x
+          complex*16,intent(in), dimension(n),depend(n) :: y
+          integer optional,check(len(x)>=n),depend(x) :: n=len(x)
+          integer,intent(in) :: idx
+          integer,intent(in) :: idy
+          complex*16 dimension(nx+ky),depend(nx,ky) :: tx
+          complex*16 dimension(ny+ky),depend(ny,ky) :: ty
+          integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
+          integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
+          integer,intent(in) :: kx
+          integer,intent(in) :: ky
+          complex*16,intent(in), dimension(nx,ny) :: bcoef
+          complex*16,intent(out), dimension(n),depend(n) :: z
+end subroutine b2valv
+
+
 
     end interface 
 end python module pyspline_cs

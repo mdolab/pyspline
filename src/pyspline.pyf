@@ -244,6 +244,51 @@ python module pyspline ! in
           real*8,optional, dimension(3 * k),depend(k) :: work
         end subroutine bvaluv
 
+        subroutine fit_foil(m,n,a,x1,x2,y1,y2,coefs) ! in fit_foil.f90
+          integer optional,check(shape(a,0)==m),depend(a) :: m=shape(a,0)
+          integer optional,intent(in),check(shape(a,1)==n),depend(a) :: n=shape(a,1)
+          double precision dimension(m,n),intent(in) :: a
+          double precision dimension(m),intent(in,copy),depend(m) :: x1
+          double precision dimension(m),intent(in,copy),depend(m) :: x2
+          double precision dimension(m),intent(in,copy),depend(m) :: y1
+          double precision dimension(m),intent(in,copy),depend(m) :: y2
+          double precision dimension(n,4),intent(out),depend(n) :: coefs
+        end subroutine fit_foil
+
+        subroutine b2valm(x,y,n,m,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,z) ! in b2valM.f90
+          real*8,intent(in),dimension(n,m) :: x
+          real*8,intent(in),dimension(n,m),depend(n,m) :: y
+          integer optional,check(shape(x,0)==n),depend(x) :: n=shape(x,0)
+          integer optional,check(shape(x,1)==m),depend(x) :: m=shape(x,1)
+          integer,intent(in) :: idx
+          integer,intent(in) :: idy
+          real*8,intent(in), dimension(nx+ky),depend(nx,ky) :: tx
+          real*8,intent(in), dimension(ny+ky),depend(ny,ky) :: ty
+          integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
+          integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
+          integer,intent(in) :: kx
+          integer,intent(in) :: ky
+          real*8,intent(in), dimension(nx,ny) :: bcoef
+          real*8,intent(out), dimension(n,m),depend(n,m) :: z
+        end subroutine b2valm
+
+        subroutine b2valv(x,y,n,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,z) ! in c_b2valV.f90
+          use complexify
+          real*8,intent(in), dimension(n) :: x
+          real*8,intent(in), dimension(n),depend(n) :: y
+          integer optional,check(len(x)>=n),depend(x) :: n=len(x)
+          integer,intent(in) :: idx
+          integer,intent(in) :: idy
+          real*8 dimension(nx+ky),depend(nx,ky) :: tx
+          real*8 dimension(ny+ky),depend(ny,ky) :: ty
+          integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
+          integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
+          integer,intent(in) :: kx
+          integer,intent(in) :: ky
+          real*8,intent(in), dimension(nx,ny) :: bcoef
+          real*8,intent(out), dimension(n),depend(n) :: z
+        end subroutine b2valv
+
 
      end interface
 end python module pyspline
