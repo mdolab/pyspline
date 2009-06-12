@@ -36,12 +36,11 @@ airfoil with a constraint on a vertical leading edge'''
 
 global ctlxu,ctlyu,ctlxl,ctlyl
 global su,sl,Ju,Jl
-
 Nctl = 13
 k = 4
 
-# Top surface of a naca0012 airfoil
-N = 91
+# Both surfaces of naca0012 airfoil
+N = 999
 x0 = 0.5*(1-cos(linspace(0,pi,N)))
 y0 = 0.12/0.2*(0.2969*x0**0.5-0.1260*x0-0.3516*x0**2 + 0.2843*x0**3-0.1015*x0**4)
 x0u = x0
@@ -79,6 +78,8 @@ t0l[0:k] = s0l[0]
 t0l[Nctl:Nctl+k] = s0l[-1]
 t0l[k-1:Nctl+1]= 0.5*(1-cos(linspace(0,pi,Nctl-k+2)))
 
+tu = t0u
+tl = t0l
 def objcon(x):
     '''Get the rms error for the given set of design variables'''
     global ctlxu,ctlyu,ctlxl,ctlyl
@@ -93,6 +94,9 @@ def objcon(x):
     ctlxl[1:Nctl-1] = x[2*Nctl-4:3*Nctl-6] # These are the control points
     ctlyl[1:Nctl-1] = x[3*Nctl-6:4*Nctl-8]
 
+    su = x[4*Nctl-8  :4*Nctl-8+  N]
+    sl = x[4*Nctl-8+N:4*Nctl-8+2*N]
+
     ctlxu[0]  = x0u[0]
     ctlxu[-1] = x0u[-1]
     ctlyu[0]  = y0u[0]
@@ -103,6 +107,19 @@ def objcon(x):
     ctlyl[0]  = y0l[0]
     ctlyl[-1] = y0l[-1]
 
+    # Calculate the jacobian J, for fixed t and s
+    h = 1.0e-40j
+    Ju = zeros([N,Nctl])
+    Jl = zeros([N,Nctl])
+    ctl = zeros([Nctl],'D')
+    for i in xrange(Nctl):
+        ctl[i] += h
+        valu = pyspline_cs.bvaluv(t0u,ctl,k,0,su)
+        vall = pyspline_cs.bvaluv(t0l,ctl,k,0,sl)
+        ctl[i] -= h    
+        Ju[:,i] = imag(valu)/imag(h)
+        Jl[:,i] = imag(vall)/imag(h)
+    # end for 
 
     f = sum(   (dot(Ju,ctlxu)-x0u)**2 + (dot(Ju,ctlyu)-y0u)**2 + (dot(Jl,ctlxl)-x0l)**2 + (dot(Jl,ctlyl)-y0l)**2)
     fail = False
@@ -132,6 +149,9 @@ def sens(x,f_obj,f_con):
     ctlxl[1:Nctl-1] = x[2*Nctl-4:3*Nctl-6] # These are the control points
     ctlyl[1:Nctl-1] = x[3*Nctl-6:4*Nctl-8]
 
+    su = x[4*Nctl-8  :4*Nctl-8+  N]
+    sl = x[4*Nctl-8+N:4*Nctl-8+2*N]
+
     ctlxu[0]  = x0u[0]
     ctlxu[-1] = x0u[-1]
     ctlyu[0]  = y0u[0]
@@ -142,11 +162,41 @@ def sens(x,f_obj,f_con):
     ctlyl[0]  = y0l[0]
     ctlyl[-1] = y0l[-1]
  
+   # Calculate the jacobian J, for fixed t and s
+    h = 1.0e-40j
+    Ju = zeros([N,Nctl])
+    Jl = zeros([N,Nctl])
+    ctl = zeros([Nctl],'D')
+    for i in xrange(Nctl):
+        ctl[i] += h
+        valu = pyspline_cs.bvaluv(t0u,ctl,k,0,su)
+        vall = pyspline_cs.bvaluv(t0l,ctl,k,0,sl)
+        ctl[i] -= h    
+        Ju[:,i] = imag(valu)/imag(h)
+        Jl[:,i] = imag(vall)/imag(h)
+    # end for 
+
     g_obj[       0:  Nctl-2] = 2*dot(dot(Ju,ctlxu)-x0u,Ju)[1:Nctl-1]
     g_obj[  Nctl-2:2*Nctl-4] = 2*dot(dot(Ju,ctlyu)-y0u,Ju)[1:Nctl-1]
     g_obj[2*Nctl-4:3*Nctl-6] = 2*dot(dot(Jl,ctlxl)-x0l,Jl)[1:Nctl-1]
     g_obj[3*Nctl-6:4*Nctl-8] = 2*dot(dot(Jl,ctlyl)-y0l,Jl)[1:Nctl-1]
 
+    # Do the S Derivates
+    s_temp = array([su],'D') + h
+    interp_x = pyspline_cs.bvaluv(tu,ctlxu,k,0,s_temp)
+    interp_y = pyspline_cs.bvaluv(tu,ctlyu,k,0,s_temp)
+    
+    g_obj[4*Nctl-8:4*Nctl-8+N] = imag((interp_x-x0u)**2 + (interp_y-y0u)**2)/imag(h)
+
+    s_temp = array([sl],'D') + h
+
+    interp_x = pyspline_cs.bvaluv(tl,ctlxl,k,0,s_temp)
+    interp_y = pyspline_cs.bvaluv(tl,ctlyl,k,0,s_temp)
+    
+    g_obj[4*Nctl-8+N:4*Nctl-8+2*N] = imag((interp_x-x0l)**2 + (interp_y-y0l)**2)/imag(h)
+
+    # Do the constraint derivative
+    
     x1 = ctlxl[1]
     y1 = ctlyl[1]
     x3 = ctlxu[1]
@@ -174,10 +224,18 @@ opt_prob = Optimization('Cubic Spline Optimization Problem',objcon)
 
 #Make sure the end points are what we want:
 
-opt_prob.addVarGroup('CTLxu',Nctl-2,'c',value=0,lower=-1,upper=1)
-opt_prob.addVarGroup('CTLyu',Nctl-2,'c',value=0,lower=-1,upper=1)
-opt_prob.addVarGroup('CTLxl',Nctl-2,'c',value=0,lower=-1,upper=1)
-opt_prob.addVarGroup('CTLyl',Nctl-2,'c',value=0,lower=-1,upper=1)
+s_init = 0.5*(1-cos(linspace(0,pi,Nctl)))
+cxu_init = interp(s_init,s0u,x0u)
+cyu_init = interp(s_init,s0u,y0u)
+cxl_init = interp(s_init,s0u,x0l)
+cyl_init = interp(s_init,s0u,y0l)
+
+opt_prob.addVarGroup('CTLxu',Nctl-2,'c',value=cxu_init,lower=-1,upper=1)
+opt_prob.addVarGroup('CTLyu',Nctl-2,'c',value=cyu_init,lower=-1,upper=1)
+opt_prob.addVarGroup('CTLxl',Nctl-2,'c',value=cxl_init,lower=-1,upper=1)
+opt_prob.addVarGroup('CTLyl',Nctl-2,'c',value=cyl_init,lower=-1,upper=1)
+opt_prob.addVarGroup('su'   ,N     ,'c',value=s0u,lower=0,upper=1)
+opt_prob.addVarGroup('sl'   ,N     ,'c',value=s0l,lower=0,upper=1)
 
 # ===================
 #  Constraints
@@ -198,181 +256,39 @@ opt = SNOPT()
 # ===================
 #  SNOPT Options
 # ===================
+# opt.setOption('Verify level',3)
 opt.setOption('Derivative level',3)
 opt.setOption('Nonderivative linesearch')
-opt.setOption('Major optimality tolerance', 1e-6)
-opt.setOption('Major feasibility tolerance',1e-6)
-opt.setOption('Minor feasibility tolerance',1e-6)
+opt.setOption('Major optimality tolerance', 1e-5)
+opt.setOption('Major feasibility tolerance',1e-5)
+opt.setOption('Minor feasibility tolerance',1e-5)
+opt.setOption('Major iterations limit',500)
 
 # ===================================================
 #  Run Optimization with Hoschek Parameter Correction
 # ===================================================
-Niter = 50
-su = s0u
-sl = s0l
-#print 'su before:',su
-for iter in xrange(Niter):
 
+result = opt(opt_prob,sens)
 
-    # Calculate the jacobian J, for fixed t and s
-    h = 1.0e-40j
-    Ju = zeros([N,Nctl])
-    Jl = zeros([N,Nctl])
-    ctl = zeros([Nctl],'D')
-    for i in xrange(Nctl):
-        ctl[i] += h
-        valu = pyspline_cs.bvaluv(t0u,ctl,k,0,su)
-        vall = pyspline_cs.bvaluv(t0l,ctl,k,0,sl)
-        ctl[i] -= h    
-        Ju[:,i] = imag(valu)/imag(h)
-        Jl[:,i] = imag(vall)/imag(h)
-    # end for 
-
-    # Determine approximation curve using SNOPT
-    result = opt(opt_prob,sens)
- 
-    RMS = sqrt(result[0][0]/(2*N))
-    print 'RMS:',RMS
-
-    ctlxu = hstack([x0u[0],result[1][       0:  Nctl-2],x0u[-1]])
-    ctlyu = hstack([y0u[0],result[1][  Nctl-2:2*Nctl-4],y0u[-1]])
-    ctlxl = hstack([x0l[0],result[1][2*Nctl-4:3*Nctl-6],x0l[-1]])
-    ctlyl = hstack([y0l[0],result[1][3*Nctl-6:4*Nctl-8],y0l[-1]])
-
-
-
-  #   Du = zeros([N,2])
-#     Dl = zeros([N,2])
-#     Du[:,0] = dot(Ju,ctlxu)-x0u
-#     Du[:,1] = dot(Ju,ctlyu)-y0u
-#     Dl[:,0] = dot(Jl,ctlxl)-x0l
-#     Dl[:,1] = dot(Jl,ctlyl)-y0l
-
-#     ydotu = zeros([N,2])
-#     ydotl = zeros([N,2])
-#     ydotu[:,0] = pyspline.bvaluv(t0u,ctlxu,k,1,su)
-#     ydotu[:,1] = pyspline.bvaluv(t0u,ctlyu,k,1,su)
-
-#     ydotl[:,0] = pyspline.bvaluv(t0l,ctlxl,k,1,sl)
-#     ydotl[:,1] = pyspline.bvaluv(t0l,ctlyl,k,1,sl)
-
-
-
-    for i in xrange(N):
-
-        #Upper Surface
-
-        for j in xrange(25):
-#            print 'muu:',muu
-            if su[i] > 1:
-                su[i] = 1
-            if su[i] < 0:
-                su[i] =0
-            
-            
-            ydotx = pyspline.bvalu(t0u,ctlxu,k,1,su[i])
-            ydoty = pyspline.bvalu(t0u,ctlyu,k,1,su[i])
-            x=pyspline.bvalu(t0u,ctlxu,k,0,su[i])
-            y=pyspline.bvalu(t0u,ctlyu,k,0,su[i])
-            
-            ydotnorm = sqrt(ydotx**2+ydoty**2)
-            delta_ci = (((x0u[i]-x)*ydotx + (y0u[i]-y)*ydoty) /ydotnorm)/(2**j)
-            s_tilde = su[i] + delta_ci*(su[-1]-su[0])/muu
-           #  print 'j:',j
-#             print 'ydotx:',ydotx
-#             print 'ydoty:',ydoty
-#             print 'ydotnorm:',ydotnorm
-#             print 'delta_ci:',delta_ci
-#             print 's:',su[i]
-#             print 's_tilde:',s_tilde
-
-            if s_tilde > 1:
-                s_tilde = 1
-            if s_tilde < 0:
-                s_tilde = 0
-
-            norm_Di = sqrt((x-x0u[i])**2 + (y-y0u[i])**2)
-
-            x_tilde = pyspline.bvalu(t0u,ctlxu,k,0,s_tilde)
-            y_tilde = pyspline.bvalu(t0u,ctlyu,k,0,s_tilde)
-            norm_Di_tilde = sqrt((x_tilde-x0u[i])**2 + (y_tilde-y0u[i])**2)
-
-#             print 'norm_Di:',norm_Di
-#             print 'norm_Di_tilde:',norm_Di_tilde
-
-            if norm_Di >= norm_Di_tilde:
-                su[i] = s_tilde
-                break
-           # if j == 9:
-                #print 'no better top'
-
-        #Lower Surface
-    for i in xrange(N):
-        for j in xrange(10):
-
-            if sl[i] > 1:
-                sl[i] = 1
-            if sl[i] < 0:
-                sl[i] =0
-            ydotx = pyspline.bvalu(t0l,ctlxl,k,1,sl[i])
-            ydoty = pyspline.bvalu(t0l,ctlyl,k,1,sl[i])
-            x=pyspline.bvalu(t0l,ctlxl,k,0,sl[i])
-            y=pyspline.bvalu(t0l,ctlyl,k,0,sl[i])
-            
-            ydotnorm = sqrt(ydotx**2+ydoty**2)
-            delta_ci = (((x-x0l[i])*ydotx + (y-y0l[i])*ydoty) /ydotnorm)/(2**j)
-            s_tilde = sl[i] + delta_ci*(sl[-1]-sl[0])/mul
-
-            if s_tilde > 1:
-                s_tilde = 1
-            if s_tilde < 0:
-                s_tilde = 0
-            
-
-            norm_Di = sqrt((x-x0l[i])**2 + (y-y0l[i])**2)
-
-            x_tilde = pyspline.bvalu(t0l,ctlxl,k,0,s_tilde)
-            y_tilde = pyspline.bvalu(t0l,ctlyl,k,0,s_tilde)
-            norm_Di_tilde = sqrt((x_tilde-x0l[i])**2 + (y_tilde-y0l[i])**2)
-
-            if norm_Di >= norm_Di_tilde:
-                #print 'delta s:',sl[i]-s_tilde
-                sl[i] = s_tilde
-                break
-          #  if j==9:
-                
-             #   print 'no better bottom:'
-            
-        
- 
-
-
-
-#print 'suafter:',su
 # ===================
 #  Print Solution  
 # ===================
 
-#print help(opt_prob._solutions[0])
-# print '#--------------------------------'
-# print '# RMS Error: ',sqrt(x_ref/(2*N))
-# print '#--------------------------------'
+print opt_prob._solutions[0]
+print '#--------------------------------'
+print '# RMS Error: ',sqrt(result[0][0]/(2*N))
+print '#--------------------------------'
 
-# print 'ctlxu:',ctlxu
-# print 'ctlyu:',ctlyu
-# print 'ctlxl:',ctlxl
-# print 'ctlyl:',ctlyl
+s = 0.5*(1-cos(linspace(0,pi,500)))
+XU = pyspline.bvaluv(t0u,ctlxu,k,0,s)
+YU = pyspline.bvaluv(t0u,ctlyu,k,0,s)
+XL = pyspline.bvaluv(t0l,ctlxl,k,0,s)
+YL = pyspline.bvaluv(t0l,ctlyl,k,0,s)
 
-#s = 0.5*(1-cos(linspace(0,pi,N00)))
-XU = pyspline.bvaluv(t0u,ctlxu,k,0,su)
-YU = pyspline.bvaluv(t0u,ctlyu,k,0,su)
-XL = pyspline.bvaluv(t0l,ctlxl,k,0,sl)
-YL = pyspline.bvaluv(t0l,ctlyl,k,0,sl)
-
-#plot(ctlxu,ctlyu,'ro')
-#plot(ctlxl,ctlyl,'go')
+plot(ctlxu,ctlyu,'ro')
+plot(ctlxl,ctlyl,'go')
 plot(x0u,y0u,'ko-')
 plot(x0l,y0l,'ko-')
-plot(XU,YU,'ro')
-plot(XL,YL,'go')
+plot(XU,YU,'r')
+plot(XL,YL,'g')
 show()
