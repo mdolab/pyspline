@@ -114,7 +114,8 @@ vu = zeros(Nv)
 for i in xrange(Nv-1):
     vu[i+1] = vu[i] + sqrt((x0[i+1]-x0[i])**2 + \
                                (y0[i+1]-y0[i])**2+ \
-                               (z0[i+1]-z0[i])**2)
+      
+                         (z0[i+1]-z0[i])**2)
 #end for
 vu = vu/vu[-1] #Normalize vu
 
