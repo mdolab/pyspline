@@ -71,7 +71,7 @@ C***FIRST EXECUTABLE STATEMENT  BVALU
       IF(N.LT.K) GO TO 101
       IF(IDERIV.LT.0 .OR. IDERIV.GE.K) GO TO 110
       KMIDER = K - IDERIV
-C
+C     
 C *** FIND *I* IN (K,N) SUCH THAT T(I) .LE. X .LT. T(I+1)
 C     (OR, .LE. T(I+1) IF T(I) .LT. T(I+1) = T(N+1)).
       KM1 = K - 1
@@ -79,6 +79,17 @@ C     (OR, .LE. T(I+1) IF T(I) .LT. T(I+1) = T(N+1)).
       IF (X.LT.T(K)) GO TO 120
       IF (MFLAG.EQ.0) GO TO 20
       IF (X.GT.T(I)) GO TO 130
+c$$$         print *,'in bvalu'
+c$$$         print *,'N:',N
+c$$$         print *,'K:',K
+c$$$         do j=1,N+K
+c$$$            print *,'T(i)',j,T(j)
+c$$$         end do
+c$$$         print *,'I:',I
+c$$$         print *,'now youre really fucked'
+c$$$         print *,'X,T(I)',X,T(I)
+c$$$         GO TO 130
+
    10 IF (I.EQ.K) GO TO 140
       I = I - 1
       IF (X.EQ.T(I)) GO TO 10
