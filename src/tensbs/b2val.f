@@ -91,7 +91,7 @@ C
 C  PARAMETERS
 C
       INTEGER
-     *        IDX, IDY, NX, NY, KX, KY
+     *        IDX, IDY, NX, NY, KX, KY,j
       REAL
      *     XVAL, YVAL, TX(1), TY(1), BCOEF(NX,NY), WORK(1)
 C
@@ -108,8 +108,22 @@ C
 C
 C***FIRST EXECUTABLE STATEMENT
       B2VAL = 0.0E0
+      
+      
+
       CALL INTRV(TY,NY+KY,YVAL,ILOY,LEFTY,MFLAG)
-      IF (MFLAG .NE. 0)  GO TO 100
+      IF (MFLAG .NE. 0)  then
+c$$$         print *,'mflag fucked,',mflag
+c$$$         print *,'lefty:',lefty
+c$$$         print *,'NY,KY:',NY,KY
+c$$$         print *,'TY:'
+c$$$         print *,'NX,KX:',Nx,KX
+c$$$         do j=1,NY+KY
+c$$$            print *,TY(j)
+c$$$         end do
+         LEFTY = NY ! THis effectivly is a bounding function
+         !GO TO 100
+      end if
          IW = KY + 1
          KCOL = LEFTY - KY
          DO 50 K=1,KY

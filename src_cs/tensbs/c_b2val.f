@@ -109,7 +109,13 @@ C
 C***FIRST EXECUTABLE STATEMENT
       B2VAL = 0.0E0
       CALL INTRV(TY,NY+KY,YVAL,ILOY,LEFTY,MFLAG)
-      IF (MFLAG .cne. 0)  GO TO 100
+      IF (MFLAG .cne. 0) then
+         lefty = ny
+
+
+         !GO TO 100
+
+      end if
          IW = KY + 1
          KCOL = LEFTY - KY
          DO 50 K=1,KY

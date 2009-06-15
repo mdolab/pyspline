@@ -34,13 +34,13 @@ C   basis functions. The coefficients a(i,j) are chosen so that
 C
 C         S(X(i),Y(j)) = FCN(i,j)   for i=1,..,NX and j=1,..,NY
 C
-C   Note that  for  each  fixed  value  of  y  S(x,y)  is  a  piecewise
-C   polynomial function of x alone, and for each fixed value of x  S(x,
-C   y) is a piecewise polynomial function of y alone. In one  dimension
-C   a piecewise polynomial may  be  created  by  partitioning  a  given
-C   interval into subintervals and defining a distinct polynomial piece
-C   on each one. The points where adjacent subintervals meet are called
-C   knots. Each of the functions U(i) and V(j)  above  is  a  piecewise
+C   Note that for each fixed value of y S(x,y) is a piecewise polynomial
+C   function of x alone, and for each fixed value of x S(x, y) is a
+C   piecewise polynomial function of y alone. In one dimension a
+C   piecewise polynomial may be created by partitioning a given interval
+C   into subintervals and defining a distinct polynomial piece on each
+C   one. The points where adjacent subintervals meet are called
+C   knots. Each of the functions U(i) and V(j) above is a piecewise
 C   polynomial.
 C
 C   Users of B2INK choose the order (degree+1) of the polynomial pieces
