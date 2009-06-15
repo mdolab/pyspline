@@ -1,7 +1,7 @@
 # =============================================================================
 # Standard Python modules
 # =============================================================================
-import os, sys, string, pdb, copy
+import os, sys, string, pdb, copy, time
 
 # =============================================================================
 # External Python modules
@@ -10,6 +10,7 @@ from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
     array, real, reshape, meshgrid, dot
 from scipy.io import read_array
 import scipy.interpolate
+from scipy.interpolate import RectBivariateSpline
 
 # =============================================================================
 # Extension modules
@@ -35,8 +36,8 @@ optimizer'''
 
 # Global Variables
 
-Nctlu = 11
-Nctlv = 7
+Nctlu =10
+Nctlv =10
 ku=4
 kv=4
 
@@ -57,9 +58,9 @@ zu0 = zeros((Nu,Nv))
 
 for j in xrange(Nv):
     for i in xrange(Nu):
-        xu0[i,j] = data[Nv*i+j,0]
-        yu0[i,j] = data[Nv*i+j,1]
-        zu0[i,j] = data[Nv*i+j,2]
+        xu0[i,j] = data[j*Nu + i ,0]
+        yu0[i,j] = data[j*Nu + i ,1]
+        zu0[i,j] = data[j*Nu + i ,2]
     #end for
 #end for
 
@@ -73,11 +74,19 @@ zl0 = zeros((Nu,Nv))
 
 for j in xrange(Nv):
     for i in xrange(Nu):
-        xl0[i,j] = data[Nv*i+j,0]
-        yl0[i,j] = data[Nv*i+j,1]
-        zl0[i,j] = data[Nv*i+j,2]
+        xl0[i,j] = data[j*Nu + i,0]
+        yl0[i,j] = data[j*Nu + i,1]
+        zl0[i,j] = data[j*Nu + i,2]
     #end for
 #end for
+
+#Flatten Data Once
+xu0flat = xu0.flatten()
+yu0flat = yu0.flatten()
+zu0flat = zu0.flatten()
+xl0flat = xl0.flatten()
+yl0flat = yl0.flatten()
+zl0flat = zl0.flatten()
 
 # Check the Data
 
@@ -85,13 +94,13 @@ f = open('output.dat','w')
 f.write ('VARIABLES = "X", "Y","Z"\n')
 f.write('Zone I=%d J = %d\n'%(Nu,Nv))
 f.write('DATAPACKING=POINT\n')
-for i in xrange(Nu):
-    for j in xrange(Nv):
+for j in xrange(Nv):
+    for i in xrange(Nu):
         f.write('%f %f %f \n'%(xu0[i,j],yu0[i,j],zu0[i,j]))
 f.write('Zone I=%d J = %d\n'%(Nu,Nv))
 f.write('DATAPACKING=POINT\n')
-for i in xrange(Nu):
-    for j in xrange(Nv):
+for j in xrange(Nv):
+    for i in xrange(Nu):
         f.write('%f %f %f \n'%(xl0[i,j],yl0[i,j],zl0[i,j]))
 
 # ==============================
@@ -118,7 +127,7 @@ ul = ul/ul[-1] #Normalize ul
 # ==============================
 # Find the 'v' parameters
 # ==============================
-x0=xl0[0,:];y0=yl0[0,:];z0=zl0[0,:] 
+x0=xu0[0,:];y0=yu0[0,:];z0=zu0[0,:] 
 vu = zeros(Nv)
 for i in xrange(Nv-1):
     vu[i+1] = vu[i] + sqrt((x0[i+1]-x0[i])**2 + \
@@ -144,134 +153,91 @@ vl = vl/vl[-1] #Normalize vl
 # U knots
 
 tu0= zeros(Nctlu + ku)
-tu0[0:ku] = 0
-tu0[Nctlu:Nctlu+ku] = 1
 tu0[ku-1:Nctlu+1]  = 0.5*(1-cos(linspace(0,pi,Nctlu-ku+2)))
+tu0[0:ku] = 0
+tu0[Nctlu:Nctlu+ku] = 1.0#+0.1*(tu0[Nctlu]-tu0[Nctlu-1])
+
 
 # V Knots
 
 tv0= zeros(Nctlv + kv)
-tv0[0:kv] = 0
-tv0[Nctlv:Nctlv+kv] = 1
 tv0[kv-1:Nctlv+1]=  linspace(0,1,Nctlv-kv+2)
-
+#tv0[kv-1:Nctlv+1]  = 0.5*(1-cos(linspace(0,pi,Nctlv-kv+2)))
+tv0[0:kv] = 0
+tv0[Nctlv:Nctlv+kv] = 1.0#+0.1*(tv0[Nctlv]-tv0[Nctlv-1])
 
 # Calculate the jacobian J, for fixed t and s
 h = 1.0e-40j
 Ju = zeros([Nu*Nv,Nctlu*Nctlv])
 Jl = zeros([Nu*Nv,Nctlu*Nctlv])
 ctl = zeros([Nctlu,Nctlv],'D')
-[Uu,Vu] = meshgrid(uu,vu)
-[Ul,Vl] = meshgrid(ul,vl)
 
-for i in xrange(Nctlu):
-    for j in xrange(Nctlv):
+[VU, UU] = meshgrid(vu,uu)
+[VL, UL] = meshgrid(vu,uu)
+
+for j in xrange(Nctlv):
+    for i in xrange(Nctlu):
         ctl[i,j] += h
-        valu = pyspline_cs.b2valv(Uu.flatten(),Vu.flatten(),0,0,tu0,tv0,ku,kv,ctl)
-        vall = pyspline_cs.b2valv(Ul.flatten(),Vl.flatten(),0,0,tu0,tv0,ku,kv,ctl)
-        
+        valu = pyspline_cs.b2valv(UU.flatten(),VU.flatten(),0,0,tu0,tv0,ku,kv,ctl)
+        vall = pyspline_cs.b2valv(UL.flatten(),VL.flatten(),0,0,tu0,tv0,ku,kv,ctl)
         ctl[i,j] -= h    
-        Ju[:,j*Nctlu + i] = imag(valu)/imag(h)
-        Jl[:,j*Nctlu + i] = imag(vall)/imag(h)
+        Ju[:,i*Nctlv + j] = imag(valu)/imag(h)
+        Jl[:,i*Nctlv + j] = imag(vall)/imag(h)
     # end for 
 # end for
-
-
-
-
+global timeCounter 
+timeCounter = 0
 def objcon(x):
     '''Get the rms error for the given set of design variables'''
+    global timeCounter
+    timeA = time.time()
+ 
+    ctlxu = x[0             : Nctlu*Nctlv]
+    ctlyu = x[1*Nctlu*Nctlv:2*Nctlu*Nctlv]
+    ctlzu = x[2*Nctlu*Nctlv:3*Nctlu*Nctlv]
+    ctlxl = x[3*Nctlu*Nctlv:4*Nctlu*Nctlv]
+    ctlyl = x[4*Nctlu*Nctlv:5*Nctlu*Nctlv]
+    ctlzl = x[5*Nctlu*Nctlv:6*Nctlu*Nctlv]
 
-#     coefxu = zeros([Nu,Nv])
-#     coefyu = zeros([Nu,Nv])
-#     coefzu = zeros([Nu,Nv])
-#     coefxl = zeros([Nu,Nv])
-#     coefyl = zeros([Nu,Nv])
-#     coefzl = zeros([Nu,Nv])
+    sum1 = sum((dot(Ju,ctlxu)-xu0flat)**2)
+    sum2 = sum((dot(Ju,ctlyu)-yu0flat)**2)
+    sum3 = sum((dot(Ju,ctlzu)-zu0flat)**2)
+    sum4 = sum((dot(Jl,ctlxl)-xl0flat)**2)
+    sum5 = sum((dot(Jl,ctlyl)-yl0flat)**2)
+    sum6 = sum((dot(Jl,ctlzl)-zl0flat)**2)
 
-#     coefxu = reshape(x[0        :   Nu*Nv- 4],[Nu,Nv])
-#     coefyu = reshape(x[1*Nu*Nv-4: 2*Nu*Nv- 8],[Nu,Nv])
-#     coefzu = reshape(x[2*Nu*Nv-8: 3*Nu*Nv-12],[Nu,Nv])
-#     coefxl = reshape(x[3*Nu*Nv-12:4*Nu*Nv-16],[Nu,Nv])
-#     coefyl = reshape(x[4*Nu*Nv-16:5:Nu*Nv-20],[Nu,Nv])
-#     coefzl = reshape(x[5*Nu*Nv-20:6*Nu*Nv-24],[Nu,Nv])
-
-#     # Fix all the corners of the grid mesh
-#     # Upper
-#     ctlxu[0 , 0] = x0u[0 , 0]
-#     ctlxu[0 ,-1] = x0u[0 ,-1]
-#     ctlxu[-1, 0] = x0u[-1, 0]
-#     ctlxu[-1,-1] = x0u[-1,-1]
-
-#     ctlyu[0 , 0] = y0u[0 , 0]
-#     ctlyu[0 ,-1] = y0u[0 ,-1]
-#     ctlyu[-1, 0] = y0u[-1, 0]
-#     ctlyu[-1,-1] = y0u[-1,-1]
-
-#     ctlzu[0 , 0] = z0u[0 , 0]
-#     ctlzu[0 ,-1] = z0u[0 ,-1]
-#     ctlzu[-1, 0] = z0u[-1, 0]
-#     ctlzu[-1,-1] = z0u[-1,-1]
-
-#     # Lower
-#     ctlxl[0 , 0] = x0l[0 , 0]
-#     ctlxl[0 ,-1] = x0l[0 ,-1]
-#     ctlxl[-1, 0] = x0l[-1, 0]
-#     ctlxl[-1,-1] = x0l[-1,-1]
-
-#     ctlyl[0 , 0] = y0l[0 , 0]
-#     ctlyl[0 ,-1] = y0l[0 ,-1]
-#     ctlyl[-1, 0] = y0l[-1, 0]
-#     ctlyl[-1,-1] = y0l[-1,-1]
-    
-#     ctlzl[0 , 0] = z0l[0 , 0]
-#     ctlzl[0 ,-1] = z0l[0 ,-1]
-#     ctlzl[-1, 0] = z0u[-1, 0]
-#     ctlzl[-1,-1] = z0l[-1,-1]
-
-    ctlxu = reshape(x[0             : Nctlu*Nctlv],[Nctlu,Nctlv])
-    ctlyu = reshape(x[1*Nctlu*Nctlv:2*Nctlu*Nctlv],[Nctlu,Nctlv])
-    ctlzu = reshape(x[2*Nctlu*Nctlv:3*Nctlu*Nctlv],[Nctlu,Nctlv])
-#     ctlxl = reshape(x[3*Nctlu*Nctlv:4*Nctlu*Nctlv],[Nctlu,Nctlv])
-#     ctlyl = reshape(x[4*Nctlu*Nctlv:5*Nctlu*Nctlv],[Nctlu,Nctlv])
-#     ctlzl = reshape(x[5*Nctlu*Nctlv:6*Nctlu*Nctlv],[Nctlu,Nctlv])
-
-#     print 'in objcon'
-#     print ctlxu
-#     print ctlyu
-#     print ctlzu
-
-    sum1 = (dot(Ju,ctlxu.flatten())-xu0.flatten())**2
-    sum2 = (dot(Ju,ctlyu.flatten())-yu0.flatten())**2
-    sum3 = (dot(Ju,ctlzu.flatten())-zu0.flatten())**2
-
-    sum1 = xu0.flatten()**2
-    sum2 = yu0.flatten()**2
-    sum3 = zu0.flatten()**2
-
-    print dot(sum1,sum1),dot(sum2,sum2),dot(sum3,sum3)
-   
-#     f = sum( (    dot(Ju,ctlxu.flatten())-xu0.flatten())**2 + \
-#                  (dot(Ju,ctlyu.flatten())-yu0.flatten())**2 + \
-#                  (dot(Ju,ctlzu.flatten())-zu0.flatten())**2)
-# #                  (dot(Jl,ctlxl.flatten())-xl0.flatten())**2 + \
-# #                  (dot(Jl,ctlyl.flatten())-yl0.flatten())**2 + \
-# #                  (dot(Jl,ctlzl.flatten())-zl0.flatten())**2   )    
-     
-    #print 'sums:',sum1,sum2,sum3
-    f= sum(sum1+sum2+sum3)
+    f= sum1+sum2+sum3+sum4+sum5+sum6
     fcon = array([])
-    
+    #rint 'obj_time:',time.time()-timeA
     fail = False
+    timeCounter += time.time()-timeA
     return f,fcon,fail
 
-# def sens(x,f_obj,f_con):
-            
-#         g_con[:,j] = imag(fcon)/imag(h)
-        
-#     # end for (dv loop)
-#     fail = False
-#     return g_obj,g_con,fail
+def sens(x,f_obj,f_con):
+    global timeCounter
+    timeA = time.time()
+    ndv = len(x)
+    g_obj = zeros(ndv)
+   
+    ctlxu = x[0             : Nctlu*Nctlv]
+    ctlyu = x[1*Nctlu*Nctlv:2*Nctlu*Nctlv]
+    ctlzu = x[2*Nctlu*Nctlv:3*Nctlu*Nctlv]
+    ctlxl = x[3*Nctlu*Nctlv:4*Nctlu*Nctlv]
+    ctlyl = x[4*Nctlu*Nctlv:5*Nctlu*Nctlv]
+    ctlzl = x[5*Nctlu*Nctlv:6*Nctlu*Nctlv]
+   
+    g_obj[            0:  Nctlu*Nctlv] = 2*dot(dot(Ju,ctlxu)-xu0flat,Ju)
+    g_obj[  Nctlu*Nctlv:2*Nctlu*Nctlv] = 2*dot(dot(Ju,ctlyu)-yu0flat,Ju)
+    g_obj[2*Nctlu*Nctlv:3*Nctlu*Nctlv] = 2*dot(dot(Ju,ctlzu)-zu0flat,Ju)
+    g_obj[3*Nctlu*Nctlv:4*Nctlu*Nctlv] = 2*dot(dot(Jl,ctlxl)-xl0flat,Jl)
+    g_obj[4*Nctlu*Nctlv:5*Nctlu*Nctlv] = 2*dot(dot(Jl,ctlyl)-yl0flat,Jl)
+    g_obj[5*Nctlu*Nctlv:6*Nctlu*Nctlv] = 2*dot(dot(Jl,ctlzl)-zl0flat,Jl)
+
+    g_con = array([])
+    fail = False
+    #rint 'constr time:',time.time()-timeA
+    timeCounter += time.time()-timeA
+    return g_obj,g_con,fail
 
 # =============================================================================
 #  Run Optimization Problem
@@ -283,17 +249,43 @@ def objcon(x):
 
 opt_prob = Optimization('Cubic Spline Optimization Problem',objcon)
 
-# ==============================
-# Find the Control Point Vectors
-# ==============================
+# ================================================
+# Find a good guess of the initial control points 
+# ================================================
 
+ctlxu = zeros((Nctlu,Nctlv))
+ctlyu = zeros((Nctlu,Nctlv))
+ctlzu = zeros((Nctlu,Nctlv))
+ctlxl = zeros((Nctlu,Nctlv))
+ctlyl = zeros((Nctlu,Nctlv))
+ctlzl = zeros((Nctlu,Nctlv))
 
-opt_prob.addVarGroup('CTLux',(Nctlu*Nctlv),'c',value=0,lower=-100,upper=100)
-opt_prob.addVarGroup('CTLuy',(Nctlu*Nctlv),'c',value=0,lower=-100,upper=100)
-opt_prob.addVarGroup('CTLuz',(Nctlu*Nctlv),'c',value=0,lower=-100,upper=100)
-# opt_prob.addVarGroup('CTLlx',(Nctlu*Nctlv),'c',value=ctlxl0.flatten(),lower=-100,upper=100)
-# opt_prob.addVarGroup('CTLly',(Nctlu*Nctlv),'c',value=ctlyl0.flatten(),lower=-100,upper=100)
-# opt_prob.addVarGroup('CTLlz',(Nctlu*Nctlv),'c',value=ctlzl0.flatten(),lower=-100,upper=100)
+#Create the interpolation
+
+Ixu = RectBivariateSpline(uu,vu,xu0,kx=1,ky=1)
+Iyu = RectBivariateSpline(uu,vu,yu0,kx=1,ky=1)
+Izu = RectBivariateSpline(uu,vu,zu0,kx=1,ky=1)
+Ixl = RectBivariateSpline(ul,vl,xl0,kx=1,ky=1)
+Iyl = RectBivariateSpline(ul,vl,yl0,kx=1,ky=1)
+Izl = RectBivariateSpline(ul,vl,zl0,kx=1,ky=1)
+
+u_interp = 0.5*(1-cos(linspace(0,pi,Nctlu)))
+v_interp = linspace(0,1,Nctlv)
+for i in xrange(Nctlu):
+    for j in xrange(Nctlv):
+        ctlxu[i,j] = Ixu(u_interp[i],v_interp[j])
+        ctlyu[i,j] = Iyu(u_interp[i],v_interp[j]) 
+        ctlzu[i,j] = Izu(u_interp[i],v_interp[j])
+        ctlxl[i,j] = Ixl(u_interp[i],v_interp[j])
+        ctlyl[i,j] = Iyl(u_interp[i],v_interp[j]) 
+        ctlzl[i,j] = Izl(u_interp[i],v_interp[j])
+   
+opt_prob.addVarGroup('CTLxu',(Nctlu*Nctlv),'c',value=ctlxu.flatten(),lower=-100,upper=100)
+opt_prob.addVarGroup('CTLyu',(Nctlu*Nctlv),'c',value=ctlyu.flatten(),lower=-100,upper=100)
+opt_prob.addVarGroup('CTLzu',(Nctlu*Nctlv),'c',value=ctlzu.flatten(),lower=-100,upper=100)
+opt_prob.addVarGroup('CTLxl',(Nctlu*Nctlv),'c',value=ctlxl.flatten(),lower=-100,upper=100)
+opt_prob.addVarGroup('CTLyl',(Nctlu*Nctlv),'c',value=ctlyl.flatten(),lower=-100,upper=100)
+opt_prob.addVarGroup('CTLzl',(Nctlu*Nctlv),'c',value=ctlzl.flatten(),lower=-100,upper=100)
 
 # ===================
 #  Constraints
@@ -316,18 +308,23 @@ opt = SNOPT()
 # ===================
 #  SNOPT Options
 # ===================
-opt.setOption('Derivative level',0)
-opt.setOption('Major iterations limit',1)
-opt.setOption('Nonderivative linesearch')
-opt.setOption('Major optimality tolerance', 1e-6)
-opt.setOption('Major feasibility tolerance',1e-6)
-opt.setOption('Minor feasibility tolerance',1e-6)
+#opt.setOption('Derivative level',0)
+opt.setOption('Major iterations limit',500)
+#opt.setOption('Nonderivative linesearch')
+opt.setOption('Major optimality tolerance', 1e-5)
+opt.setOption('Major feasibility tolerance',1e-5)
+opt.setOption('Minor feasibility tolerance',1e-5)
 
 # ===================
 #  Run Optimization
 # ===================
 
-result = opt(opt_prob)#,sens)
+result = opt(opt_prob,sens)
+print opt_prob._solutions[0]
+print '#--------------------------------'
+print '# RMS Error: ',sqrt(result[0][0]/(2*Nu*Nv))
+print '#--------------------------------'
+
 
 # ===================
 #  Print Solution  
@@ -336,14 +333,38 @@ result = opt(opt_prob)#,sens)
 ctlxu = reshape(result[1][0             : Nctlu*Nctlv],[Nctlu,Nctlv])
 ctlyu = reshape(result[1][1*Nctlu*Nctlv:2*Nctlu*Nctlv],[Nctlu,Nctlv])
 ctlzu = reshape(result[1][2*Nctlu*Nctlv:3*Nctlu*Nctlv],[Nctlu,Nctlv])
+ctlxl = reshape(result[1][3*Nctlu*Nctlv:4*Nctlu*Nctlv],[Nctlu,Nctlv])
+ctlyl = reshape(result[1][4*Nctlu*Nctlv:5*Nctlu*Nctlv],[Nctlu,Nctlv])
+ctlzl = reshape(result[1][5*Nctlu*Nctlv:6*Nctlu*Nctlv],[Nctlu,Nctlv])
+
 print 'ctlxu:',ctlxu
 print 'ctlyu:',ctlyu
 print 'ctlzu:',ctlzu
 
+#Just call the objective
+
+# x = hstack([ctlxu.flatten(),ctlyu.flatten(),ctlzu.flatten()])
+# objcon(x)
+
+
 f.write('Zone I=%d J = %d\n'%(Nu,Nv))
 f.write('DATAPACKING=POINT\n')
-for i in xrange(Nu):
-    for j in xrange(Nv):
+for j in xrange(Nv):
+    for i in xrange(Nu):
         f.write('%f %f %f \n'%(pyspline.b2val(uu[i],vu[j],0,0,tu0,tv0,ku,kv,ctlxu),
                                pyspline.b2val(uu[i],vu[j],0,0,tu0,tv0,ku,kv,ctlyu),
                                pyspline.b2val(uu[i],vu[j],0,0,tu0,tv0,ku,kv,ctlzu)))
+
+
+
+f.write('Zone I=%d J = %d\n'%(Nu,Nv))
+f.write('DATAPACKING=POINT\n')
+for j in xrange(Nv):
+    for i in xrange(Nu):
+        f.write('%f %f %f \n'%(pyspline.b2val(ul[i],vl[j],0,0,tu0,tv0,ku,kv,ctlxl),
+                               pyspline.b2val(ul[i],vl[j],0,0,tu0,tv0,ku,kv,ctlyl),
+                               pyspline.b2val(ul[i],vl[j],0,0,tu0,tv0,ku,kv,ctlzl)))
+
+
+
+print 'Eval Time:',timeCounter
