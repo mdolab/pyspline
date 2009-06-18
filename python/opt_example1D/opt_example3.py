@@ -181,7 +181,7 @@ def sens(x,f_obj,f_con):
     g_obj[2*Nctl-4:3*Nctl-6] = 2*dot(dot(Jl,ctlxl)-x0l,Jl)[1:Nctl-1]
     g_obj[3*Nctl-6:4*Nctl-8] = 2*dot(dot(Jl,ctlyl)-y0l,Jl)[1:Nctl-1]
 
-    # Do the S Derivates
+  #   # Do the S Derivates
     s_temp = array([su],'D') + h
     interp_x = pyspline_cs.bvaluv(tu,ctlxu,k,0,s_temp)
     interp_y = pyspline_cs.bvaluv(tu,ctlyu,k,0,s_temp)
@@ -274,7 +274,7 @@ result = opt(opt_prob,sens)
 #  Print Solution  
 # ===================
 
-print opt_prob._solutions[0]
+#print opt_prob._solutions[0]
 print '#--------------------------------'
 print '# RMS Error: ',sqrt(result[0][0]/(2*N))
 print '#--------------------------------'
