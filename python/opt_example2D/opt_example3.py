@@ -7,7 +7,7 @@ import os, sys, string, pdb, copy, time
 # External Python modules
 # =============================================================================
 from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
-    array, real, reshape, meshgrid, dot
+    array, real, reshape, meshgrid, dot, cross
 from scipy.io import read_array
 import scipy.interpolate
 from scipy.interpolate import RectBivariateSpline
@@ -36,8 +36,8 @@ optimizer'''
 
 # Global Variables
 
-Nctlu =9
-Nctlv =6
+Nctlu =13
+Nctlv =5
 ku=4
 kv=4
 
@@ -183,14 +183,20 @@ def objcon(x):
     fail = False
     fcon = dot(B,x)
 
-    # Calculate the LE constraint
-    A = ctl[0,0,0,:] # Root LE (upper)
-    B = ctl[0,1,0,:] # Root LE upper +1
-    C = ctl[1,-1,0,:]# Root LE lower +1
+   #  # Calculate the LE constraint
+    xA = ctl[0,0,0,:] # Root LE (upper)
+    xB = ctl[0,1,0,:] # Root LE upper +1
+    xC = ctl[1,-2,0,:]# Root LE lower +1
 
-    
-
-
+    v1 = xB-xA #vector from A to B
+    v2 = xA-xC #vector from A to C
+    print 'norm',dot(cross(v1,v2),cross(v1,v2))
+    # Now take cross product and quadrature sum
+    xProduct = (v1[1]*v2[2]-v1[2]*v2[1])**2+ (-v1[0]*v2[2]+v1[2]*v2[0] )**2 +  ( v1[0]*v2[1] - v1[1]*v2[0])**2
+    fcon[-1] = 1e6*xProduct
+    print 'vectors:',v1,v2
+    print 'xProduct',xProduct
+    print 'check',v1[0]/v2[0],v1[1]/v2[1],v1[2]/v2[2]
     timeCounter += time.time()-timeA
     return f,fcon,fail
 
@@ -218,6 +224,34 @@ def sens(x,f_obj,f_con):
     
     fail = False
     g_con = B
+    h = 1.0e-40j
+    x = array(x,'D')
+    for i in xrange(ndv):
+        x[i] += h
+
+        ctl = zeros((Nsurf,Nctlu,Nctlv,3),'D')
+        for isurf in xrange(Nsurf):
+            for idim in xrange(3):
+                ctl[isurf,:,:,idim] = reshape(x[isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv : isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv + Nctlu*Nctlv],[Nctlu,Nctlv])
+                
+
+        #  # Calculate the LE constraint
+        xA = ctl[0,0,0,:] # Root LE (upper)
+        xB = ctl[0,1,0,:] # Root LE upper +1
+        xC = ctl[1,-2,0,:]# Root LE lower +1
+        
+        v1 = xB-xA #vector from A to B
+        v2 = xA-xC #vector from A to C
+
+        # Now take cross product and quadrature sum
+        xProduct = (v1[1]*v2[2]-v1[2]*v2[1])**2+ (-v1[0]*v2[2]+v1[2]*v2[0] )**2 +  ( v1[0]*v2[1] - v1[1]*v2[0])**2
+
+        g_con[-1,i] = imag(1e6*xProduct)/imag(h)
+
+        x[i] -= h
+    #end for
+
+
     timeCounter += time.time()-timeA
     return g_obj,g_con,fail
 
@@ -306,11 +340,12 @@ for idim in xrange(3):
         counter +=2
     # end for
 # end for
-    
 # LE Continutiy Constraint
 
 opt_prob.addCon('LE constraint',type='i',lower=0,upper=0)
-
+print ncon
+print ndv
+print B.shape
 
 # ===================
 #  Objective
