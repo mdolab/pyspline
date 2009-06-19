@@ -36,7 +36,7 @@ optimizer'''
 
 # Global Variables
 
-Nctlu =17
+Nctlu =13
 Nctlv =9
 ku=4
 kv=4
@@ -56,7 +56,6 @@ Nv = 25
 
 Nsurf = 2
 X = zeros([Nsurf,Nu,Nv,3])
-X_flat = zeros([Nsurf,Nu*Nv,3])
 # Top surface of wing
 print 'reading upper surface...'
 data = read_array(file("upper_surface.inp"))
@@ -419,7 +418,6 @@ for isurf in xrange(Nsurf):
     for j in xrange(Nctlv):
         for i in xrange(Nctlu):
             f.write('%f %f %f \n'%(ctl[isurf,i,j,0],ctl[isurf,i,j,1],ctl[isurf,i,j,2]))
-
 
 
 print 'Eval Time:',timeCounter
