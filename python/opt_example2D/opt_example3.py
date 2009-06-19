@@ -36,8 +36,8 @@ optimizer'''
 
 # Global Variables
 
-Nctlu =13
-Nctlv =7
+Nctlu =17
+Nctlv =9
 ku=4
 kv=4
 
@@ -160,7 +160,7 @@ timeCounter = 0.0
 
 def objcon(x):
     '''Get the rms error for the given set of design variables'''
-    global timeCounter,B
+    global timeCounter,Bcon
     timeA = time.time()
  
 # Unpack the x-values
@@ -181,31 +181,35 @@ def objcon(x):
     # end for 
     f = total
     fail = False
-    fcon = dot(B,x)
+    fcon = dot(Bcon,x)
+    index = 4*Nsurf*3 + 2*Nctlv*3
 
    #  # Calculate the LE constraint
-    xA = ctl[0,0,0,:] # Root LE (upper)
-    xB = ctl[0,1,0,:] # Root LE upper +1
-    xC = ctl[1,-2,0,:]# Root LE lower +1
+    for j in xrange(Nctlv):
 
-    v1 = xB-xA #vector from A to B
-    v2 = xA-xC #vector from A to C
-    #print 'norm',dot(cross(v1,v2),cross(v1,v2))
-    # Now take cross product and quadrature sum
-    xProduct = (v1[1]*v2[2]-v1[2]*v2[1])**2+ (-v1[0]*v2[2]+v1[2]*v2[0] )**2 +  ( v1[0]*v2[1] - v1[1]*v2[0])**2
-    #fcon[-1] = (1.0e6*xProduct)
+        A = ctl[0,0,j,:] # Root LE (upper)
+        B = ctl[0,1,j,:] # Root LE upper +1
+        C = ctl[1,-2,j,:]# Root LE lower +1
+        #rint 'a,b,c',A,B,C
+        # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
 
-    
-    fcon[-2] = (v1[0]/v2[0])/(v1[1]/v2[1])
-    fcon[-1] = (v1[0]/v2[0])/(v1[2]/v2[2])
-    #print 'vectors:',v1,v2
-#     print 'xProduct',xProduct
-#    print 'check',v1[0]/v2[0],v1[1]/v2[1],v1[2]/v2[2]
+        A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
+        A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
+        A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
+
+        #print 'A1,A2,A3 obj:',A1,A2,A3   
+        fcon[index + 0] = A1
+        fcon[index + 1] = A2
+        fcon[index + 2] = A3
+        index += 3
+    # end for
+
     timeCounter += time.time()-timeA
     return f,fcon,fail
 
 def sens(x,f_obj,f_con):
-    global timeCounter,B
+    #print 'sens'
+    global timeCounter,Bcon
     timeA = time.time()
     ndv = len(x)
     g_obj = zeros(ndv)
@@ -227,32 +231,44 @@ def sens(x,f_obj,f_con):
     # end for 
     
     fail = False
-    g_con = B
+    g_con = Bcon
     h = 1.0e-40j
     x = array(x,'D')
-    for i in xrange(ndv):
-        x[i] += h
 
+    for i in xrange(ndv):
+        index = 4*Nsurf*3 + 2*Nctlv*3
+        x[i] += h
+        #print 'i',i
         ctl = zeros((Nsurf,Nctlu,Nctlv,3),'D')
         for isurf in xrange(Nsurf):
             for idim in xrange(3):
                 ctl[isurf,:,:,idim] = reshape(x[isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv : isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv + Nctlu*Nctlv],[Nctlu,Nctlv])
                 
-        #  # Calculate the LE constraint
-        xA = ctl[0,0,0,:] # Root LE (upper)
-        xB = ctl[0,1,0,:] # Root LE upper +1
-        xC = ctl[1,-2,0,:]# Root LE lower +1
-        
-        v1 = xB-xA #vector from A to B
-        v2 = xA-xC #vector from A to C
-        xProduct = (v1[1]*v2[2]-v1[2]*v2[1])**2+ (-v1[0]*v2[2]+v1[2]*v2[0] )**2 +  ( v1[0]*v2[1] - v1[1]*v2[0])**2
-#         # Now take cross product and quadrature sum
-#        g_con[-1,i] = imag((1.0e6*xProduct))/imag(h)
-        g_con[-2,i] = imag((v1[0]/v2[0])/(v1[1]/v2[1]))/imag(h)
-        g_con[-1,i] = imag((v1[0]/v2[0])/(v1[2]/v2[2]))/imag(h)
-        x[i] -= h
-#     #end for
+        for j in xrange(Nctlv):
+            A = ctl[0,0,j,:] # Root LE (upper)
+            B = ctl[0,1,j,:] # Root LE upper +1
+            C = ctl[1,-2,j,:]# Root LE lower +1
 
+            # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
+    
+            A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
+            A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
+            A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
+
+            g_con[index+0,i] = imag(A1)/imag(h)
+            g_con[index+1,i] = imag(A2)/imag(h)
+            g_con[index+2,i] = imag(A3)/imag(h)
+#            print g_con[index+0,i] 
+#            print g_con[index+1,i]
+#            print g_con[index+2,1] 
+            #print 'checking:',g_con[4*Nsurf*3+2*Nctlv*3 +0,0],g_con[4*Nsurf*3+2*Nctlv*3 +1,0],g_con[4*Nsurf*3+2*Nctlv*3 +2,0]
+
+            index += 3
+        # end for
+        x[i] -= h
+    # end for
+        #print 'done gcon:',g_con[4*Nsurf*3+2*Nctlv*3 +0,0],g_con[4*Nsurf*3+2*Nctlv*3 +1,0],g_con[4*Nsurf*3+2*Nctlv*3 +2,0]
+        #sys.exit(0)
     timeCounter += time.time()-timeA
     return g_obj,g_con,fail
 
@@ -260,62 +276,22 @@ def sens(x,f_obj,f_con):
 #  Run Optimization Problem
 # =============================================================================
 
-# ===================
-#  Variables
-# ===================
-
 opt_prob = Optimization('Cubic Spline Optimization Problem',objcon)
-
-# ================================================
-# Find a good guess of the initial control points 
-# ================================================
-
-# ctl = zeros((Nsurf,Nctlu,Nctlv,3))
-
-# #Create the interpolation
-# u_interp = 0.5*(1-cos(linspace(0,pi,Nctlu)))
-# v_interp = linspace(0,1,Nctlv)
-
-# for isurf in xrange(Nsurf):
-#     for idim in xrange(3):
-#         I = RectBivariateSpline(u[isurf],v[isurf],X[isurf,:,:,idim],kx=1,ky=1)
-#         for i in xrange(Nctlu):
-#             for j in xrange(Nctlv):
-#                 ctl[isurf,i,j,idim] = I(u_interp[i],v_interp[j])
-#             # end for
-#         # end for
-#     # end for
-# # end for 
-# ndv = 0
-# for isurf in xrange(Nsurf):
-#     for idim in xrange(3):
-#         if idim == 0: name = 'ctlx'
-#         if idim == 1: name = 'ctly'
-#         if idim == 2: name = 'ctlz'
-#         name +=str(isurf)
-#         opt_prob.addVarGroup(name,Nctlu*Nctlv,'c',value=ctl[isurf,:,:,idim].flatten(),lower=-100,upper=100)
-#         ndv += Nctlu*Nctlv
-#     # end for
-# # end for 
-
-
-
-ndv = Nctlu*Nctlv*Nsurf*3
-
 
 # ===================
 #  Constraints
 # ===================
 # First figure out how many constraints we are going to have
 ncon = 0
-
+ndv = Nctlu*Nctlv*Nsurf*3
 # Each of four corners on each Surf
 
 ncon += 4*Nsurf*3 # three for the dimensions
 ncon += 2*Nctlv*3 # Set the LE and TE to be same on upper and lower surfaces
-ncon += 2         # one constraint for the continutity constraint
-global B
-B = zeros([ncon,ndv]) #This is the constraint derivative matrix (constant since these are linear constraints)
+ncon += Nctlv*3   # 3*Nctlv constraint for the continutity constraint
+print 'Ncon:',ncon
+global Bcon
+Bcon = zeros([ncon,ndv]) #This is the constraint derivative matrix ((Mostly) constant)
 
 # Corner Constraints
 counter = 0
@@ -326,10 +302,10 @@ for isurf in xrange(Nsurf):
         opt_prob.addCon('coner constr',type= 'i',lower=X[isurf,-1,0,idim],upper=X[isurf,-1,0,idim])
         opt_prob.addCon('coner constr',type= 'i',lower=X[isurf,-1,-1,idim],upper=X[isurf,-1,-1,idim])
 
-        B[counter  ,isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv + 0] = 1
-        B[counter+1,isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv + Nctlv-1] = 1
-        B[counter+2,isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv + Nctlu*Nctlv-Nctlv] = 1
-        B[counter+3,isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv + Nctlu*Nctlv-1] = 1
+        Bcon[counter  ,isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv + 0] = 1
+        Bcon[counter+1,isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv + Nctlv-1] = 1
+        Bcon[counter+2,isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv + Nctlu*Nctlv-Nctlv] = 1
+        Bcon[counter+3,isurf*3*Nctlu*Nctlv + idim*Nctlu*Nctlv + Nctlu*Nctlv-1] = 1
         counter += 4
     # end for
 # end for 
@@ -339,21 +315,31 @@ for idim in xrange(3):
     for j in xrange(Nctlv):
         opt_prob.addCon('edge constraint',type='i',lower=0,upper=0)
         opt_prob.addCon('edge constraint',type='i',lower=0,upper=0)
-        B[counter,idim*Nctlv*Nctlu + j] = 1
-        B[counter,3*Nctlu*Nctlv + idim*Nctlv*Nctlu + (Nctlu-1)*Nctlv + j] = -1
-        B[counter+1,idim*Nctlv*Nctlu + (Nctlu-1)*Nctlv + j] = 1
-        B[counter+1,3*Nctlu*Nctlv + idim*Nctlv*Nctlu + j] = -1
+        Bcon[counter,idim*Nctlv*Nctlu + j] = 1
+        Bcon[counter,3*Nctlu*Nctlv + idim*Nctlv*Nctlu + (Nctlu-1)*Nctlv + j] = -1
+        Bcon[counter+1,idim*Nctlv*Nctlu + (Nctlu-1)*Nctlv + j] = 1
+        Bcon[counter+1,3*Nctlu*Nctlv + idim*Nctlv*Nctlu + j] = -1
         counter +=2
     # end for
 # end for
-# LE Continutiy Constraint
 
-opt_prob.addCon('LE constraint',type='i',lower=1,upper=1)
-opt_prob.addCon('LE constraint',type='i',lower=1,upper=1)
+# LE Continutiy Constraint
+for j in xrange(Nctlv):
+    for icon in xrange(3):
+        opt_prob.addCon('LE constraint',type='i',lower=0,upper=0)
+    # end for
+#end for
+
+
+# ===================
+#  Variables
+# ===================
+
 
 # Lets do a lms fit instead
+
 timeA = time.time()
-ctl = pyspline.fit_surf(Nsurf,Nu,Nv,Nctlu,Nctlv,ncon,J,X,B,zeros(ncon))
+ctl = pyspline.fit_surf(Nsurf,Nu,Nv,Nctlu,Nctlv,ncon,J,X,Bcon,zeros(ncon))
 print 'LMS Fit Time:',time.time()-timeA
 for isurf in xrange(Nsurf):
     for idim in xrange(3):
@@ -361,9 +347,13 @@ for isurf in xrange(Nsurf):
         if idim == 1: name = 'ctly'
         if idim == 2: name = 'ctlz'
         name +=str(isurf)
-        opt_prob.addVarGroup(name,Nctlu*Nctlv,'c',value=ctl[isurf,:,:,idim].flatten(),lower=-100,upper=100)
+        opt_prob.addVarGroup(name,Nctlu*Nctlv,'c',value=ctl[isurf,:,:,idim].flatten(),\
+                                 lower=ctl[isurf,:,:,idim].flatten()-.1, \
+                                 upper=ctl[isurf,:,:,idim].flatten()+.1)
     # end for
 # end for 
+
+
 
 # ===================
 #  Objective
@@ -384,9 +374,9 @@ opt = SNOPT()
 opt.setOption('Major iterations limit',150)
 #opt.setOption('Linesearch tolerance',.1)
 #opt.setOption('Nonderivative linesearch')
-opt.setOption('Major optimality tolerance', 1e-5)
-opt.setOption('Major feasibility tolerance',1e-5)
-opt.setOption('Minor feasibility tolerance',1e-5)
+opt.setOption('Major optimality tolerance', 1e-6)
+opt.setOption('Major feasibility tolerance',5e-10)
+opt.setOption('Minor feasibility tolerance',1e-6)
 
 # ===================
 #  Run Optimization
@@ -433,3 +423,42 @@ for isurf in xrange(Nsurf):
 
 
 print 'Eval Time:',timeCounter
+
+
+
+
+
+# ======================================================================
+# Old Code Snippets
+# ======================================================================
+# ================================================
+# Find a good guess of the initial control points 
+# ================================================
+
+# ctl = zeros((Nsurf,Nctlu,Nctlv,3))
+
+# #Create the interpolation
+# u_interp = 0.5*(1-cos(linspace(0,pi,Nctlu)))
+# v_interp = linspace(0,1,Nctlv)
+
+# for isurf in xrange(Nsurf):
+#     for idim in xrange(3):
+#         I = RectBivariateSpline(u[isurf],v[isurf],X[isurf,:,:,idim],kx=1,ky=1)
+#         for i in xrange(Nctlu):
+#             for j in xrange(Nctlv):
+#                 ctl[isurf,i,j,idim] = I(u_interp[i],v_interp[j])
+#             # end for
+#         # end for
+#     # end for
+# # end for 
+# ndv = 0
+# for isurf in xrange(Nsurf):
+#     for idim in xrange(3):
+#         if idim == 0: name = 'ctlx'
+#         if idim == 1: name = 'ctly'
+#         if idim == 2: name = 'ctlz'
+#         name +=str(isurf)
+#         opt_prob.addVarGroup(name,Nctlu*Nctlv,'c',value=ctl[isurf,:,:,idim].flatten(),lower=-100,upper=100)
+#         ndv += Nctlu*Nctlv
+#     # end for
+# # end for 
