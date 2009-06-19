@@ -72,6 +72,7 @@ OBJ =   bspline/bfqad.o\
 	misc/b2valM.o\
 	misc/b2valV.o\
 	lmsfit/fit_foil.o\
+	lmsfit/fit_surf.o\
 
 
 ###================================================
@@ -97,8 +98,10 @@ clean:
 	$(RM) xerror/*.o
 	@echo "Removing .o files in misc"
 	$(RM) misc/*.o
-	@echo "Removign .o files in fitpack"
+	@echo "Removing .o files in fitpack"
 	$(RM) fitpack/*.o
+	@echo "Removing .o files in lmsfit"
+	$(RM) lmsfit/*.o
 	@echo "Removing library"
 	$(RM) libtensbs.a
 

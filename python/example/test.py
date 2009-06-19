@@ -12,9 +12,29 @@ import sys,os,string,time
 from numpy import array,zeros,sin,cos,array,linspace,pi,meshgrid,ones,where,\
     interp, append, hstack,sqrt,mat
 
+# =============================================================================
+# Extension modules
+# =============================================================================
+import pyspline 
+import pyspline_cs
+
+#pyOPT
+sys.path.append(os.path.abspath('../../../../pyACDT/pyACDT/Optimization/pyOpt/'))
+from pyOpt_optimization import Optimization
+
+#pySNOPT
+sys.path.append(os.path.abspath('../../../../pyACDT/pyACDT/Optimization/pyOpt/pySNOPT'))
+from pySNOPT import SNOPT
+
+import pyspline
+import pyspline_cs
+
+
 #pySpline
 sys.path.append("../")
 import pySpline 
+
+print 'sys.path1:',sys.path
 
 # Define an analytic function
 
@@ -22,9 +42,6 @@ u = linspace(-1,1,10)
 v = linspace(-1,1,10)
 
 [U,V] = meshgrid(u,v)
-
-
-
 
 # create the surface object
 
