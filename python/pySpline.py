@@ -25,7 +25,7 @@ __version__ = '$Revision: $'
 # Standard Python modules
 # =============================================================================
 import os, sys, string, time
-print 'sys.path',sys.path
+
 # =============================================================================
 # External Python modules
 # =============================================================================
@@ -67,7 +67,6 @@ class spline():
                     self.tu,self.tv,self.coef[isurf,:,:,idim] = pyspline.b2ink(u[isurf,:],v[isurf,:],X[isurf,:,:,idim],ku,kv)
                 # end for
             # end for
-
            
         elif fit_type == 'lms':
             Nu = len(u[0,:])
@@ -79,22 +78,26 @@ class spline():
             # ==============================
 
             # U knots
-
+            print 'fuck nctlu:',Nctlu,Nctlv
             tu0= zeros(Nctlu + ku)
             tu0[ku-1:Nctlu+1]  = 0.5*(1-cos(linspace(0,pi,Nctlu-ku+2)))
             tu0[0:ku] = 0
             tu0[Nctlu:Nctlu+ku] = 1.0#+0.1*(tu0[Nctlu]-tu0[Nctlu-1])
             
             # V Knots
-            
+
             tv0= zeros(Nctlv + kv)
-            tv0[kv-1:Nctlv+1]=  linspace(0,1,Nctlv-kv+2)
-            # tv0[kv-1:Nctlv+1]  = 0.5*(1-cos(linspace(0,pi,Nctlv-kv+2)))
+            print 'v size:',tv0.shape
+            tv0[kv-1:Nctlv+1] =  linspace(0,1,Nctlv-kv+2)
+            print 'tv01',tv0
+            tv0[kv-1:Nctlv+1] = v[0,1:-1]
+ #          tv0[kv-1:Nctlv+1]  = 0.5*(1-cos(linspace(0,pi,Nctlv-kv+2)))
             tv0[0:kv] = 0
             tv0[Nctlv:Nctlv+kv] = 1.0#+0.1*(tv0[Nctlv]-tv0[Nctlv-1])
 
             self.tu = tu0
             self.tv = tv0
+            print 'knots:',tu0,tv0,ku,kv
 
             # Calculate the jacobian J, for fixed t and s
 
@@ -183,6 +186,7 @@ class spline():
 
             timeA = time.time()
             ctl = pyspline.fit_surf(Nsurf,Nu,Nv,Nctlu,Nctlv,ncon,self.J,X,self.Bcon,zeros(ncon))
+            #ctl = zeros([Nsurf,Nctlu,Nctlv,3])
             print 'LMS Fit Time:',time.time()-timeA
             for isurf in xrange(Nsurf):
                 for idim in xrange(3):
@@ -191,8 +195,8 @@ class spline():
                     if idim == 2: name = 'ctlz'
                     name +=str(isurf)
                     opt_prob.addVarGroup(name,Nctlu*Nctlv,'c',value=ctl[isurf,:,:,idim].flatten(),\
-                                             lower=ctl[isurf,:,:,idim].flatten()-.1, \
-                                             upper=ctl[isurf,:,:,idim].flatten()+.1)
+                                             lower=ctl[isurf,:,:,idim].flatten()-10, \
+                                             upper=ctl[isurf,:,:,idim].flatten()+10)
                 # end for
             # end for 
 
@@ -207,26 +211,26 @@ class spline():
             # ===================
             #opt.setOption('Derivative level',0)
             #opt.setOption('Verify level',3)
-            opt.setOption('Major iterations limit',150)
+            opt.setOption('Major iterations limit',10)
             #opt.setOption('Linesearch tolerance',.1)
             #opt.setOption('Nonderivative linesearch')
-            opt.setOption('Major optimality tolerance', 1e-6)
-            opt.setOption('Major feasibility tolerance',1e-9)
-            opt.setOption('Minor feasibility tolerance',1e-6)
+            opt.setOption('Major optimality tolerance', 1e-5)
+            opt.setOption('Major feasibility tolerance',1e-8)
+            opt.setOption('Minor feasibility tolerance',1e-5)
 
             # ===================
             #  Run Optimization
             # ===================
 
             result = opt(opt_prob,self.__sens)
-
+            
             print '#--------------------------------'
-            print '# RMS Error: ',sqrt(result[0][0]/(2*Nu*Nv))
+            print '# RMS Error: ',sqrt(result[0][0]/(Nsurf*Nu*Nv))
             print '#--------------------------------'
             
             # Set the control points
             self.coef = self.__unpack_x(result[1][:])
-
+            #self.coef = ctl
         else:
             print 'Error: fit_type is not understood. Type must be \'lms\' or \'interpolate\''
             sys.exit(0)
@@ -273,9 +277,8 @@ class spline():
         ndv = len(x)
         g_obj = zeros(ndv)
          # Unpack the x-values
-        N = self.Nctlu*self.Nctlv
-
         ctl = self.__unpack_x(x)
+        N = self.Nctlu*self.Nctlv
 
         for isurf in xrange(self.Nsurf):
             for idim in xrange(3):
@@ -291,7 +294,7 @@ class spline():
         for i in xrange(ndv):
             index = 4*self.Nsurf*3 + 2*self.Nctlv*3
             x[i] += h
-            ctl = self.__unpack_x_complex(x)
+            ctl = self.__unpack_x(x,'D')
             for j in xrange(self.Nctlv):
                 A = ctl[0,0,j,:] # Root LE (upper)
                 B = ctl[0,1,j,:] # Root LE upper +1
@@ -310,26 +313,15 @@ class spline():
         # end for
         return g_obj,g_con,False
 
-    def __unpack_x(self,x):
-        ctl = zeros((self.Nsurf,self.Nctlu,self.Nctlv,3))
+    def __unpack_x(self,x,dtype='d'):
+        ctl = zeros((self.Nsurf,self.Nctlu,self.Nctlv,3),dtype)
         N = self.Nctlu*self.Nctlv
         for isurf in xrange(self.Nsurf):
             for idim in xrange(3):
                 ctl[isurf,:,:,idim] = reshape(x[isurf*3*N + idim*N : isurf*3*N + idim*N + N],[self.Nctlu,self.Nctlv])
-            # end if
-        #end if
+            # end for
+        #end for
         return ctl
-
-    def __unpack_x_complex(self,x):
-        ctl = zeros((self.Nsurf,self.Nctlu,self.Nctlv,3),'D')
-        N = self.Nctlu*self.Nctlv
-        for isurf in xrange(self.Nsurf):
-            for idim in xrange(3):
-                ctl[isurf,:,:,idim] = reshape(x[isurf*3*N + idim*N : isurf*3*N + idim*N + N],[self.Nctlu,self.Nctlv])
-            # end if
-        #end if
-        return ctl
-
 
     def getValue(self,isurf,u,v):
         
@@ -388,7 +380,6 @@ class spline():
         v0: scalar: The guess for the v coordinate of the intersection
 
         '''
-
         maxIter = 25
 
         u = u0
@@ -454,15 +445,17 @@ class spline():
                 # end for
             # end for
         # end for 
-
+        u_plot = linspace(0,1,50)
+        u_plot = 0.5*(1-cos(linspace(0,pi,50)))
+        v_plot = linspace(0,1,50)
         # Dump re-interpolated surface
         for isurf in xrange(self.Nsurf):
-            f.write('Zone T=%s I=%d J = %d\n'%('interpolated',self.Nu,self.Nv))
+            f.write('Zone T=%s I=%d J = %d\n'%('interpolated',len(u_plot),len(v_plot)))
             f.write('DATAPACKING=POINT\n')
-            for j in xrange(self.Nv):
-                for i in xrange(self.Nu):
+            for j in xrange(len(v_plot)):
+                for i in xrange(len(u_plot)):
                     for idim in xrange(3):
-                        f.write('%f '%(pyspline.b2val(self.u0[isurf,i],self.v0[isurf,j],0,0,self.tu,self.tv,self.ku,self.kv,self.coef[isurf,:,:,idim])))
+                        f.write('%f '%(pyspline.b2val(u_plot[i],v_plot[j],0,0,self.tu,self.tv,self.ku,self.kv,self.coef[isurf,:,:,idim])))
                     # end for 
                     f.write('\n')
                 # end for

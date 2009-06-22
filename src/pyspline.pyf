@@ -273,13 +273,12 @@ python module pyspline ! in
         end subroutine b2valm
 
         subroutine b2valv(x,y,n,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,z) ! in c_b2valV.f90
-          use complexify
           real*8,intent(in), dimension(n) :: x
           real*8,intent(in), dimension(n),depend(n) :: y
           integer optional,check(len(x)>=n),depend(x) :: n=len(x)
           integer,intent(in) :: idx
           integer,intent(in) :: idy
-          real*8 dimension(nx+ky),depend(nx,ky) :: tx
+          real*8 dimension(nx+kx),depend(nx,kx) :: tx
           real*8 dimension(ny+ky),depend(ny,ky) :: ty
           integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
           integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
