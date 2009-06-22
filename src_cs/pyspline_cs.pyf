@@ -99,7 +99,7 @@ python module pyspline_cs ! in
           integer optional,check(shape(x,1)==m),depend(x) :: m=shape(x,1)
           integer,intent(in) :: idx
           integer,intent(in) :: idy
-          complex*16,intent(in), dimension(nx+ky),depend(nx,ky) :: tx
+          complex*16,intent(in), dimension(nx+kx),depend(nx,kx) :: tx
           complex*16,intent(in), dimension(ny+ky),depend(ny,ky) :: ty
           integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
           integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
@@ -116,7 +116,7 @@ python module pyspline_cs ! in
           integer optional,check(len(x)>=n),depend(x) :: n=len(x)
           integer,intent(in) :: idx
           integer,intent(in) :: idy
-          complex*16 dimension(nx+ky),depend(nx,ky) :: tx
+          complex*16 dimension(nx+kx),depend(nx,kx) :: tx
           complex*16 dimension(ny+ky),depend(ny,ky) :: ty
           integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
           integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
