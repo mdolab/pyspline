@@ -30,7 +30,7 @@ import os, sys, string, time
 # External Python modules
 # =============================================================================
 from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
-    array, real, reshape, meshgrid, dot, cross
+    array, real, reshape, meshgrid, dot, cross, mod
 
 import scipy.linalg
 from pyOpt_optimization import Optimization
@@ -90,7 +90,7 @@ class spline():
             print 'v size:',tv0.shape
             tv0[kv-1:Nctlv+1] =  linspace(0,1,Nctlv-kv+2)
             print 'tv01',tv0
-            tv0[kv-1:Nctlv+1] = v[0,1:-1]
+            #tv0[kv-1:Nctlv+1] = v[0,1:-1]
  #          tv0[kv-1:Nctlv+1]  = 0.5*(1-cos(linspace(0,pi,Nctlv-kv+2)))
             tv0[0:kv] = 0
             tv0[Nctlv:Nctlv+kv] = 1.0#+0.1*(tv0[Nctlv]-tv0[Nctlv-1])
@@ -472,6 +472,98 @@ class spline():
                 # end for
             # end for
         # end for 
+
+
+    def writeIGES(self,file_name):
+
+        f = open(file_name,'w')
+        f.write('                                                                        S      1\n')
+        f.write('1H,,1H;,7H128-000,11H128-000.IGS,9H{unknown},9H{unknown},16,6,15,13,15, G      1\n')
+        f.write('7H128-000,1.,1,4HINCH,8,0.016,15H19970830.165254,0.0001,0.,             G      2\n')
+        f.write('21Hdennette@wiz-worx.com,23HLegacy PDD AP Committee,11,3,               G      3\n')
+        f.write('13H920717.080000,23HMIL-PRF-28000B0,CLASS 1;                            G      4\n')
+        
+        f.write('     128       1       0       1       0       0       0       000000001D      1\n')
+        f.write('     128       0       2     128       0                                D      2\n')
+        counter = 1
+        f.write('%3d,%4d,%4d,%4d,%4d,%1d,%1d,%1d,%1d,%1d,%37s1P%7d\n'%(128,self.Nu-1,self.Nv-1,self.ku-1,self.kv-1,0,0,1,0,0,' ',counter))
+        counter += 1
+        # Now do the knots
+
+        pos_counter = 0
+
+        for i in xrange(len(self.tu)):
+            pos_counter += 1
+            f.write('%12.6g,'%(self.tu[i]))
+            if mod(pos_counter,5) == 0:
+                f.write('      1P%7d\n'%(counter))
+                counter += 1
+                pos_counter = 0
+
+
+        for i in xrange(len(self.tv)):
+            pos_counter += 1
+            f.write('%12.6g,'%(self.tv[i]))
+            if mod(pos_counter,5) == 0:
+                f.write('      1P%7d\n'%(counter))
+                counter += 1
+                pos_counter = 0
+            # end if
+        # end for
+
+        for i in xrange(self.Nu*self.Nv):
+            pos_counter += 1
+            f.write('%12.6g,'%(1.0))
+            if mod(pos_counter,5) == 0:
+                f.write('      1P%7d\n'%(counter))
+                counter += 1
+                pos_counter = 0
+            # end if
+        # end for 
+        for j in xrange(self.Nctlv):
+            for i in xrange(self.Nctlu):
+                for idim in xrange(3):
+                    pos_counter += 1
+                    f.write('%12.6g,'%(self.coef[0,i,j,idim]))
+                    if mod(pos_counter,5) == 0:
+                        f.write('      1P%7d\n'%(counter))
+                        counter += 1
+                        pos_counter = 0
+                    # end if
+                # end for
+            # end for
+        # end for
+        
+        # Ouput the ranges
+        for  i in xrange(4):
+            pos_counter += 1
+            if i == 0:
+                f.write('%12.6g,'%(self.u0[0,0]))
+            if i == 1:
+                f.write('%12.6g,'%(self.u0[0,-1]))
+            if i == 2:
+                f.write('%12.6g,'%(self.v0[0,0]))
+            if i == 3:
+                f.write('%12.6g;'%(self.v0[0,-1])) # semi-colon for the last entity
+            if mod(pos_counter,5)==0:
+                f.write('      1P%7d\n'%(counter))
+                counter += 1
+                pos_counter = 0
+            else: # We have to close it up anyway
+                if i ==3:
+                    for j  in xrange(5-pos_counter):
+                        f.write('%13s'%(' '))
+                    f.write('      1P%7d\n'%(counter))
+                    pos_counter = 0
+
+                    
+        # Output the Terminate Statement
+        f.write('S%7dG%7dD%7dP%7d%40sT%7s\n'%(1,4,2,counter,' ',' '))
+
+        f.close()
+
+
+
 
 #==============================================================================
 # Class Test
