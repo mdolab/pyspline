@@ -32,7 +32,8 @@ import os, sys, string, time
 from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
     array, real, reshape, meshgrid, dot, cross, mod
 
-import scipy.linalg
+import numpy.linalg
+
 from pyOpt_optimization import Optimization
 from pySNOPT import SNOPT
 import pyspline
@@ -44,7 +45,7 @@ import pyspline_cs
 
 class spline():
 
-    def __init__(self,u,v,X,task='create',Nctlu = 30, Nctlv = 30, ku=4,kv=4,*args, **kwargs):
+    def __init__(self,u,v,X,task='create',Nctlu = 9,Nctlv = 9,ku=4,kv=4,*args, **kwargs):
         print 'Task: %s'%(task)
 
         self.u0 = u
@@ -92,10 +93,7 @@ class spline():
 
             #Calculate the knot vector
             self.__calcKnots()
-#            print 'knots: tu,tv:',self.tu,self.tv
-
             self.__calcJacobian()
-#            print 'jacobian shape:',self.J.shape
 
 #             # Lets do a lms 
             print 'before lms:'
@@ -105,7 +103,7 @@ class spline():
             print 'LMS Fit Time:',time.time()-timeA
             self.coef = ctl
         else:
-            print 'Error: fit_type is not understood. Type must be \'lms\' or \'interpolate\''
+            print 'Error: task is not understood. Type must be \'lms\',\'interpolate\' or \'create\''
             sys.exit(0)
         return
 
@@ -326,7 +324,7 @@ class spline():
             A[1,2]   = -r[1]
             A[2,2]   = -r[2]
 
-            x_up = scipy.linalg.solve(A,-f)
+            x_up = numpy.linalg.solve(A,-f)
 
             # Add a little error checking here:
             
@@ -339,29 +337,19 @@ class spline():
             v = v + x_up[1]
             s = s + x_up[2]
 
-            if scipy.linalg.norm(x_up) < 1e-12:
+            if numpy.linalg.norm(x_up) < 1e-12:
                 return u,v,x
 
         # end for
 
         print 'Warning: Newton Iteration for u,v,s did not converge:'
         print 'u = %f, v = %f, s = %f\n'%(u,v,s)
-        print 'Norm of update:',scipy.linalg.norm(x_up)
+        print 'Norm of update:',numpy.linalg.norm(x_up)
 
         return u,v,x
 
-    def writeTecplot(self,handle=None,file_name=None):
-        
-        if not(handle) and not(file_name):
-            print 'A file handle OR file_name must be given'
-            sys.exit(0)
-
-        if handle:
-            pass
-        else:
-            f = open(file_name,'w')
-            handle.write ('VARIABLES = "X", "Y","Z"\n')
-
+    def writeTecplot(self,handle):
+        '''Output this surface's data to a open file handle \'handle\''''
         handle.write('Zone T=%s I=%d J = %d\n'%('orig_data',self.Nu,self.Nv))
         handle.write('DATAPACKING=POINT\n')
         for j in xrange(self.Nv):
@@ -395,6 +383,112 @@ class spline():
             # end for
         # end for 
 
+
+
+    def writeIGES_directory(self,handle,Dcount,Pcount):
+
+        '''Write the IGES file header information (Directory Entry Section) for this surface'''
+        # A simplier Calc based on cmlib definations
+        # The 13 is for the 9 parameters at the start, and 4 at the end. See the IGES 5.3 Manual
+        #paraEntries = 13 + Knotsu              + Knotsv               + Weights               + control points
+        paraEntries = 13 + (len(self.tu)) + (len(self.tv)) +   self.Nctlu*self.Nctlv + 3*self.Nctlu*self.Nctlv+1
+        print 'Nctlu,Nctlv,ku,kv:',self.Nctlu,self.Nctlv,self.ku,self.kv
+        print 'paraEntries:',paraEntries
+
+        paraLines = paraEntries / 5
+        if mod(paraEntries,5) != 0: paraLines += 1
+
+        print 'paraLInes:',paraLines
+
+        handle.write('     128%8d       0       0       1       0       0       000000001D%7d\n'%(Pcount,Dcount))
+        handle.write('     128       0       2%8d       0                               0D%7d\n'%(paraLines,Dcount+1))
+        Dcount += 2
+        Pcount += paraLines
+        return Pcount , Dcount
+
+
+    def writeIGES_parameters(self,handle,Pcount,counter):
+        '''Write the IGES parameter information for this surface'''
+
+        handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'%(128,self.Nctlu-1,self.Nctlv-1,self.ku-1,self.kv-1,Pcount,counter))
+        counter += 1
+        handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'%(0,0,1,0,0,Pcount,counter))
+        counter += 1
+        
+        pos_counter = 0
+
+
+        for i in xrange(len(self.tu)):
+            pos_counter += 1
+            handle.write('%12.6g,'%(self.tu[i]))
+            if mod(pos_counter,5) == 0:
+                handle.write('%7dP%7d\n'%(Pcount,counter))
+                counter += 1
+                pos_counter = 0
+
+
+        for i in xrange(len(self.tv)):
+            pos_counter += 1
+            handle.write('%12.6g,'%(self.tv[i]))
+            if mod(pos_counter,5) == 0:
+                handle.write('%7dP%7d\n'%(Pcount,counter))
+                counter += 1
+                pos_counter = 0
+            # end if
+        # end for
+
+        for i in xrange(self.Nctlu*self.Nctlv):
+            pos_counter += 1
+            handle.write('%12.6g,'%(1.0))
+            if mod(pos_counter,5) == 0:
+                handle.write('%7dP%7d\n'%(Pcount,counter))
+                counter += 1
+                pos_counter = 0
+            # end if
+        # end for 
+        for j in xrange(self.Nctlv):
+            for i in xrange(self.Nctlu):
+                for idim in xrange(3):
+                    pos_counter += 1
+                    handle.write('%12.6g,'%(self.coef[i,j,idim]))
+                    if mod(pos_counter,5) == 0:
+                        handle.write('%7dP%7d\n'%(Pcount,counter))
+                        counter += 1
+                        pos_counter = 0
+                    # end if
+                # end for
+            # end for
+        # end for
+        
+        # Ouput the ranges
+        for  i in xrange(4):
+            pos_counter += 1
+            if i == 0:
+                handle.write('%12.6g,'%(self.tu[0]))
+            if i == 1:
+                handle.write('%12.6g,'%(self.tu[-1]))
+            if i == 2:
+                handle.write('%12.6g,'%(self.tv[0]))
+            if i == 3:
+                handle.write('%12.6g;'%(self.tv[-1])) # semi-colon for the last entity
+            if mod(pos_counter,5)==0:
+                handle.write('%7dP%7d\n'%(Pcount,counter))
+                counter += 1
+                pos_counter = 0
+            else: # We have to close it up anyway
+                if i ==3:
+                    for j  in xrange(5-pos_counter):
+                        handle.write('%13s'%(' '))
+                        
+                    pos_counter = 0
+                    handle.write('%7dP%7d\n'%(Pcount,counter))
+                    counter += 1
+        Pcount += 2
+#        counter += 1
+        return Pcount,counter
+
+
+      
 
     def writeIGES(self,file_name):
 
