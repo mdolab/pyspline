@@ -79,9 +79,10 @@ OBJ =   bspline/bfqad.o\
 ###  Default compilers and flags
 
 ### Intel Fortran Compiler
-FC = ifort
+FC = gfortran
 
-FFLAGS = -O2 -r8
+#FFLAGS = -O2 -r8
+FFLAGS = -O2 -fdefault-real-8
 AR       = ar
 AR_FLAGS = -rvs
 
