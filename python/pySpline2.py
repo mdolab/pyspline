@@ -43,40 +43,112 @@ import pyspline_cs
 # pySpline class
 # =============================================================================
 
-class spline():
+class surf_spline():
 
-    def __init__(self,u,v,X,task='create',Nctlu = 9,Nctlv = 9,ku=4,kv=4,*args, **kwargs):
-        print 'Task: %s'%(task)
+    def __init__(self,task='create',*args,**kwargs):
 
-        self.u0 = u
-        self.v0 = v        
-        self.x0 = X
-        self.Nu = len(u)
-        self.Nv = len(v)     
+        '''Create an instance of a b-spline surface. There are three ways to initialize 
+        the class as determined by the task flag:
+
+        task = 'create': Create an instance of the spline class
+        directly by supplying the required information. **kwargs MUST
+        contain the folloiwng information:
+
+            ku, integer: Order for u
+            kv, integer: Order for v
+            Nctlu, integer: Number of u control points
+            Nctlv, integer: Number of v control points
+            tu, real array: Knot vector for u
+            tv, real array: Knot vector for v
+            coef, real array size(Nctlu,Nctlv,nDim): Array of control point values
+
+        task = 'interpolate': Create an instance of the spline class
+        by using an nterpolating spline to given data points. **kwarg
+        MUST contain the following information:
+
+            ku, integer: Order for u
+            kv, integer: Order for v
+            u, real, array: Array of u values 
+            v, real, array: Array of v values
+            X, real, array, size(len(u),len(v),nDim): Array of data points to fit
+'''
+        print 'pySpline Class Initialization Type: %s'%(task)
+
+        if task == 'create':
+            assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
+                and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs, \
+                'Error: ku,kv,tu,tv, and coef MUST be defined for task=\'create\''
+            
+            self.u = None
+            self.v = None
+            self.X = None
+            self.Nu = None
+            self.Nv = None
+            self.ku = kwargs['ku'] 
+            self.kv = kwargs['kv']
+            self.tu = kwargs['tu']
+            self.tv = kwargs['tv']
+            self.coef = kwargs['coef']
+            self.Nctlu = self.coef.shape[0]
+            self.Nctlv = self.coef.shape[1]
+            self.orig_data = False
+            self.range = kwargs['range']
+            self.nDim = self.coef.shape[2]
+            return
+     
         if task == 'interpolate':
-            self.Nctlu = len(u)
-            self.Nctlv = len(v)
-            self.ku = ku
-            self.kv = kv
-          
-            self.coef = zeros((self.Nctlu,self.Nctlv,3))
+            
+            assert 'ku' in kwargs and 'kv' in kwargs and 'u' in kwargs \
+                and 'v' in kwargs and 'X' in kwargs, \
+                'Error: ku,kv,u,v and X MUST be defined for task \'interpolate\''
+            
+            self.u = kwargs['u']
+            self.v = kwargs['v']
+            self.Nu = len(self.u)
+            self.Nv = len(self.v)
+            self.Nctlu = len(self.u)
+            self.Nctlv = len(self.v)
+            self.ku = kwargs['ku']
+            self.kv = kwargs['kv']
+            self.X  = kwargs['X']
+            self.orig_data = True
+            self.nDim  = self.X.shape[2]
+            self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
+            self.range = array([u[0],u[-1],v[0],v[-1]])
 
-            if self.Nu <= ku:
+
+            #Sanity check to make sure k is less than N
+            if self.Nu <= self.ku:
                 self.ku = self.Nu-1
-            if self.Nv <= kv:
+            if self.Nv <= self.kv:
                 self.kv = self.Nv-1
 
-            for idim in xrange(3):
-                self.tu,self.tv,self.coef[:,:,idim]= pyspline.b2ink(u,v,X[:,:,idim],self.ku,self.kv)
+            for idim in xrange(self.nDim):
+                self.tu,self.tv,self.coef[:,:,idim]= pyspline.b2ink(self.u,self.v,self.X[:,:,idim],self.ku,self.kv)
             #end for
+                
+            return
            
         elif task == 'lms':
             # Do some checking on the number of control points
-            print 'Nu,Nv:',self.Nu,self.Nv
-            self.Nctlu = Nctlu
-            self.Nctlv = Nctlv
-            self.ku = ku
-            self.kv = kv
+            assert 'ku' in kwargs and 'kv' in kwargs and 'u' in kwargs \
+                and 'v' in kwargs and 'X' in kwargs, \
+                'Error: ku,kv,u,v and X MUST be defined for task \'interpolate\''
+
+            self.u = kwargs['u']
+            self.v = kwargs['v']
+            self.Nu = len(self.u)
+            self.Nv = len(self.v)
+            self.Nctlu = len(self.u)
+            self.Nctlv = len(self.v)
+            self.ku = kwargs['ku']
+            self.kv = kwargs['kv']
+            self.X  = kwargs['X']
+            self.nDim  = self.X.shape[2]
+            self.orig_data = True
+            self.range = array([u[0],u[-1],v[0],v[-1]])
+
+            # Sanity Check on Inputs
             if self.Nctlu > self.Nu:
                 self.Nctlu  = self.Nu
             if self.Nctlv > self.Nv:
@@ -89,22 +161,20 @@ class spline():
                 kv = self.Nv-1
                 self.kv = kv
 
-#            print 'Nu,Nv,Nctlu,Nctlv,ku,kv:',self.Nu,self.Nv,self.Nctlu,self.Nctlv,self.ku,self.kv
-
-            #Calculate the knot vector
+           #Calculate the knot vector and Jacobian
             self.__calcKnots()
             self.__calcJacobian()
 
 #             # Lets do a lms 
-            print 'before lms:'
             timeA = time.time()
-            print self.J.shape
             ctl = pyspline.fit_surf(self.Nu,self.Nv,self.Nctlu,self.Nctlv,self.J,X)
             print 'LMS Fit Time:',time.time()-timeA
             self.coef = ctl
-        else:
-            print 'Error: task is not understood. Type must be \'lms\',\'interpolate\' or \'create\''
-            sys.exit(0)
+            
+            return 
+
+        print 'Error: task is not understood. Type must be \'lms\',\'interpolate\' or \'create\''
+        sys.exit(0)
         return
 
     def __calcKnots(self):
@@ -146,7 +216,7 @@ class spline():
         U = zeros((self.Nu,self.Nv))
         #print 'Nu,Nv,Nctlu,Nctlv,ku,kv:',self.Nu,self.Nv,self.Nctlu,self.Nctlv,self.ku,self.kv
         #print 'u0,v0:',self.u0,self.v0
-        [V, U] = meshgrid(self.v0,self.u0)
+        [V, U] = meshgrid(self.v,self.u)
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
                 ctl[i,j] += h
@@ -166,11 +236,11 @@ class spline():
 
         total = 0.0
 
-        for idim in xrange(3):
-            total += sum((dot(self.J,ctl[:,:,idim].flatten()) - self.x0[:,:,idim].flatten())**2)
+        for idim in xrange(self.nDim):
+            total += sum((dot(self.J,ctl[:,:,idim].flatten()) - self.X[:,:,idim].flatten())**2)
         # end for 
         fcon = dot(Bcon,x)
-        index = 4*3 + 2*self.Nctlv*3
+        index = 4*self.nDim + 2*self.Nctlv*self.nDim
 
        #  # Calculate the LE constraint
         for j in xrange(self.Nctlv):
@@ -200,9 +270,9 @@ class spline():
         ctl = self.__unpack_x(x)
         N = self.Nctlu*self.Nctlv
 
-        for idim in xrange(3):
-            g_obj[3*N + idim*N :  3*N + idim*N + N] = \
-                2*dot(dot(self.J,ctl[:,:,idim].flatten())-self.x0[:,:,idim].flatten(),self.J)
+        for idim in xrange(self.nDim):
+            g_obj[self.nDim*N + idim*N :  self.nDim*N + idim*N + N] = \
+                2*dot(dot(self.J,ctl[:,:,idim].flatten())-self.X[:,:,idim].flatten(),self.J)
         # end for 
 
         g_con = self.Bcon
@@ -210,7 +280,7 @@ class spline():
         x = array(x,'D')
 
         for i in xrange(ndv):
-            index = 4*3 + 2*self.Nctlv*3
+            index = 4*self.nDim + 2*self.Nctlv*self.nDim
             x[i] += h
             ctl = self.__unpack_x(x,'D')
             for j in xrange(self.Nctlv):
@@ -232,36 +302,35 @@ class spline():
         return g_obj,g_con,False
 
     def __unpack_x(self,x,dtype='d'):
-        ctl = zeros((self.Nctlu,self.Nctlv,3),dtype)
+        ctl = zeros((self.Nctlu,self.Nctlv,self.nDim),dtype)
         N = self.Nctlu*self.Nctlv
-        for idim in xrange(3):
-            ctl[:,:,idim] = reshape(x[3*N + idim*N : 3*N + idim*N + N],[self.Nctlu,self.Nctlv])
+        for idim in xrange(self.nDim):
+            ctl[:,:,idim] = reshape(x[self.nDim*N + idim*N : self.nDim*N + idim*N + N],[self.Nctlu,self.Nctlv])
         # end for
         return ctl
 
     def getValue(self,u,v):
         
         '''Get the value of the spline at point u,v'''
-        x = zeros([3])
-        for idim in xrange(3):
+        x = zeros([nDim])
+        for idim in xrange(self.nDim):
             x[idim] = pyspline.b2val(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         
         return x
 
-
     def getValueV(self,u,v):
         '''Get the value of a spline at vector of points u,v'''
         assert u.shape == v.shape, 'u and v must be the same length'
-        x = zeros(len(u),3)
-        for idim in xrange(3):
+        x = zeros(len(u),self.nDim)
+        for idim in xrange(self.nDim):
             x[:,idim] = pyspline.b2valv(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         return x
 
     def getValueM(self,u,v):
         '''Get the value of a spline at matrix of points u,v'''
         assert u.shape == v.shape, 'u and v must be the same shape'
-        x = zeros((u.shape[0],u.shape[1],3))
-        for idim in xrange(3):
+        x = zeros((u.shape[0],u.shape[1],self.nDim))
+        for idim in xrange(self.nDim):
             x[:,:,idim] = pyspline.b2valm(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
 
         return x
@@ -270,11 +339,11 @@ class spline():
         
         '''Get the jacobian at point u,v'''
 
-        J = zeros((3,2))
+        J = zeros((self.nDim,2))
         
-        for idim in xrange(3):
+        for idim in xrange(self.nDim):
             J[idim,0] = pyspline.b2val(u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-            J[idim,1] = pyspline.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.bcoef_x)
+            J[idim,1] = pyspline.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
 
         return J
 
@@ -350,31 +419,38 @@ class spline():
 
     def writeTecplot(self,handle):
         '''Output this surface's data to a open file handle \'handle\''''
-        handle.write('Zone T=%s I=%d J = %d\n'%('orig_data',self.Nu,self.Nv))
-        handle.write('DATAPACKING=POINT\n')
-        for j in xrange(self.Nv):
-            for i in xrange(self.Nu):
-                handle.write('%f %f %f \n'%(self.x0[i,j,0],self.x0[i,j,1],self.x0[i,j,2]))
-            # end for
-        # end for 
-        u_plot = linspace(0,1,25)
-        u_plot = self.u0
-        #u_plot = 0.5*(1-cos(linspace(0,pi,50)))
-        v_plot = linspace(0,1,25)
-        v_plot = self.v0
+
+        if self.orig_data:
+            handle.write('Zone T=%s I=%d J = %d\n'%('orig_data',self.Nu,self.Nv))
+            handle.write('DATAPACKING=POINT\n')
+            for j in xrange(self.Nv):
+                for i in xrange(self.Nu):
+                    handle.write('%f %f %f \n'%(self.X[i,j,0],self.X[i,j,1],self.X[i,j,2]))
+                # end for
+            # end for 
+        # end if
+
+        if self.orig_data:
+            u_plot = self.u
+            v_plot = self.v
+        else:
+            u_plot = linspace(self.range[0],self.range[1],25)
+            v_plot = linspace(self.range[2],self.range[3],25)
+        # end if 
+
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'%('interpolated',len(u_plot),len(v_plot)))
         handle.write('DATAPACKING=POINT\n')
         for j in xrange(len(v_plot)):
             for i in xrange(len(u_plot)):
-                for idim in xrange(3):
+                for idim in xrange(self.nDim):
                     handle.write('%f '%(pyspline.b2val(u_plot[i],v_plot[j],0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])))
                 # end for 
                 handle.write('\n')
             # end for
         # end for 
 
-        # Dump Control Points
+        # Dump Control Points (Always have these :-) ) 
         handle.write('Zone T=%s I=%d J = %d\n'%('control_pts',self.Nctlu,self.Nctlv))
         handle.write('DATAPACKING=POINT\n')
         for j in xrange(self.Nctlv):
@@ -384,21 +460,17 @@ class spline():
         # end for 
 
 
-
     def writeIGES_directory(self,handle,Dcount,Pcount):
 
         '''Write the IGES file header information (Directory Entry Section) for this surface'''
         # A simplier Calc based on cmlib definations
         # The 13 is for the 9 parameters at the start, and 4 at the end. See the IGES 5.3 Manual
         #paraEntries = 13 + Knotsu              + Knotsv               + Weights               + control points
+        assert self.nDim == 3, 'Must have 3 dimensions to write to IGES file'
         paraEntries = 13 + (len(self.tu)) + (len(self.tv)) +   self.Nctlu*self.Nctlv + 3*self.Nctlu*self.Nctlv+1
-        print 'Nctlu,Nctlv,ku,kv:',self.Nctlu,self.Nctlv,self.ku,self.kv
-        print 'paraEntries:',paraEntries
 
         paraLines = paraEntries / 5
         if mod(paraEntries,5) != 0: paraLines += 1
-
-        print 'paraLInes:',paraLines
 
         handle.write('     128%8d       0       0       1       0       0       000000001D%7d\n'%(Pcount,Dcount))
         handle.write('     128       0       2%8d       0                               0D%7d\n'%(paraLines,Dcount+1))
@@ -484,102 +556,83 @@ class spline():
                     handle.write('%7dP%7d\n'%(Pcount,counter))
                     counter += 1
         Pcount += 2
-#        counter += 1
         return Pcount,counter
 
 
-      
+class linear_spline():
 
-    def writeIGES(self,file_name):
+    def __init__(self,task='create',*args,**kwargs):
 
-        f = open(file_name,'w')
-        f.write('                                                                        S      1\n')
-        f.write('1H,,1H;,7H128-000,11H128-000.IGS,9H{unknown},9H{unknown},16,6,15,13,15, G      1\n')
-        f.write('7H128-000,1.,1,4HINCH,8,0.016,15H19970830.165254,0.0001,0.,             G      2\n')
-        f.write('21Hdennette@wiz-worx.com,23HLegacy PDD AP Committee,11,3,               G      3\n')
-        f.write('13H920717.080000,23HMIL-PRF-28000B0,CLASS 1;                            G      4\n')
-        
-        f.write('     128       1       0       1       0       0       0       000000001D      1\n')
-        f.write('     128       0       2     128       0                                D      2\n')
-        counter = 1
-        f.write('%3d,%4d,%4d,%4d,%4d,%1d,%1d,%1d,%1d,%1d,%37s1P%7d\n'%(128,self.Nu-1,self.Nv-1,self.ku-1,self.kv-1,0,0,1,0,0,' ',counter))
-        counter += 1
-        # Now do the knots
+        '''Create an instance of a b-spline surface. There are three ways to initialize 
+        the class as determined by the task flag:
 
-        pos_counter = 0
+        task = 'create': Create an instance of the spline class
+        directly by supplying the required information. **kwargs MUST
+        contain the folloiwng information:
 
-        for i in xrange(len(self.tu)):
-            pos_counter += 1
-            f.write('%12.6g,'%(self.tu[i]))
-            if mod(pos_counter,5) == 0:
-                f.write('      1P%7d\n'%(counter))
-                counter += 1
-                pos_counter = 0
+            ku, integer: Order for u
+            kv, integer: Order for v
+            Nctlu, integer: Number of u control points
+            Nctlv, integer: Number of v control points
+            tu, real array: Knot vector for u
+            tv, real array: Knot vector for v
+            coef, real array size(Nctlu,Nctlv,nDim): Array of control point values
 
+        task = 'interpolate': Create an instance of the spline class
+        by using an nterpolating spline to given data points. **kwarg
+        MUST contain the following information:
 
-        for i in xrange(len(self.tv)):
-            pos_counter += 1
-            f.write('%12.6g,'%(self.tv[i]))
-            if mod(pos_counter,5) == 0:
-                f.write('      1P%7d\n'%(counter))
-                counter += 1
-                pos_counter = 0
+            ku, integer: Order for u
+            kv, integer: Order for v
+            u, real, array: Array of u values 
+            v, real, array: Array of v values
+            X, real, array, size(len(u),len(v),nDim): Array of data points to fit
+'''
+        print 'pySpline Class Initialization Type: %s'%(task)
+
+        if task == 'create':
+            print 'create option not implemented yet'
+            sys.exit(0)
+     
+        if task == 'interpolate':
+            
+            assert 'k' in kwargs and 's' in kwargs \
+                and 'X' in kwargs, \
+                'Error: k,s, and X MUST be defined for task \'interpolate\''
+            
+            self.s = kwargs['u']
+            self.N = len(self.u)
+            self.Nctl = len(self.u)
+            self.k = kwargs['k']
+            self.X  = kwargs['X']
+            self.orig_data = True
+            self.nDim  = self.X.shape[1]
+            self.coef = zeros((self.Nctl,self.nDim))
+            self.range = array([s[0],s[-1]])
+
+            # Sanity check to make sure k is less than N
+            if self.N <= self.k:
+                self.k = self.N-1
             # end if
-        # end for
+    
+            # Generate the knot vector
+            self.t = pyspline.bknot(self.s,self.N,self.k)
 
-        for i in xrange(self.Nu*self.Nv):
-            pos_counter += 1
-            f.write('%12.6g,'%(1.0))
-            if mod(pos_counter,5) == 0:
-                f.write('      1P%7d\n'%(counter))
-                counter += 1
-                pos_counter = 0
-            # end if
-        # end for 
-        for j in xrange(self.Nctlv):
-            for i in xrange(self.Nctlu):
-                for idim in xrange(3):
-                    pos_counter += 1
-                    f.write('%12.6g,'%(self.coef[0,i,j,idim]))
-                    if mod(pos_counter,5) == 0:
-                        f.write('      1P%7d\n'%(counter))
-                        counter += 1
-                        pos_counter = 0
-                    # end if
-                # end for
-            # end for
-        # end for
+            for idim in xrange(self.nDim):
+                self.coef[:,idim]= pyspline.bink(self.s,self.X[:,idim],self.t,self.k)
+            #end for
+                
+            return
+   
+    def getValue(self,s):
         
-        # Ouput the ranges
-        for  i in xrange(4):
-            pos_counter += 1
-            if i == 0:
-                f.write('%12.6g,'%(self.u0[0,0]))
-            if i == 1:
-                f.write('%12.6g,'%(self.u0[0,-1]))
-            if i == 2:
-                f.write('%12.6g,'%(self.v0[0,0]))
-            if i == 3:
-                f.write('%12.6g;'%(self.v0[0,-1])) # semi-colon for the last entity
-            if mod(pos_counter,5)==0:
-                f.write('      1P%7d\n'%(counter))
-                counter += 1
-                pos_counter = 0
-            else: # We have to close it up anyway
-                if i ==3:
-                    for j  in xrange(5-pos_counter):
-                        f.write('%13s'%(' '))
-                    f.write('      1P%7d\n'%(counter))
-                    pos_counter = 0
+        '''Get the value of the spline at point u,v'''
+        x = zeros([nDim])
+        for idim in xrange(self.nDim):
+            x[idim] = pyspline.bvalu(self.t,self.coef,self.k,0,s)
 
-                    
-        # Output the Terminate Statement
-        f.write('S%7dG%7dD%7dP%7d%40sT%7s\n'%(1,4,2,counter,' ',' '))
-
-        f.close()
-
-
-
+        return x
+        
 
 #==============================================================================
 # Class Test
