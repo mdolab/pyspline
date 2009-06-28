@@ -50,7 +50,7 @@ class surf_spline():
         '''Create an instance of a b-spline surface. There are three ways to initialize 
         the class as determined by the task flag:
 
-        task = 'create': Create an instance of the spline class
+        task = \'create\': Create an instance of the spline class
         directly by supplying the required information. **kwargs MUST
         contain the folloiwng information:
 
@@ -62,15 +62,27 @@ class surf_spline():
             tv, real array: Knot vector for v
             coef, real array size(Nctlu,Nctlv,nDim): Array of control point values
 
-        task = 'interpolate': Create an instance of the spline class
-        by using an nterpolating spline to given data points. **kwarg
+        task = \'interpolate\': Create an instance of the spline class
+        by using an interpolating spline to given data points. **kwarg
         MUST contain the following information:
 
             ku, integer: Order for u
             kv, integer: Order for v
-            u, real, array: Array of u values 
-            v, real, array: Array of v values
+            u, real, array: list of u values 
+            v, real, array: list of v values
             X, real, array, size(len(u),len(v),nDim): Array of data points to fit
+
+        task = \'lms\': Create an instance of the spline class using a
+        Least-Mean-Squares fit to the spline. . **kwargs MUST contain
+        the following information:
+
+            ku, integer: Order for u
+            kv, integer: Order for v
+            u, real, array: list of u values 
+            v, real, array: list of v values
+            X, real, array, size(len(u),len(v),nDim): Array of data points to fit
+      
+            
 '''
         print 'pySpline Class Initialization Type: %s'%(task)
 
@@ -187,18 +199,18 @@ class surf_spline():
         
         # U knots
         tu= zeros(self.Nctlu + self.ku)
-        tu[self.ku-1:self.Nctlu+1]  = 0.5*(1-cos(linspace(0,pi,self.Nctlu-self.ku+2)))
-        tu[0:self.ku] = 0
-        tu[self.Nctlu:self.Nctlu+self.ku] = 1.0#+0.1*(tu0[Nctlu]-tu0[Nctlu-1])
+        tu[self.ku-1:self.Nctlu+1]  = self.range[0] + (0.5*(1-cos(linspace(0,pi,self.Nctlu-self.ku+2))))*(self.range[1]-self.range[0])
+        tu[0:self.ku] = self.range[0]
+        tu[self.Nctlu:self.Nctlu+self.ku] = self.range[1]#+0.1*(tu0[Nctlu]-tu0[Nctlu-1])
             
         # V Knots
 
         tv= zeros(self.Nctlv + self.kv)
-        tv[self.kv-1:self.Nctlv+1] =  linspace(0,1,self.Nctlv-self.kv+2)
+        tv[self.kv-1:self.Nctlv+1] =  linspace(self.range[2],self.range[3],self.Nctlv-self.kv+2)
             #tv0[kv-1:Nctlv+1] = v[0,1:-1]
             #          tv0[kv-1:Nctlv+1]  = 0.5*(1-cos(linspace(0,pi,Nctlv-kv+2)))
-        tv[0:self.kv] = 0
-        tv[self.Nctlv:self.Nctlv+self.kv] = 1.0#+0.1*(tv0[Nctlv]-tv0[Nctlv-1])
+        tv[0:self.kv] = self.range[2]
+        tv[self.Nctlv:self.Nctlv+self.kv] = self.range[3]#+0.1*(tv0[Nctlv]-tv0[Nctlv-1])
         
         self.tu = tu
         self.tv = tv
@@ -214,8 +226,7 @@ class surf_spline():
 
         V = zeros((self.Nu,self.Nv))
         U = zeros((self.Nu,self.Nv))
-        #print 'Nu,Nv,Nctlu,Nctlv,ku,kv:',self.Nu,self.Nv,self.Nctlu,self.Nctlv,self.ku,self.kv
-        #print 'u0,v0:',self.u0,self.v0
+
         [V, U] = meshgrid(self.v,self.u)
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
@@ -228,86 +239,86 @@ class surf_spline():
         # end for
 
 
-    def __objcon(self,x):
-        '''Get the rms error for the given set of design variables'''
-        # Unpack the x-values
-        Bcon  = self.Bcon
-        ctl = self.__unpack_x(x)
+#     def __objcon(self,x):
+#         '''Get the rms error for the given set of design variables'''
+#         # Unpack the x-values
+#         Bcon  = self.Bcon
+#         ctl = self.__unpack_x(x)
 
-        total = 0.0
+#         total = 0.0
 
-        for idim in xrange(self.nDim):
-            total += sum((dot(self.J,ctl[:,:,idim].flatten()) - self.X[:,:,idim].flatten())**2)
-        # end for 
-        fcon = dot(Bcon,x)
-        index = 4*self.nDim + 2*self.Nctlv*self.nDim
+#         for idim in xrange(self.nDim):
+#             total += sum((dot(self.J,ctl[:,:,idim].flatten()) - self.X[:,:,idim].flatten())**2)
+#         # end for 
+#         fcon = dot(Bcon,x)
+#         index = 4*self.nDim + 2*self.Nctlv*self.nDim
 
-       #  # Calculate the LE constraint
-        for j in xrange(self.Nctlv):
+#        #  # Calculate the LE constraint
+#         for j in xrange(self.Nctlv):
 
-            A = ctl[0,0,j,:] # Root LE (upper)
-            B = ctl[0,1,j,:] # Root LE upper +1
-            C = ctl[1,-2,j,:]# Root LE lower +1
+#             A = ctl[0,0,j,:] # Root LE (upper)
+#             B = ctl[0,1,j,:] # Root LE upper +1
+#             C = ctl[1,-2,j,:]# Root LE lower +1
 
-            # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
+#             # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
 
-            A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
-            A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
-            A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
+#             A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
+#             A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
+#             A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
 
-            fcon[index:index+3] = array([A1,A2,A3])
-            index += 3
-        # end for
+#             fcon[index:index+3] = array([A1,A2,A3])
+#             index += 3
+#         # end for
 
-        return total,fcon,False
+#         return total,fcon,False
 
 
-    def __sens(self,x,f_obj,f_con):
+#     def __sens(self,x,f_obj,f_con):
 
-        ndv = len(x)
-        g_obj = zeros(ndv)
-         # Unpack the x-values
-        ctl = self.__unpack_x(x)
-        N = self.Nctlu*self.Nctlv
+#         ndv = len(x)
+#         g_obj = zeros(ndv)
+#          # Unpack the x-values
+#         ctl = self.__unpack_x(x)
+#         N = self.Nctlu*self.Nctlv
 
-        for idim in xrange(self.nDim):
-            g_obj[self.nDim*N + idim*N :  self.nDim*N + idim*N + N] = \
-                2*dot(dot(self.J,ctl[:,:,idim].flatten())-self.X[:,:,idim].flatten(),self.J)
-        # end for 
+#         for idim in xrange(self.nDim):
+#             g_obj[self.nDim*N + idim*N :  self.nDim*N + idim*N + N] = \
+#                 2*dot(dot(self.J,ctl[:,:,idim].flatten())-self.X[:,:,idim].flatten(),self.J)
+#         # end for 
 
-        g_con = self.Bcon
-        h = 1.0e-40j
-        x = array(x,'D')
+#         g_con = self.Bcon
+#         h = 1.0e-40j
+#         x = array(x,'D')
 
-        for i in xrange(ndv):
-            index = 4*self.nDim + 2*self.Nctlv*self.nDim
-            x[i] += h
-            ctl = self.__unpack_x(x,'D')
-            for j in xrange(self.Nctlv):
-                A = ctl[0,0,j,:] # Root LE (upper)
-                B = ctl[0,1,j,:] # Root LE upper +1
-                C = ctl[1,-2,j,:]# Root LE lower +1
+#         for i in xrange(ndv):
+#             index = 4*self.nDim + 2*self.Nctlv*self.nDim
+#             x[i] += h
+#             ctl = self.__unpack_x(x,'D')
+#             for j in xrange(self.Nctlv):
+#                 A = ctl[0,0,j,:] # Root LE (upper)
+#                 B = ctl[0,1,j,:] # Root LE upper +1
+#                 C = ctl[1,-2,j,:]# Root LE lower +1
 
-                # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
+#                 # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
 
-                A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
-                A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
-                A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
+#                 A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
+#                 A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
+#                 A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
 
-                g_con[index:index+3,i] = imag(array([A1,A2,A3]))/imag(h)
-                index += 3
-            # end for
-            x[i] -= h
-        # end for
-        return g_obj,g_con,False
+#                 g_con[index:index+3,i] = imag(array([A1,A2,A3]))/imag(h)
+#                 index += 3
+#             # end for
+#             x[i] -= h
+#         # end for
+#         return g_obj,g_con,False
 
-    def __unpack_x(self,x,dtype='d'):
-        ctl = zeros((self.Nctlu,self.Nctlv,self.nDim),dtype)
-        N = self.Nctlu*self.Nctlv
-        for idim in xrange(self.nDim):
-            ctl[:,:,idim] = reshape(x[self.nDim*N + idim*N : self.nDim*N + idim*N + N],[self.Nctlu,self.Nctlv])
-        # end for
-        return ctl
+#     def __unpack_x(self,x,dtype='d'):
+#         ctl = zeros((self.Nctlu,self.Nctlv,self.nDim),dtype)
+#         N = self.Nctlu*self.Nctlv
+#         for idim in xrange(self.nDim):
+#             ctl[:,:,idim] = reshape(x[self.nDim*N + idim*N : self.nDim*N + idim*N + N],[self.Nctlu,self.Nctlv])
+#         # end for
+#         return ctl
 
     def getValue(self,u,v):
         
@@ -418,7 +429,7 @@ class surf_spline():
         return u,v,x
 
     def writeTecplot(self,handle):
-        '''Output this surface's data to a open file handle \'handle\''''
+        '''Output this surface\'s data to a open file handle \'handle\''''
 
         if self.orig_data:
             handle.write('Zone T=%s I=%d J = %d\n'%('orig_data',self.Nu,self.Nv))
@@ -566,7 +577,7 @@ class linear_spline():
         '''Create an instance of a b-spline surface. There are three ways to initialize 
         the class as determined by the task flag:
 
-        task = 'create': Create an instance of the spline class
+        task = \'create\': Create an instance of the spline class
         directly by supplying the required information. **kwargs MUST
         contain the folloiwng information:
 
@@ -578,7 +589,7 @@ class linear_spline():
             tv, real array: Knot vector for v
             coef, real array size(Nctlu,Nctlv,nDim): Array of control point values
 
-        task = 'interpolate': Create an instance of the spline class
+        task = \'interpolate\': Create an instance of the spline class
         by using an nterpolating spline to given data points. **kwarg
         MUST contain the following information:
 
@@ -616,10 +627,10 @@ class linear_spline():
             # end if
     
             # Generate the knot vector
-            self.t = pyspline.bknot(self.s,self.N,self.k)
+            self.t = pyspline.bknot(self.s,self.k)
 
             for idim in xrange(self.nDim):
-                self.coef[:,idim]= pyspline.bink(self.s,self.X[:,idim],self.t,self.k)
+                self.coef[:,idim]= pyspline.bintk(self.s,self.X[:,idim],self.t,self.k)
             #end for
                 
             return
