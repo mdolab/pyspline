@@ -8,7 +8,7 @@ import os, sys, string, pdb, copy
 # =============================================================================
 from numpy import linspace, cos, sin, arccos, pi, hstack, zeros, ones, sqrt,\
     imag, interp, array, real, dot
-from matplotlib.pylab import plot,show
+#from matplotlib.pylab import plot,show
 
 # =============================================================================
 # Extension modules
@@ -285,10 +285,10 @@ YU = pyspline.bvaluv(t0u,ctlyu,k,0,s)
 XL = pyspline.bvaluv(t0l,ctlxl,k,0,s)
 YL = pyspline.bvaluv(t0l,ctlyl,k,0,s)
 
-plot(ctlxu,ctlyu,'ro')
-plot(ctlxl,ctlyl,'go')
-plot(x0u,y0u,'ko-')
-plot(x0l,y0l,'ko-')
-plot(XU,YU,'r')
-plot(XL,YL,'g')
-show()
+# plot(ctlxu,ctlyu,'ro')
+# plot(ctlxl,ctlyl,'go')
+# plot(x0u,y0u,'ko-')
+# plot(x0l,y0l,'ko-')
+# plot(XU,YU,'r')
+# plot(XL,YL,'g')
+# show()
