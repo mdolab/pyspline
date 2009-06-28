@@ -34,8 +34,8 @@ from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
 
 import numpy.linalg
 
-from pyOpt_optimization import Optimization
-from pySNOPT import SNOPT
+#from pyOpt_optimization import Optimization
+#from pySNOPT import SNOPT
 import pyspline
 import pyspline_cs
 
@@ -89,7 +89,7 @@ class surf_spline():
         if task == 'create':
             assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
                 and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs, \
-                'Error: ku,kv,tu,tv, and coef MUST be defined for task=\'create\''
+                'Error: ku,kv,tu,tv,coef and range MUST be defined for task=\'create\''
             
             self.u = None
             self.v = None
@@ -126,7 +126,7 @@ class surf_spline():
             self.orig_data = True
             self.nDim  = self.X.shape[2]
             self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
-            self.range = array([u[0],u[-1],v[0],v[-1]])
+            self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
 
 
             #Sanity check to make sure k is less than N
@@ -602,24 +602,53 @@ class linear_spline():
         print 'pySpline Class Initialization Type: %s'%(task)
 
         if task == 'create':
-            print 'create option not implemented yet'
-            sys.exit(0)
+            assert 'k' in kwargs and 't' in kwargs and \
+                'coef' in kwargs and 'range' in kwargs, \
+                'Error: k,t,coef, and range MUST be defined for task=\'create\''
+            
+            self.s = None
+            self.X = None
+            self.N = None
+            self.k = kwargs['k'] 
+            self.t = kwargs['t']
+            self.coef = kwargs['coef']
+            self.Nctl = self.coef.shape[0]
+            self.orig_data = False
+            self.range = kwargs['range']
+            self.nDim = self.coef.shape[1]
+
+            return
+        
      
         if task == 'interpolate':
-            
-            assert 'k' in kwargs and 's' in kwargs \
-                and 'X' in kwargs, \
-                'Error: k,s, and X MUST be defined for task \'interpolate\''
-            
-            self.s = kwargs['u']
-            self.N = len(self.u)
-            self.Nctl = len(self.u)
-            self.k = kwargs['k']
+
+            assert 'k' in kwargs and 'X' in kwargs, \
+                'Error: k, and X MUST be defined for task \'interpolate\''
+
             self.X  = kwargs['X']
-            self.orig_data = True
             self.nDim  = self.X.shape[1]
+            self.N = self.X.shape[0]
+            self.k = kwargs['k']
+            
+            if 's' in kwargs:
+                self.s = kwargs['s']
+            else:
+                # We need to parameterize the curve
+                self.s = zeros(self.N);
+                for i in xrange(self.N-1):
+                    dist = 0
+                    for idim in xrange(self.nDim):
+                        dist += (self.X[i+1,idim] - self.X[i,idim])**2
+                    # end for
+                    self.s[i+1] = self.s[i] + sqrt(dist)
+                # end for
+                
+            self.Nctl = self.N
+
             self.coef = zeros((self.Nctl,self.nDim))
-            self.range = array([s[0],s[-1]])
+            self.range = array([self.s[0],self.s[-1]])
+
+            self.orig_data = True
 
             # Sanity check to make sure k is less than N
             if self.N <= self.k:
@@ -638,12 +667,55 @@ class linear_spline():
     def getValue(self,s):
         
         '''Get the value of the spline at point u,v'''
-        x = zeros([nDim])
+        x = zeros([self.nDim])
         for idim in xrange(self.nDim):
-            x[idim] = pyspline.bvalu(self.t,self.coef,self.k,0,s)
+            x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
 
         return x
         
+
+    def writeTecplot(self,handle):
+        '''Output this line\'s data to a open file handle \'handle\''''
+
+        if self.orig_data:
+            handle.write('Zone T=%s I=%d \n'%('orig_data',self.N))
+            handle.write('DATAPACKING=POINT\n')
+            for i in xrange(self.N):
+                for idim in xrange(self.nDim):
+                    handle.write('%f '%(self.X[i,idim]))
+                # end for
+                handle.write('\n')
+        # end if
+
+        if self.orig_data:
+            s_plot = self.s
+        else:
+            s_plot = linspace(self.range[0],self.range[1],25)
+        # end if 
+
+        # Dump re-interpolated surface
+        handle.write('Zone T=%s I=%d \n'%('interpolated',len(s_plot)))
+        handle.write('DATAPACKING=POINT\n')
+        for i in xrange(len(s_plot)):
+            for idim in xrange(self.nDim):
+                handle.write('%f '%(pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s_plot[i])))
+            # end for 
+            handle.write('\n')
+        # end for 
+
+        # Dump Control Points (Always have these :-) ) 
+        handle.write('Zone T=%s I = %d\n'%('control_pts',self.N))
+        handle.write('DATAPACKING=POINT\n')
+        for i in xrange(self.N):
+            for idim in xrange(self.nDim):
+                handle.write('%f '%(self.coef[i,idim]))
+            # end for
+            handle.write('\n')
+        # end for
+
+        return
+
+
 
 #==============================================================================
 # Class Test
