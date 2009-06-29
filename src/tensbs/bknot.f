@@ -39,7 +39,7 @@ C  ----------------------------
 C
 C     (SHIFT RIGHT ENPOINTS SLIGHTLY -- SEE PG 350 OF REFERENCE)
       RNOT = X(N) + 0.10E0*( X(N)-X(N-1) )
-      !RNOT = X(N)                ! TEMPORARY GKK
+      RNOT = X(N)           ! TEMPORARY GKK
       DO 110 J=1,K
          T(J) = X(1)
          NPJ = N + J

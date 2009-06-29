@@ -32,6 +32,7 @@ OBJ =   bspline/bfqad.o\
 	tensbs/b3ink.o\
 	tensbs/b3val.o\
 	tensbs/bknot.o\
+	tensbs/knots.o\
 	tensbs/btpcf.o\
 	xerror/fdump.o\
 	xerror/j4save.o\
@@ -42,32 +43,6 @@ OBJ =   bspline/bfqad.o\
 	xerror/xerrwv.o\
 	xerror/xersav.o\
 	xerror/xgetua.o\
-	fitpack/curfit.o\
-	fitpack/fpbspl.o\
-	fitpack/fpcurf.o\
-	fitpack/fpgivs.o\
-	fitpack/fprati.o\
-	fitpack/fpback.o\
-	fitpack/fpchec.o\
-	fitpack/fpdisc.o\
-	fitpack/fpknot.o\
-	fitpack/fprota.o\
-	fitpack/splev.o\
-	fitpack/fpbacp.o\
-	fitpack/fpchep.o\
-	fitpack/fpgrpa.o\
-	fitpack/fppasu.o\
-	fitpack/fptrnp.o\
-	fitpack/fptrpe.o\
-	fitpack/parsur.o\
-	fitpack/fpsuev.o\
-	fitpack/surev.o\
-	fitpack/fporde.o\
-	fitpack/fprank.o\
-	fitpack/fpsurf.o\
-	fitpack/surfit.o\
-	fitpack/bispev.o\
-	fitpack/fpbisp.o\
 	misc/bvaluV.o\
 	misc/b2valM.o\
 	misc/b2valV.o\
@@ -79,10 +54,10 @@ OBJ =   bspline/bfqad.o\
 ###  Default compilers and flags
 
 ### Intel Fortran Compiler
-FC = gfortran
+FC = ifort
 
-#FFLAGS = -O2 -r8
-FFLAGS = -O2 -fdefault-real-8
+FFLAGS = -O2 -r8
+#FFLAGS = -O2 -fdefault-real-8
 AR       = ar
 AR_FLAGS = -rvs
 
@@ -124,3 +99,33 @@ libtensbs: $(OBJ)
 	@echo
 	@echo "        --- Compiled $*.f90 successfully ---"
 	@echo	
+
+
+
+# O-files for the fitpack function NO LONGER USED
+# 	fitpack/curfit.o\
+# 	fitpack/fpbspl.o\
+# 	fitpack/fpcurf.o\
+# 	fitpack/fpgivs.o\
+# 	fitpack/fprati.o\
+# 	fitpack/fpback.o\
+# 	fitpack/fpchec.o\
+# 	fitpack/fpdisc.o\
+# 	fitpack/fpknot.o\
+# 	fitpack/fprota.o\
+# 	fitpack/splev.o\
+# 	fitpack/fpbacp.o\
+# 	fitpack/fpchep.o\
+# 	fitpack/fpgrpa.o\
+# 	fitpack/fppasu.o\
+# 	fitpack/fptrnp.o\
+# 	fitpack/fptrpe.o\
+# 	fitpack/parsur.o\
+# 	fitpack/fpsuev.o\
+# 	fitpack/surev.o\
+# 	fitpack/fporde.o\
+# 	fitpack/fprank.o\
+# 	fitpack/fpsurf.o\
+# 	fitpack/surfit.o\
+# 	fitpack/bispev.o\
+# 	fitpack/fpbisp.o\

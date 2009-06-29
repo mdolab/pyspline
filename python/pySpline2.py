@@ -110,21 +110,28 @@ class surf_spline():
      
         if task == 'interpolate':
             
-            assert 'ku' in kwargs and 'kv' in kwargs and 'u' in kwargs \
-                and 'v' in kwargs and 'X' in kwargs, \
+            assert 'ku' in kwargs and 'kv' and 'X' in kwargs,\
                 'Error: ku,kv,u,v and X MUST be defined for task \'interpolate\''
-            
-            self.u = kwargs['u']
-            self.v = kwargs['v']
-            self.Nu = len(self.u)
-            self.Nv = len(self.v)
-            self.Nctlu = len(self.u)
-            self.Nctlv = len(self.v)
+
+            self.X  = kwargs['X']
+            self.Nu = self.X.shape[0]
+            self.Nv = self.X.shape[1]
+            self.nDim  = self.X.shape[2]
+            self.Nctlu = self.Nu
+            self.Nctlv = self.Nv
             self.ku = kwargs['ku']
             self.kv = kwargs['kv']
-            self.X  = kwargs['X']
+
+
+            if 'u' in kwargs and 'v' in kwargs:
+                self.u = kwargs['u']
+                self.v = kwargs['v']
+            else:
+                self._calcParameterization()
+            # end if
+                
             self.orig_data = True
-            self.nDim  = self.X.shape[2]
+            
             self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
             self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
 
@@ -143,22 +150,29 @@ class surf_spline():
            
         elif task == 'lms':
             # Do some checking on the number of control points
-            assert 'ku' in kwargs and 'kv' in kwargs and 'u' in kwargs \
-                and 'v' in kwargs and 'X' in kwargs, \
-                'Error: ku,kv,u,v and X MUST be defined for task \'interpolate\''
 
-            self.u = kwargs['u']
-            self.v = kwargs['v']
-            self.Nu = len(self.u)
-            self.Nv = len(self.v)
-            self.Nctlu = len(self.u)
-            self.Nctlv = len(self.v)
+            assert 'ku' in kwargs and 'kv' in kwargs and \
+                   'Nctlu' in kwargs and 'Nctlv' in kwargs and 'X' in kwargs, \
+                   'Error: ku,kv,Nctlu, Nctlv and X MUST be defined for task \'lms\''
+
+            self.X  = kwargs['X']
+            self.Nu = self.X.shape[0]
+            self.Nv = self.X.shape[1]
+            self.nDim  = self.X.shape[2]
+            self.Nctlu = kwargs['Nctlu']
+            self.Nctlv = kwargs['Nctlv']
             self.ku = kwargs['ku']
             self.kv = kwargs['kv']
-            self.X  = kwargs['X']
-            self.nDim  = self.X.shape[2]
+
+            if 'u' in kwargs and 'v' in kwargs:
+                self.u = kwargs['u']
+                self.v = kwargs['v']
+            else:
+                self._calcParameterization()
+            # end if
+                
             self.orig_data = True
-            self.range = array([u[0],u[-1],v[0],v[-1]])
+            self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
 
             # Sanity Check on Inputs
             if self.Nctlu > self.Nu:
@@ -166,22 +180,19 @@ class surf_spline():
             if self.Nctlv > self.Nv:
                 self.Nctlv = self.Nv
 
-            if self.Nu <= ku:
-                ku = self.Nu-1
-                self.ku = ku
-            if self.Nv <= kv:
-                kv = self.Nv-1
-                self.kv = kv
+            if self.Nu <= self.ku:
+                self.ku = self.Nu-1
+            if self.Nv <= self.kv:
+                self.kv = self.Nv-1
 
            #Calculate the knot vector and Jacobian
-            self.__calcKnots()
-            self.__calcJacobian()
+            self._calcKnots()
+            self._calcJacobian()
 
 #             # Lets do a lms 
             timeA = time.time()
-            ctl = pyspline.fit_surf(self.Nu,self.Nv,self.Nctlu,self.Nctlv,self.J,X)
+            self.coef = pyspline.fit_surf(self.Nu,self.Nv,self.Nctlu,self.Nctlv,self.J,self.X)
             print 'LMS Fit Time:',time.time()-timeA
-            self.coef = ctl
             
             return 
 
@@ -189,7 +200,58 @@ class surf_spline():
         sys.exit(0)
         return
 
-    def __calcKnots(self):
+    def _calcParameterization(self):
+
+        u = (zeros(self.Nu))
+        singular_counter = 0
+
+        for j in xrange(self.Nv): #loop over each v, and average the 'u' parameter 
+            temp = zeros(self.Nu,'d')
+
+            for i in xrange(self.Nu-1):
+                temp[i+1] = temp[i] + sqrt((self.X[i+1,j,0]-self.X[i,j,0])**2 +\
+                                           (self.X[i+1,j,1]-self.X[i,j,1])**2 +\
+                                           (self.X[i+1,j,2]-self.X[i,j,2])**2)
+            # end for
+
+            if temp[-1] == 0: # We have a singular point
+                singular_counter += 1
+                temp[:] = 0.0
+            else:
+                temp /= temp[-1]
+            # end if
+
+            u += temp #accumulate the u-parameter calcs for each j
+            
+        # end for 
+        u/=(self.Nv-singular_counter) #divide by the number of 'j's we had
+        self.u = u
+        
+        v = zeros(self.Nv)
+        singular_counter = 0
+        for i in xrange(self.Nu): #loop over each v, and average the 'u' parameter 
+            temp = zeros(self.Nv)
+            for j in xrange(self.Nv-1):
+                temp[j+1] = temp[j] + sqrt((self.X[i,j+1,0]-self.X[i,j,0])**2 +\
+                                           (self.X[i,j+1,1]-self.X[i,j,1])**2 +\
+                                           (self.X[i,j+1,2]-self.X[i,j,2])**2)
+            # end for
+            if temp[-1] == 0: #We have a singular point
+                singular_counter += 1
+                temp[:] = 0.0
+            else:
+                temp /= temp[-1]
+            #end if 
+
+            v += temp #accumulate the v-parameter calcs for each i
+        # end for 
+        v/=(self.Nu-singular_counter) #divide by the number of 'i's we had
+        self.v = v
+
+        return
+
+
+    def _calcKnots(self):
 
         '''Find the initial knot vector for this problem'''
 
@@ -217,15 +279,12 @@ class surf_spline():
 
         return
 
-    def __calcJacobian(self):
+    def _calcJacobian(self):
         
         # Calculate the jacobian J, for fixed t and s
         h = 1.0e-40j
         self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv])
         ctl = zeros([self.Nctlu,self.Nctlv],'D')
-
-        V = zeros((self.Nu,self.Nv))
-        U = zeros((self.Nu,self.Nv))
 
         [V, U] = meshgrid(self.v,self.u)
         for j in xrange(self.Nctlv):
@@ -618,8 +677,7 @@ class linear_spline():
             self.nDim = self.coef.shape[1]
 
             return
-        
-     
+             
         if task == 'interpolate':
 
             assert 'k' in kwargs and 'X' in kwargs, \
@@ -633,21 +691,12 @@ class linear_spline():
             if 's' in kwargs:
                 self.s = kwargs['s']
             else:
-                # We need to parameterize the curve
-                self.s = zeros(self.N);
-                for i in xrange(self.N-1):
-                    dist = 0
-                    for idim in xrange(self.nDim):
-                        dist += (self.X[i+1,idim] - self.X[i,idim])**2
-                    # end for
-                    self.s[i+1] = self.s[i] + sqrt(dist)
-                # end for
+                self._getParameterization()
+            # end if
                 
             self.Nctl = self.N
-
             self.coef = zeros((self.Nctl,self.nDim))
             self.range = array([self.s[0],self.s[-1]])
-
             self.orig_data = True
 
             # Sanity check to make sure k is less than N
@@ -663,6 +712,20 @@ class linear_spline():
             #end for
                 
             return
+
+
+    def _getParameterization(self):
+        # We need to parameterize the curve
+        self.s = zeros(self.N);
+        for i in xrange(self.N-1):
+            dist = 0
+            for idim in xrange(self.nDim):
+                dist += (self.X[i+1,idim] - self.X[i,idim])**2
+                # end for
+                self.s[i+1] = self.s[i] + sqrt(dist)
+            # end for
+        # end for
+        return
    
     def getValue(self,s):
         
@@ -693,7 +756,7 @@ class linear_spline():
             s_plot = linspace(self.range[0],self.range[1],25)
         # end if 
 
-        # Dump re-interpolated surface
+        # Dump re-interpolated spline
         handle.write('Zone T=%s I=%d \n'%('interpolated',len(s_plot)))
         handle.write('DATAPACKING=POINT\n')
         for i in xrange(len(s_plot)):

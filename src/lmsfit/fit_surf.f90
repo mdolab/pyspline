@@ -46,7 +46,6 @@ external dgglse ! Constrained
 external dgels ! Unconstrained
 
 ! Code for doing unconstrained least squares
-print *,'In fit_surf'
 
 do idim = 1,3
    do i=1,Nu
@@ -57,11 +56,11 @@ do idim = 1,3
    !print *,X_temp
    trans = 'n'
    lwork = 2*Nctlu*Nctlv*Nu*Nv
-   print *,'before copy'
+!   print *,'before copy'
    A_temp(:,:) = A(:,:)
    !call dgels( TRANS, M,     N,      NRHS, A,          LDA,  B,    LDB, WORK, LWORK, INFO )
    call dgels(trans  ,Nu*Nv,Nctlu*Nctlv,1,  A_temp,Nu*Nv, X_temp,Nu*Nv,    work, lwork,  info)
-   print *,'done dgels'
+!   print *,'done dgels'
    do i =1,Nctlu
       do j = 1,Nctlv
          ctl(i,j,idim) = X_temp((i-1)*Nctlv + j,1)
