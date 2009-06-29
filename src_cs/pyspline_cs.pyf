@@ -18,6 +18,7 @@ python module pyspline_cs ! in
             complex*16, optional, dimension(nx*ny + MAX(2*kx*(nx+1),2*ky*(ny+1))) ::work
             integer,optional,intent(in) :: iflag=0
         end subroutine b2ink
+
         function b2val(xval,yval,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,work) ! in :pyspline:b2val.f
             complex*16,intent(in) :: xval
             complex*16,intent(in) :: yval
@@ -57,21 +58,6 @@ python module pyspline_cs ! in
           complex*16, intent(out):: bvalu
         end function bvalu
 
-        subroutine bint4(x,y,ndata,ibcl,ibcr,fbcl,fbcr,kntopt,t,bcoef,n,k,w) ! in bint4.f
-          complex*16,intent(in), dimension(ndata) :: x
-          complex*16,intent(in), dimension(ndata) :: y
-          integer,optional,check(len(x)>=ndata),depend(x) :: ndata=len(x)
-          integer,intent(in) :: ibcl
-          integer,intent(in) :: ibcr
-          complex*16,intent(in) :: fbcl
-          complex*16,intent(in) :: fbcr
-          integer,intent(in) :: kntopt
-          complex*16,intent(out), dimension(ndata+6) :: t
-          complex*16,intent(out), dimension(ndata+2) :: bcoef
-          integer,intent(out) :: n
-          integer,intent(out) :: k
-          complex*16,optional, dimension(5*(ndata+2)) :: w
-        end subroutine bint4
         subroutine bknot(x,n,k,t) ! in bknot.f
           complex*16,intent(in), dimension(n) :: x
           integer optional,check(len(x)>=n),depend(x) :: n=len(x)
@@ -124,9 +110,7 @@ python module pyspline_cs ! in
           integer,intent(in) :: ky
           complex*16,intent(in), dimension(nx,ny) :: bcoef
           complex*16,intent(out), dimension(n),depend(n) :: z
-end subroutine b2valv
-
-
+        end subroutine b2valv
 
     end interface 
 end python module pyspline_cs
