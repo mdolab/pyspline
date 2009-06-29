@@ -24,7 +24,7 @@ __version__ = '$Revision: $'
 # =============================================================================
 # Standard Python modules
 # =============================================================================
-import os, sys, string, time
+import os, sys, string, time, copy
 
 # =============================================================================
 # External Python modules
@@ -255,28 +255,9 @@ class surf_spline():
 
         '''Find the initial knot vector for this problem'''
 
-        # ==============================
-        # Find the Initial Knot Vectors
-        # ==============================
+        self.tu = pyspline.knots(self.u,self.Nctlu,self.ku)
+        self.tv = pyspline.knots(self.v,self.Nctlv,self.kv)
         
-        # U knots
-        tu= zeros(self.Nctlu + self.ku)
-        tu[self.ku-1:self.Nctlu+1]  = self.range[0] + (0.5*(1-cos(linspace(0,pi,self.Nctlu-self.ku+2))))*(self.range[1]-self.range[0])
-        tu[0:self.ku] = self.range[0]
-        tu[self.Nctlu:self.Nctlu+self.ku] = self.range[1]#+0.1*(tu0[Nctlu]-tu0[Nctlu-1])
-            
-        # V Knots
-
-        tv= zeros(self.Nctlv + self.kv)
-        tv[self.kv-1:self.Nctlv+1] =  linspace(self.range[2],self.range[3],self.Nctlv-self.kv+2)
-            #tv0[kv-1:Nctlv+1] = v[0,1:-1]
-            #          tv0[kv-1:Nctlv+1]  = 0.5*(1-cos(linspace(0,pi,Nctlv-kv+2)))
-        tv[0:self.kv] = self.range[2]
-        tv[self.Nctlv:self.Nctlv+self.kv] = self.range[3]#+0.1*(tv0[Nctlv]-tv0[Nctlv-1])
-        
-        self.tu = tu
-        self.tv = tv
-
         return
 
     def _calcJacobian(self):
@@ -296,7 +277,7 @@ class surf_spline():
                 # end for
             # end for 
         # end for
-
+        return
 
 #     def __objcon(self,x):
 #         '''Get the rms error for the given set of design variables'''
@@ -379,10 +360,34 @@ class surf_spline():
 #         # end for
 #         return ctl
 
+    def getIsoEdgeCurve(self,*args,**kwargs):
+        '''Get a 1D curve defining one of the 4 edges of the surface'''
+
+        assert 'u' in kwargs or 'v' in kwargs, 'u or v must be specified on input'
+        if 'u' in kwargs:
+            if kwargs['u'] == 0:
+                spl = linear_spline('create',k=self.kv,t=self.tv,coef=self.coef[0,:,:],range=[self.range[2],self.range[3]])
+                spl.reverseDirection()
+            if kwargs['u'] == 1:
+                spl= linear_spline('create',k=self.kv,t=self.tv,coef=self.coef[-1,:,:],range=[self.range[2],self.range[3]])
+        elif 'v' in kwargs:
+            if kwargs['v'] == 0:
+                spl = linear_spline('create',k=self.ku,t=self.tu,coef=self.coef[:,0,:],range=[self.range[0],self.range[1]])
+            if kwargs['v'] == 1:
+                spl = linear_spline('create',k=self.ku,t=self.tu,coef=self.coef[:,-1,:],range=[self.range[0],self.range[1]])
+                spl.reverseDirection()
+        else:
+            print 'u or v wre not specified'
+            sys.exit(1)
+        # end if
+        return spl
+        
+
+
     def getValue(self,u,v):
         
         '''Get the value of the spline at point u,v'''
-        x = zeros([nDim])
+        x = zeros([self.nDim])
         for idim in xrange(self.nDim):
             x[idim] = pyspline.b2val(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         
@@ -499,7 +504,7 @@ class surf_spline():
                 # end for
             # end for 
         # end if
-
+                
         if self.orig_data:
             u_plot = self.u
             v_plot = self.v
@@ -507,6 +512,7 @@ class surf_spline():
             u_plot = linspace(self.range[0],self.range[1],25)
             v_plot = linspace(self.range[2],self.range[3],25)
         # end if 
+      
 
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'%('interpolated',len(u_plot),len(v_plot)))
@@ -713,6 +719,15 @@ class linear_spline():
                 
             return
 
+
+    def reverseDirection(self):
+        '''reverse the direction sense of the spline'''
+        for idim in xrange(self.nDim):
+            temp = copy.deepcopy(self.coef[:,idim])
+            temp = temp[::-1]
+            self.coef[:,idim] = temp
+        return
+        
 
     def _getParameterization(self):
         # We need to parameterize the curve
