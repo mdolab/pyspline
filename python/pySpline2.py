@@ -360,29 +360,23 @@ class surf_spline():
 #         # end for
 #         return ctl
 
-    def getIsoEdgeCurve(self,*args,**kwargs):
-        '''Get a 1D curve defining one of the 4 edges of the surface'''
+    def getValueEdge(self,edge,s):
+        '''Get the value of the spline on edge, edge=0,1,2,3 where
+        edges are oriented in the standard counter-clockwise fashion.'''
 
-        assert 'u' in kwargs or 'v' in kwargs, 'u or v must be specified on input'
-        if 'u' in kwargs:
-            if kwargs['u'] == 0:
-                spl = linear_spline('create',k=self.kv,t=self.tv,coef=self.coef[0,:,:],range=[self.range[2],self.range[3]])
-                spl.reverseDirection()
-            if kwargs['u'] == 1:
-                spl= linear_spline('create',k=self.kv,t=self.tv,coef=self.coef[-1,:,:],range=[self.range[2],self.range[3]])
-        elif 'v' in kwargs:
-            if kwargs['v'] == 0:
-                spl = linear_spline('create',k=self.ku,t=self.tu,coef=self.coef[:,0,:],range=[self.range[0],self.range[1]])
-            if kwargs['v'] == 1:
-                spl = linear_spline('create',k=self.ku,t=self.tu,coef=self.coef[:,-1,:],range=[self.range[0],self.range[1]])
-                spl.reverseDirection()
+        if edge == 0:
+            return self.getValue(s,0)
+        elif edge == 1:
+            return self.getValue(1,s)
+        elif edge == 2:
+            return self.getValue(1-s,1)
+        elif edge ==3:
+            return self.getValue(0,1-s)
         else:
-            print 'u or v wre not specified'
+            print 'Edge must be between 0 and 3'
             sys.exit(1)
-        # end if
-        return spl
-        
-
+            return
+        #end if 
 
     def getValue(self,u,v):
         
@@ -719,15 +713,6 @@ class linear_spline():
                 
             return
 
-
-    def reverseDirection(self):
-        '''reverse the direction sense of the spline'''
-        for idim in xrange(self.nDim):
-            temp = copy.deepcopy(self.coef[:,idim])
-            temp = temp[::-1]
-            self.coef[:,idim] = temp
-        return
-        
 
     def _getParameterization(self):
         # We need to parameterize the curve
