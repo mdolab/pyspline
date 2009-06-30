@@ -165,6 +165,7 @@ class spline():
                     opt_prob.addCon('edge constraint',type='i',lower=0,upper=0)
                     self.Bcon[counter,idim*Nctlv*Nctlu + j] = 1
                     self.Bcon[counter,3*Nctlu*Nctlv + idim*Nctlv*Nctlu + (Nctlu-1)*Nctlv + j] = -1
+
                     self.Bcon[counter+1,idim*Nctlv*Nctlu + (Nctlu-1)*Nctlv + j] = 1
                     self.Bcon[counter+1,3*Nctlu*Nctlv + idim*Nctlv*Nctlu + j] = -1
                     counter +=2
