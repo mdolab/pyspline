@@ -378,6 +378,27 @@ class surf_spline():
             return
         #end if 
 
+    def getValueCorner(self,corner):
+        '''Get the value of the spline on corner i where nodes are oriented in
+        the standard counter-clockwise fashion.'''
+
+        if corner == 0:
+            return self.getValue(0,0)
+        elif corner == 1:
+            return self.getValue(1,0)
+        elif corner == 2:
+            return self.getValue(1,1)
+        elif corner ==3:
+            return self.getValue(0,1)
+        else:
+            print 'Corner must be between 0 and 3'
+            sys.exit(1)
+            return
+        #end if 
+
+
+
+
     def getValue(self,u,v):
         
         '''Get the value of the spline at point u,v'''
@@ -506,7 +527,9 @@ class surf_spline():
             u_plot = linspace(self.range[0],self.range[1],25)
             v_plot = linspace(self.range[2],self.range[3],25)
         # end if 
-      
+            
+        u_plot = linspace(self.range[0],self.range[1],25)
+        v_plot = linspace(self.range[2],self.range[3],25)
 
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'%('interpolated',len(u_plot),len(v_plot)))
