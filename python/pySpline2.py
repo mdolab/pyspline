@@ -367,11 +367,11 @@ class surf_spline():
         if edge == 0:
             return self.getValue(s,0)
         elif edge == 1:
-            return self.getValue(1,s)
+            return self.getValue(s,1)
         elif edge == 2:
-            return self.getValue(1-s,1)
+            return self.getValue(0,s)
         elif edge ==3:
-            return self.getValue(0,1-s)
+            return self.getValue(1,s)
         else:
             print 'Edge must be between 0 and 3'
             sys.exit(1)
@@ -396,7 +396,31 @@ class surf_spline():
             return
         #end if 
 
+    def getCoefEdge(self,edge):
+        '''Get Coef along edge edge'''
 
+        if   edge == 0:
+            return self.coef[:,0,:]
+        elif edge == 1:
+            return self.coef[:,-1,:]
+        elif edge == 2:
+            return self.coef[0,:,:]
+        else:
+            return self.coef[-1,:,:]
+        
+    def setCoefEdge(self,edge,new_coef):
+        '''Get Coef along edge edge'''
+
+        if   edge == 0:
+            self.coef[:,0,:] = new_coef
+        elif edge == 1:
+            self.coef[:,-1,:] = new_coef
+        elif edge == 2:
+            self.coef[0,:,:] = new_coef
+        else:
+            self.coef[-1,:,:] = new_coef
+        return
+                
 
 
     def getValue(self,u,v):
