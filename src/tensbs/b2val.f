@@ -113,7 +113,7 @@ C***FIRST EXECUTABLE STATEMENT
 
       CALL INTRV(TY,NY+KY,YVAL,ILOY,LEFTY,MFLAG)
       IF (MFLAG .NE. 0)  then
-c$$$         print *,'mflag fucked,',mflag
+c$$$         print *,'mflag screwed',mflag
 c$$$         print *,'lefty:',lefty
 c$$$         print *,'NY,KY:',NY,KY
 c$$$         print *,'TY:'
@@ -124,16 +124,18 @@ c$$$         end do
          LEFTY = NY ! THis effectivly is a bounding function
          !GO TO 100
       end if
-         IW = KY + 1
-         KCOL = LEFTY - KY
-         DO 50 K=1,KY
-            KCOL = KCOL + 1
-            WORK(K) = BVALU(TX,BCOEF(1,KCOL),NX,KX,IDX,XVAL,INBVX,
-     *                      WORK(IW))
-   50    CONTINUE
-         INBV = 1
-         KCOL = LEFTY - KY + 1
-         B2VAL = BVALU(TY(KCOL),WORK,KY,KY,IDY,YVAL,INBV,WORK(IW))
-  100 CONTINUE
+      IW = KY + 1
+      KCOL = LEFTY - KY
+      DO 50 K=1,KY
+         KCOL = KCOL + 1
+         WORK(K) = BVALU(TX,BCOEF(1,KCOL),NX,KX,IDX,XVAL,INBVX,
+     *        WORK(IW))
+ 50   CONTINUE
+      INBV = 1
+      KCOL = LEFTY - KY + 1
+      B2VAL = BVALU(TY(KCOL),WORK,KY,KY,IDY,YVAL,INBV,WORK(IW))
+      
+ 100  
+      CONTINUE
       RETURN
       END
