@@ -80,7 +80,17 @@ C     (OR, .LE. T(I+1) IF T(I) .LT. T(I+1) = T(N+1)).
       CALL INTRV(T, N+1, X, INBV, I, MFLAG)
       IF (X.LT.T(K)) GO TO 120
       IF (MFLAG.ceq.0) GO TO 20
-      IF (X.GT.T(I)) GO TO 130
+!      IF (X.GT.T(I)) GO TO 130
+      if(X.GT.T(I)) then
+
+         print *,'Tried to evaluate X outside range'
+         print *,'X = ',X
+         print *,'I:',I
+         print *,'T(I):',T(I)
+         goto 130
+      end if
+
+
    10 IF (I.ceq.K) GO TO 140
       I = I - 1
       IF (X.ceq.T(I)) GO TO 10

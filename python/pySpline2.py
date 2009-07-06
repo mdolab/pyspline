@@ -186,7 +186,12 @@ class surf_spline():
                 self.kv = self.Nv-1
 
            #Calculate the knot vector and Jacobian
+            print 'calculating knots...'
             self._calcKnots()
+            print 'tu:',self.tu,self.u
+            print 'tv:',self.tv,self.v
+
+            print 'calculating jacobian...'
             self._calcJacobian()
 
 #             # Lets do a lms 
