@@ -78,7 +78,11 @@ C     (OR, .LE. T(I+1) IF T(I) .LT. T(I+1) = T(N+1)).
       CALL INTRV(T, N+1, X, INBV, I, MFLAG)
       IF (X.LT.T(K)) GO TO 120
       IF (MFLAG.EQ.0) GO TO 20
-      IF (X.GT.T(I)) GO TO 130
+!      IF (X.GT.T(I)) GO TO 130
+      if(X.GT.T(I)) then
+         X = T(I)
+      end if
+      
 c$$$         print *,'in bvalu'
 c$$$         print *,'N:',N
 c$$$         print *,'K:',K

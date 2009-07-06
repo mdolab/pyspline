@@ -135,7 +135,6 @@ c$$$         end do
       KCOL = LEFTY - KY + 1
       B2VAL = BVALU(TY(KCOL),WORK,KY,KY,IDY,YVAL,INBV,WORK(IW))
       
- 100  
-      CONTINUE
+ 100  CONTINUE
       RETURN
       END
