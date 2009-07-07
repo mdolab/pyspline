@@ -84,13 +84,16 @@ class surf_spline():
       
             
 '''
-        print 'pySpline Class Initialization Type: %s'%(task)
+        sys.stdout.write('pySpline Type: %s. '%(task))
+
+        self.edge_con = [False,False,False,False]  #Is edge connected to another edge 
+        self.master_edge = [False,False,False,False] # Is edge a Master Edge?
 
         if task == 'create':
             assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
                 and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs, \
                 'Error: ku,kv,tu,tv,coef and range MUST be defined for task=\'create\''
-            
+            sys.stdout.write('\n')
             self.u = None
             self.v = None
             self.X = None
@@ -141,11 +144,13 @@ class surf_spline():
                 self.ku = self.Nu-1
             if self.Nv <= self.kv:
                 self.kv = self.Nv-1
-
+            
+            timeA = time.time()
             for idim in xrange(self.nDim):
                 self.tu,self.tv,self.coef[:,:,idim]= pyspline.b2ink(self.u,self.v,self.X[:,:,idim],self.ku,self.kv)
             #end for
-                
+            
+            sys.stdout.write(' Interpolate Time: %6.5f s\n'%(time.time()-timeA))
             return
            
         elif task == 'lms':
@@ -186,18 +191,16 @@ class surf_spline():
                 self.kv = self.Nv-1
 
            #Calculate the knot vector and Jacobian
-            print 'calculating knots...'
+            sys.stdout.write(' Calculating: knots ')
             self._calcKnots()
-            print 'tu:',self.tu,self.u
-            print 'tv:',self.tv,self.v
 
-            print 'calculating jacobian...'
+            sys.stdout.write(' jacobian, ')
             self._calcJacobian()
 
 #             # Lets do a lms 
             timeA = time.time()
             self.coef = pyspline.fit_surf(self.Nu,self.Nv,self.Nctlu,self.Nctlv,self.J,self.X)
-            print 'LMS Fit Time:',time.time()-timeA
+            sys.stdout.write(' LMS Fit Time: %6.5f s\n'%(time.time()-timeA))
             
             return 
 
