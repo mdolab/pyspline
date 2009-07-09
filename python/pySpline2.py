@@ -37,7 +37,6 @@ import numpy.linalg
 #from pyOpt_optimization import Optimization
 #from pySNOPT import SNOPT
 import pyspline
-import pyspline_cs
 
 # =============================================================================
 # pySpline class
@@ -86,7 +85,7 @@ class surf_spline():
 '''
         sys.stdout.write('pySpline Type: %s. '%(task))
 
-        self.edge_con = [False,False,False,False]  #Is edge connected to another edge 
+        self.edge_con = [ [], [], [], []] #Is edge connected to another edge 
         self.master_edge = [False,False,False,False] # Is edge a Master Edge?
 
         if task == 'create':
@@ -271,17 +270,14 @@ class surf_spline():
     def _calcJacobian(self):
         
         # Calculate the jacobian J, for fixed t and s
-        h = 1.0e-40j
         self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv])
-        ctl = zeros([self.Nctlu,self.Nctlv],'D')
-
+        ctl = zeros([self.Nctlu,self.Nctlv])
         [V, U] = meshgrid(self.v,self.u)
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
-                ctl[i,j] += h
-                val = pyspline_cs.b2valv(U.flatten(),V.flatten(),0,0,self.tu,self.tv,self.ku,self.kv,ctl)
-                ctl[i,j] -= h    
-                self.J[:,i*self.Nctlv + j] = imag(val)/imag(h)
+                ctl[i,j] += 1
+                self.J[:,i*self.Nctlv + j] = pyspline.b2valv(U.flatten(),V.flatten(),0,0,self.tu,self.tv,self.ku,self.kv,ctl)
+                ctl[i,j] -= 1
                 # end for
             # end for 
         # end for

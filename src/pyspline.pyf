@@ -127,11 +127,8 @@ python module pyspline ! in
           integer intent(in) :: nv
           integer intent(in) :: nctlu
           integer intent(in) :: nctlv
-!          integer intent(in) :: ncon
           double precision dimension(nu*nv,nctlu*nctlv),intent(in),depend(nu,nv,nctlu,nctlv) :: a
           double precision dimension(nu,nv,3),intent(in),depend(nu,nv) :: x
-!          double precision dimension(ncon,3*nctlu*nctlv),intent(in),depend(nctlu,nctlv,ncon) :: b
-!          double precision dimension(ncon),intent(in),depend(ncon) :: d
           double precision dimension(nctlu,nctlv,3),intent(out),depend(nctlu,nctlv) :: ctl
         end subroutine fit_surf
 
