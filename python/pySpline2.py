@@ -86,7 +86,7 @@ class surf_spline():
         sys.stdout.write('pySpline Type: %s. '%(task))
 
         self.edge_con = [ [], [], [], []] #Is edge connected to another edge 
-        self.master_edge = [False,False,False,False] # Is edge a Master Edge?
+        self.master_edge = [True,True,True,True] # Is edge a Master Edge?...it is unless it its driven
 
         if task == 'create':
             assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
@@ -100,8 +100,8 @@ class surf_spline():
             self.Nv = None
             self.ku = kwargs['ku'] 
             self.kv = kwargs['kv']
-            self.tu = kwargs['tu']
-            self.tv = kwargs['tv']
+            self.tu = array(kwargs['tu'])
+            self.tv = array(kwargs['tv'])
             self.coef = kwargs['coef']
             self.Nctlu = self.coef.shape[0]
             self.Nctlv = self.coef.shape[1]
@@ -140,9 +140,9 @@ class surf_spline():
 
             #Sanity check to make sure k is less than N
             if self.Nu <= self.ku:
-                self.ku = self.Nu-1
+                self.ku = self.Nu
             if self.Nv <= self.kv:
-                self.kv = self.Nv-1
+                self.kv = self.Nv
             
             timeA = time.time()
             for idim in xrange(self.nDim):
@@ -185,9 +185,9 @@ class surf_spline():
                 self.Nctlv = self.Nv
 
             if self.Nu <= self.ku:
-                self.ku = self.Nu-1
+                self.ku = self.Nu
             if self.Nv <= self.kv:
-                self.kv = self.Nv-1
+                self.kv = self.Nv
 
            #Calculate the knot vector and Jacobian
             sys.stdout.write(' Calculating: knots ')
@@ -256,6 +256,97 @@ class surf_spline():
         self.v = v
 
         return
+
+    def _calcNFree(self):
+        
+        '''Internal function to calculate how many "free" control points we
+        have. i.e. the master edges'''
+        Nctlu = self.Nctlu
+        Nctlv = self.Nctlv
+        Nu    = self.Nu
+        Nv    = self.Nv
+        
+        if self.master_edge[0] == False:
+            Nv -= 1
+            Nctlv -= 1
+            
+        if self.master_edge[1] == False:
+            Nv -= 1
+            Nctlv -= 1
+
+        if self.master_edge[2] == False:
+            Nu -= 1
+            Nctlu -= 1
+
+        if self.master_edge[3] == False:
+            Nu -= 1
+            Nctlu -= 1
+            
+        self.Nu_free = Nu
+        self.Nv_free = Nv
+
+        self.Nctlu_free = Nctlu
+        self.Nctlv_free = Nctlv
+        
+        return
+
+    def _getCropData(self):
+        '''This internal function gets the original data coorsponding but
+        omits the data along edges which are not masters'''
+
+        #X = zeros([self.Nu_free,self.Nv_free,3])
+        
+        # There is no easy way of doing this to my knowlege. There are
+        # 16 combination of Master/Slave  edges (2^4) And each results
+        # in a different section of  the matrix X being returned. Here
+        # we will simply hard code the 16 combination 
+        master_edge = self.master_edge
+
+        # All Master (zero Slave)
+        if self.master_edge == [True,True,True,True]:
+            return self.X
+
+        # Three Master/1 Slave
+        elif master_edge == [False,True,True,True]:
+            return self.X[:,1:,:]
+        elif master_edge == [True,False,True,True]:
+            return self.X[:,0:-1,:]
+        elif master_edge == [True,True,False,True]:
+            return self.X[1:,:,:]
+        elif master_edge == [True,True,True,False]:
+            return self.X[0:-1,:,:]
+
+        # Two Master / Two Slave
+        elif master_edge == [True,True,False,False]:
+            return self.X[1:-1,:,:]
+        elif master_edge == [False,False,True,True]:
+            return self.X[:,1:-1,:]
+
+        elif master_edge == [True,False,False,True]:
+            return self.X[1:,0:-1,:]
+        elif master_edge == [False,True,False,True]:
+            return self.X[1:,1,:,:]
+        elif master_edge == [False,True,True,False]:
+            return self.X[0:-1,1:,:]
+        elif master_edge == [True,False,True,False]:
+            return self.X[0:-1,0:-1,:]
+        
+        # One Master / Three Slave
+        elif master_edge == [True,False,False,False]:
+            return self.X[1:-1,0:-1,:]
+        elif master_edge == [False,True,False,False]:
+            return self.X[1:-1,1:,:]
+        elif master_edge == [False,False,True,False]:
+            return self.X[0:-1:,1:-1,:]
+        elif master_edge == [False,False,False,True]:
+            return self.X[1:,1:-1,:]
+
+        # Zero Master / All Slave
+        elif master_edge == [False,False,False,False]:
+            return self.X[1:-1,1:-1,:]
+
+        
+        
 
 
     def _calcKnots(self):
@@ -413,7 +504,7 @@ class surf_spline():
             return self.coef[-1,:,:]
         
     def setCoefEdge(self,edge,new_coef):
-        '''Get Coef along edge edge'''
+        '''Set Coef along edge edge'''
 
         if   edge == 0:
             self.coef[:,0,:] = new_coef
@@ -424,8 +515,6 @@ class surf_spline():
         else:
             self.coef[-1,:,:] = new_coef
         return
-                
-
 
     def getValue(self,u,v):
         
@@ -579,6 +668,22 @@ class surf_spline():
                 handle.write('%f %f %f \n'%(self.coef[i,j,0],self.coef[i,j,1],self.coef[i,j,2]))
             # end for
         # end for 
+
+
+    def writeTecplotEdge(self,handle,edge):
+        '''Dump out a linear zone along edge used for visualizing edge continuity'''
+
+        N = 25
+        handle.write('Zone T=%s I=%d\n'%('cont_edge',N))
+        handle.write('DATAPACKING=POINT\n')
+        s = linspace(0,1,N)
+        for i in xrange(N):
+            value = self.getValueEdge(edge,s[i])
+            handle.write('%f %f %f \n'%(value[0],value[1],value[2]))
+        # end for
+        return
+            
+
 
 
     def writeIGES_directory(self,handle,Dcount,Pcount):
