@@ -131,7 +131,9 @@ class surf_spline():
             else:
                 self._calcParameterization()
             # end if
-                
+
+            # Set a linear version fo U and V
+            [self.V, self.U] = meshgrid(self.v,self.u)
             self.orig_data = True
             
             self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
@@ -174,7 +176,10 @@ class surf_spline():
             else:
                 self._calcParameterization()
             # end if
-                
+
+            # Set a linear version fo U and V
+            [self.V, self.U] = meshgrid(self.v,self.u)
+
             self.orig_data = True
             self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
 
@@ -290,7 +295,7 @@ class surf_spline():
         
         return
 
-    def _getCropData(self):
+    def _getCropData(self,X):
         '''This internal function gets the original data coorsponding but
         omits the data along edges which are not masters'''
 
@@ -304,46 +309,46 @@ class surf_spline():
 
         # All Master (zero Slave)
         if self.master_edge == [True,True,True,True]:
-            return self.X
+            return X
 
         # Three Master/1 Slave
         elif master_edge == [False,True,True,True]:
-            return self.X[:,1:,:]
+            return X[:,1:]
         elif master_edge == [True,False,True,True]:
-            return self.X[:,0:-1,:]
+            return X[:,0:-1]
         elif master_edge == [True,True,False,True]:
-            return self.X[1:,:,:]
+            return X[1:,:]
         elif master_edge == [True,True,True,False]:
-            return self.X[0:-1,:,:]
+            return X[0:-1,:]
 
         # Two Master / Two Slave
         elif master_edge == [True,True,False,False]:
-            return self.X[1:-1,:,:]
+            return X[1:-1,:]
         elif master_edge == [False,False,True,True]:
-            return self.X[:,1:-1,:]
+            return X[:,1:-1]
 
         elif master_edge == [True,False,False,True]:
-            return self.X[1:,0:-1,:]
+            return X[1:,0:-1]
         elif master_edge == [False,True,False,True]:
-            return self.X[1:,1,:,:]
+            return X[1:,1,:]
         elif master_edge == [False,True,True,False]:
-            return self.X[0:-1,1:,:]
+            return X[0:-1,1:]
         elif master_edge == [True,False,True,False]:
-            return self.X[0:-1,0:-1,:]
+            return X[0:-1,0:-1]
         
         # One Master / Three Slave
         elif master_edge == [True,False,False,False]:
-            return self.X[1:-1,0:-1,:]
+            return X[1:-1,0:-1]
         elif master_edge == [False,True,False,False]:
-            return self.X[1:-1,1:,:]
+            return X[1:-1,1:]
         elif master_edge == [False,False,True,False]:
-            return self.X[0:-1:,1:-1,:]
+            return X[0:-1:,1:-1]
         elif master_edge == [False,False,False,True]:
-            return self.X[1:,1:-1,:]
+            return X[1:,1:-1]
 
         # Zero Master / All Slave
         elif master_edge == [False,False,False,False]:
-            return self.X[1:-1,1:-1,:]
+            return X[1:-1,1:-1]
 
         
         
@@ -363,16 +368,59 @@ class surf_spline():
         # Calculate the jacobian J, for fixed t and s
         self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv])
         ctl = zeros([self.Nctlu,self.Nctlv])
-        [V, U] = meshgrid(self.v,self.u)
+
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
                 ctl[i,j] += 1
-                self.J[:,i*self.Nctlv + j] = pyspline.b2valv(U.flatten(),V.flatten(),0,0,self.tu,self.tv,self.ku,self.kv,ctl)
+                self.J[:,i*self.Nctlv + j] = pyspline.b2valv(self.U.flatten(),self.V.flatten(),0,0,self.tu,self.tv,self.ku,self.kv,ctl)
                 ctl[i,j] -= 1
                 # end for
             # end for 
         # end for
         return
+
+    def checkCtl(self,i,j):
+        ''' This function checks to see if a control point is a master. i.e. Internal or on a master edge'''
+
+        if i > 0 and i < self.Nctlu-1 and j > 0 and j < self.Nctlv-1:
+            #This is the internal case...
+            return True
+
+        # Now we need to check if its on a master edge (but not a corner)
+        
+        if i == 0 and j > 0 and j < self.Nctlv-1 and self.master_edge[0]:
+            return True
+        if i == self.Nctlu-1 and j > 0 and j < self.Nctlv-1 and self.master_edge[1]:
+            return True
+        if j == 0 and i > 0 and i < self.Nctlu-1 and self.master_edge[2]:
+            return True
+        if j == self.Nctlv-1 and i > 0 and i < self.Nctlu-1 and self.master_edge[3]:
+            return True
+        
+        # Now check Corners...Must be on BOTH master edges
+
+        if i == 0 and j == 0 and self.master_edge[0] and self.master_edge[2]:
+            return True
+        if i == 0 and j == self.Nctlv-1 and self.master_edge[0] and self.master_edge[3]:
+            return True
+        if i == self.Nctlu-1 and j == 0 and self.master_edge[1] and self.master_edge[2]:
+            return True
+        if i == self.Nctlu-1 and j == self.Nctlv-1 and self.master_edge[1] and self.master_edge[3]:
+            return True
+        
+        
+        # else:
+
+        return False
+        
+
+    def _calcCtlDeriv(self,i,j):
+        '''Calculate the derivative wrt control point i,j'''
+        ctl = zeros([self.Nctlu,self.Nctlv])
+        ctl[i,j] += 1
+        
+        return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
+        
 
 #     def __objcon(self,x):
 #         '''Get the rms error for the given set of design variables'''
