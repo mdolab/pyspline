@@ -34,8 +34,6 @@ from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
 
 import numpy.linalg
 
-#from pyOpt_optimization import Optimization
-#from pySNOPT import SNOPT
 import pyspline
 
 # =============================================================================
@@ -85,8 +83,14 @@ class surf_spline():
 '''
         sys.stdout.write('pySpline Type: %s. '%(task))
 
+        # This is the optional additional info required for use with pyGeo
         self.edge_con = [ [], [], [], []] #Is edge connected to another edge 
         self.master_edge = [True,True,True,True] # Is edge a Master Edge?...it is unless it its driven
+        self.dir = [None,None,None,None]
+        self.edge_type = [None,None,None,None]
+        self.node_con = [[],[],[],[]]
+        self.master_node = [None,None,None,None] # Is each node a master node?
+
 
         if task == 'create':
             assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
@@ -330,7 +334,7 @@ class surf_spline():
         elif master_edge == [True,False,False,True]:
             return X[1:,0:-1]
         elif master_edge == [False,True,False,True]:
-            return X[1:,1,:]
+            return X[1:,1]
         elif master_edge == [False,True,True,False]:
             return X[0:-1,1:]
         elif master_edge == [True,False,True,False]:
@@ -384,35 +388,65 @@ class surf_spline():
 
         if i > 0 and i < self.Nctlu-1 and j > 0 and j < self.Nctlv-1:
             #This is the internal case...
-            return True
+            return 0,None,None
 
         # Now we need to check if its on a master edge (but not a corner)
         
-        if i == 0 and j > 0 and j < self.Nctlv-1 and self.master_edge[0]:
-            return True
-        if i == self.Nctlu-1 and j > 0 and j < self.Nctlv-1 and self.master_edge[1]:
-            return True
-        if j == 0 and i > 0 and i < self.Nctlu-1 and self.master_edge[2]:
-            return True
-        if j == self.Nctlv-1 and i > 0 and i < self.Nctlu-1 and self.master_edge[3]:
-            return True
+        if j == 0 and i > 0 and i < self.Nctlu-1:
+            if self.master_edge[0]:
+                return 0,[self.edge_con[0],i,self.dir[0],self.edge_type[0]],None  #Face,Edge,Node
+            else:
+                return 1,None,None
+        
+        if j == self.Nctlv-1 and i > 0 and i < self.Nctlu-1:
+            if self.master_edge[1]:
+                return 0,[self.edge_con[1],i,self.dir[1],self.edge_type[1]],None  #Face,Edge,Node
+            else:
+                return 1,None,None
+
+        if i == 0 and j > 0 and j < self.Nctlv-1:
+            if self.master_edge[2]:
+                return 0,[self.edge_con[2],j,self.dir[2],self.edge_type[2]],None  #Face,Edge,Node
+            else:
+                return 1,None,None
+        if i == self.Nctlu-1 and j > 0 and j < self.Nctlv-1 :
+            if self.master_edge[3]:
+                return 0,[self.edge_con[3],j,self.dir[3],self.edge_type[3]],None  #Face,Edge,Node
+            else:
+                return 1,None,None
         
         # Now check Corners...Must be on BOTH master edges
 
-        if i == 0 and j == 0 and self.master_edge[0] and self.master_edge[2]:
-            return True
-        if i == 0 and j == self.Nctlv-1 and self.master_edge[0] and self.master_edge[3]:
-            return True
-        if i == self.Nctlu-1 and j == 0 and self.master_edge[1] and self.master_edge[2]:
-            return True
-        if i == self.Nctlu-1 and j == self.Nctlv-1 and self.master_edge[1] and self.master_edge[3]:
-            return True
-        
-        
+        if j == 0 and i == 0:
+            if self.master_node[0]:
+                print 'self.node_con:',self.node_con
+                return 0,None,self.node_con[0]
+            else:
+                return 1,None,None
+            
+        if j == 0 and i == self.Nctlu-1:
+            if self.master_node[1]:
+                return 0,None,self.node_con[1]
+            else:
+                return 1,None,None
+            
+        if j == self.Nctlv-1 and i == 0:
+            if self.master_node[2]:
+                return 0,None,self.node_con[2]
+            else:
+                return 1, None, None
+
+        if j == self.Nctlv-1 and i == self.Nctlu-1:
+            if self.master_node[3]:
+                return 0,None,self.node_con[3]
+            else:
+                return 1, None, None
+
+
+
+                
         # else:
 
-        return False
-        
 
     def _calcCtlDeriv(self,i,j):
         '''Calculate the derivative wrt control point i,j'''
@@ -420,6 +454,53 @@ class surf_spline():
         ctl[i,j] += 1
         
         return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
+
+    def _calcCtlDerivNode(self,node):
+        '''Calculate the derivative wrt control point i,j'''
+        ctl = zeros([self.Nctlu,self.Nctlv])
+        if node == 0:
+            ctl[0,0] += 1
+        elif node == 1:
+            ctl[-1,0] += 1
+        elif node == 2:
+            ctl[0,-1] += 1
+        else:
+            ctl[-1,-1] += 1
+        
+        return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
+
+    def _calcCtlDerivEdge(self,edge,index,dir):
+        '''Calculate the derivative wrt control point i,j'''
+        ctl = zeros([self.Nctlu,self.Nctlv])
+        if edge == 0:
+            if dir==1:
+                ctl[index,0] += 1
+            else:
+                ctl[self.Nctlu-index-1,0] += 1
+
+        elif edge == 1:
+            if dir ==1:
+                ctl[index,-1] += 1
+            else:
+                ctl[self.Nctlu-index-1,-1] += 1
+
+        elif edge == 2:
+            if dir == 1:
+                ctl[0,index] += 1
+            else:
+                ctl[0,self.Nctlv-index-1] += 1
+        else:
+            if dir == 1:
+                ctl[-1,index] += 1
+            else:
+                clt[-1,self.Nctlv-index-1] += 1
+        
+        
+        return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
+
+
+
+
         
 
 #     def __objcon(self,x):
