@@ -33,6 +33,7 @@ from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
     array, real, reshape, meshgrid, dot, cross, mod
 
 import numpy.linalg
+from numpy.linalg import lstsq
 
 import pyspline
 
@@ -207,7 +208,10 @@ class surf_spline():
 
 #             # Lets do a lms 
             timeA = time.time()
-            self.coef = pyspline.fit_surf(self.Nu,self.Nv,self.Nctlu,self.Nctlv,self.J,self.X)
+            self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim])
+            for idim in xrange(self.nDim):
+                self.coef[:,:,idim] = reshape(lstsq(self.J,self.X[:,:,idim].flatten())[0],[self.Nctlu,self.Nctlv])
+
             sys.stdout.write(' LMS Fit Time: %6.5f s\n'%(time.time()-timeA))
             
             return 
@@ -354,8 +358,7 @@ class surf_spline():
         elif master_edge == [False,False,False,False]:
             return X[1:-1,1:-1]
 
-        
-        
+        return
 
 
     def _calcKnots(self):
@@ -419,7 +422,6 @@ class surf_spline():
 
         if j == 0 and i == 0:
             if self.master_node[0]:
-                print 'self.node_con:',self.node_con
                 return 0,None,self.node_con[0]
             else:
                 return 1,None,None
@@ -441,10 +443,6 @@ class surf_spline():
                 return 0,None,self.node_con[3]
             else:
                 return 1, None, None
-
-
-
-                
         # else:
 
 
@@ -499,90 +497,6 @@ class surf_spline():
         return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
 
 
-
-
-        
-
-#     def __objcon(self,x):
-#         '''Get the rms error for the given set of design variables'''
-#         # Unpack the x-values
-#         Bcon  = self.Bcon
-#         ctl = self.__unpack_x(x)
-
-#         total = 0.0
-
-#         for idim in xrange(self.nDim):
-#             total += sum((dot(self.J,ctl[:,:,idim].flatten()) - self.X[:,:,idim].flatten())**2)
-#         # end for 
-#         fcon = dot(Bcon,x)
-#         index = 4*self.nDim + 2*self.Nctlv*self.nDim
-
-#        #  # Calculate the LE constraint
-#         for j in xrange(self.Nctlv):
-
-#             A = ctl[0,0,j,:] # Root LE (upper)
-#             B = ctl[0,1,j,:] # Root LE upper +1
-#             C = ctl[1,-2,j,:]# Root LE lower +1
-
-#             # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
-
-#             A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
-#             A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
-#             A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
-
-#             fcon[index:index+3] = array([A1,A2,A3])
-#             index += 3
-#         # end for
-
-#         return total,fcon,False
-
-
-#     def __sens(self,x,f_obj,f_con):
-
-#         ndv = len(x)
-#         g_obj = zeros(ndv)
-#          # Unpack the x-values
-#         ctl = self.__unpack_x(x)
-#         N = self.Nctlu*self.Nctlv
-
-#         for idim in xrange(self.nDim):
-#             g_obj[self.nDim*N + idim*N :  self.nDim*N + idim*N + N] = \
-#                 2*dot(dot(self.J,ctl[:,:,idim].flatten())-self.X[:,:,idim].flatten(),self.J)
-#         # end for 
-
-#         g_con = self.Bcon
-#         h = 1.0e-40j
-#         x = array(x,'D')
-
-#         for i in xrange(ndv):
-#             index = 4*self.nDim + 2*self.Nctlv*self.nDim
-#             x[i] += h
-#             ctl = self.__unpack_x(x,'D')
-#             for j in xrange(self.Nctlv):
-#                 A = ctl[0,0,j,:] # Root LE (upper)
-#                 B = ctl[0,1,j,:] # Root LE upper +1
-#                 C = ctl[1,-2,j,:]# Root LE lower +1
-
-#                 # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
-
-#                 A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
-#                 A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
-#                 A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
-
-#                 g_con[index:index+3,i] = imag(array([A1,A2,A3]))/imag(h)
-#                 index += 3
-#             # end for
-#             x[i] -= h
-#         # end for
-#         return g_obj,g_con,False
-
-#     def __unpack_x(self,x,dtype='d'):
-#         ctl = zeros((self.Nctlu,self.Nctlv,self.nDim),dtype)
-#         N = self.Nctlu*self.Nctlv
-#         for idim in xrange(self.nDim):
-#             ctl[:,:,idim] = reshape(x[self.nDim*N + idim*N : self.nDim*N + idim*N + N],[self.Nctlu,self.Nctlv])
-#         # end for
-#         return ctl
 
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3 where
@@ -683,6 +597,7 @@ class surf_spline():
 
         return J
 
+
     def findUV(self,x0,r,u0,v0):
         ''' Try to find the parametric u-v coordinate of the spline
         which coorsponds to the intersection of the directed vector 
@@ -753,6 +668,7 @@ class surf_spline():
 
         return u,v,x
 
+
     def writeTecplot(self,handle):
         '''Output this surface\'s data to a open file handle \'handle\''''
 
@@ -798,6 +714,8 @@ class surf_spline():
             # end for
         # end for 
 
+        return
+
 
     def writeTecplotEdge(self,handle,edge):
         '''Dump out a linear zone along edge used for visualizing edge continuity'''
@@ -811,10 +729,7 @@ class surf_spline():
             handle.write('%f %f %f \n'%(value[0],value[1],value[2]))
         # end for
         return
-            
-
-
-
+  
     def writeIGES_directory(self,handle,Dcount,Pcount):
 
         '''Write the IGES file header information (Directory Entry Section) for this surface'''
@@ -852,7 +767,8 @@ class surf_spline():
                 handle.write('%7dP%7d\n'%(Pcount,counter))
                 counter += 1
                 pos_counter = 0
-
+            # end if
+        # end for
 
         for i in xrange(len(self.tv)):
             pos_counter += 1
@@ -873,6 +789,7 @@ class surf_spline():
                 pos_counter = 0
             # end if
         # end for 
+
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
                 for idim in xrange(3):
@@ -906,10 +823,14 @@ class surf_spline():
                 if i ==3:
                     for j  in xrange(5-pos_counter):
                         handle.write('%13s'%(' '))
-                        
+                    # end for
                     pos_counter = 0
                     handle.write('%7dP%7d\n'%(Pcount,counter))
                     counter += 1
+                # end if
+            # end if
+        # end for
+
         Pcount += 2
         return Pcount,counter
 
@@ -998,7 +919,6 @@ class linear_spline():
                 
             return
 
-
     def _getParameterization(self):
         # We need to parameterize the curve
         self.s = zeros(self.N);
@@ -1064,7 +984,6 @@ class linear_spline():
         return
 
 
-
 #==============================================================================
 # Class Test
 #==============================================================================
@@ -1077,3 +996,88 @@ if __name__ == '__main__':
 
 
 
+
+
+
+        
+
+#     def __objcon(self,x):
+#         '''Get the rms error for the given set of design variables'''
+#         # Unpack the x-values
+#         Bcon  = self.Bcon
+#         ctl = self.__unpack_x(x)
+
+#         total = 0.0
+
+#         for idim in xrange(self.nDim):
+#             total += sum((dot(self.J,ctl[:,:,idim].flatten()) - self.X[:,:,idim].flatten())**2)
+#         # end for 
+#         fcon = dot(Bcon,x)
+#         index = 4*self.nDim + 2*self.Nctlv*self.nDim
+
+#        #  # Calculate the LE constraint
+#         for j in xrange(self.Nctlv):
+
+#             A = ctl[0,0,j,:] # Root LE (upper)
+#             B = ctl[0,1,j,:] # Root LE upper +1
+#             C = ctl[1,-2,j,:]# Root LE lower +1
+
+#             # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
+
+#             A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
+#             A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
+#             A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
+
+#             fcon[index:index+3] = array([A1,A2,A3])
+#             index += 3
+#         # end for
+
+#         return total,fcon,False
+
+
+#     def __sens(self,x,f_obj,f_con):
+
+#         ndv = len(x)
+#         g_obj = zeros(ndv)
+#          # Unpack the x-values
+#         ctl = self.__unpack_x(x)
+#         N = self.Nctlu*self.Nctlv
+
+#         for idim in xrange(self.nDim):
+#             g_obj[self.nDim*N + idim*N :  self.nDim*N + idim*N + N] = \
+#                 2*dot(dot(self.J,ctl[:,:,idim].flatten())-self.X[:,:,idim].flatten(),self.J)
+#         # end for 
+
+#         g_con = self.Bcon
+#         h = 1.0e-40j
+#         x = array(x,'D')
+
+#         for i in xrange(ndv):
+#             index = 4*self.nDim + 2*self.Nctlv*self.nDim
+#             x[i] += h
+#             ctl = self.__unpack_x(x,'D')
+#             for j in xrange(self.Nctlv):
+#                 A = ctl[0,0,j,:] # Root LE (upper)
+#                 B = ctl[0,1,j,:] # Root LE upper +1
+#                 C = ctl[1,-2,j,:]# Root LE lower +1
+
+#                 # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
+
+#                 A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
+#                 A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
+#                 A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
+
+#                 g_con[index:index+3,i] = imag(array([A1,A2,A3]))/imag(h)
+#                 index += 3
+#             # end for
+#             x[i] -= h
+#         # end for
+#         return g_obj,g_con,False
+
+#     def __unpack_x(self,x,dtype='d'):
+#         ctl = zeros((self.Nctlu,self.Nctlv,self.nDim),dtype)
+#         N = self.Nctlu*self.Nctlv
+#         for idim in xrange(self.nDim):
+#             ctl[:,:,idim] = reshape(x[self.nDim*N + idim*N : self.nDim*N + idim*N + N],[self.Nctlu,self.Nctlv])
+#         # end for
+#         return ctl
