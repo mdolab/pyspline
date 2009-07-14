@@ -919,6 +919,41 @@ class linear_spline():
                 
             return
 
+
+    def projectPoint(self,x0,s0=0,Niter=20,tol=1e-6):
+        '''Project a point x0 onto the curve and return parametric position
+        giving minimum distance. This should also work if point is
+        already on the curve as well'''
+
+        # We will use a starting point s0 if given
+
+        # Check we have the same dimension:
+        assert len(x0) == self.nDim,'Dimension of x0 and the dimension of spline must be the same'
+        converged = False
+        for i in xrange(Niter):
+            D = x0 - self.getValue(s0) 
+            Ydot = self.getDerivative(s0)
+            update = dot(D,Ydot)/(sqrt(dot(Ydot,Ydot)))/self.length
+
+            # Check to see if update went too far
+            D2 = x0-self.getValue(s0+update)
+            
+            if abs(dot(D2,D2)) > abs(dot(D,D)):
+                update /= 2
+
+            if abs(update)<tol:
+                s0 += update
+                converged=True
+                D = x0-self.getValue(s0) # Get the final Difference
+                break
+            else:
+                s0 += update
+            # end if
+        # end for
+        
+        return s0,D,converged
+
+
     def _getParameterization(self):
         # We need to parameterize the curve
         self.s = zeros(self.N);
@@ -930,6 +965,8 @@ class linear_spline():
                 self.s[i+1] = self.s[i] + sqrt(dist)
             # end for
         # end for
+        self.length = self.s[-1]
+        self.s /= self.s[-1]
         return
    
     def getValue(self,s):
@@ -940,7 +977,16 @@ class linear_spline():
             x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
 
         return x
+ 
+    def getDerivative(self,s):
         
+        '''Get the value of the derivative of spline at point u,v'''
+        x = zeros(self.nDim)
+        for idim in xrange(self.nDim):
+            x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,1,s)
+
+        return x        
+
 
     def writeTecplot(self,handle):
         '''Output this line\'s data to a open file handle \'handle\''''
