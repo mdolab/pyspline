@@ -92,7 +92,6 @@ class surf_spline():
         self.node_con = [[],[],[],[]]
         self.master_node = [None,None,None,None] # Is each node a master node?
 
-
         if task == 'create':
             assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
                 and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs, \
@@ -129,7 +128,6 @@ class surf_spline():
             self.ku = kwargs['ku']
             self.kv = kwargs['kv']
 
-
             if 'u' in kwargs and 'v' in kwargs:
                 self.u = kwargs['u']
                 self.v = kwargs['v']
@@ -143,7 +141,6 @@ class surf_spline():
             
             self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
             self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
-
 
             #Sanity check to make sure k is less than N
             if self.Nu <= self.ku:
@@ -200,7 +197,7 @@ class surf_spline():
                 self.kv = self.Nv
 
            #Calculate the knot vector and Jacobian
-            sys.stdout.write(' Calculating: knots ')
+            sys.stdout.write(' Calculating: knots, ')
             self._calcKnots()
 
             sys.stdout.write(' jacobian, ')
@@ -499,18 +496,90 @@ class surf_spline():
 
 
     def associateRefAxis(self,ref_axis):
-        '''Create link between ref_axis and this patch'''
-        self.links = []
-        for i in xrange(self.Nctlu):
-            for j in xrange(self.Nctlv):
-                s, D,conv = ref_axis.xs.projectPoint(self.coef[i,j])
+        '''Create links between ref_axis and this patch'''
 
-                if not conv:
-                    print 'A point did not converge:',s,D,conv,self.coef[i,j]
-                
-                self.links.append([s,D])
+        # First we Need to deduce along which direction u or v the directed. 
+        # First estimate Over what portion the surface and ref axis co-inside
+
+        # Find the s range for the 4 corners
+
+        p = zeros(4)
+        p[0],conv,D,esp = ref_axis.xs.projectPoint(self.coef[0 , 0])
+        p[1],conv,D,esp = ref_axis.xs.projectPoint(self.coef[0 ,-1])
+        p[2],conv,D,esp = ref_axis.xs.projectPoint(self.coef[-1, 0])
+        p[3],conv,D,esp = ref_axis.xs.projectPoint(self.coef[-1,-1])
+
+        min_s = min(p)
+        max_s = max(p)
+
+        # Now we know over what portion of the ref axis we are dealing
+        # with. Get an average dn over that distance
+        N = 10
+        # First get an average normal vector:
+        dn = zeros(3)
+        s = linspace(min_s,max_s,N)
+        for i in xrange(N):
+            dn += ref_axis.xs.getDerivative(s[i])
+        dn /= N
+
+        # Now test with dot product 9 points on the surface to see
+        # whcih is larger du*dn or dv*dn
+        u_dot_tot = 0
+        v_dot_tot = 0
+        s = linspace(0,1,3)
+        for i in xrange(3):
+            for j in xrange(3):
+                du,dv = self.getDerivative(s[i],s[j])
+                u_dot_tot += abs(dot(du,dn))
+                v_dot_tot += abs(dot(dv,dn))
             # end if
         # end if
+        # print 'totals:'
+#         print u_dot_tot,v_dot_tot
+
+        self.links = []
+        if v_dot_tot > u_dot_tot:
+            for j in xrange(self.Nctlv):
+                # Create a line (k=2 spline) for the control points along U
+
+                ctl_line = linear_spline('lms',X=self.coef[:,j],Nctl=2,k=2)
+                # Now find the minimum distance between midpoint and the ref_axis
+                s,D,conv,eps = ref_axis.xs.projectPoint(ctl_line.getValue(0.5))
+
+                # Now loop over the control points to set links
+                base_point = ref_axis.xs.getValue(s)
+                for i in xrange(self.Nctlu):
+                    D = self.coef[i,j] - base_point
+                    self.links.append([s,D])
+                # end if
+            # end for
+        else:
+            for i in xrange(self.Nctlu):
+                # Create a line (k=2 spline) for the control points along U
+
+                ctl_line = linear_spline('lms',X=self.coef[i,:],Nctl=2,k=2)
+                # Now find the minimum distance between midpoint and the ref_axis
+                s,D,conv,eps = ref_axis.xs.projectPoint(ctl_line.getValue(0.5))
+
+                # Now loop over the control points to set links
+                base_point = ref_axis.xs.getValue(s)
+                for j in xrange(self.Nctlv):
+                    D = self.coef[i,j] - base_point
+                    self.links.append([s,D])
+                # end if
+            # end for
+
+
+
+    def update(self,ref_axis):
+        '''Update the control points with ref_axis:'''
+        counter = 0
+        for j in xrange(self.Nctlv):
+            for i in xrange(self.Nctlu):
+                self.coef[i,j,:] = ref_axis.xs.getValue(self.links[counter][0]) + self.links[counter][1]
+                counter += 1
+            # end for
+        # end for
 
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3 where
@@ -598,6 +667,18 @@ class surf_spline():
             x[:,:,idim] = pyspline.b2valm(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
 
         return x
+
+
+    def getDerivative(self,u,v):
+        
+        '''Get the value of the derivative of spline at point u,v'''
+        du = zeros(self.nDim)
+        dv = zeros(self.nDim)
+        for idim in xrange(self.nDim):
+            du[idim] = pyspline.b2val(u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            dv[idim] = pyspline.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+        return du,dv
+
 
     def getJacobian(self,u,v):
         
@@ -704,8 +785,8 @@ class surf_spline():
             v_plot = linspace(self.range[2],self.range[3],25)
         # end if 
             
-        u_plot = linspace(self.range[0],self.range[1],25)
-        v_plot = linspace(self.range[2],self.range[3],25)
+        u_plot = linspace(self.range[0],self.range[1],50)
+        v_plot = linspace(self.range[2],self.range[3],50)
 
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'%('interpolated',len(u_plot),len(v_plot)))
@@ -731,11 +812,14 @@ class surf_spline():
         return
 
 
-    def writeTecplotEdge(self,handle,edge):
+    def writeTecplotEdge(self,handle,edge,*args,**kwargs):
         '''Dump out a linear zone along edge used for visualizing edge continuity'''
 
         N = 25
-        handle.write('Zone T=%s I=%d\n'%('cont_edge',N))
+        if 'name' in kwargs:
+            handle.write('Zone T=%s I=%d\n'%(kwargs['name'],N))
+        else:
+            handle.write('Zone T=%s I=%d\n'%('edge',N))
         handle.write('DATAPACKING=POINT\n')
         s = linspace(0,1,N)
         for i in xrange(N):
@@ -877,7 +961,7 @@ class linear_spline():
             v, real, array: Array of v values
             X, real, array, size(len(u),len(v),nDim): Array of data points to fit
 '''
-        print 'pySpline Class Initialization Type: %s'%(task)
+        #print 'pySpline Class Initialization Type: %s'%(task)
 
         if task == 'create':
             assert 'k' in kwargs and 't' in kwargs and \
@@ -925,12 +1009,49 @@ class linear_spline():
     
             # Generate the knot vector
             self.t = pyspline.bknot(self.s,self.k)
-
             for idim in xrange(self.nDim):
                 self.coef[:,idim]= pyspline.bintk(self.s,self.X[:,idim],self.t,self.k)
             #end for
                 
-            return
+        if task == 'lms':
+
+            assert 'k' in kwargs and 'X' in kwargs and 'Nctl' in kwargs , \
+                'Error: k, X and Nctl MUST be defined for task \'interpolate\''
+
+            self.X  = kwargs['X']
+
+            self.nDim  = self.X.shape[1]
+            self.N = self.X.shape[0]
+            self.k = kwargs['k']
+            self.Nctl = kwargs['Nctl']
+
+            if 's' in kwargs:
+                self.s = kwargs['s']
+            else:
+                self._getParameterization()
+            # end if
+
+            self.coef = zeros((self.Nctl,self.nDim))
+            self.range = array([self.s[0],self.s[-1]])
+            self.orig_data = True
+
+            # Sanity check to make sure k is less than N
+            if self.N <= self.k:
+                self.k = self.N-1
+            # end if
+
+            if self.Nctl > self.N:
+                self.Nctl  = self.N
+
+            # Generate the knot vector
+            self.t = pyspline.knots(self.s,self.Nctl,self.k)
+            # Calculate the Jacobian
+            self._calcJacobian()
+            for idim in xrange(self.nDim):
+                self.coef[:,idim] = lstsq(self.J,self.X[:,idim])[0]
+            # end for
+
+        return
 
 
     def projectPoint(self,x0,s0=0,Niter=20,tol=1e-8):
@@ -972,7 +1093,7 @@ class linear_spline():
             # end if
         # end for
         
-        return s0,D,converged
+        return s0,D,converged,update
 
 
     def _getParameterization(self):
@@ -1007,6 +1128,21 @@ class linear_spline():
             x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,1,s)
 
         return x        
+
+
+    def _calcJacobian(self):
+        
+        # Calculate the jacobian J, for fixed t and s
+        self.J = zeros([self.N,self.Nctl])
+        ctl = zeros([self.Nctl])
+
+        for i in xrange(self.Nctl):
+            ctl[i] += 1
+            self.J[:,i] = pyspline.bvaluv(self.t,ctl,self.k,0,self.s)
+            ctl[i] -= 1
+        # end for
+            
+        return
 
 
     def writeTecplot(self,handle):
