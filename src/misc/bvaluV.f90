@@ -1,4 +1,4 @@
-      subroutine bvaluV(T,A,N,K,IDERIV,X,Y,NX,INBV,WORK)
+      subroutine bvaluV(T,A,N,K,IDERIV,X,Y,NX,WORK)
 !***DESCRIPTION
 !
 !     Written by Gaetan Kenway
@@ -33,7 +33,7 @@
 !          BVALU   - value of the IDERIV-th derivative at X
 !
       
-      INTEGER IDERIV,N,K,NX,I
+      INTEGER IDERIV,N,K,NX,I,INBV
 
       REAL*8 A(N)
       REAL*8 T(N+K)
@@ -41,8 +41,10 @@
       REAL*8 Y(NX)
       REAL*8 WORK(3*K)
 
-      EXTERNAL bvalu
 
+
+      EXTERNAL bvalu
+      INBV = 1
       do I = 1,NX
          if (X(I) .gt. T(N+k)) then
             X(I) = T(N+k)

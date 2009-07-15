@@ -46,8 +46,6 @@ OBJ =   bspline/bfqad.o\
 	misc/bvaluV.o\
 	misc/b2valM.o\
 	misc/b2valV.o\
-	lmsfit/fit_foil.o\
-	lmsfit/fit_surf.o\
 
 
 ###================================================
@@ -129,3 +127,7 @@ libtensbs: $(OBJ)
 # 	fitpack/surfit.o\
 # 	fitpack/bispev.o\
 # 	fitpack/fpbisp.o\
+
+# O-files for the fit_surf functions NO LONGER USED
+#	lmsfit/fit_foil.o\
+#	lmsfit/fit_surf.o\
