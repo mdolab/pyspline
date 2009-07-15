@@ -297,10 +297,11 @@ class surf_spline():
             
         self.Nu_free = Nu
         self.Nv_free = Nv
-
+        self.N_free = Nu*Nv
+        
         self.Nctlu_free = Nctlu
         self.Nctlv_free = Nctlv
-        
+        self.Nctl_free = Nctlu*Nctlv
         return
 
     def _getCropData(self,X):
@@ -497,6 +498,19 @@ class surf_spline():
         return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
 
 
+    def associateRefAxis(self,ref_axis):
+        '''Create link between ref_axis and this patch'''
+        self.links = []
+        for i in xrange(self.Nctlu):
+            for j in xrange(self.Nctlv):
+                s, D,conv = ref_axis.xs.projectPoint(self.coef[i,j])
+
+                if not conv:
+                    print 'A point did not converge:',s,D,conv,self.coef[i,j]
+                
+                self.links.append([s,D])
+            # end if
+        # end if
 
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3 where
@@ -759,7 +773,6 @@ class surf_spline():
         
         pos_counter = 0
 
-
         for i in xrange(len(self.tu)):
             pos_counter += 1
             handle.write('%12.6g,'%(self.tu[i]))
@@ -920,7 +933,7 @@ class linear_spline():
             return
 
 
-    def projectPoint(self,x0,s0=0,Niter=20,tol=1e-6):
+    def projectPoint(self,x0,s0=0,Niter=20,tol=1e-8):
         '''Project a point x0 onto the curve and return parametric position
         giving minimum distance. This should also work if point is
         already on the curve as well'''
@@ -930,14 +943,21 @@ class linear_spline():
         # Check we have the same dimension:
         assert len(x0) == self.nDim,'Dimension of x0 and the dimension of spline must be the same'
         converged = False
+
         for i in xrange(Niter):
             D = x0 - self.getValue(s0) 
             Ydot = self.getDerivative(s0)
             update = dot(D,Ydot)/(sqrt(dot(Ydot,Ydot)))/self.length
 
             # Check to see if update went too far
-            D2 = x0-self.getValue(s0+update)
-            
+
+            if s0+update > self.range[1]:
+                update = self.range[1]-s0
+            elif s0+update< self.range[0]:
+                # Only put the update up to the end
+                update = self.range[0]-s0
+                                
+            D2 = x0-self.getValue(s0+update)            
             if abs(dot(D2,D2)) > abs(dot(D,D)):
                 update /= 2
 
@@ -948,6 +968,7 @@ class linear_spline():
                 break
             else:
                 s0 += update
+                # end if
             # end if
         # end for
         
