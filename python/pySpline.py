@@ -785,8 +785,8 @@ class surf_spline():
             v_plot = linspace(self.range[2],self.range[3],25)
         # end if 
             
-        u_plot = linspace(self.range[0],self.range[1],50)
-        v_plot = linspace(self.range[2],self.range[3],50)
+        u_plot = linspace(self.range[0],self.range[1],25)
+        v_plot = linspace(self.range[2],self.range[3],25)
 
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'%('interpolated',len(u_plot),len(v_plot)))
