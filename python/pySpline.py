@@ -498,12 +498,15 @@ class surf_spline():
     def associateRefAxis(self,ref_axis):
         '''Create links between ref_axis and this patch'''
 
-        # First we Need to deduce along which direction u or v the directed. 
-        # First estimate Over what portion the surface and ref axis co-inside
+        print 'associateRefAxis'
+        # First we Need to deduce along which direction (u or v) the
+        # reference axis is directed.  First estimate Over what
+        # portion the surface and ref axis co-inside
 
         # Find the s range for the 4 corners
 
         p = zeros(4)
+        
         p[0],conv,D,esp = ref_axis.xs.projectPoint(self.coef[0 , 0])
         p[1],conv,D,esp = ref_axis.xs.projectPoint(self.coef[0 ,-1])
         p[2],conv,D,esp = ref_axis.xs.projectPoint(self.coef[-1, 0])
@@ -513,49 +516,62 @@ class surf_spline():
         max_s = max(p)
 
         # Now we know over what portion of the ref axis we are dealing
-        # with. Get an average dn over that distance
-        N = 10
-        # First get an average normal vector:
-        dn = zeros(3)
-        s = linspace(min_s,max_s,N)
+        # with.  Take 3 Normal Vectors
+        N = 3
+        sn = linspace(min_s,max_s,N)
+        dn = zeros((N,3))
         for i in xrange(N):
-            dn += ref_axis.xs.getDerivative(s[i])
-        dn /= N
+            dn[i,:] = ref_axis.xs.getDerivative(sn[i])
 
-        # Now test with dot product 9 points on the surface to see
-        # whcih is larger du*dn or dv*dn
+        # Now Do two tests: Take three points in u and test 3 groups
+        # against dn and take three points in v and test the  3 groups
+        # again
+    
         u_dot_tot = 0
-        v_dot_tot = 0
-        s = linspace(0,1,3)
-        for i in xrange(3):
-            for j in xrange(3):
-                du,dv = self.getDerivative(s[i],s[j])
-                u_dot_tot += abs(dot(du,dn))
-                v_dot_tot += abs(dot(dv,dn))
-            # end if
-        # end if
-        # print 'totals:'
-#         print u_dot_tot,v_dot_tot
+        s = linspace(0,1,N)
+    
+        for i in xrange(N):
+            for n in xrange(N):
+                du,dv = self.getDerivative(s[i],s[n])
+                u_dot_tot += abs(dot(du,dn[n,:]))
+            # end for
+        # end for
 
+        v_dot_tot = 0
+        for j in xrange(N):
+            for n in xrange(N):
+                du,dv = self.getDerivative(s[n],s[j])
+                v_dot_tot += abs(dot(dv,dn[n,:]))
+            # end for
+        # end for
+        
         self.links = []
+
+        
         if v_dot_tot > u_dot_tot:
+            #print 'along v:'
             for j in xrange(self.Nctlv):
                 # Create a line (k=2 spline) for the control points along U
-
+                
                 ctl_line = linear_spline('lms',X=self.coef[:,j],Nctl=2,k=2)
                 # Now find the minimum distance between midpoint and the ref_axis
                 s,D,conv,eps = ref_axis.xs.projectPoint(ctl_line.getValue(0.5))
 
                 # Now loop over the control points to set links
                 base_point = ref_axis.xs.getValue(s)
+                M = ref_axis.getRotMatrixGlobalToLocal(s)
+                
                 for i in xrange(self.Nctlu):
                     D = self.coef[i,j] - base_point
+                    D = dot(M,D) #Rotate to local frame
                     self.links.append([s,D])
                 # end if
             # end for
+            self.ref_axis_dir = 1 # Ref axis is aligned along v
         else:
+            #print 'along u:'
             for i in xrange(self.Nctlu):
-                # Create a line (k=2 spline) for the control points along U
+                # Create a line (k=2 spline) for the control points along V
 
                 ctl_line = linear_spline('lms',X=self.coef[i,:],Nctl=2,k=2)
                 # Now find the minimum distance between midpoint and the ref_axis
@@ -563,23 +579,42 @@ class surf_spline():
 
                 # Now loop over the control points to set links
                 base_point = ref_axis.xs.getValue(s)
+                M = ref_axis.getRotMatrixGlobalToLocal(s)
+                
                 for j in xrange(self.Nctlv):
                     D = self.coef[i,j] - base_point
+                    D = dot(M,D) #Rotate to local frame
                     self.links.append([s,D])
                 # end if
             # end for
+            self.ref_axis_dir = 0 # Ref axis is aligned along u
 
 
 
     def update(self,ref_axis):
         '''Update the control points with ref_axis:'''
         counter = 0
-        for j in xrange(self.Nctlv):
-            for i in xrange(self.Nctlu):
-                self.coef[i,j,:] = ref_axis.xs.getValue(self.links[counter][0]) + self.links[counter][1]
-                counter += 1
+        if self.ref_axis_dir == 1:
+            for j in xrange(self.Nctlv):
+                s = self.links[counter][0]
+                M = ref_axis.getRotMatrixLocalToGloabl(s)
+                X_base = ref_axis.xs.getValue(s)
+                for i in xrange(self.Nctlu):
+                    self.coef[i,j,:] = X_base + dot(M,self.links[counter][1])*ref_axis.scales(s)
+                    counter += 1
+                # end for
             # end for
-        # end for
+        else:
+            for i in xrange(self.Nctlu):
+                s = self.links[counter][0]
+                M = ref_axis.getRotMatrixLocalToGloabl(s)
+                X_base = ref_axis.xs.getValue(s)
+                
+                for j in xrange(self.Nctlv):
+                    self.coef[i,j,:] = X_base + dot(M,self.links[counter][1])*ref_axis.scales(s)
+                    counter += 1
+                # end for
+            # end for
 
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3 where
@@ -668,7 +703,6 @@ class surf_spline():
 
         return x
 
-
     def getDerivative(self,u,v):
         
         '''Get the value of the derivative of spline at point u,v'''
@@ -691,6 +725,61 @@ class surf_spline():
             J[idim,1] = pyspline.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
 
         return J
+
+    def projectPoint(self,x0,u0=0.5,v0=0.5,Niter=50,tol=1e-6):
+
+        '''Project a point x0 onto the surface. i.e. Find the point on
+        the surface that minimizes the distance from x0 to surface(u,v)'''
+
+        # We will use a starting point u0,v0 if given
+
+        # Check we have the same dimension:
+        assert len(x0) == self.nDim,'Dimension of x0 and the dimension of spline must be the same'
+        converged = False
+        print 'x0:',x0
+        for i in xrange(Niter):
+            D = x0 - self.getValue(u0,v0)
+            Ydotu,Ydotv = self.getDerivative(u0,v0)
+            updateu = dot(D,Ydotu)/(sqrt(dot(Ydotu,Ydotu)))#/self.length
+            updatev = dot(D,Ydotv)/(sqrt(dot(Ydotv,Ydotv)))#/self.length
+            # Check to see if update went too far
+
+            if u0+updateu > self.range[1]:
+                updateu = self.range[1]-u0
+            elif u0+updateu< self.range[0]:
+                # Only put the update up to the end
+                updateu = self.range[0]-u0
+
+            if v0+updatev > self.range[3]:
+                updatev = self.range[3]-v0
+            elif v0+updatev< self.range[2]:
+                # Only put the update up to the end
+                updatev = self.range[2]-v0
+
+                                
+            D2 = x0-self.getValue(u0+updateu,v0+updatev)
+            if abs(dot(D2,D2)) > abs(dot(D,D)):
+                print 'half update'
+                updateu /= 2
+                updatev /= 2
+
+            if abs(updateu)<tol and abs(updatev)<tol:
+                u0 += updateu
+                v0 += updatev
+                
+                converged=True
+                D = x0-self.getValue(u0,v0) # Get the final Difference
+                break
+            else:
+                u0 += updateu
+                v0 += updatev
+                print 'u0,v0',u0,v0,'updates:',updateu,updatev,'val:',self.getValue(u0,v0)
+                # end if
+            # end if
+        # end for
+        print 'Took %d iterations'%(i)
+        return u0,v0,D,converged
+
 
 
     def findUV(self,x0,r,u0,v0):
@@ -827,7 +916,8 @@ class surf_spline():
             handle.write('%f %f %f \n'%(value[0],value[1],value[2]))
         # end for
         return
-  
+
+
     def writeIGES_directory(self,handle,Dcount,Pcount):
 
         '''Write the IGES file header information (Directory Entry Section) for this surface'''
@@ -1004,9 +1094,9 @@ class linear_spline():
 
             # Sanity check to make sure k is less than N
             if self.N <= self.k:
-                self.k = self.N-1
+                self.k = self.N
             # end if
-    
+
             # Generate the knot vector
             self.t = pyspline.bknot(self.s,self.k)
             for idim in xrange(self.nDim):
@@ -1037,7 +1127,7 @@ class linear_spline():
 
             # Sanity check to make sure k is less than N
             if self.N <= self.k:
-                self.k = self.N-1
+                self.k = self.N
             # end if
 
             if self.Nctl > self.N:
@@ -1066,7 +1156,7 @@ class linear_spline():
         converged = False
 
         for i in xrange(Niter):
-            D = x0 - self.getValue(s0) 
+            D = x0 - self.getValue(s0)
             Ydot = self.getDerivative(s0)
             update = dot(D,Ydot)/(sqrt(dot(Ydot,Ydot)))/self.length
 
@@ -1110,6 +1200,11 @@ class linear_spline():
         self.length = self.s[-1]
         self.s /= self.s[-1]
         return
+
+    def __call__(self,s):
+
+        return self.getValue(s)
+
    
     def getValue(self,s):
         
