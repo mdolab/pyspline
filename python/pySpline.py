@@ -92,6 +92,15 @@ class surf_spline():
         self.node_con = [[],[],[],[]]
         self.master_node = [None,None,None,None] # Is each node a master node?
 
+        self.Nu_free = None
+        self.Nv_free = None
+        self.N_free  = None
+        self.Nctlu_free = None
+        self.Nctlv_free = None
+        self.Nctl_free  = None
+        self.links = None
+        self.ref_axis_dir = None
+        
         if task == 'create':
             assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
                 and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs, \
@@ -495,7 +504,7 @@ class surf_spline():
         return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
 
 
-    def associateRefAxis(self,ref_axis):
+    def associateRefAxis(self,ref_axis,section=None):
         '''Create links between ref_axis and this patch'''
 
         print 'associateRefAxis'
@@ -514,6 +523,26 @@ class surf_spline():
 
         min_s = min(p)
         max_s = max(p)
+        print 'fucking section:',section
+        if not section==None: # Restrict the attachment to a section of the ref axis:
+            print 'section:',section
+            nBreaks = len(ref_axis.breaks)
+
+            range = 1.0/(nBreaks + 1)
+            print 'range:',range
+            lower_s = section*range
+            upper_s = (section+1)*range
+
+            start = 0
+            if max_s>upper_s:
+                max_s = upper_s
+            if min_s < lower_s:
+                min_s = lower_s
+
+                
+
+        print 'p is:',p
+        print 'max_s,min_s:',max_s,min_s,upper_s,lower_s
 
         # Now we know over what portion of the ref axis we are dealing
         # with.  Take 3 Normal Vectors
@@ -522,6 +551,7 @@ class surf_spline():
         dn = zeros((N,3))
         for i in xrange(N):
             dn[i,:] = ref_axis.xs.getDerivative(sn[i])
+
 
         # Now Do two tests: Take three points in u and test 3 groups
         # against dn and take three points in v and test the  3 groups
@@ -549,14 +579,18 @@ class surf_spline():
 
         
         if v_dot_tot > u_dot_tot:
-            #print 'along v:'
+            print 'along v:'
             for j in xrange(self.Nctlv):
                 # Create a line (k=2 spline) for the control points along U
                 
                 ctl_line = linear_spline('lms',X=self.coef[:,j],Nctl=2,k=2)
                 # Now find the minimum distance between midpoint and the ref_axis
-                s,D,conv,eps = ref_axis.xs.projectPoint(ctl_line.getValue(0.5))
-
+                s,D,conv,eps = ref_axis.xs.projectPoint(ctl_line.getValue(0.25))
+                if s > max_s:
+                    s = max_s
+                if s < min_s:
+                    s = min_s
+                print 's is:',s
                 # Now loop over the control points to set links
                 base_point = ref_axis.xs.getValue(s)
                 M = ref_axis.getRotMatrixGlobalToLocal(s)
@@ -576,7 +610,10 @@ class surf_spline():
                 ctl_line = linear_spline('lms',X=self.coef[i,:],Nctl=2,k=2)
                 # Now find the minimum distance between midpoint and the ref_axis
                 s,D,conv,eps = ref_axis.xs.projectPoint(ctl_line.getValue(0.5))
-
+                if s > max_s:
+                    s = max_s
+                if s < min_s:
+                    s = min_s
                 # Now loop over the control points to set links
                 base_point = ref_axis.xs.getValue(s)
                 M = ref_axis.getRotMatrixGlobalToLocal(s)
@@ -594,10 +631,15 @@ class surf_spline():
     def update(self,ref_axis):
         '''Update the control points with ref_axis:'''
         counter = 0
+        print 'updating a surace'
+        
+
         if self.ref_axis_dir == 1:
             for j in xrange(self.Nctlv):
                 s = self.links[counter][0]
+
                 M = ref_axis.getRotMatrixLocalToGloabl(s)
+                print 's,M:',s,M
                 X_base = ref_axis.xs.getValue(s)
                 for i in xrange(self.Nctlu):
                     self.coef[i,j,:] = X_base + dot(M,self.links[counter][1])*ref_axis.scales(s)
@@ -615,7 +657,8 @@ class surf_spline():
                     counter += 1
                 # end for
             # end for
-
+        print 'done update'
+        print 
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3 where
         edges are oriented in the standard counter-clockwise fashion.'''
@@ -726,7 +769,7 @@ class surf_spline():
 
         return J
 
-    def projectPoint(self,x0,u0=0.5,v0=0.5,Niter=50,tol=1e-6):
+    def projectPoint(self,x0,u0=0.5,v0=0.5,Niter=25,tol=1e-6):
 
         '''Project a point x0 onto the surface. i.e. Find the point on
         the surface that minimizes the distance from x0 to surface(u,v)'''
@@ -736,7 +779,7 @@ class surf_spline():
         # Check we have the same dimension:
         assert len(x0) == self.nDim,'Dimension of x0 and the dimension of spline must be the same'
         converged = False
-        print 'x0:',x0
+        #print 'x0:',x0
         for i in xrange(Niter):
             D = x0 - self.getValue(u0,v0)
             Ydotu,Ydotv = self.getDerivative(u0,v0)
@@ -749,19 +792,21 @@ class surf_spline():
             elif u0+updateu< self.range[0]:
                 # Only put the update up to the end
                 updateu = self.range[0]-u0
+            # end if
 
             if v0+updatev > self.range[3]:
                 updatev = self.range[3]-v0
             elif v0+updatev< self.range[2]:
                 # Only put the update up to the end
                 updatev = self.range[2]-v0
-
+            # end if
                                 
             D2 = x0-self.getValue(u0+updateu,v0+updatev)
             if abs(dot(D2,D2)) > abs(dot(D,D)):
-                print 'half update'
+                #print 'half update'
                 updateu /= 2
                 updatev /= 2
+            # end if
 
             if abs(updateu)<tol and abs(updatev)<tol:
                 u0 += updateu
@@ -773,11 +818,10 @@ class surf_spline():
             else:
                 u0 += updateu
                 v0 += updatev
-                print 'u0,v0',u0,v0,'updates:',updateu,updatev,'val:',self.getValue(u0,v0)
-                # end if
+                #print 'u0,v0',u0,v0,'updates:',updateu,updatev,'val:',self.getValue(u0,v0)
             # end if
         # end for
-        print 'Took %d iterations'%(i)
+        #print 'Took %d iterations'%(i)
         return u0,v0,D,converged
 
 
@@ -902,7 +946,7 @@ class surf_spline():
 
 
     def writeTecplotEdge(self,handle,edge,*args,**kwargs):
-        '''Dump out a linear zone along edge used for visualizing edge continuity'''
+        '''Dump out a linear zone along edge used for visualizing edge connections'''
 
         N = 25
         if 'name' in kwargs:
@@ -1083,6 +1127,7 @@ class linear_spline():
             
             if 's' in kwargs:
                 self.s = kwargs['s']
+                self._getLength()
             else:
                 self._getParameterization()
             # end if
@@ -1117,6 +1162,7 @@ class linear_spline():
 
             if 's' in kwargs:
                 self.s = kwargs['s']
+                self._getLength()
             else:
                 self._getParameterization()
             # end if
@@ -1199,6 +1245,20 @@ class linear_spline():
         # end for
         self.length = self.s[-1]
         self.s /= self.s[-1]
+        return
+
+    def _getLength(self):
+        # We need to the length of the curve
+        s = zeros(self.N);
+        for i in xrange(self.N-1):
+            dist = 0
+            for idim in xrange(self.nDim):
+                dist += (self.X[i+1,idim] - self.X[i,idim])**2
+                # end for
+                s[i+1] = s[i] + sqrt(dist)
+            # end for
+        # end for
+        self.length = s[-1]
         return
 
     def __call__(self,s):
