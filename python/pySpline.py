@@ -144,7 +144,7 @@ class surf_spline():
                 self._calcParameterization()
             # end if
 
-            # Set a linear version fo U and V
+            # Set a linear version of U and V
             [self.V, self.U] = meshgrid(self.v,self.u)
             self.orig_data = True
             
@@ -180,6 +180,31 @@ class surf_spline():
             self.Nctlv = kwargs['Nctlv']
             self.ku = kwargs['ku']
             self.kv = kwargs['kv']
+            self.orig_data = True
+
+            # Sanity Check on Inputs
+            if self.Nctlu > self.Nu:
+                self.Nctlu  = self.Nu
+            if self.Nctlv > self.Nv:
+
+                print 'Warning: More control points in v than data Points. Re-Interpolating'
+                assert 'ctlv_spacing' in kwargs,'ctlv_spacing Must be in kwargs when More control points than datapoints are given'
+                ctlv_spacing = kwargs['ctlv_spacing']
+                Xnew = zeros((self.Nu,len(ctlv_spacing),3))
+
+                for i in xrange (self.Nu):
+                    Xnew[i,:,:] = linear_spline(task='interpolate',X=self.X[i,:,:],k=2).getValueV(ctlv_spacing)
+                # end for
+
+                self.X = Xnew
+                self.Nctlv = len(ctlv_spacing)
+                self.Nv    = self.Nctlv
+
+            # end if
+            if self.Nu <= self.ku:
+                self.ku = self.Nu
+            if self.Nv <= self.kv:
+                self.kv = self.Nv
 
             if 'u' in kwargs and 'v' in kwargs:
                 self.u = kwargs['u']
@@ -187,23 +212,11 @@ class surf_spline():
             else:
                 self._calcParameterization()
             # end if
-
-            # Set a linear version fo U and V
-            [self.V, self.U] = meshgrid(self.v,self.u)
-
-            self.orig_data = True
+            
             self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
 
-            # Sanity Check on Inputs
-            if self.Nctlu > self.Nu:
-                self.Nctlu  = self.Nu
-            if self.Nctlv > self.Nv:
-                self.Nctlv = self.Nv
-
-            if self.Nu <= self.ku:
-                self.ku = self.Nu
-            if self.Nv <= self.kv:
-                self.kv = self.Nv
+            # Set a linear version of U and V
+            [self.V, self.U] = meshgrid(self.v,self.u)
 
            #Calculate the knot vector and Jacobian
             sys.stdout.write(' Calculating: knots, ')
@@ -732,7 +745,7 @@ class surf_spline():
     def getValueV(self,u,v):
         '''Get the value of a spline at vector of points u,v'''
         assert u.shape == v.shape, 'u and v must be the same length'
-        x = zeros(len(u),self.nDim)
+        x = zeros((len(u),self.nDim))
         for idim in xrange(self.nDim):
             x[:,idim] = pyspline.b2valv(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         return x
@@ -1274,6 +1287,15 @@ class linear_spline():
             x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
 
         return x
+
+    def getValueV(self,s):
+        '''Get the value of a spline at vector of points s'''
+        x = zeros((len(s),self.nDim))
+        for idim in xrange(self.nDim):
+            x[:,idim] = pyspline.bvaluv(self.t,self.coef[:,idim],self.k,0,s)
+
+        return x
+
  
     def getDerivative(self,s):
         
@@ -1281,7 +1303,7 @@ class linear_spline():
         x = zeros(self.nDim)
         for idim in xrange(self.nDim):
             x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,1,s)
-
+            
         return x        
 
 
