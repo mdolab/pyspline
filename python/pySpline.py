@@ -598,7 +598,7 @@ class surf_spline():
                 
                 ctl_line = linear_spline('lms',X=self.coef[:,j],Nctl=2,k=2)
                 # Now find the minimum distance between midpoint and the ref_axis
-                s,D,conv,eps = ref_axis.xs.projectPoint(ctl_line.getValue(0.25))
+                s,D,conv,eps = ref_axis.xs.projectPoint(ctl_line.getValue(1.0))
                 if s > max_s:
                     s = max_s
                 if s < min_s:
@@ -640,19 +640,36 @@ class surf_spline():
             self.ref_axis_dir = 0 # Ref axis is aligned along u
 
 
+    def associateRefAxis2(self,ref_axis,s):
+        '''Create links between ref_axis and this patch.'''
+
+        self.ref_axis_dir = 1 #since it is ONLY called from Lifting Surface
+        self.links = []
+        assert len(s) == self.Nctlv, 's must be of length Nctlv'
+        for j in xrange(self.Nctlv):
+            # Now loop over the control points to set links
+            base_point = ref_axis.xs.getValue(s[j])
+            M = ref_axis.getRotMatrixGlobalToLocal(s[j])
+
+            for i in xrange(self.Nctlu):
+                D = self.coef[i,j] - base_point
+                D = dot(M,D) #Rotate to local frame
+                self.links.append([s[j],D])
+            # end if
+        # end for
+
+
 
     def update(self,ref_axis):
         '''Update the control points with ref_axis:'''
         counter = 0
-        print 'updating a surace'
-        
 
         if self.ref_axis_dir == 1:
             for j in xrange(self.Nctlv):
                 s = self.links[counter][0]
 
                 M = ref_axis.getRotMatrixLocalToGloabl(s)
-                print 's,M:',s,M
+                
                 X_base = ref_axis.xs.getValue(s)
                 for i in xrange(self.Nctlu):
                     self.coef[i,j,:] = X_base + dot(M,self.links[counter][1])*ref_axis.scales(s)
@@ -670,8 +687,8 @@ class surf_spline():
                     counter += 1
                 # end for
             # end for
-        print 'done update'
-        print 
+     
+
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3 where
         edges are oriented in the standard counter-clockwise fashion.'''
@@ -1134,19 +1151,30 @@ class linear_spline():
                 'Error: k, and X MUST be defined for task \'interpolate\''
 
             self.X  = kwargs['X']
-            self.nDim  = self.X.shape[1]
+            if len(self.X.shape) == 1:
+                self.nDim = 1
+            else:
+                self.nDim  = self.X.shape[1]
+            # end if
+
             self.N = self.X.shape[0]
             self.k = kwargs['k']
             
             if 's' in kwargs:
                 self.s = kwargs['s']
-                self._getLength()
+                if self.nDim > 1:
+                    self._getLength()
+                # end if
             else:
-                self._getParameterization()
+                if self.nDim > 1:
+                    self._getParameterization()
+                else:
+                    print 'Erorr: For 1D mapping splines, the basis, s, must be given as input'
+                    sys.exit(1)
+                # end if
             # end if
                 
             self.Nctl = self.N
-            self.coef = zeros((self.Nctl,self.nDim))
             self.range = array([self.s[0],self.s[-1]])
             self.orig_data = True
 
@@ -1157,30 +1185,48 @@ class linear_spline():
 
             # Generate the knot vector
             self.t = pyspline.bknot(self.s,self.k)
-            for idim in xrange(self.nDim):
-                self.coef[:,idim]= pyspline.bintk(self.s,self.X[:,idim],self.t,self.k)
+            if self.nDim > 1:
+                self.coef = zeros((self.Nctl,self.nDim))
+                for idim in xrange(self.nDim):
+                    self.coef[:,idim]= pyspline.bintk(self.s,self.X[:,idim],self.t,self.k)
+            else:
+                self.coef = pyspline.bintk(self.s,self.X,self.t,self.k)
+            # end if
+                
             #end for
                 
         if task == 'lms':
 
             assert 'k' in kwargs and 'X' in kwargs and 'Nctl' in kwargs , \
                 'Error: k, X and Nctl MUST be defined for task \'interpolate\''
+           
 
             self.X  = kwargs['X']
+            if len(self.X.shape) == 1:
+                self.nDim = 1
+            else:
+                self.nDim  = self.X.shape[1]
+            # end if
 
-            self.nDim  = self.X.shape[1]
             self.N = self.X.shape[0]
             self.k = kwargs['k']
             self.Nctl = kwargs['Nctl']
 
             if 's' in kwargs:
                 self.s = kwargs['s']
-                self._getLength()
+                if self.nDim > 1:
+                    self._getLength()
+                # end if
             else:
-                self._getParameterization()
+                if self.nDim > 1:
+                    self._getParameterization()
+                else:
+                    print 'Erorr: For 1D mapping splines, the basis, s, must be given as input'
+                    sys.exit(1)
+                # end if
             # end if
-
-            self.coef = zeros((self.Nctl,self.nDim))
+                
+            self.Nctl = self.N
             self.range = array([self.s[0],self.s[-1]])
             self.orig_data = True
 
@@ -1193,12 +1239,17 @@ class linear_spline():
                 self.Nctl  = self.N
 
             # Generate the knot vector
-            self.t = pyspline.knots(self.s,self.Nctl,self.k)
-            # Calculate the Jacobian
-            self._calcJacobian()
-            for idim in xrange(self.nDim):
-                self.coef[:,idim] = lstsq(self.J,self.X[:,idim])[0]
-            # end for
+            self.t = pyspline.bknot(self.s,self.k)
+            if idim > 1:
+                # Calculate the Jacobian
+                self._calcJacobian()
+                self.coef = zeros((self.Nctl,self.nDim))
+                for idim in xrange(self.nDim):
+                    self.coef[:,idim] = lstsq(self.J,self.X[:,idim])[0]
+                # end for
+            else:
+                self.coef = lstsq(self.J,self.X)[0]
+            # end if
 
         return
 
@@ -1282,18 +1333,26 @@ class linear_spline():
     def getValue(self,s):
         
         '''Get the value of the spline at point u,v'''
-        x = zeros([self.nDim])
-        for idim in xrange(self.nDim):
-            x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
-
+        if self.nDim == 1:
+            x = pyspline.bvalu(self.t,self.coef,self.k,0,s)
+        else:
+            x = zeros([self.nDim])
+            for idim in xrange(self.nDim):
+                x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
+            # end for
+        # end if
         return x
 
     def getValueV(self,s):
         '''Get the value of a spline at vector of points s'''
-        x = zeros((len(s),self.nDim))
-        for idim in xrange(self.nDim):
-            x[:,idim] = pyspline.bvaluv(self.t,self.coef[:,idim],self.k,0,s)
-
+        if self.nDim == 1:
+            x = pyspline.bvaluv(self.t,self.coef,self.k,0,s)
+        else:
+            x = zeros((len(s),self.nDim))
+            for idim in xrange(self.nDim):
+                x[:,idim] = pyspline.bvaluv(self.t,self.coef[:,idim],self.k,0,s)
+            # end for
+        # end if
         return x
 
  
