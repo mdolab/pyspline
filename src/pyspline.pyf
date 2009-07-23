@@ -77,17 +77,6 @@ python module pyspline ! in
           real*8,optional, dimension(3 * k),depend(k) :: work
         end subroutine bvaluv
 
-        subroutine fit_foil(m,n,a,x1,x2,y1,y2,coefs) ! in fit_foil.f90
-          integer optional,check(shape(a,0)==m),depend(a) :: m=shape(a,0)
-          integer optional,intent(in),check(shape(a,1)==n),depend(a) :: n=shape(a,1)
-          double precision dimension(m,n),intent(in) :: a
-          double precision dimension(m),intent(in,copy),depend(m) :: x1
-          double precision dimension(m),intent(in,copy),depend(m) :: x2
-          double precision dimension(m),intent(in,copy),depend(m) :: y1
-          double precision dimension(m),intent(in,copy),depend(m) :: y2
-          double precision dimension(n,4),intent(out),depend(n) :: coefs
-        end subroutine fit_foil
-
         subroutine b2valm(x,y,n,m,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,z) ! in b2valM.f90
           real*8,intent(in),dimension(n,m) :: x
           real*8,intent(in),dimension(n,m),depend(n,m) :: y
@@ -121,17 +110,6 @@ python module pyspline ! in
           real*8,intent(out), dimension(n),depend(n) :: z
         end subroutine b2valv
 
-        subroutine fit_surf(nu,nv,nctlu,nctlv,a,x,ctl) ! in fit_surf.f90
-          integer intent(in) :: nu
-          integer intent(in) :: nv
-          integer intent(in) :: nctlu
-          integer intent(in) :: nctlv
-          double precision dimension(nu*nv,nctlu*nctlv),intent(in),depend(nu,nv,nctlu,nctlv) :: a
-          double precision dimension(nu,nv,3),intent(in),depend(nu,nv) :: x
-          double precision dimension(nctlu,nctlv,3),intent(out),depend(nctlu,nctlv) :: ctl
-        end subroutine fit_surf
-
-
         subroutine knots(x,n,nctl,k,t) ! in knots.f90
           double precision dimension(n),intent(in) :: x
           integer optional,intent(in),check(len(x)>=n),depend(x) :: n=len(x)
@@ -140,7 +118,18 @@ python module pyspline ! in
           double precision dimension(nctl+k),intent(out),depend(nctl,k) :: t
         end subroutine knots
 
+        subroutine updatesurfacepoints(coef,update,tx,ty,kx,ky,nx,ny) ! in updateSurfacePoints.f90
+            double precision dimension(nx,ny,3),intent(in,out) :: coef
+            double precision dimension(nx,ny),intent(in),depend(nx,ny) :: update
+            double precision dimension(kx+nx),intent(in),depend(kx,nx) :: tx
+            double precision dimension(kx+ny),intent(in),depend(kx,ny) :: ty
+            integer intent(in) :: kx
+            integer intent(in) :: ky
+            integer optional,check(shape(coef,0)==nx),depend(coef) :: nx=shape(coef,0)
+            integer optional,check(shape(coef,1)==ny),depend(coef) :: ny=shape(coef,1)
+        end subroutine updatesurfacepoints
 
+    
      end interface
 end python module pyspline
 
@@ -286,3 +275,25 @@ end python module pyspline
 !           integer optional,check(len(iwrk)>=kwrk),depend(iwrk) :: kwrk=len(iwrk)
 !           integer,intent(out) :: ier
 !         end subroutine bispev
+
+!         subroutine fit_foil(m,n,a,x1,x2,y1,y2,coefs) ! in fit_foil.f90
+!           integer optional,check(shape(a,0)==m),depend(a) :: m=shape(a,0)
+!           integer optional,intent(in),check(shape(a,1)==n),depend(a) :: n=shape(a,1)
+!           double precision dimension(m,n),intent(in) :: a
+!           double precision dimension(m),intent(in,copy),depend(m) :: x1
+!           double precision dimension(m),intent(in,copy),depend(m) :: x2
+!           double precision dimension(m),intent(in,copy),depend(m) :: y1
+!           double precision dimension(m),intent(in,copy),depend(m) :: y2
+!           double precision dimension(n,4),intent(out),depend(n) :: coefs
+!         end subroutine fit_foil
+
+
+!         subroutine fit_surf(nu,nv,nctlu,nctlv,a,x,ctl) ! in fit_surf.f90
+!           integer intent(in) :: nu
+!           integer intent(in) :: nv
+!           integer intent(in) :: nctlu
+!           integer intent(in) :: nctlv
+!           double precision dimension(nu*nv,nctlu*nctlv),intent(in),depend(nu,nv,nctlu,nctlv) :: a
+!           double precision dimension(nu,nv,3),intent(in),depend(nu,nv) :: x
+!           double precision dimension(nctlu,nctlv,3),intent(out),depend(nctlu,nctlv) :: ctl
+!         end subroutine fit_surf
