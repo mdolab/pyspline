@@ -45,7 +45,8 @@ OBJ = 	complexify.o \
 	xerror/c_xgetua.o\
 	misc/c_bvaluV.o\
 	misc/c_b2valM.o\
-	misc/c_b2valV.o
+	misc/c_b2valV.o\
+	misc/updateSurfacePoints.o
 
 
 ###================================================
