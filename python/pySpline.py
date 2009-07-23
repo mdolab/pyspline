@@ -186,21 +186,9 @@ class surf_spline():
             if self.Nctlu > self.Nu:
                 self.Nctlu  = self.Nu
             if self.Nctlv > self.Nv:
-
-                print 'Warning: More control points in v than data Points. Re-Interpolating'
-                assert 'ctlv_spacing' in kwargs,'ctlv_spacing Must be in kwargs when More control points than datapoints are given'
-                ctlv_spacing = kwargs['ctlv_spacing']
-                Xnew = zeros((self.Nu,len(ctlv_spacing),3))
-
-                for i in xrange (self.Nu):
-                    Xnew[i,:,:] = linear_spline(task='interpolate',X=self.X[i,:,:],k=2).getValueV(ctlv_spacing)
-                # end for
-
-                self.X = Xnew
-                self.Nctlv = len(ctlv_spacing)
-                self.Nv    = self.Nctlv
-
+                self.Nctlv = self.Nv
             # end if
+            
             if self.Nu <= self.ku:
                 self.ku = self.Nu
             if self.Nv <= self.kv:
@@ -220,6 +208,8 @@ class surf_spline():
 
            #Calculate the knot vector and Jacobian
             sys.stdout.write(' Calculating: knots, ')
+
+
             self._calcKnots()
 
             sys.stdout.write(' jacobian, ')
@@ -334,50 +324,244 @@ class surf_spline():
         # in a different section of  the matrix X being returned. Here
         # we will simply hard code the 16 combination 
         master_edge = self.master_edge
+# --------------------------------------------------------
+#         # All Master (zero Slave)
+#         if self.master_edge == [True,True,True,True]:
+#             return X
 
-        # All Master (zero Slave)
-        if self.master_edge == [True,True,True,True]:
-            return X
+#         # Three Master/1 Slave
+#         elif master_edge == [False,True,True,True]:
+#             return X[:,1:]
+#         elif master_edge == [True,False,True,True]:
+#             return X[:,0:-1]
+#         elif master_edge == [True,True,False,True]:
+#             return X[1:,:]
+#         elif master_edge == [True,True,True,False]:
+#             return X[0:-1,:]
 
-        # Three Master/1 Slave
-        elif master_edge == [False,True,True,True]:
-            return X[:,1:]
-        elif master_edge == [True,False,True,True]:
-            return X[:,0:-1]
-        elif master_edge == [True,True,False,True]:
-            return X[1:,:]
-        elif master_edge == [True,True,True,False]:
-            return X[0:-1,:]
+#         # Two Master / Two Slave
+#         elif master_edge == [True,True,False,False]:
+#             return X[1:-1,:]
+#         elif master_edge == [False,False,True,True]:
+#             return X[:,1:-1]
 
-        # Two Master / Two Slave
-        elif master_edge == [True,True,False,False]:
-            return X[1:-1,:]
-        elif master_edge == [False,False,True,True]:
-            return X[:,1:-1]
-
-        elif master_edge == [True,False,False,True]:
-            return X[1:,0:-1]
-        elif master_edge == [False,True,False,True]:
-            return X[1:,1]
-        elif master_edge == [False,True,True,False]:
-            return X[0:-1,1:]
-        elif master_edge == [True,False,True,False]:
-            return X[0:-1,0:-1]
+#         elif master_edge == [True,False,False,True]:
+#             return X[1:,0:-1]
+#         elif master_edge == [False,True,False,True]:
+#             return X[1:,1]
+#         elif master_edge == [False,True,True,False]:
+#             return X[0:-1,1:]
+#         elif master_edge == [True,False,True,False]:
+#             return X[0:-1,0:-1]
         
-        # One Master / Three Slave
-        elif master_edge == [True,False,False,False]:
-            return X[1:-1,0:-1]
-        elif master_edge == [False,True,False,False]:
-            return X[1:-1,1:]
-        elif master_edge == [False,False,True,False]:
-            return X[0:-1:,1:-1]
-        elif master_edge == [False,False,False,True]:
-            return X[1:,1:-1]
+#         # One Master / Three Slave
+#         elif master_edge == [True,False,False,False]:
+#             return X[1:-1,0:-1]
+#         elif master_edge == [False,True,False,False]:
+#             return X[1:-1,1:]
+#         elif master_edge == [False,False,True,False]:
+#             return X[0:-1:,1:-1]
+#         elif master_edge == [False,False,False,True]:
+#             return X[1:,1:-1]
 
-        # Zero Master / All Slave
-        elif master_edge == [False,False,False,False]:
-            return X[1:-1,1:-1]
+#         # Zero Master / All Slave
+#         elif master_edge == [False,False,False,False]:
+#             return X[1:-1,1:-1]
 
+# --------------------------------------------------------
+
+# Use a Binary Tree-Type Search -> Faster -> log n scaling 
+
+        if self.master_edge[0] == True:
+            if self.master_edge[1] == True:
+                if self.master_edge[2] == True:
+                    if self.master_edge[3] == True:
+                        #[True,True,True,True]:
+                        return X
+                    else:
+                        #[True,True,True,False]:
+                        return X[0:-1,:]
+                    # end if
+                else:
+                    if self.master_edge[3] == True:
+                        #[True,True,False,True]:
+                        return X[1:,:]
+                    else:
+                        #[True,True,False,False]:
+                        return X[1:-1,:]
+                    # end if
+                # end if
+            else:
+                if self.master_edge[2] == True:
+
+                    if self.master_edge[3] == True:
+                        #[True,False,True,True]:
+                        return X[:,0:-1]
+                    else:
+                        #[True,False,True,False]:
+                        return X[0:-1,0:-1]
+                    # end if
+                else:
+                    if self.master_edge[3] == True:
+                        #[True,False,False,True]:
+                        return X[1:,0:-1]
+                    else:
+                        #[True,False,False,False]:
+                        return X[1:-1,0:-1]
+                    # end if
+                # end if
+            # end if
+        else:
+            if self.master_edge[1] == True:
+                if self.master_edge[2] == True:
+                    if self.master_edge[3] == True:
+                        #[False,True,True,True]:
+                        return X[:,1:]
+                    else:
+                        #[False,True,True,False]:
+                        return X[0:-1,1:]
+                    # end if
+                else:
+                    if self.master_edge[3] == True:
+                        # [False,True,False,True]:
+                        return X[1:,1]
+                    else:
+                        # [False,True,False,False]:
+                        return X[1:-1,1:]
+                    # end if
+                # end if
+            else:
+                if self.master_edge[2] == True:
+                    if self.master_edge[3] == True:
+                        #[False,False,True,True]:
+                        return X[:,1:-1]
+                    else:
+                        # [False,False,True,False]:
+                        return X[0:-1:,1:-1]
+                    # end if
+                else:
+                    if self.master_edge[3] == True:
+                        #[False,False,False,True]:
+                        return X[1:,1:-1]
+                    else:
+                        # [False,False,False,False]:
+                        return X[1:-1,1:-1]
+                    # end if
+                # end if
+            # end if
+        #end if
+        return
+
+
+    def getFreeCtl(self):
+
+        '''Return Free control Points'''
+        # This requires some explaining: the getFreeIndex function
+        # generates the pythonic index string which coorsponds to the
+        # section of the coefficient martrix which is free or
+        # driving. Then to return these values we make a string that
+        # contains 'self.coef' and then the slice_string which is
+        # something like [:,1:-1]. This is only possible in an
+        # interpreted language
+        return eval('self.coef'+self.slice_string)
+
+
+    def setFreeCtl(self,coef):
+
+        '''Sets Free control Points'''
+        # See getFreeCtl for how this works
+        
+        return eval('self.coef'+self.slice_string,'=coef')
+
+    
+    def _getFreeIndex(self):
+        '''This internal function gets string slice which tells
+        various functions how to slice out control points or data that
+        coorspond to master edges'''
+        # Use a Binary Tree-Type Search -> Faster -> log n scaling 
+
+        slice_string = ''
+
+        if self.master_edge[0] == True:
+            if self.master_edge[1] == True:
+                if self.master_edge[2] == True:
+                    if self.master_edge[3] == True:
+                        #[True,True,True,True]:
+                        slice_string = '[:,:]'
+                    else:
+                        #[True,True,True,False]:
+                         slice_string = '[0:-1,:]'
+                    # end if
+                else:
+                    if self.master_edge[3] == True:
+                        #[True,True,False,True]:
+                        slice_string = '[1:,:]'
+                    else:
+                        #[True,True,False,False]:
+                        slice_string = '[1:-1,:]'
+                    # end if
+                # end if
+            else:
+                if self.master_edge[2] == True:
+
+                    if self.master_edge[3] == True:
+                        #[True,False,True,True]:
+                        slice_string = '[:,0:-1]'
+                    else:
+                        #[True,False,True,False]:
+                        slice_string = '[0:-1,0:-1]'
+                    # end if
+                else:
+                    if self.master_edge[3] == True:
+                        #[True,False,False,True]:
+                        slice_string = '[1:,0:-1]'
+                    else:
+                        #[True,False,False,False]:
+                        slice_string = '[1:-1,0:-1]'
+                    # end if
+                # end if
+            # end if
+        else:
+            if self.master_edge[1] == True:
+                if self.master_edge[2] == True:
+                    if self.master_edge[3] == True:
+                        #[False,True,True,True]:
+                        slice_string = '[:,1:]'
+                    else:
+                        #[False,True,True,False]:
+                        slice_string = '[0:-1,1:]'
+                    # end if
+                else:
+                    if self.master_edge[3] == True:
+                        # [False,True,False,True]:
+                        slice_string = '[1:,1]'
+                    else:
+                        # [False,True,False,False]:
+                        slice_string = '[1:-1,1:]'
+                    # end if
+                # end if
+            else:
+                if self.master_edge[2] == True:
+                    if self.master_edge[3] == True:
+                        #[False,False,True,True]:
+                        slice_string = '[:,1:-1]'
+                    else:
+                        # [False,False,True,False]:
+                        slice_string = '[0:-1:,1:-1]'
+                    # end if
+                else:
+                    if self.master_edge[3] == True:
+                        #[False,False,False,True]:
+                        slice_string = '[1:,1:-1]'
+                    else:
+                        # [False,False,False,False]:
+                        slice_string = '[1:-1,1:-1]'
+                    # end if
+                # end if
+            # end if
+        #end if
+
+        self.slice_string = slice_string
         return
 
 
@@ -517,10 +701,10 @@ class surf_spline():
         return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
 
 
-    def associateRefAxis(self,ref_axis,section=None):
+    def associateRefAxis(self,ref_axis):#,section=None):
         '''Create links between ref_axis and this patch'''
 
-        print 'associateRefAxis'
+        #print 'associateRefAxis'
         # First we Need to deduce along which direction (u or v) the
         # reference axis is directed.  First estimate Over what
         # portion the surface and ref axis co-inside
@@ -536,26 +720,9 @@ class surf_spline():
 
         min_s = min(p)
         max_s = max(p)
-        print 'fucking section:',section
-        if not section==None: # Restrict the attachment to a section of the ref axis:
-            print 'section:',section
-            nBreaks = len(ref_axis.breaks)
-
-            range = 1.0/(nBreaks + 1)
-            print 'range:',range
-            lower_s = section*range
-            upper_s = (section+1)*range
-
-            start = 0
-            if max_s>upper_s:
-                max_s = upper_s
-            if min_s < lower_s:
-                min_s = lower_s
-
-                
-
-        print 'p is:',p
-        print 'max_s,min_s:',max_s,min_s,upper_s,lower_s
+       
+        #print 'p is:',p
+       
 
         # Now we know over what portion of the ref axis we are dealing
         # with.  Take 3 Normal Vectors
@@ -592,7 +759,7 @@ class surf_spline():
 
         
         if v_dot_tot > u_dot_tot:
-            print 'along v:'
+            #print 'along v:'
             for j in xrange(self.Nctlv):
                 # Create a line (k=2 spline) for the control points along U
                 
@@ -603,7 +770,7 @@ class surf_spline():
                     s = max_s
                 if s < min_s:
                     s = min_s
-                print 's is:',s
+            #    print 's is:',s
                 # Now loop over the control points to set links
                 base_point = ref_axis.xs.getValue(s)
                 M = ref_axis.getRotMatrixGlobalToLocal(s)
@@ -687,6 +854,28 @@ class surf_spline():
                     counter += 1
                 # end for
             # end for
+
+    def updateSurfacePoints(self,delta):
+        '''Update the control points on surface deltas normal to the surface'''
+
+        # Do a cheap update assuming delta = Nctlu*Nctlv
+
+        # Question: where do we get Normal for Control Point?
+
+        for i in xrange(self.Nctlu):
+            for j in xrange(self.Nctlv):
+                # The coordinates where we get the normal are NOT
+                # stictly correct...the last ones will run out into
+                # the 1's at the end of the knot vector
+                
+                n = self.getNormal(self.tu[self.ku-2 + i],self.tv[self.kv-2+j])
+
+                self.coef[i,j] -= delta[i,j] * n
+                # The MINUS is because the surface normals MUST point inward
+                
+            # end for
+        # end for
+        
      
 
     def getValueEdge(self,edge,s):
@@ -749,6 +938,19 @@ class surf_spline():
         else:
             self.coef[-1,:,:] = new_coef
         return
+
+    def getNormal(self,u,v):
+        '''Get the normal at the surface point u,v'''
+        du,dv = self.getDerivative(u,v)
+
+        # Now cross and normalize
+        n = zeros(3)
+        n[0] = du[1]*dv[2]-du[2]*dv[1]
+        n[1] = du[2]*dv[0]-du[0]*dv[2]
+        n[2] = du[0]*dv[1]-du[1]*dv[0]
+        
+        n/= sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])
+        return n
 
     def getValue(self,u,v):
         
@@ -1240,7 +1442,7 @@ class linear_spline():
 
             # Generate the knot vector
             self.t = pyspline.bknot(self.s,self.k)
-            if idim > 1:
+            if self.nDim > 1:
                 # Calculate the Jacobian
                 self._calcJacobian()
                 self.coef = zeros((self.Nctl,self.nDim))
