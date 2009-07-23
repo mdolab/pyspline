@@ -317,141 +317,7 @@ class surf_spline():
         '''This internal function gets the original data coorsponding but
         omits the data along edges which are not masters'''
 
-        #X = zeros([self.Nu_free,self.Nv_free,3])
-        
-        # There is no easy way of doing this to my knowlege. There are
-        # 16 combination of Master/Slave  edges (2^4) And each results
-        # in a different section of  the matrix X being returned. Here
-        # we will simply hard code the 16 combination 
-        master_edge = self.master_edge
-# --------------------------------------------------------
-#         # All Master (zero Slave)
-#         if self.master_edge == [True,True,True,True]:
-#             return X
-
-#         # Three Master/1 Slave
-#         elif master_edge == [False,True,True,True]:
-#             return X[:,1:]
-#         elif master_edge == [True,False,True,True]:
-#             return X[:,0:-1]
-#         elif master_edge == [True,True,False,True]:
-#             return X[1:,:]
-#         elif master_edge == [True,True,True,False]:
-#             return X[0:-1,:]
-
-#         # Two Master / Two Slave
-#         elif master_edge == [True,True,False,False]:
-#             return X[1:-1,:]
-#         elif master_edge == [False,False,True,True]:
-#             return X[:,1:-1]
-
-#         elif master_edge == [True,False,False,True]:
-#             return X[1:,0:-1]
-#         elif master_edge == [False,True,False,True]:
-#             return X[1:,1]
-#         elif master_edge == [False,True,True,False]:
-#             return X[0:-1,1:]
-#         elif master_edge == [True,False,True,False]:
-#             return X[0:-1,0:-1]
-        
-#         # One Master / Three Slave
-#         elif master_edge == [True,False,False,False]:
-#             return X[1:-1,0:-1]
-#         elif master_edge == [False,True,False,False]:
-#             return X[1:-1,1:]
-#         elif master_edge == [False,False,True,False]:
-#             return X[0:-1:,1:-1]
-#         elif master_edge == [False,False,False,True]:
-#             return X[1:,1:-1]
-
-#         # Zero Master / All Slave
-#         elif master_edge == [False,False,False,False]:
-#             return X[1:-1,1:-1]
-
-# --------------------------------------------------------
-
-# Use a Binary Tree-Type Search -> Faster -> log n scaling 
-
-        if self.master_edge[0] == True:
-            if self.master_edge[1] == True:
-                if self.master_edge[2] == True:
-                    if self.master_edge[3] == True:
-                        #[True,True,True,True]:
-                        return X
-                    else:
-                        #[True,True,True,False]:
-                        return X[0:-1,:]
-                    # end if
-                else:
-                    if self.master_edge[3] == True:
-                        #[True,True,False,True]:
-                        return X[1:,:]
-                    else:
-                        #[True,True,False,False]:
-                        return X[1:-1,:]
-                    # end if
-                # end if
-            else:
-                if self.master_edge[2] == True:
-
-                    if self.master_edge[3] == True:
-                        #[True,False,True,True]:
-                        return X[:,0:-1]
-                    else:
-                        #[True,False,True,False]:
-                        return X[0:-1,0:-1]
-                    # end if
-                else:
-                    if self.master_edge[3] == True:
-                        #[True,False,False,True]:
-                        return X[1:,0:-1]
-                    else:
-                        #[True,False,False,False]:
-                        return X[1:-1,0:-1]
-                    # end if
-                # end if
-            # end if
-        else:
-            if self.master_edge[1] == True:
-                if self.master_edge[2] == True:
-                    if self.master_edge[3] == True:
-                        #[False,True,True,True]:
-                        return X[:,1:]
-                    else:
-                        #[False,True,True,False]:
-                        return X[0:-1,1:]
-                    # end if
-                else:
-                    if self.master_edge[3] == True:
-                        # [False,True,False,True]:
-                        return X[1:,1]
-                    else:
-                        # [False,True,False,False]:
-                        return X[1:-1,1:]
-                    # end if
-                # end if
-            else:
-                if self.master_edge[2] == True:
-                    if self.master_edge[3] == True:
-                        #[False,False,True,True]:
-                        return X[:,1:-1]
-                    else:
-                        # [False,False,True,False]:
-                        return X[0:-1:,1:-1]
-                    # end if
-                else:
-                    if self.master_edge[3] == True:
-                        #[False,False,False,True]:
-                        return X[1:,1:-1]
-                    else:
-                        # [False,False,False,False]:
-                        return X[1:-1,1:-1]
-                    # end if
-                # end if
-            # end if
-        #end if
-        return
-
+        return eval('X'+self.slice_string)
 
     def getFreeCtl(self):
 
@@ -825,8 +691,6 @@ class surf_spline():
             # end if
         # end for
 
-
-
     def update(self,ref_axis):
         '''Update the control points with ref_axis:'''
         counter = 0
@@ -834,13 +698,11 @@ class surf_spline():
         if self.ref_axis_dir == 1:
             for j in xrange(self.Nctlv):
                 s = self.links[counter][0]
-
                 M = ref_axis.getRotMatrixLocalToGloabl(s)
-                
                 X_base = ref_axis.xs.getValue(s)
                 for i in xrange(self.Nctlu):
-                    self.coef[i,j,:] = X_base + dot(M,self.links[counter][1])*ref_axis.scales(s)
-                    counter += 1
+                   self.coef[i,j,:] = X_base + dot(M,self.links[counter][1])*ref_axis.scales(s)
+                   counter += 1
                 # end for
             # end for
         else:
@@ -857,26 +719,31 @@ class surf_spline():
 
     def updateSurfacePoints(self,delta):
         '''Update the control points on surface deltas normal to the surface'''
+        update = zeros((self.Nctlu,self.Nctlv)) 
+        exec('update'+self.slice_string+' = delta')
 
-        # Do a cheap update assuming delta = Nctlu*Nctlv
+# ------------- Python Code ------------------------------------------------
 
-        # Question: where do we get Normal for Control Point?
-
-        for i in xrange(self.Nctlu):
-            for j in xrange(self.Nctlv):
-                # The coordinates where we get the normal are NOT
-                # stictly correct...the last ones will run out into
-                # the 1's at the end of the knot vector
+#  for i in xrange(self.Nctlu):
+#             for j in xrange(self.Nctlv):
+#                 # The coordinates where we get the normal are NOT
+#                 # stictly correct...the last ones will run out into
+#                 # the 1's at the end of the knot vector
                 
-                n = self.getNormal(self.tu[self.ku-2 + i],self.tv[self.kv-2+j])
+#                 n = self.getNormal(self.tu[self.ku-2 + i],self.tv[self.kv-2+j])
 
-                self.coef[i,j] -= delta[i,j] * n
-                # The MINUS is because the surface normals MUST point inward
+#                 self.coef[i,j] -= update[i,j] * n
+#                 # The MINUS is because the surface normals MUST point inward
                 
-            # end for
-        # end for
-        
-     
+#             # end for
+#         # end for
+
+# -------------------------------------------------------------------------
+
+        # Call the fortran function instead
+        self.coef = pyspline.updatesurfacepoints(self.coef,update,self.tu,self.tv,self.ku,self.kv)
+
+        return
 
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3 where
@@ -1722,3 +1589,141 @@ if __name__ == '__main__':
 #             ctl[:,:,idim] = reshape(x[self.nDim*N + idim*N : self.nDim*N + idim*N + N],[self.Nctlu,self.Nctlv])
 #         # end for
 #         return ctl
+
+
+
+
+        #X = zeros([self.Nu_free,self.Nv_free,3])
+        
+        # There is no easy way of doing this to my knowlege. There are
+        # 16 combination of Master/Slave  edges (2^4) And each results
+        # in a different section of  the matrix X being returned. Here
+        # we will simply hard code the 16 combination 
+#        master_edge = self.master_edge
+# --------------------------------------------------------
+#         # All Master (zero Slave)
+#         if self.master_edge == [True,True,True,True]:
+#             return X
+
+#         # Three Master/1 Slave
+#         elif master_edge == [False,True,True,True]:
+#             return X[:,1:]
+#         elif master_edge == [True,False,True,True]:
+#             return X[:,0:-1]
+#         elif master_edge == [True,True,False,True]:
+#             return X[1:,:]
+#         elif master_edge == [True,True,True,False]:
+#             return X[0:-1,:]
+
+#         # Two Master / Two Slave
+#         elif master_edge == [True,True,False,False]:
+#             return X[1:-1,:]
+#         elif master_edge == [False,False,True,True]:
+#             return X[:,1:-1]
+
+#         elif master_edge == [True,False,False,True]:
+#             return X[1:,0:-1]
+#         elif master_edge == [False,True,False,True]:
+#             return X[1:,1]
+#         elif master_edge == [False,True,True,False]:
+#             return X[0:-1,1:]
+#         elif master_edge == [True,False,True,False]:
+#             return X[0:-1,0:-1]
+        
+#         # One Master / Three Slave
+#         elif master_edge == [True,False,False,False]:
+#             return X[1:-1,0:-1]
+#         elif master_edge == [False,True,False,False]:
+#             return X[1:-1,1:]
+#         elif master_edge == [False,False,True,False]:
+#             return X[0:-1:,1:-1]
+#         elif master_edge == [False,False,False,True]:
+#             return X[1:,1:-1]
+
+#         # Zero Master / All Slave
+#         elif master_edge == [False,False,False,False]:
+#             return X[1:-1,1:-1]
+
+# --------------------------------------------------------
+
+##  Use a Binary Tree-Type Search -> Faster -> log n scaling 
+
+#         if self.master_edge[0] == True:
+#             if self.master_edge[1] == True:
+#                 if self.master_edge[2] == True:
+#                     if self.master_edge[3] == True:
+#                         #[True,True,True,True]:
+#                         return X
+#                     else:
+#                         #[True,True,True,False]:
+#                         return X[0:-1,:]
+#                     # end if
+#                 else:
+#                     if self.master_edge[3] == True:
+#                         #[True,True,False,True]:
+#                         return X[1:,:]
+#                     else:
+#                         #[True,True,False,False]:
+#                         return X[1:-1,:]
+#                     # end if
+#                 # end if
+#             else:
+#                 if self.master_edge[2] == True:
+
+#                     if self.master_edge[3] == True:
+#                         #[True,False,True,True]:
+#                         return X[:,0:-1]
+#                     else:
+#                         #[True,False,True,False]:
+#                         return X[0:-1,0:-1]
+#                     # end if
+#                 else:
+#                     if self.master_edge[3] == True:
+#                         #[True,False,False,True]:
+#                         return X[1:,0:-1]
+#                     else:
+#                         #[True,False,False,False]:
+#                         return X[1:-1,0:-1]
+#                     # end if
+#                 # end if
+#             # end if
+#         else:
+#             if self.master_edge[1] == True:
+#                 if self.master_edge[2] == True:
+#                     if self.master_edge[3] == True:
+#                         #[False,True,True,True]:
+#                         return X[:,1:]
+#                     else:
+#                         #[False,True,True,False]:
+#                         return X[0:-1,1:]
+#                     # end if
+#                 else:
+#                     if self.master_edge[3] == True:
+#                         # [False,True,False,True]:
+#                         return X[1:,1]
+#                     else:
+#                         # [False,True,False,False]:
+#                         return X[1:-1,1:]
+#                     # end if
+#                 # end if
+#             else:
+#                 if self.master_edge[2] == True:
+#                     if self.master_edge[3] == True:
+#                         #[False,False,True,True]:
+#                         return X[:,1:-1]
+#                     else:
+#                         # [False,False,True,False]:
+#                         return X[0:-1:,1:-1]
+#                     # end if
+#                 else:
+#                     if self.master_edge[3] == True:
+#                         #[False,False,False,True]:
+#                         return X[1:,1:-1]
+#                     else:
+#                         # [False,False,False,False]:
+#                         return X[1:-1,1:-1]
+#                     # end if
+#                 # end if
+#             # end if
+#         #end if
+#         return
