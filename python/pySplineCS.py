@@ -35,6 +35,7 @@ from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
 import numpy.linalg
 from numpy.linalg import lstsq
 
+import pyspline_cs
 import pyspline
 
 # =============================================================================
@@ -148,7 +149,7 @@ class surf_spline():
             [self.V, self.U] = meshgrid(self.v,self.u)
             self.orig_data = True
             
-            self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
+            self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim),'D')
             self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
 
             #Sanity check to make sure k is less than N
@@ -159,7 +160,7 @@ class surf_spline():
             
             timeA = time.time()
             for idim in xrange(self.nDim):
-                self.tu,self.tv,self.coef[:,:,idim]= pyspline.b2ink(self.u,self.v,self.X[:,:,idim],self.ku,self.kv)
+                self.tu,self.tv,self.coef[:,:,idim]= pyspline_cs.b2ink(self.u,self.v,self.X[:,:,idim],self.ku,self.kv)
             #end for
             
             sys.stdout.write(' Interpolate Time: %6.5f s\n'%(time.time()-timeA))
@@ -217,7 +218,7 @@ class surf_spline():
 
 #             # Lets do a lms 
             timeA = time.time()
-            self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim])
+            self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim],'D')
             for idim in xrange(self.nDim):
                 self.coef[:,:,idim] = reshape(lstsq(self.J,self.X[:,:,idim].flatten())[0],[self.Nctlu,self.Nctlv])
 
@@ -231,11 +232,11 @@ class surf_spline():
 
     def _calcParameterization(self):
 
-        u = (zeros(self.Nu))
+        u = zeros(self.Nu,'D')
         singular_counter = 0
 
         for j in xrange(self.Nv): #loop over each v, and average the 'u' parameter 
-            temp = zeros(self.Nu,'d')
+            temp = zeros(self.Nu,'D')
 
             for i in xrange(self.Nu-1):
                 temp[i+1] = temp[i] + sqrt((self.X[i+1,j,0]-self.X[i,j,0])**2 +\
@@ -256,10 +257,10 @@ class surf_spline():
         u/=(self.Nv-singular_counter) #divide by the number of 'j's we had
         self.u = u
         
-        v = zeros(self.Nv)
+        v = zeros(self.Nv,'D')
         singular_counter = 0
         for i in xrange(self.Nu): #loop over each v, and average the 'u' parameter 
-            temp = zeros(self.Nv)
+            temp = zeros(self.Nv,'D')
             for j in xrange(self.Nv-1):
                 temp[j+1] = temp[j] + sqrt((self.X[i,j+1,0]-self.X[i,j,0])**2 +\
                                            (self.X[i,j+1,1]-self.X[i,j,1])**2 +\
@@ -443,13 +444,13 @@ class surf_spline():
     def _calcJacobian(self):
         
         # Calculate the jacobian J, for fixed t and s
-        self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv])
-        ctl = zeros([self.Nctlu,self.Nctlv])
+        self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv],'D')
+        ctl = zeros([self.Nctlu,self.Nctlv],'D')
 
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
                 ctl[i,j] += 1
-                self.J[:,i*self.Nctlv + j] = pyspline.b2valv(self.U.flatten(),self.V.flatten(),0,0,self.tu,self.tv,self.ku,self.kv,ctl)
+                self.J[:,i*self.Nctlv + j] = pyspline_cs.b2valv(self.U.flatten(),self.V.flatten(),0,0,self.tu,self.tv,self.ku,self.kv,ctl)
                 ctl[i,j] -= 1
                 # end for
             # end for 
@@ -518,14 +519,14 @@ class surf_spline():
 
     def _calcCtlDeriv(self,i,j):
         '''Calculate the derivative wrt control point i,j'''
-        ctl = zeros([self.Nctlu,self.Nctlv])
+        ctl = zeros([self.Nctlu,self.Nctlv],'D')
         ctl[i,j] += 1
         
-        return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
+        return self._getCropData(pyspline_cs.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
 
     def _calcCtlDerivNode(self,node):
         '''Calculate the derivative wrt control point i,j'''
-        ctl = zeros([self.Nctlu,self.Nctlv])
+        ctl = zeros([self.Nctlu,self.Nctlv],'D')
         if node == 0:
             ctl[0,0] += 1
         elif node == 1:
@@ -535,11 +536,11 @@ class surf_spline():
         else:
             ctl[-1,-1] += 1
         
-        return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
+        return self._getCropData(pyspline_cs.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
 
     def _calcCtlDerivEdge(self,edge,index,dir):
         '''Calculate the derivative wrt control point i,j'''
-        ctl = zeros([self.Nctlu,self.Nctlv])
+        ctl = zeros([self.Nctlu,self.Nctlv],'D')
         if edge == 0:
             if dir==1:
                 ctl[index,0] += 1
@@ -564,7 +565,7 @@ class surf_spline():
                 clt[-1,self.Nctlv-index-1] += 1
         
         
-        return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
+        return self._getCropData(pyspline_cs.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
 
 
     def associateRefAxis(self,ref_axis):#,section=None):
@@ -577,7 +578,7 @@ class surf_spline():
 
         # Find the s range for the 4 corners
 
-        p = zeros(4)
+        p = zeros(4,'D')
         
         p[0],conv,D,esp = ref_axis.xs.projectPoint(self.coef[0 , 0])
         p[1],conv,D,esp = ref_axis.xs.projectPoint(self.coef[0 ,-1])
@@ -594,7 +595,7 @@ class surf_spline():
         # with.  Take 3 Normal Vectors
         N = 3
         sn = linspace(min_s,max_s,N)
-        dn = zeros((N,3))
+        dn = zeros((N,3),'D')
         for i in xrange(N):
             dn[i,:] = ref_axis.xs.getDerivative(sn[i])
 
@@ -694,7 +695,7 @@ class surf_spline():
     def update(self,ref_axis):
         '''Update the control points with ref_axis:'''
         counter = 0
-
+        print 'update from cs'
         if self.ref_axis_dir == 1:
             for j in xrange(self.Nctlv):
                 s = self.links[counter][0]
@@ -719,7 +720,7 @@ class surf_spline():
 
     def updateSurfacePoints(self,delta):
         '''Update the control points on surface deltas normal to the surface'''
-        update = zeros((self.Nctlu,self.Nctlv)) 
+        update = zeros((self.Nctlu,self.Nctlv),'D') 
         exec('update'+self.slice_string+' = delta')
 
 # ------------- Python Code ------------------------------------------------
@@ -741,7 +742,7 @@ class surf_spline():
 # -------------------------------------------------------------------------
 
         # Call the fortran function instead
-        self.coef = pyspline.updatesurfacepoints(self.coef,update,self.tu,self.tv,self.ku,self.kv)
+        self.coef = pyspline_cs.updatesurfacepoints(self.coef,update,self.tu,self.tv,self.ku,self.kv)
 
         return
 
@@ -811,7 +812,7 @@ class surf_spline():
         du,dv = self.getDerivative(u,v)
 
         # Now cross and normalize
-        n = zeros(3)
+        n = zeros(3,'D')
         n[0] = du[1]*dv[2]-du[2]*dv[1]
         n[1] = du[2]*dv[0]-du[0]*dv[2]
         n[2] = du[0]*dv[1]-du[1]*dv[0]
@@ -822,37 +823,37 @@ class surf_spline():
     def getValue(self,u,v):
         
         '''Get the value of the spline at point u,v'''
-        x = zeros([self.nDim])
+        x = zeros([self.nDim],'D')
         for idim in xrange(self.nDim):
-            x[idim] = pyspline.b2val(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            x[idim] = pyspline_cs.b2val(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         
         return x
 
     def getValueV(self,u,v):
         '''Get the value of a spline at vector of points u,v'''
         assert u.shape == v.shape, 'u and v must be the same length'
-        x = zeros((len(u),self.nDim))
+        x = zeros((len(u),self.nDim),'D')
         for idim in xrange(self.nDim):
-            x[:,idim] = pyspline.b2valv(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            x[:,idim] = pyspline_cs.b2valv(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         return x
 
     def getValueM(self,u,v):
         '''Get the value of a spline at matrix of points u,v'''
         assert u.shape == v.shape, 'u and v must be the same shape'
-        x = zeros((u.shape[0],u.shape[1],self.nDim))
+        x = zeros((u.shape[0],u.shape[1],self.nDim),'D')
         for idim in xrange(self.nDim):
-            x[:,:,idim] = pyspline.b2valm(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            x[:,:,idim] = pyspline_cs.b2valm(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
 
         return x
 
     def getDerivative(self,u,v):
         
         '''Get the value of the derivative of spline at point u,v'''
-        du = zeros(self.nDim)
-        dv = zeros(self.nDim)
+        du = zeros(self.nDim,'D')
+        dv = zeros(self.nDim,'D')
         for idim in xrange(self.nDim):
-            du[idim] = pyspline.b2val(u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-            dv[idim] = pyspline.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            du[idim] = pyspline_cs.b2val(u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            dv[idim] = pyspline_cs.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         return du,dv
 
 
@@ -860,11 +861,11 @@ class surf_spline():
         
         '''Get the jacobian at point u,v'''
 
-        J = zeros((self.nDim,2))
+        J = zeros((self.nDim,2),'D')
         
         for idim in xrange(self.nDim):
-            J[idim,0] = pyspline.b2val(u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-            J[idim,1] = pyspline.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            J[idim,0] = pyspline_cs.b2val(u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            J[idim,1] = pyspline_cs.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
 
         return J
 
@@ -959,13 +960,13 @@ class surf_spline():
 
             x = self.getValue(u,v) #x contains the x,y,z coordinates 
 
-            f = mat(zeros((3,1)))
+            f = mat(zeros((3,1),'D'))
             f[0] = x[0]-(x0[0]+r[0]*s)
             f[1] = x[1]-(x0[1]+r[1]*s)
             f[2] = x[2]-(x0[2]+r[2]*s)
 
             J = self.getJacobian(u,v)
-            A = mat(zeros((3,3)))
+            A = mat(zeros((3,3),'D'))
             A[:,0:2] = J
             A[0,2]   = -r[0]
             A[1,2]   = -r[1]
@@ -1004,7 +1005,7 @@ class surf_spline():
             handle.write('DATAPACKING=POINT\n')
             for j in xrange(self.Nv):
                 for i in xrange(self.Nu):
-                    handle.write('%f %f %f \n'%(self.X[i,j,0],self.X[i,j,1],self.X[i,j,2]))
+                    handle.write('%f %f %f \n'%(real(self.X[i,j,0]),real(self.X[i,j,1]),real(self.X[i,j,2])))
                 # end for
             # end for 
         # end if
@@ -1026,7 +1027,7 @@ class surf_spline():
         for j in xrange(len(v_plot)):
             for i in xrange(len(u_plot)):
                 for idim in xrange(self.nDim):
-                    handle.write('%f '%(pyspline.b2val(u_plot[i],v_plot[j],0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])))
+                    handle.write('%f '%(real(pyspline_cs.b2val(u_plot[i],v_plot[j],0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim]))))
                 # end for 
                 handle.write('\n')
             # end for
@@ -1037,7 +1038,7 @@ class surf_spline():
         handle.write('DATAPACKING=POINT\n')
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
-                handle.write('%f %f %f \n'%(self.coef[i,j,0],self.coef[i,j,1],self.coef[i,j,2]))
+                handle.write('%f %f %f \n'%(real(self.coef[i,j,0]),real(self.coef[i,j,1]),real(self.coef[i,j,2])))
             # end for
         # end for 
 
@@ -1056,7 +1057,7 @@ class surf_spline():
         s = linspace(0,1,N)
         for i in xrange(N):
             value = self.getValueEdge(edge,s[i])
-            handle.write('%f %f %f \n'%(value[0],value[1],value[2]))
+            handle.write('%f %f %f \n'%(real(value[0]),real(value[1]),real(value[2])))
         # end for
         return
 
@@ -1253,13 +1254,13 @@ class linear_spline():
             # end if
 
             # Generate the knot vector
-            self.t = pyspline.bknot(self.s,self.k)
+            self.t = pyspline_cs.bknot(self.s,self.k)
             if self.nDim > 1:
-                self.coef = zeros((self.Nctl,self.nDim))
+                self.coef = zeros((self.Nctl,self.nDim),'D')
                 for idim in xrange(self.nDim):
-                    self.coef[:,idim]= pyspline.bintk(self.s,self.X[:,idim],self.t,self.k)
+                    self.coef[:,idim]= pyspline_cs.bintk(self.s,self.X[:,idim],self.t,self.k)
             else:
-                self.coef = pyspline.bintk(self.s,self.X,self.t,self.k)
+                self.coef = pyspline_cs.bintk(self.s,self.X,self.t,self.k)
             # end if
                 
             #end for
@@ -1308,11 +1309,11 @@ class linear_spline():
                 self.Nctl  = self.N
 
             # Generate the knot vector
-            self.t = pyspline.bknot(self.s,self.k)
+            self.t = pyspline_cs.bknot(self.s,self.k)
             if self.nDim > 1:
                 # Calculate the Jacobian
                 self._calcJacobian()
-                self.coef = zeros((self.Nctl,self.nDim))
+                self.coef = zeros((self.Nctl,self.nDim),'D')
                 for idim in xrange(self.nDim):
                     self.coef[:,idim] = lstsq(self.J,self.X[:,idim])[0]
                 # end for
@@ -1367,7 +1368,7 @@ class linear_spline():
 
     def _getParameterization(self):
         # We need to parameterize the curve
-        self.s = zeros(self.N);
+        self.s = zeros(self.N,'D');
         for i in xrange(self.N-1):
             dist = 0
             for idim in xrange(self.nDim):
@@ -1382,7 +1383,7 @@ class linear_spline():
 
     def _getLength(self):
         # We need to the length of the curve
-        s = zeros(self.N);
+        s = zeros(self.N,'D');
         for i in xrange(self.N-1):
             dist = 0
             for idim in xrange(self.nDim):
@@ -1397,11 +1398,11 @@ class linear_spline():
     def __call__(self,s):
 
         if self.nDim == 1:
-            x = pyspline.bvalu(self.t,self.coef,self.k,0,s)
+            x = pyspline_cs.bvalu(self.t,self.coef,self.k,0,s)
         else:
-            x = zeros([self.nDim])
+            x = zeros([self.nDim],'D')
             for idim in xrange(self.nDim):
-                x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
+                x[idim] = pyspline_cs.bvalu(self.t,self.coef[:,idim],self.k,0,s)
             # end for
         # end if
         return x
@@ -1411,11 +1412,11 @@ class linear_spline():
         
         '''Get the value of the spline at point u,v'''
         if self.nDim == 1:
-            x = pyspline.bvalu(self.t,self.coef,self.k,0,s)
+            x = pyspline_cs.bvalu(self.t,self.coef,self.k,0,s)
         else:
-            x = zeros([self.nDim])
+            x = zeros([self.nDim],'D')
             for idim in xrange(self.nDim):
-                x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
+                x[idim] = pyspline_cs.bvalu(self.t,self.coef[:,idim],self.k,0,s)
             # end for
         # end if
         return x
@@ -1423,11 +1424,11 @@ class linear_spline():
     def getValueV(self,s):
         '''Get the value of a spline at vector of points s'''
         if self.nDim == 1:
-            x = pyspline.bvaluv(self.t,self.coef,self.k,0,s)
+            x = pyspline_cs.bvaluv(self.t,self.coef,self.k,0,s)
         else:
-            x = zeros((len(s),self.nDim))
+            x = zeros((len(s),self.nDim),'D')
             for idim in xrange(self.nDim):
-                x[:,idim] = pyspline.bvaluv(self.t,self.coef[:,idim],self.k,0,s)
+                x[:,idim] = pyspline_cs.bvaluv(self.t,self.coef[:,idim],self.k,0,s)
             # end for
         # end if
         return x
@@ -1436,9 +1437,9 @@ class linear_spline():
     def getDerivative(self,s):
         
         '''Get the value of the derivative of spline at point u,v'''
-        x = zeros(self.nDim)
+        x = zeros(self.nDim,'D')
         for idim in xrange(self.nDim):
-            x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,1,s)
+            x[idim] = pyspline_cs.bvalu(self.t,self.coef[:,idim],self.k,1,s)
             
         return x        
 
@@ -1446,12 +1447,12 @@ class linear_spline():
     def _calcJacobian(self):
         
         # Calculate the jacobian J, for fixed t and s
-        self.J = zeros([self.N,self.Nctl])
-        ctl = zeros([self.Nctl])
+        self.J = zeros([self.N,self.Nctl],'D')
+        ctl = zeros([self.Nctl],'D')
 
         for i in xrange(self.Nctl):
             ctl[i] += 1
-            self.J[:,i] = pyspline.bvaluv(self.t,ctl,self.k,0,self.s)
+            self.J[:,i] = pyspline_cs.bvaluv(self.t,ctl,self.k,0,self.s)
             ctl[i] -= 1
         # end for
             
@@ -1482,7 +1483,7 @@ class linear_spline():
         handle.write('DATAPACKING=POINT\n')
         for i in xrange(len(s_plot)):
             for idim in xrange(self.nDim):
-                handle.write('%f '%(pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s_plot[i])))
+                handle.write('%f '%(pyspline_cs.bvalu(self.t,self.coef[:,idim],self.k,0,s_plot[i])))
             # end for 
             handle.write('\n')
         # end for 
@@ -1506,232 +1507,6 @@ class linear_spline():
 if __name__ == '__main__':
 	
     # Run a Simple Test Case
-    print 'Testing pySpline...\n'
+    print 'Testing pySplineCS..\n'
     print 'There is an example in the ./example directory'
 
-
-
-
-
-
-
-        
-
-#     def __objcon(self,x):
-#         '''Get the rms error for the given set of design variables'''
-#         # Unpack the x-values
-#         Bcon  = self.Bcon
-#         ctl = self.__unpack_x(x)
-
-#         total = 0.0
-
-#         for idim in xrange(self.nDim):
-#             total += sum((dot(self.J,ctl[:,:,idim].flatten()) - self.X[:,:,idim].flatten())**2)
-#         # end for 
-#         fcon = dot(Bcon,x)
-#         index = 4*self.nDim + 2*self.Nctlv*self.nDim
-
-#        #  # Calculate the LE constraint
-#         for j in xrange(self.Nctlv):
-
-#             A = ctl[0,0,j,:] # Root LE (upper)
-#             B = ctl[0,1,j,:] # Root LE upper +1
-#             C = ctl[1,-2,j,:]# Root LE lower +1
-
-#             # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
-
-#             A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
-#             A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
-#             A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
-
-#             fcon[index:index+3] = array([A1,A2,A3])
-#             index += 3
-#         # end for
-
-#         return total,fcon,False
-
-
-#     def __sens(self,x,f_obj,f_con):
-
-#         ndv = len(x)
-#         g_obj = zeros(ndv)
-#          # Unpack the x-values
-#         ctl = self.__unpack_x(x)
-#         N = self.Nctlu*self.Nctlv
-
-#         for idim in xrange(self.nDim):
-#             g_obj[self.nDim*N + idim*N :  self.nDim*N + idim*N + N] = \
-#                 2*dot(dot(self.J,ctl[:,:,idim].flatten())-self.X[:,:,idim].flatten(),self.J)
-#         # end for 
-
-#         g_con = self.Bcon
-#         h = 1.0e-40j
-#         x = array(x,'D')
-
-#         for i in xrange(ndv):
-#             index = 4*self.nDim + 2*self.Nctlv*self.nDim
-#             x[i] += h
-#             ctl = self.__unpack_x(x,'D')
-#             for j in xrange(self.Nctlv):
-#                 A = ctl[0,0,j,:] # Root LE (upper)
-#                 B = ctl[0,1,j,:] # Root LE upper +1
-#                 C = ctl[1,-2,j,:]# Root LE lower +1
-
-#                 # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
-
-#                 A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
-#                 A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
-#                 A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
-
-#                 g_con[index:index+3,i] = imag(array([A1,A2,A3]))/imag(h)
-#                 index += 3
-#             # end for
-#             x[i] -= h
-#         # end for
-#         return g_obj,g_con,False
-
-#     def __unpack_x(self,x,dtype='d'):
-#         ctl = zeros((self.Nctlu,self.Nctlv,self.nDim),dtype)
-#         N = self.Nctlu*self.Nctlv
-#         for idim in xrange(self.nDim):
-#             ctl[:,:,idim] = reshape(x[self.nDim*N + idim*N : self.nDim*N + idim*N + N],[self.Nctlu,self.Nctlv])
-#         # end for
-#         return ctl
-
-
-
-
-        #X = zeros([self.Nu_free,self.Nv_free,3])
-        
-        # There is no easy way of doing this to my knowlege. There are
-        # 16 combination of Master/Slave  edges (2^4) And each results
-        # in a different section of  the matrix X being returned. Here
-        # we will simply hard code the 16 combination 
-#        master_edge = self.master_edge
-# --------------------------------------------------------
-#         # All Master (zero Slave)
-#         if self.master_edge == [True,True,True,True]:
-#             return X
-
-#         # Three Master/1 Slave
-#         elif master_edge == [False,True,True,True]:
-#             return X[:,1:]
-#         elif master_edge == [True,False,True,True]:
-#             return X[:,0:-1]
-#         elif master_edge == [True,True,False,True]:
-#             return X[1:,:]
-#         elif master_edge == [True,True,True,False]:
-#             return X[0:-1,:]
-
-#         # Two Master / Two Slave
-#         elif master_edge == [True,True,False,False]:
-#             return X[1:-1,:]
-#         elif master_edge == [False,False,True,True]:
-#             return X[:,1:-1]
-
-#         elif master_edge == [True,False,False,True]:
-#             return X[1:,0:-1]
-#         elif master_edge == [False,True,False,True]:
-#             return X[1:,1]
-#         elif master_edge == [False,True,True,False]:
-#             return X[0:-1,1:]
-#         elif master_edge == [True,False,True,False]:
-#             return X[0:-1,0:-1]
-        
-#         # One Master / Three Slave
-#         elif master_edge == [True,False,False,False]:
-#             return X[1:-1,0:-1]
-#         elif master_edge == [False,True,False,False]:
-#             return X[1:-1,1:]
-#         elif master_edge == [False,False,True,False]:
-#             return X[0:-1:,1:-1]
-#         elif master_edge == [False,False,False,True]:
-#             return X[1:,1:-1]
-
-#         # Zero Master / All Slave
-#         elif master_edge == [False,False,False,False]:
-#             return X[1:-1,1:-1]
-
-# --------------------------------------------------------
-
-##  Use a Binary Tree-Type Search -> Faster -> log n scaling 
-
-#         if self.master_edge[0] == True:
-#             if self.master_edge[1] == True:
-#                 if self.master_edge[2] == True:
-#                     if self.master_edge[3] == True:
-#                         #[True,True,True,True]:
-#                         return X
-#                     else:
-#                         #[True,True,True,False]:
-#                         return X[0:-1,:]
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         #[True,True,False,True]:
-#                         return X[1:,:]
-#                     else:
-#                         #[True,True,False,False]:
-#                         return X[1:-1,:]
-#                     # end if
-#                 # end if
-#             else:
-#                 if self.master_edge[2] == True:
-
-#                     if self.master_edge[3] == True:
-#                         #[True,False,True,True]:
-#                         return X[:,0:-1]
-#                     else:
-#                         #[True,False,True,False]:
-#                         return X[0:-1,0:-1]
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         #[True,False,False,True]:
-#                         return X[1:,0:-1]
-#                     else:
-#                         #[True,False,False,False]:
-#                         return X[1:-1,0:-1]
-#                     # end if
-#                 # end if
-#             # end if
-#         else:
-#             if self.master_edge[1] == True:
-#                 if self.master_edge[2] == True:
-#                     if self.master_edge[3] == True:
-#                         #[False,True,True,True]:
-#                         return X[:,1:]
-#                     else:
-#                         #[False,True,True,False]:
-#                         return X[0:-1,1:]
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         # [False,True,False,True]:
-#                         return X[1:,1]
-#                     else:
-#                         # [False,True,False,False]:
-#                         return X[1:-1,1:]
-#                     # end if
-#                 # end if
-#             else:
-#                 if self.master_edge[2] == True:
-#                     if self.master_edge[3] == True:
-#                         #[False,False,True,True]:
-#                         return X[:,1:-1]
-#                     else:
-#                         # [False,False,True,False]:
-#                         return X[0:-1:,1:-1]
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         #[False,False,False,True]:
-#                         return X[1:,1:-1]
-#                     else:
-#                         # [False,False,False,False]:
-#                         return X[1:-1,1:-1]
-#                     # end if
-#                 # end if
-#             # end if
-#         #end if
-#         return
