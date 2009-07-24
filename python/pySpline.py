@@ -36,6 +36,7 @@ import numpy.linalg
 from numpy.linalg import lstsq
 
 import pyspline
+import pyspline_cs
 
 # =============================================================================
 # pySpline class
@@ -100,7 +101,14 @@ class surf_spline():
         self.Nctl_free  = None
         self.links = None
         self.ref_axis_dir = None
-        
+
+        self.dtype = 'd' # Use real version by default
+        self.pyspline = pyspline
+
+        if 'complex' in kwargs:
+            self.pyspline = pyspline_cs
+            self.dtype = 'D'
+        # end if
         if task == 'create':
             assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
                 and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs, \
@@ -113,14 +121,15 @@ class surf_spline():
             self.Nv = None
             self.ku = kwargs['ku'] 
             self.kv = kwargs['kv']
-            self.tu = array(kwargs['tu'])
-            self.tv = array(kwargs['tv'])
-            self.coef = kwargs['coef']
+            self.tu = array(kwargs['tu'],self.dtype)
+            self.tv = array(kwargs['tv'],self.dtype)
+            self.coef = array(kwargs['coef'],self.dtype)
             self.Nctlu = self.coef.shape[0]
             self.Nctlv = self.coef.shape[1]
             self.orig_data = False
             self.range = kwargs['range']
             self.nDim = self.coef.shape[2]
+
             return
      
         if task == 'interpolate':
@@ -148,7 +157,7 @@ class surf_spline():
             [self.V, self.U] = meshgrid(self.v,self.u)
             self.orig_data = True
             
-            self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
+            self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim),self.dtype)
             self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
 
             #Sanity check to make sure k is less than N
@@ -159,7 +168,7 @@ class surf_spline():
             
             timeA = time.time()
             for idim in xrange(self.nDim):
-                self.tu,self.tv,self.coef[:,:,idim]= pyspline.b2ink(self.u,self.v,self.X[:,:,idim],self.ku,self.kv)
+                self.tu,self.tv,self.coef[:,:,idim]= self.pyspline.b2ink(self.u,self.v,self.X[:,:,idim],self.ku,self.kv)
             #end for
             
             sys.stdout.write(' Interpolate Time: %6.5f s\n'%(time.time()-timeA))
@@ -171,6 +180,8 @@ class surf_spline():
             assert 'ku' in kwargs and 'kv' in kwargs and \
                    'Nctlu' in kwargs and 'Nctlv' in kwargs and 'X' in kwargs, \
                    'Error: ku,kv,Nctlu, Nctlv and X MUST be defined for task \'lms\''
+
+      
 
             self.X  = kwargs['X']
             self.Nu = self.X.shape[0]
@@ -217,7 +228,7 @@ class surf_spline():
 
 #             # Lets do a lms 
             timeA = time.time()
-            self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim])
+            self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim],self.dtype)
             for idim in xrange(self.nDim):
                 self.coef[:,:,idim] = reshape(lstsq(self.J,self.X[:,:,idim].flatten())[0],[self.Nctlu,self.Nctlv])
 
@@ -231,11 +242,11 @@ class surf_spline():
 
     def _calcParameterization(self):
 
-        u = (zeros(self.Nu))
+        u = zeros(self.Nu,self.dtype)
         singular_counter = 0
 
         for j in xrange(self.Nv): #loop over each v, and average the 'u' parameter 
-            temp = zeros(self.Nu,'d')
+            temp = zeros(self.Nu,self.dtype)
 
             for i in xrange(self.Nu-1):
                 temp[i+1] = temp[i] + sqrt((self.X[i+1,j,0]-self.X[i,j,0])**2 +\
@@ -256,10 +267,10 @@ class surf_spline():
         u/=(self.Nv-singular_counter) #divide by the number of 'j's we had
         self.u = u
         
-        v = zeros(self.Nv)
+        v = zeros(self.Nv,self.dtype)
         singular_counter = 0
         for i in xrange(self.Nu): #loop over each v, and average the 'u' parameter 
-            temp = zeros(self.Nv)
+            temp = zeros(self.Nv,self.dtype)
             for j in xrange(self.Nv-1):
                 temp[j+1] = temp[j] + sqrt((self.X[i,j+1,0]-self.X[i,j,0])**2 +\
                                            (self.X[i,j+1,1]-self.X[i,j,1])**2 +\
@@ -435,21 +446,26 @@ class surf_spline():
 
         '''Find the initial knot vector for this problem'''
 
+        # ADD COMPLEX VERSION OF KNOTS
+        #self.tu = self.pyspline.knots(self.u,self.Nctlu,self.ku)
+        #self.tv = self.pyspline.knots(self.v,self.Nctlv,self.kv)
+
         self.tu = pyspline.knots(self.u,self.Nctlu,self.ku)
         self.tv = pyspline.knots(self.v,self.Nctlv,self.kv)
+
         
         return
 
     def _calcJacobian(self):
         
         # Calculate the jacobian J, for fixed t and s
-        self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv])
-        ctl = zeros([self.Nctlu,self.Nctlv])
+        self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv],self.dtype)
+        ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
 
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
                 ctl[i,j] += 1
-                self.J[:,i*self.Nctlv + j] = pyspline.b2valv(self.U.flatten(),self.V.flatten(),0,0,self.tu,self.tv,self.ku,self.kv,ctl)
+                self.J[:,i*self.Nctlv + j] = self.pyspline.b2valv(self.U.flatten(),self.V.flatten(),0,0,self.tu,self.tv,self.ku,self.kv,ctl)
                 ctl[i,j] -= 1
                 # end for
             # end for 
@@ -518,14 +534,14 @@ class surf_spline():
 
     def _calcCtlDeriv(self,i,j):
         '''Calculate the derivative wrt control point i,j'''
-        ctl = zeros([self.Nctlu,self.Nctlv])
+        ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
         ctl[i,j] += 1
         
-        return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
+        return self._getCropData(self.pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
 
     def _calcCtlDerivNode(self,node):
         '''Calculate the derivative wrt control point i,j'''
-        ctl = zeros([self.Nctlu,self.Nctlv])
+        ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
         if node == 0:
             ctl[0,0] += 1
         elif node == 1:
@@ -535,11 +551,11 @@ class surf_spline():
         else:
             ctl[-1,-1] += 1
         
-        return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
+        return self._getCropData(self.pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
 
     def _calcCtlDerivEdge(self,edge,index,dir):
         '''Calculate the derivative wrt control point i,j'''
-        ctl = zeros([self.Nctlu,self.Nctlv])
+        ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
         if edge == 0:
             if dir==1:
                 ctl[index,0] += 1
@@ -564,7 +580,7 @@ class surf_spline():
                 clt[-1,self.Nctlv-index-1] += 1
         
         
-        return self._getCropData(pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
+        return self._getCropData(self.pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,self.ku,self.kv,ctl)).flatten()
 
 
     def associateRefAxis(self,ref_axis):#,section=None):
@@ -577,7 +593,7 @@ class surf_spline():
 
         # Find the s range for the 4 corners
 
-        p = zeros(4)
+        p = zeros(4,self.dtype)
         
         p[0],conv,D,esp = ref_axis.xs.projectPoint(self.coef[0 , 0])
         p[1],conv,D,esp = ref_axis.xs.projectPoint(self.coef[0 ,-1])
@@ -594,7 +610,7 @@ class surf_spline():
         # with.  Take 3 Normal Vectors
         N = 3
         sn = linspace(min_s,max_s,N)
-        dn = zeros((N,3))
+        dn = zeros((N,3),self.dtype)
         for i in xrange(N):
             dn[i,:] = ref_axis.xs.getDerivative(sn[i])
 
@@ -719,7 +735,7 @@ class surf_spline():
 
     def updateSurfacePoints(self,delta):
         '''Update the control points on surface deltas normal to the surface'''
-        update = zeros((self.Nctlu,self.Nctlv)) 
+        update = zeros((self.Nctlu,self.Nctlv),self.dtype) 
         exec('update'+self.slice_string+' = delta')
 
 # ------------- Python Code ------------------------------------------------
@@ -741,7 +757,7 @@ class surf_spline():
 # -------------------------------------------------------------------------
 
         # Call the fortran function instead
-        self.coef = pyspline.updatesurfacepoints(self.coef,update,self.tu,self.tv,self.ku,self.kv)
+        self.coef = self.pyspline.updatesurfacepoints(self.coef,update,self.tu,self.tv,self.ku,self.kv)
 
         return
 
@@ -811,7 +827,7 @@ class surf_spline():
         du,dv = self.getDerivative(u,v)
 
         # Now cross and normalize
-        n = zeros(3)
+        n = zeros(3,self.dtype)
         n[0] = du[1]*dv[2]-du[2]*dv[1]
         n[1] = du[2]*dv[0]-du[0]*dv[2]
         n[2] = du[0]*dv[1]-du[1]*dv[0]
@@ -822,37 +838,37 @@ class surf_spline():
     def getValue(self,u,v):
         
         '''Get the value of the spline at point u,v'''
-        x = zeros([self.nDim])
+        x = zeros((self.nDim),self.dtype)
         for idim in xrange(self.nDim):
-            x[idim] = pyspline.b2val(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            x[idim] = self.pyspline.b2val(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         
         return x
 
     def getValueV(self,u,v):
         '''Get the value of a spline at vector of points u,v'''
         assert u.shape == v.shape, 'u and v must be the same length'
-        x = zeros((len(u),self.nDim))
+        x = zeros((len(u),self.nDim),self.dtype)
         for idim in xrange(self.nDim):
-            x[:,idim] = pyspline.b2valv(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            x[:,idim] = self.pyspline.b2valv(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         return x
 
     def getValueM(self,u,v):
         '''Get the value of a spline at matrix of points u,v'''
         assert u.shape == v.shape, 'u and v must be the same shape'
-        x = zeros((u.shape[0],u.shape[1],self.nDim))
+        x = zeros((u.shape[0],u.shape[1],self.nDim),self.dtype)
         for idim in xrange(self.nDim):
-            x[:,:,idim] = pyspline.b2valm(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            x[:,:,idim] = self.pyspline.b2valm(u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
 
         return x
 
     def getDerivative(self,u,v):
         
         '''Get the value of the derivative of spline at point u,v'''
-        du = zeros(self.nDim)
-        dv = zeros(self.nDim)
+        du = zeros(self.nDim,self.dtype)
+        dv = zeros(self.nDim,self.dtype)
         for idim in xrange(self.nDim):
-            du[idim] = pyspline.b2val(u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-            dv[idim] = pyspline.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            du[idim] = self.pyspline.b2val(u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            dv[idim] = self.pyspline.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         return du,dv
 
 
@@ -860,11 +876,11 @@ class surf_spline():
         
         '''Get the jacobian at point u,v'''
 
-        J = zeros((self.nDim,2))
+        J = zeros((self.nDim,2),self.dtype)
         
         for idim in xrange(self.nDim):
-            J[idim,0] = pyspline.b2val(u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-            J[idim,1] = pyspline.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            J[idim,0] = self.pyspline.b2val(u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            J[idim,1] = self.pyspline.b2val(u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
 
         return J
 
@@ -959,13 +975,13 @@ class surf_spline():
 
             x = self.getValue(u,v) #x contains the x,y,z coordinates 
 
-            f = mat(zeros((3,1)))
+            f = mat(zeros((3,1),self.dtype))
             f[0] = x[0]-(x0[0]+r[0]*s)
             f[1] = x[1]-(x0[1]+r[1]*s)
             f[2] = x[2]-(x0[2]+r[2]*s)
 
             J = self.getJacobian(u,v)
-            A = mat(zeros((3,3)))
+            A = mat(zeros((3,3),self.dtype))
             A[:,0:2] = J
             A[0,2]   = -r[0]
             A[1,2]   = -r[1]
@@ -1004,7 +1020,7 @@ class surf_spline():
             handle.write('DATAPACKING=POINT\n')
             for j in xrange(self.Nv):
                 for i in xrange(self.Nu):
-                    handle.write('%f %f %f \n'%(self.X[i,j,0],self.X[i,j,1],self.X[i,j,2]))
+                    handle.write('%f %f %f \n'%(self.X[i,j,0].astype('d'),self.X[i,j,1].astype('d'),self.X[i,j,2].astype('d')))
                 # end for
             # end for 
         # end if
@@ -1013,12 +1029,12 @@ class surf_spline():
             u_plot = self.u
             v_plot = self.v
         else:
-            u_plot = linspace(self.range[0],self.range[1],25)
-            v_plot = linspace(self.range[2],self.range[3],25)
+            u_plot = linspace(self.range[0],self.range[1],25).astype('d')
+            v_plot = linspace(self.range[2],self.range[3],25).astype('d')
         # end if 
             
-        u_plot = linspace(self.range[0],self.range[1],25)
-        v_plot = linspace(self.range[2],self.range[3],25)
+        u_plot = linspace(self.range[0],self.range[1],25).astype('d')
+        v_plot = linspace(self.range[2],self.range[3],25).astype('d')
 
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'%('interpolated',len(u_plot),len(v_plot)))
@@ -1026,7 +1042,7 @@ class surf_spline():
         for j in xrange(len(v_plot)):
             for i in xrange(len(u_plot)):
                 for idim in xrange(self.nDim):
-                    handle.write('%f '%(pyspline.b2val(u_plot[i],v_plot[j],0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])))
+                    handle.write('%f '%(pyspline.b2val(u_plot[i],v_plot[j],0,0,self.tu.astype('d'),self.tv.astype('d'),self.ku,self.kv,self.coef[:,:,idim].astype('d'))))
                 # end for 
                 handle.write('\n')
             # end for
@@ -1037,7 +1053,7 @@ class surf_spline():
         handle.write('DATAPACKING=POINT\n')
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
-                handle.write('%f %f %f \n'%(self.coef[i,j,0],self.coef[i,j,1],self.coef[i,j,2]))
+                handle.write('%f %f %f \n'%(self.coef[i,j,0].astype('d'),self.coef[i,j,1].astype('d'),self.coef[i,j,2].astype('d')))
             # end for
         # end for 
 
@@ -1055,7 +1071,7 @@ class surf_spline():
         handle.write('DATAPACKING=POINT\n')
         s = linspace(0,1,N)
         for i in xrange(N):
-            value = self.getValueEdge(edge,s[i])
+            value = self.getValueEdge(edge,s[i]).astype('d')
             handle.write('%f %f %f \n'%(value[0],value[1],value[2]))
         # end for
         return
@@ -1092,7 +1108,7 @@ class surf_spline():
 
         for i in xrange(len(self.tu)):
             pos_counter += 1
-            handle.write('%12.6g,'%(self.tu[i]))
+            handle.write('%12.6g,'%(real(self.tu[i])))
             if mod(pos_counter,5) == 0:
                 handle.write('%7dP%7d\n'%(Pcount,counter))
                 counter += 1
@@ -1102,7 +1118,7 @@ class surf_spline():
 
         for i in xrange(len(self.tv)):
             pos_counter += 1
-            handle.write('%12.6g,'%(self.tv[i]))
+            handle.write('%12.6g,'%(real(self.tv[i])))
             if mod(pos_counter,5) == 0:
                 handle.write('%7dP%7d\n'%(Pcount,counter))
                 counter += 1
@@ -1124,7 +1140,7 @@ class surf_spline():
             for i in xrange(self.Nctlu):
                 for idim in xrange(3):
                     pos_counter += 1
-                    handle.write('%12.6g,'%(self.coef[i,j,idim]))
+                    handle.write('%12.6g,'%(real(self.coef[i,j,idim])))
                     if mod(pos_counter,5) == 0:
                         handle.write('%7dP%7d\n'%(Pcount,counter))
                         counter += 1
@@ -1138,13 +1154,13 @@ class surf_spline():
         for  i in xrange(4):
             pos_counter += 1
             if i == 0:
-                handle.write('%12.6g,'%(self.tu[0]))
+                handle.write('%12.6g,'%(real(self.tu[0])))
             if i == 1:
-                handle.write('%12.6g,'%(self.tu[-1]))
+                handle.write('%12.6g,'%(real(self.tu[-1])))
             if i == 2:
-                handle.write('%12.6g,'%(self.tv[0]))
+                handle.write('%12.6g,'%(real(self.tv[0])))
             if i == 3:
-                handle.write('%12.6g;'%(self.tv[-1])) # semi-colon for the last entity
+                handle.write('%12.6g;'%(real(self.tv[-1]))) # semi-colon for the last entity
             if mod(pos_counter,5)==0:
                 handle.write('%7dP%7d\n'%(Pcount,counter))
                 counter += 1
@@ -1195,6 +1211,14 @@ class linear_spline():
             X, real, array, size(len(u),len(v),nDim): Array of data points to fit
 '''
         #print 'pySpline Class Initialization Type: %s'%(task)
+
+        self.pyspline = pyspline
+        self.dtype = 'd'
+
+        if 'complex' in kwargs:
+            self.pyspline = pyspline_cs
+            self.dtype = 'D'
+        # end if
 
         if task == 'create':
             assert 'k' in kwargs and 't' in kwargs and \
@@ -1253,13 +1277,13 @@ class linear_spline():
             # end if
 
             # Generate the knot vector
-            self.t = pyspline.bknot(self.s,self.k)
+            self.t = self.pyspline.bknot(self.s,self.k)
             if self.nDim > 1:
-                self.coef = zeros((self.Nctl,self.nDim))
+                self.coef = zeros((self.Nctl,self.nDim),self.dtype)
                 for idim in xrange(self.nDim):
-                    self.coef[:,idim]= pyspline.bintk(self.s,self.X[:,idim],self.t,self.k)
+                    self.coef[:,idim]= self.pyspline.bintk(self.s,self.X[:,idim],self.t,self.k)
             else:
-                self.coef = pyspline.bintk(self.s,self.X,self.t,self.k)
+                self.coef = self.pyspline.bintk(self.s,self.X,self.t,self.k)
             # end if
                 
             #end for
@@ -1308,11 +1332,11 @@ class linear_spline():
                 self.Nctl  = self.N
 
             # Generate the knot vector
-            self.t = pyspline.bknot(self.s,self.k)
+            self.t = self.pyspline.bknot(self.s,self.k)
             if self.nDim > 1:
                 # Calculate the Jacobian
                 self._calcJacobian()
-                self.coef = zeros((self.Nctl,self.nDim))
+                self.coef = zeros((self.Nctl,self.nDim),self.dtype)
                 for idim in xrange(self.nDim):
                     self.coef[:,idim] = lstsq(self.J,self.X[:,idim])[0]
                 # end for
@@ -1367,7 +1391,7 @@ class linear_spline():
 
     def _getParameterization(self):
         # We need to parameterize the curve
-        self.s = zeros(self.N);
+        self.s = zeros(self.N,self.dtype);
         for i in xrange(self.N-1):
             dist = 0
             for idim in xrange(self.nDim):
@@ -1382,7 +1406,7 @@ class linear_spline():
 
     def _getLength(self):
         # We need to the length of the curve
-        s = zeros(self.N);
+        s = zeros(self.N,self.dtype);
         for i in xrange(self.N-1):
             dist = 0
             for idim in xrange(self.nDim):
@@ -1397,11 +1421,11 @@ class linear_spline():
     def __call__(self,s):
 
         if self.nDim == 1:
-            x = pyspline.bvalu(self.t,self.coef,self.k,0,s)
+            x = self.pyspline.bvalu(self.t,self.coef,self.k,0,s)
         else:
-            x = zeros([self.nDim])
+            x = zeros((self.nDim),self.dtype)
             for idim in xrange(self.nDim):
-                x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
+                x[idim] = self.pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
             # end for
         # end if
         return x
@@ -1411,11 +1435,11 @@ class linear_spline():
         
         '''Get the value of the spline at point u,v'''
         if self.nDim == 1:
-            x = pyspline.bvalu(self.t,self.coef,self.k,0,s)
+            x = self.pyspline.bvalu(self.t,self.coef,self.k,0,s)
         else:
-            x = zeros([self.nDim])
+            x = zeros((self.nDim),self.dtype)
             for idim in xrange(self.nDim):
-                x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
+                x[idim] = self.pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s)
             # end for
         # end if
         return x
@@ -1423,11 +1447,11 @@ class linear_spline():
     def getValueV(self,s):
         '''Get the value of a spline at vector of points s'''
         if self.nDim == 1:
-            x = pyspline.bvaluv(self.t,self.coef,self.k,0,s)
+            x = self.pyspline.bvaluv(self.t,self.coef,self.k,0,s)
         else:
-            x = zeros((len(s),self.nDim))
+            x = zeros((len(s),self.nDim),self.dtype)
             for idim in xrange(self.nDim):
-                x[:,idim] = pyspline.bvaluv(self.t,self.coef[:,idim],self.k,0,s)
+                x[:,idim] = self.pyspline.bvaluv(self.t,self.coef[:,idim],self.k,0,s)
             # end for
         # end if
         return x
@@ -1436,9 +1460,9 @@ class linear_spline():
     def getDerivative(self,s):
         
         '''Get the value of the derivative of spline at point u,v'''
-        x = zeros(self.nDim)
+        x = zeros(self.nDim,self.dtype)
         for idim in xrange(self.nDim):
-            x[idim] = pyspline.bvalu(self.t,self.coef[:,idim],self.k,1,s)
+            x[idim] = self.pyspline.bvalu(self.t,self.coef[:,idim],self.k,1,s)
             
         return x        
 
@@ -1446,12 +1470,12 @@ class linear_spline():
     def _calcJacobian(self):
         
         # Calculate the jacobian J, for fixed t and s
-        self.J = zeros([self.N,self.Nctl])
-        ctl = zeros([self.Nctl])
+        self.J = zeros((self.N,self.Nctl),self.dtype)
+        ctl = zeros((self.Nctl),self.dtype)
 
         for i in xrange(self.Nctl):
             ctl[i] += 1
-            self.J[:,i] = pyspline.bvaluv(self.t,ctl,self.k,0,self.s)
+            self.J[:,i] = self.pyspline.bvaluv(self.t,ctl,self.k,0,self.s)
             ctl[i] -= 1
         # end for
             
@@ -1466,7 +1490,7 @@ class linear_spline():
             handle.write('DATAPACKING=POINT\n')
             for i in xrange(self.N):
                 for idim in xrange(self.nDim):
-                    handle.write('%f '%(self.X[i,idim]))
+                    handle.write('%f '%(real(self.X[i,idim])))
                 # end for
                 handle.write('\n')
         # end if
@@ -1474,7 +1498,7 @@ class linear_spline():
         if self.orig_data:
             s_plot = self.s
         else:
-            s_plot = linspace(self.range[0],self.range[1],25)
+            s_plot = linspace(self.range[0],self.range[1],25).astype('d')
         # end if 
 
         # Dump re-interpolated spline
@@ -1482,7 +1506,7 @@ class linear_spline():
         handle.write('DATAPACKING=POINT\n')
         for i in xrange(len(s_plot)):
             for idim in xrange(self.nDim):
-                handle.write('%f '%(pyspline.bvalu(self.t,self.coef[:,idim],self.k,0,s_plot[i])))
+                handle.write('%f '%(pyspline.bvalu(self.t.astype('d'),self.coef[:,idim].astype('d'),self.k,0,s_plot[i])))
             # end for 
             handle.write('\n')
         # end for 
@@ -1492,7 +1516,7 @@ class linear_spline():
         handle.write('DATAPACKING=POINT\n')
         for i in xrange(self.N):
             for idim in xrange(self.nDim):
-                handle.write('%f '%(self.coef[i,idim]))
+                handle.write('%f '%(real(self.coef[i,idim])))
             # end for
             handle.write('\n')
         # end for
@@ -1506,7 +1530,7 @@ class linear_spline():
 if __name__ == '__main__':
 	
     # Run a Simple Test Case
-    print 'Testing pySpline...\n'
+    print 'Testing pyspline...\n'
     print 'There is an example in the ./example directory'
 
 
