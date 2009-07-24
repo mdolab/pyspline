@@ -124,6 +124,22 @@ python module pyspline_cs ! in
             integer optional,check(shape(coef,1)==ny),depend(coef) :: ny=shape(coef,1)
         end subroutine updatesurfacepoints
 
+        subroutine getcomplexcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,ns,nx,ny) ! in :test:getComplexCoef.f90
+            integer intent(in) :: dir
+            complex*16 dimension(nref),intent(in) :: s
+            complex*16 dimension(nref + 2),intent(in),depend(nref) :: t
+            complex*16 dimension(nref,3),intent(in),depend(nref) :: x
+            complex*16 dimension(nref,3),intent(in),depend(nref) :: rot
+            complex*16 dimension(nref),intent(in),depend(nref) :: scale
+            complex*16 dimension(ns),intent(in) :: s_pos
+            complex*16 dimension(ns,3),intent(in),depend(ns) :: links
+            complex*16 dimension(nx,ny,3),intent(out),depend(nx,ny) :: coef
+            integer optional,check(len(s)>=nref),depend(s) :: nref=len(s)
+            integer optional,check(len(s_pos)>=ns),depend(s_pos) :: ns=len(s_pos)
+            integer :: nx
+            integer :: ny
+        end subroutine getcomplexcoef
+
     end interface 
 end python module pyspline_cs
 
