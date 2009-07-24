@@ -637,7 +637,8 @@ class surf_spline():
             # end for
         # end for
         
-        self.links = []
+        self.links_s = []
+        self.links_x = []
 
         
         if v_dot_tot > u_dot_tot:
@@ -660,7 +661,9 @@ class surf_spline():
                 for i in xrange(self.Nctlu):
                     D = self.coef[i,j] - base_point
                     D = dot(M,D) #Rotate to local frame
-                    self.links.append([s,D])
+                    self.links_s.append(s)
+                    self.links_x.append(D)
+                    #self.links.append([s,D])
                 # end if
             # end for
             self.ref_axis_dir = 1 # Ref axis is aligned along v
@@ -683,29 +686,11 @@ class surf_spline():
                 for j in xrange(self.Nctlv):
                     D = self.coef[i,j] - base_point
                     D = dot(M,D) #Rotate to local frame
-                    self.links.append([s,D])
+                    self.links_s.append(s)
+                    self.links_x.append(D)
                 # end if
             # end for
             self.ref_axis_dir = 0 # Ref axis is aligned along u
-
-
-    def associateRefAxis2(self,ref_axis,s):
-        '''Create links between ref_axis and this patch.'''
-
-        self.ref_axis_dir = 1 #since it is ONLY called from Lifting Surface
-        self.links = []
-        assert len(s) == self.Nctlv, 's must be of length Nctlv'
-        for j in xrange(self.Nctlv):
-            # Now loop over the control points to set links
-            base_point = ref_axis.xs.getValue(s[j])
-            M = ref_axis.getRotMatrixGlobalToLocal(s[j])
-
-            for i in xrange(self.Nctlu):
-                D = self.coef[i,j] - base_point
-                D = dot(M,D) #Rotate to local frame
-                self.links.append([s[j],D])
-            # end if
-        # end for
 
     def update(self,ref_axis):
         '''Update the control points with ref_axis:'''
@@ -713,25 +698,58 @@ class surf_spline():
 
         if self.ref_axis_dir == 1:
             for j in xrange(self.Nctlv):
-                s = self.links[counter][0]
+                s = self.links_s[counter]
                 M = ref_axis.getRotMatrixLocalToGloabl(s)
                 X_base = ref_axis.xs.getValue(s)
                 for i in xrange(self.Nctlu):
-                   self.coef[i,j,:] = X_base + dot(M,self.links[counter][1])*ref_axis.scales(s)
+                   self.coef[i,j,:] = X_base + dot(M,self.links_x[counter])*ref_axis.scales(s)
                    counter += 1
                 # end for
             # end for
         else:
             for i in xrange(self.Nctlu):
-                s = self.links[counter][0]
+                s = self.links_s[counter]
                 M = ref_axis.getRotMatrixLocalToGloabl(s)
                 X_base = ref_axis.xs.getValue(s)
                 
                 for j in xrange(self.Nctlv):
-                    self.coef[i,j,:] = X_base + dot(M,self.links[counter][1])*ref_axis.scales(s)
+                    self.coef[i,j,:] = X_base + dot(M,self.links_x[counter])*ref_axis.scales(s)
                     counter += 1
                 # end for
             # end for
+
+
+    def getComplexCoef(self,ref_axis):
+        '''This is a specific function used ONLY for complex step
+        derivatives. This function takes the complex step on the
+        reference axis, propagates them to the coefficients and then
+        returns the free coefficients'''
+
+        dir = self.ref_axis_dir
+        s_pos = self.links_s # s - Positions where control points are attached to axis
+        links = self.links_x # Vectors links for each control point
+        # Data from the ref_axis:
+        s = ref_axis.s    # parameter for ref axis
+        t = ref_axis.xs.t # common knot vector for ref axis
+        x = ref_axis.xs.coef
+        rot   = zeros((ref_axis.N,3),'D')
+        rot[:,0] = ref_axis.rotxs.coef
+        rot[:,1] = ref_axis.rotys.coef
+        rot[:,2] = ref_axis.rotzs.coef
+        scales = ref_axis.scales.coef
+        links = array(links)
+       #  print 'check:'
+#         print 'dir:,',dir
+#         print 's:',s
+#         print 't:',t
+#         print 'x:',x
+#         print 'rot:',rot
+#         print 'scales:',scales
+#         print 's_pos:',s_pos
+#         print 'links:',links
+        
+        coef = pyspline_cs.getcomplexcoef(dir,s,t,x,rot,scales,s_pos,links,self.Nctlu,self.Nctlv)
+        return eval('coef'+self.slice_string)
 
     def updateSurfacePoints(self,delta):
         '''Update the control points on surface deltas normal to the surface'''
@@ -756,7 +774,7 @@ class surf_spline():
 
 # -------------------------------------------------------------------------
 
-        # Call the fortran function instead
+        # Call the fortran function instead - Much Faster
         self.coef = self.pyspline.updatesurfacepoints(self.coef,update,self.tu,self.tv,self.ku,self.kv)
 
         return
