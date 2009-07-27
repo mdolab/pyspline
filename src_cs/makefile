@@ -47,7 +47,8 @@ OBJ = 	complexify.o \
 	misc/c_b2valM.o\
 	misc/c_b2valV.o\
 	misc/updateSurfacePoints.o\
-	misc/getComplexCoef.o\
+	misc/c_getcoef.o\
+#	misc/getComplexCoef.o\
 
 
 ###================================================

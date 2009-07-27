@@ -46,7 +46,8 @@ OBJ =   bspline/bfqad.o\
 	misc/bvaluV.o\
 	misc/b2valM.o\
 	misc/b2valV.o\
-	misc/updateSurfacePoints.o
+	misc/updateSurfacePoints.o\
+	misc/getcoef.o
 
 
 ###================================================

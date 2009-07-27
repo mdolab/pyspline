@@ -106,6 +106,7 @@ class surf_spline():
 
         self.dtype = 'd' # Use real version by default
         self.pyspline = pyspline
+        self.pyspline_cs = pyspline_cs
 
         if 'complex' in kwargs:
             self.pyspline = pyspline_cs
@@ -672,68 +673,6 @@ master. i.e. Internal or on a master edge'''
         return dir,max_s,min_s
        
 
-#     def update(self,ref_axis):
-#         '''Update the control points with ref_axis:'''
-#         counter = 0
-
-#         if self.ref_axis_dir == 1:
-#             for j in xrange(self.Nctlv):
-#                 s = self.links_s[counter]
-#                 M = ref_axis.getRotMatrixLocalToGloabl(s)
-#                 X_base = ref_axis.xs.getValue(s)
-#                 for i in xrange(self.Nctlu):
-#                    self.coef[i,j,:] = X_base + \
-#                        dot(M,self.links_x[counter])*ref_axis.scales(s)
-#                    counter += 1
-#                 # end for
-#             # end for
-#         else:
-#             for i in xrange(self.Nctlu):
-#                 s = self.links_s[counter]
-#                 M = ref_axis.getRotMatrixLocalToGloabl(s)
-#                 X_base = ref_axis.xs.getValue(s)
-                
-#                 for j in xrange(self.Nctlv):
-#                     self.coef[i,j,:] = X_base +\
-#                         dot(M,self.links_x[counter])*ref_axis.scales(s)
-#                     counter += 1
-#                 # end for
-#             # end for
-
-
-    def getComplexCoef(self,ref_axis):
-        '''This is a specific function used ONLY for complex step
-        derivatives. This function takes the complex step on the
-        reference axis, propagates them to the coefficients and then
-        returns the free coefficients'''
-
-        dir = self.ref_axis_dir
-        # s - Positions where control points are attached to axis
-        s_pos = self.links_s
-        links = self.links_x # Vectors links for each control point
-        # Data from the ref_axis:
-        s = ref_axis.s    # parameter for ref axis
-        t = ref_axis.xs.t # common knot vector for ref axis
-        x = ref_axis.xs.coef
-        rot   = zeros((ref_axis.N,3),'D')
-        rot[:,0] = ref_axis.rotxs.coef
-        rot[:,1] = ref_axis.rotys.coef
-        rot[:,2] = ref_axis.rotzs.coef
-        scales = ref_axis.scales.coef
-        links = array(links)
-       #  print 'check:'
-#         print 'dir:,',dir
-#         print 's:',s
-#         print 't:',t
-#         print 'x:',x
-#         print 'rot:',rot
-#         print 'scales:',scales
-#         print 's_pos:',s_pos
-#         print 'links:',links
-        
-        coef = pyspline_cs.getcomplexcoef(\
-            dir,s,t,x,rot,scales,s_pos,links,self.Nctlu,self.Nctlv)
-        return eval('coef'+self.slice_string)
 
     def updateSurfacePoints(self,delta):
         '''Update the control points on surface deltas normal to the surface'''
