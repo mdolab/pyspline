@@ -1,4 +1,4 @@
-subroutine getComplexCoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,ns,nx,ny)
+subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny)
 
 !*** DESCRIPTION
 !
@@ -34,7 +34,7 @@ subroutine getComplexCoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,ns,nx,ny)
 
   real, PARAMETER :: pi = 3.14159265358979
 
-  integer nx,ny,i,j,idim,nref,ns,inbv
+  integer nx,ny,i,j,idim,nref,inbv
   integer   , intent(in)     :: dir
   ! Ref axis:
   complex*16, intent(in)     :: s(nref)
@@ -44,8 +44,8 @@ subroutine getComplexCoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,ns,nx,ny)
   complex*16, intent(in)     :: scale(nref)
 
   ! Link Data
-  complex*16, intent(in)     :: s_pos(ns)
-  complex*16, intent(in)     :: links(ns,3)
+  complex*16, intent(in)     :: s_pos(nx,ny)
+  complex*16, intent(in)     :: links(nx,ny,3)
 
   ! Output
   complex*16, intent(out)    :: coef(nx,ny,3)
@@ -64,29 +64,17 @@ subroutine getComplexCoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,ns,nx,ny)
   complex*16 bvalu
   complex*16                :: work(3*2)
 
- ! print *,'in getcomplex'
+  print *,'in getcoef'
+  
   if (dir .eq. 1) then  ! Ref axis along V
-     
-
-   !   print *, 'check:'
-!      print *, 'dir:,',dir
-!      print *, 's:',s
-!      print *, 't:',t
-!      print *, 'x:',x
-!      print *, 'rot:',rot
-!      print *, 'scales:',scale
-!      print *, 's_pos:',s_pos
-!      print *,'links:',links
-!      print *,'Nx:',nx
-!      print *,'ny:',ny
-!      print *,'nref:',nref
-
-     i=1
-     j=1
      do j = 1,Ny
-        current_s = s_pos(i,j)
+        !print *,'i,j,s_pos:',i,j,s_pos(1,j)
+        current_s = s_pos(1,j)
         current_scale = bvalu(t,scale,nref,2,0,current_s,inbv,work)        
         ! Now we need the rotation Matrix
+
+        ! Python Command:
+        !inv(dot(self._roty(self.rotys(s)), dot(self._rotx(self.rotxs(s)),self._rotz(self.rotzs(s)))))
         
         ! X Rot:
         angle = bvalu(t,rot(:,1),nref,2,0,current_s,inbv,work)
@@ -99,6 +87,9 @@ subroutine getComplexCoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,ns,nx,ny)
         ! Z Rot:
         angle = bvalu(t,rot(:,3),nref,2,0,current_s,inbv,work)
         call zrot(angle*pi/180,matz)
+
+        rot_mat = matmul(maty,matmul(matx,matz))
+
 
         rot_mat = matmul(maty,matmul(matx,matz))
         
@@ -129,11 +120,12 @@ subroutine getComplexCoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,ns,nx,ny)
      end do 
 
   else
+     i=1
+     j=1
 
-     counter = 1
      do i = 1,Nx
 
-        current_s = s_pos(counter)
+        current_s = s_pos(i,j)
         current_scale = bvalu(t,scale,nref,2,0,current_s,inbv,work)        
         ! Now we need the rotation Matrix
 
@@ -177,8 +169,7 @@ subroutine getComplexCoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,ns,nx,ny)
         
         
         do j =1,Ny
-           coef(i,j,:) = X_base + matmul(inv_rot_mat,links(counter,:))*current_scale
-           counter = counter + 1
+           coef(i,j,:) = X_base + matmul(inv_rot_mat,links(i,j,:))*current_scale
         end do
      end do 
 
@@ -186,7 +177,7 @@ subroutine getComplexCoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,ns,nx,ny)
   end if
 
 
-end subroutine getComplexCoef
+end subroutine getcoef
 
 
 subroutine xrot(theta,rotmat)
