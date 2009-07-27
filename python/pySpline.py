@@ -30,7 +30,7 @@ import os, sys, string, time, copy
 # External Python modules
 # =============================================================================
 from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
-    array, real, reshape, meshgrid, dot, cross, mod
+    array, real, reshape, meshgrid, dot, cross, mod, floor
 
 import numpy.linalg
 from numpy.linalg import lstsq
@@ -307,7 +307,12 @@ class surf_spline():
         Nctlv = self.Nctlv
         Nu    = self.Nu
         Nv    = self.Nv
-        
+       
+        if Nu == None:
+            Nu = 0
+        if Nv == None:
+            Nv = 0
+
         if self.master_edge[0] == False:
             Nv -= 1
             Nctlv -= 1
@@ -324,10 +329,11 @@ class surf_spline():
             Nu -= 1
             Nctlu -= 1
             
+
         self.Nu_free = Nu
         self.Nv_free = Nv
         self.N_free = Nu*Nv
-        
+
         self.Nctlu_free = Nctlu
         self.Nctlv_free = Nctlv
         self.Nctl_free = Nctlu*Nctlv
@@ -606,29 +612,28 @@ master. i.e. Internal or on a master edge'''
                                      self.ku,self.kv,ctl)).flatten()
 
 
-    def associateRefAxis(self,ref_axis):#,section=None):
-        '''Create links between ref_axis and this patch'''
+    def getRefAxisDir(self,ref_axis,coef):
+        '''Determine the primary orientation of a ref_axis'''
 
-        #print 'associateRefAxis'
-        # First we Need to deduce along which direction (u or v) the
+        # Note: We pass the coef we want BACK in. This allows for a
+        # section of the coefficients to be used
+
+        # We need to deduce along which direction (u or v) the
         # reference axis is directed.  First estimate Over what
         # portion the surface and ref axis co-inside
-
+        
         # Find the s range for the 4 corners
 
         p = zeros(4,self.dtype)
         
-        p[0],conv,D,esp = ref_axis.xs.projectPoint(self.coef[0 , 0])
-        p[1],conv,D,esp = ref_axis.xs.projectPoint(self.coef[0 ,-1])
-        p[2],conv,D,esp = ref_axis.xs.projectPoint(self.coef[-1, 0])
-        p[3],conv,D,esp = ref_axis.xs.projectPoint(self.coef[-1,-1])
+        p[0],conv,D,esp = ref_axis.xs.projectPoint(coef[0 , 0])
+        p[1],conv,D,esp = ref_axis.xs.projectPoint(coef[0 ,-1])
+        p[2],conv,D,esp = ref_axis.xs.projectPoint(coef[-1, 0])
+        p[3],conv,D,esp = ref_axis.xs.projectPoint(coef[-1,-1])
 
         min_s = min(p)
         max_s = max(p)
        
-        #print 'p is:',p
-       
-
         # Now we know over what portion of the ref axis we are dealing
         # with.  Take 3 Normal Vectors
         N = 3
@@ -636,7 +641,7 @@ master. i.e. Internal or on a master edge'''
         dn = zeros((N,3),self.dtype)
         for i in xrange(N):
             dn[i,:] = ref_axis.xs.getDerivative(sn[i])
-
+        # end if
 
         # Now Do two tests: Take three points in u and test 3 groups
         # against dn and take three points in v and test the  3 groups
@@ -648,7 +653,7 @@ master. i.e. Internal or on a master edge'''
         for i in xrange(N):
             for n in xrange(N):
                 du,dv = self.getDerivative(s[i],s[n])
-                u_dot_tot += abs(dot(du,dn[n,:]))
+                u_dot_tot += dot(du,dn[n,:])
             # end for
         # end for
 
@@ -656,93 +661,44 @@ master. i.e. Internal or on a master edge'''
         for j in xrange(N):
             for n in xrange(N):
                 du,dv = self.getDerivative(s[n],s[j])
-                v_dot_tot += abs(dot(dv,dn[n,:]))
+                v_dot_tot += dot(dv,dn[n,:])
             # end for
         # end for
         
-        self.links_s = []
-        self.links_x = []
-
-        
         if v_dot_tot > u_dot_tot:
-            #print 'along v:'
-            for j in xrange(self.Nctlv):
-                # Create a line (k=2 spline) for the control points along U
-                
-                ctl_line = linear_spline('lms',X=self.coef[:,j],Nctl=2,k=2)
-                # Now find the minimum distance between midpoint and the ref_axis
-                s,D,conv,eps = ref_axis.xs.projectPoint(ctl_line.getValue(1.0))
-                if s > max_s:
-                    s = max_s
-                if s < min_s:
-                    s = min_s
-            #    print 's is:',s
-                # Now loop over the control points to set links
-                base_point = ref_axis.xs.getValue(s)
-                M = ref_axis.getRotMatrixGlobalToLocal(s)
-                
-                for i in xrange(self.Nctlu):
-                    D = self.coef[i,j] - base_point
-                    D = dot(M,D) #Rotate to local frame
-                    self.links_s.append(s)
-                    self.links_x.append(D)
-                    #self.links.append([s,D])
-                # end if
-            # end for
-            self.ref_axis_dir = 1 # Ref axis is aligned along v
+            dir = 1
         else:
-            #print 'along u:'
-            for i in xrange(self.Nctlu):
-                # Create a line (k=2 spline) for the control points along V
+            dir = 0
+        return dir,max_s,min_s
+       
 
-                ctl_line = linear_spline('lms',X=self.coef[i,:],Nctl=2,k=2)
-                # Now find the minimum distance between midpoint 
-                # and the ref_axis
-                s,D,conv,eps = ref_axis.xs.projectPoint(ctl_line.getValue(0.5))
-                if s > max_s:
-                    s = max_s
-                if s < min_s:
-                    s = min_s
-                # Now loop over the control points to set links
-                base_point = ref_axis.xs.getValue(s)
-                M = ref_axis.getRotMatrixGlobalToLocal(s)
+#     def update(self,ref_axis):
+#         '''Update the control points with ref_axis:'''
+#         counter = 0
+
+#         if self.ref_axis_dir == 1:
+#             for j in xrange(self.Nctlv):
+#                 s = self.links_s[counter]
+#                 M = ref_axis.getRotMatrixLocalToGloabl(s)
+#                 X_base = ref_axis.xs.getValue(s)
+#                 for i in xrange(self.Nctlu):
+#                    self.coef[i,j,:] = X_base + \
+#                        dot(M,self.links_x[counter])*ref_axis.scales(s)
+#                    counter += 1
+#                 # end for
+#             # end for
+#         else:
+#             for i in xrange(self.Nctlu):
+#                 s = self.links_s[counter]
+#                 M = ref_axis.getRotMatrixLocalToGloabl(s)
+#                 X_base = ref_axis.xs.getValue(s)
                 
-                for j in xrange(self.Nctlv):
-                    D = self.coef[i,j] - base_point
-                    D = dot(M,D) #Rotate to local frame
-                    self.links_s.append(s)
-                    self.links_x.append(D)
-                # end if
-            # end for
-            self.ref_axis_dir = 0 # Ref axis is aligned along u
-
-    def update(self,ref_axis):
-        '''Update the control points with ref_axis:'''
-        counter = 0
-
-        if self.ref_axis_dir == 1:
-            for j in xrange(self.Nctlv):
-                s = self.links_s[counter]
-                M = ref_axis.getRotMatrixLocalToGloabl(s)
-                X_base = ref_axis.xs.getValue(s)
-                for i in xrange(self.Nctlu):
-                   self.coef[i,j,:] = X_base + \
-                       dot(M,self.links_x[counter])*ref_axis.scales(s)
-                   counter += 1
-                # end for
-            # end for
-        else:
-            for i in xrange(self.Nctlu):
-                s = self.links_s[counter]
-                M = ref_axis.getRotMatrixLocalToGloabl(s)
-                X_base = ref_axis.xs.getValue(s)
-                
-                for j in xrange(self.Nctlv):
-                    self.coef[i,j,:] = X_base +\
-                        dot(M,self.links_x[counter])*ref_axis.scales(s)
-                    counter += 1
-                # end for
-            # end for
+#                 for j in xrange(self.Nctlv):
+#                     self.coef[i,j,:] = X_base +\
+#                         dot(M,self.links_x[counter])*ref_axis.scales(s)
+#                     counter += 1
+#                 # end for
+#             # end for
 
 
     def getComplexCoef(self,ref_axis):
@@ -1068,7 +1024,7 @@ master. i.e. Internal or on a master edge'''
         return u,v,x
 
 
-    def writeTecplot(self,handle):
+    def writeTecplot(self,handle,size=None):
         '''Output this surface\'s data to a open file handle \'handle\''''
 
         if self.orig_data:
@@ -1083,16 +1039,33 @@ master. i.e. Internal or on a master edge'''
             # end for 
         # end if
                 
-        if self.orig_data:
-            u_plot = self.u
-            v_plot = self.v
+        if not size:
+            u_plot = linspace(self.range[0],self.range[1],50).astype('d')
+            v_plot = linspace(self.range[2],self.range[3],50).astype('d')
         else:
-            u_plot = linspace(self.range[0],self.range[1],25).astype('d')
-            v_plot = linspace(self.range[2],self.range[3],25).astype('d')
-        # end if 
+
+            # Cheaply calculate the length of each size of the surface
+            # to determine its lenght and then use the size parameter 
+            # to determine the number of points to use
+
+            u = array([0,0.5,1,1,1,0.5,0,0])
+            v = array([0,0,0,0.5,1,1,1,0.5])
+            val = self.getValueV(u,v)
+
+            u_len = (self._e_dist(val[0],val[1])+self._e_dist(val[1],val[2])+\
+                         self._e_dist(val[4],val[5])+\
+                         self._e_dist(val[5],val[6]))/2
             
-        u_plot = linspace(self.range[0],self.range[1],50).astype('d')
-        v_plot = linspace(self.range[2],self.range[3],50).astype('d')
+            v_len = (self._e_dist(val[2],val[3])+self._e_dist(val[3],val[4])+\
+                         self._e_dist(val[6],val[7])+\
+                         self._e_dist(val[7],val[0]))/2
+            
+            nu=int(floor(real(u_len/size)))
+            nv=int(floor(real(v_len/size)))
+            
+            u_plot = linspace(self.range[0],self.range[1],nu).astype('d')
+
+            v_plot = linspace(self.range[2],self.range[3],nv).astype('d')
 
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'\
@@ -1102,36 +1075,27 @@ master. i.e. Internal or on a master edge'''
         # ---------------------------------------------------------------
         # NOTE: The section section has fewer fortran calls and is faster
         # ---------------------------------------------------------------
-        # for j in xrange(len(v_plot)):
+     #    for j in xrange(len(v_plot)):
 #             for i in xrange(len(u_plot)):
 #                 for idim in xrange(self.nDim):
-#                     handle.write('%f '\
-# %(pyspline.b2val(u_plot[i],v_plot[j],0,0,self.tu.astype('d'),\
-#self.tv.astype('d'),self.ku,self.kv,self.coef[:,:,idim].astype('d'))))
-#                 # end for 
-#                 handle.write('\n')
+# #                     handle.write('%f '%(pyspline.b2val(\
+# #                                 u_plot[i],v_plot[j],0,0,self.tu.astype('d'),\
+# #                                     self.tv.astype('d'),self.ku,self.kv,\
+# #                                     self.coef[:,:,idim].astype('d'))))
+# #                 # end for 
+# #                 handle.write('\n')
 #             # end for
 #         # end for
-        # ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
         [V_plot,U_plot] = meshgrid(v_plot,u_plot)
-        X = pyspline.b2valm( U_plot,V_plot,0,0,self.tu.astype('d'),\
-                                 self.tv.astype('d'),self.ku,self.kv,\
-                                 self.coef[:,:,0].astype('d'))
-        Y = pyspline.b2valm( U_plot,V_plot,0,0,self.tu.astype('d'),\
-                                 self.tv.astype('d'),self.ku,self.kv,\
-                                 self.coef[:,:,1].astype('d'))
-        Z = pyspline.b2valm( U_plot,V_plot,0,0,self.tu.astype('d'),\
-                                 self.tv.astype('d'),self.ku,self.kv,\
-                                 self.coef[:,:,2].astype('d'))
-
+        X = self.getValueM( U_plot,V_plot)
         for j in xrange(len(v_plot)):
             for i in xrange(len(u_plot)):
-                for idim in xrange(self.nDim):
-                    handle.write('%f %f %f \n'%(X[i,j],Y[i,j],Z[i,j]))
+                    handle.write('%f %f %f \n'%(X[i,j,0],X[i,j,1],X[i,j,2]))
                 # end if
             # end if
         # end if
-
+        #sys.exit(0)
         # ---------------------------------------------------------------------
         
         # Dump Control Points (Always have these :-) ) 
@@ -1165,7 +1129,6 @@ master. i.e. Internal or on a master edge'''
             handle.write('%f %f %f \n'%(value[0],value[1],value[2]))
         # end for
         return
-
 
     def writeIGES_directory(self,handle,Dcount,Pcount):
 
@@ -1276,6 +1239,10 @@ master. i.e. Internal or on a master edge'''
 
         Pcount += 2
         return Pcount,counter
+
+    def _e_dist(self,x1,x2):
+        '''Get the eculidean distance between two points'''
+        return sqrt((x1[0]-x2[0])**2 + (x1[1]-x2[1])**2 + (x1[2]-x2[2])**2)
 
 
 class linear_spline():
