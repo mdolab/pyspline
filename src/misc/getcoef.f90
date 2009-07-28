@@ -64,15 +64,22 @@ subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny)
   double precision bvalu
   double precision                :: work(3*2)
 
-  !print *,'in getcoef'
-  
+  print *,'in getcoef'
+  i=1
+  inbv = 1
   if (dir .eq. 1) then  ! Ref axis along V
      do j = 1,Ny
-        !print *,'i,j,s_pos:',i,j,s_pos(i,j)
+        print *,'along v'
+        print *,'i,j,s_pos:',i,j,s_pos(1,j)
         current_s = s_pos(1,j)
+        print *,'current_s:',current_s
+        print *,'t:',t
+        print *,'scale:',scale
+        print *,'nref:',nref
+        
         current_scale = bvalu(t,scale,nref,2,0,current_s,inbv,work)        
         ! Now we need the rotation Matrix
-
+        print *,'done scale'
         ! Python Command:
         !inv(dot(self._roty(self.rotys(s)), dot(self._rotx(self.rotxs(s)),self._rotz(self.rotzs(s)))))
         
@@ -87,9 +94,6 @@ subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny)
         ! Z Rot:
         angle = bvalu(t,rot(:,3),nref,2,0,current_s,inbv,work)
         call zrot(angle*pi/180,matz)
-
-        rot_mat = matmul(maty,matmul(matx,matz))
-
 
         rot_mat = matmul(maty,matmul(matx,matz))
         
@@ -109,7 +113,7 @@ subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny)
         inv_rot_mat(3,1) =   (rot_mat(2,1)*rot_mat(3,2) - rot_mat(2,2)*rot_mat(3,1))/det
         inv_rot_mat(3,2) = - (rot_mat(1,1)*rot_mat(3,2) - rot_mat(1,2)*rot_mat(3,1))/det
         inv_rot_mat(3,3) =   (rot_mat(1,1)*rot_mat(2,2) - rot_mat(1,2)*rot_mat(2,1))/det
-        
+        print *,'done inverse'
         do idim =1,3
            X_base(idim) = bvalu(t,x(:,idim),nref,2,0,current_s,inbv,work)
         end do
@@ -125,7 +129,7 @@ subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny)
 
      do i = 1,Nx
 
-        current_s = s_pos(i,j)
+        current_s = s_pos(i,1)
         current_scale = bvalu(t,scale,nref,2,0,current_s,inbv,work)        
         ! Now we need the rotation Matrix
 

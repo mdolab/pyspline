@@ -69,16 +69,21 @@ C***FIRST EXECUTABLE STATEMENT  BVALU
       BVALU = 0.0E0
       IF(K.LT.1) GO TO 102
       IF(N.LT.K) GO TO 101
+
       IF(IDERIV.LT.0 .OR. IDERIV.GE.K) GO TO 110
       KMIDER = K - IDERIV
 C     
 C *** FIND *I* IN (K,N) SUCH THAT T(I) .LE. X .LT. T(I+1)
 C     (OR, .LE. T(I+1) IF T(I) .LT. T(I+1) = T(N+1)).
       KM1 = K - 1
+
       CALL INTRV(T, N+1, X, INBV, I, MFLAG)
+
+
       IF (X.LT.T(K)) GO TO 120
       IF (MFLAG.EQ.0) GO TO 20
 !      IF (X.GT.T(I)) GO TO 130
+
       if(X.GT.T(I)) then
          X = T(I)
       end if
