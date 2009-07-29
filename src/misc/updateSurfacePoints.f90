@@ -1,4 +1,4 @@
-subroutine updateSurfacePoints(coef,update,tx,ty,kx,ky,nx,ny)
+subroutine updateSurfacePoints(coef,coef_update,update,tx,ty,kx,ky,nx,ny)
 
 
 !*** DESCRIPTION
@@ -21,7 +21,7 @@ subroutine updateSurfacePoints(coef,update,tx,ty,kx,ky,nx,ny)
 !     ny      - Integer, The number of control points in y
 !
 !     Output:
-!     coef    - Real, Matrix of displaced coefficients, size nx by ny
+!     coef_update - Real, Matrix of displaced coefficients, size nx by ny by 3
 !
   implicit none
 
@@ -29,7 +29,8 @@ subroutine updateSurfacePoints(coef,update,tx,ty,kx,ky,nx,ny)
   integer,          intent(in)     :: kx,ky
   double precision, intent(in)     :: tx(kx+nx)
   double precision, intent(in)     :: ty(kx+ny)
-  double precision, intent(inout)  :: coef(nx,ny,3)
+  double precision, intent(in)     :: coef(nx,ny,3)
+  double precision, intent(out)    :: coef_update(nx,ny,3)
   double precision, intent(in)     :: update(nx,ny)
 
   double precision                 :: dx(3)
@@ -46,8 +47,8 @@ subroutine updateSurfacePoints(coef,update,tx,ty,kx,ky,nx,ny)
         
         ! First get the directional derivatives 
         do idim = 1,3
-           dx(idim) = b2val(tx(kx-2 + i),ty(ky-2 + j),1,0,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
-           dy(idim) = b2val(tx(kx-2 + i),ty(ky-2 + j),0,1,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
+           dx(idim) = b2val(tx(kx-1 + i),ty(ky-1 + j),1,0,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
+           dy(idim) = b2val(tx(kx-1 + i),ty(ky-1 + j),0,1,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
         end do
 
         ! Now get the cross product 
@@ -61,7 +62,7 @@ subroutine updateSurfacePoints(coef,update,tx,ty,kx,ky,nx,ny)
 
         ! Move control point along the normal vector
         do idim = 1,3
-           coef(i,j,idim) = coef(i,j,idim) - update(i,j)*n(idim)
+           coef_update(i,j,idim) = coef(i,j,idim) - update(i,j)*n(idim)
         end do
      end do
   end do

@@ -112,9 +112,9 @@ python module pyspline_cs ! in
           complex*16,intent(out), dimension(n),depend(n) :: z
         end subroutine b2valv
 
-
-        subroutine updatesurfacepoints(coef,update,tx,ty,kx,ky,nx,ny) ! in updateSurfacePoints.f90
-            complex*16 dimension(nx,ny,3),intent(in,out) :: coef
+        subroutine updatesurfacepoints(coef,coef_update,update,tx,ty,kx,ky,nx,ny) ! in updateSurfacePoints.f90
+            complex*16 dimension(nx,ny,3),intent(in) :: coef
+            complex*16 dimension(nx,ny,3),intent(out),depend(nx,ny) :: coef_update
             complex*16 dimension(nx,ny),intent(in),depend(nx,ny) :: update
             complex*16 dimension(kx+nx),intent(in),depend(kx,nx) :: tx
             complex*16 dimension(kx+ny),intent(in),depend(kx,ny) :: ty
@@ -123,6 +123,7 @@ python module pyspline_cs ! in
             integer optional,check(shape(coef,0)==nx),depend(coef) :: nx=shape(coef,0)
             integer optional,check(shape(coef,1)==ny),depend(coef) :: ny=shape(coef,1)
         end subroutine updatesurfacepoints
+        
 
         subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny) ! in :test:getcoef.f90
             integer intent(in) :: dir
