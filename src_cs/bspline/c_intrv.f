@@ -62,6 +62,7 @@ C
       DIMENSION XT(LXT)
 C***FIRST EXECUTABLE STATEMENT  INTRV
       IHI = ILO + 1
+      !print *,'intrv:',ilo,ihi
       IF (IHI.LT.LXT) GO TO 10
       IF (X.GE.XT(LXT)) GO TO 110
       IF (LXT.LE.1) GO TO 90

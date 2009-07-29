@@ -329,8 +329,7 @@ class surf_spline():
         if self.master_edge[3] == False:
             Nu -= 1
             Nctlu -= 1
-            
-
+  
         self.Nu_free = Nu
         self.Nv_free = Nv
         self.N_free = Nu*Nv
@@ -343,118 +342,120 @@ class surf_spline():
     def _getCropData(self,X):
         '''This internal function gets the original data coorsponding but
         omits the data along edges which are not masters'''
+        return X[self.slice_u,self.slice_v]
 
-        return eval('X'+self.slice_string)
 
     def getFreeCtl(self):
 
         '''Return Free control Points'''
-        # This requires some explaining: the getFreeIndex function
-        # generates the pythonic index string which coorsponds to the
-        # section of the coefficient martrix which is free or
-        # driving. Then to return these values we make a string that
-        # contains 'self.coef' and then the slice_string which is
-        # something like [:,1:-1]. This is only possible in an
-        # interpreted language
-        return eval('self.coef'+self.slice_string)
+        return self.coef[self.slice_u,self.slice_v]
+        
 
 
     def setFreeCtl(self,coef):
 
         '''Sets Free control Points'''
         # See getFreeCtl for how this works
-        
-        return eval('self.coef'+self.slice_string,'=coef')
 
+        self.coef[self.slice_u,self.slice_v] = coef
+
+        return 
+
+    def setFreeCtlSection(self,coef,slice_u,slice_v):
+
+        '''Set a section of the free control points'''
+        
+        temp = self.getFreeCtl()
+        temp[slice_u,slice_v] = coef
+        self.setFreeCtl(temp)
+
+        return
     
+
     def _getFreeIndex(self):
         '''This internal function gets string slice which tells
         various functions how to slice out control points or data that
         coorspond to master edges'''
         # Use a Binary Tree-Type Search -> Faster -> log n scaling 
 
-        slice_string = ''
-
         if self.master_edge[0] == True:
+            vs = 0
             if self.master_edge[1] == True:
+                ve = self.Nctlv
                 if self.master_edge[2] == True:
+                    us = 0
                     if self.master_edge[3] == True:
-                        #[True,True,True,True]:
-                        slice_string = '[:,:]'
+                        ue = self.Nctlu
                     else:
-                        #[True,True,True,False]:
-                         slice_string = '[0:-1,:]'
+                        ue = self.Nctlu-1
                     # end if
                 else:
+                    us = 1
                     if self.master_edge[3] == True:
-                        #[True,True,False,True]:
-                        slice_string = '[1:,:]'
+                        ue = self.Nctlu
                     else:
-                        #[True,True,False,False]:
-                        slice_string = '[1:-1,:]'
+                        ue = self.Nctlu-1
                     # end if
                 # end if
             else:
+                ve = self.Nctlv-1
                 if self.master_edge[2] == True:
-
+                    us = 0
                     if self.master_edge[3] == True:
-                        #[True,False,True,True]:
-                        slice_string = '[:,0:-1]'
+                        ue = self.Nctlu
                     else:
-                        #[True,False,True,False]:
-                        slice_string = '[0:-1,0:-1]'
+                        ue = self.Nctlu-1
                     # end if
                 else:
+                    us = 1
                     if self.master_edge[3] == True:
-                        #[True,False,False,True]:
-                        slice_string = '[1:,0:-1]'
+                        ue = self.Nctlu
                     else:
-                        #[True,False,False,False]:
-                        slice_string = '[1:-1,0:-1]'
+                        ue = self.Nctlu-1
                     # end if
                 # end if
             # end if
         else:
+            vs = 1
             if self.master_edge[1] == True:
+                ve = self.Nctlv
                 if self.master_edge[2] == True:
+                    us = 0
                     if self.master_edge[3] == True:
-                        #[False,True,True,True]:
-                        slice_string = '[:,1:]'
+                        ue = self.Nctlu
                     else:
-                        #[False,True,True,False]:
-                        slice_string = '[0:-1,1:]'
+                        ue = self.Nctlu-1
                     # end if
                 else:
+                    us = 1
                     if self.master_edge[3] == True:
-                        # [False,True,False,True]:
-                        slice_string = '[1:,1]'
+                        ue = self.Nctlu
                     else:
-                        # [False,True,False,False]:
-                        slice_string = '[1:-1,1:]'
+                        ue = self.Nctlu-1
                     # end if
                 # end if
             else:
+                ve = self.Nctlv-1
                 if self.master_edge[2] == True:
+                    us = 0
                     if self.master_edge[3] == True:
-                        #[False,False,True,True]:
-                        slice_string = '[:,1:-1]'
+                        ue = self.Nctlu
                     else:
-                        # [False,False,True,False]:
-                        slice_string = '[0:-1:,1:-1]'
+                        ue = self.Nctlu-1
                     # end if
                 else:
+                    us = 1
                     if self.master_edge[3] == True:
-                        #[False,False,False,True]:
-                        slice_string = '[1:,1:-1]'
+                        ue = self.Nctlu
                     else:
-                        # [False,False,False,False]:
-                        slice_string = '[1:-1,1:-1]'
+                        ue = self.Nctlu-1
                     # end if
                 # end if
             # end if
         #end if
+        self.slice_u = slice(us,ue)
+        self.slice_v = slice(vs,ve)
 
-        self.slice_string = slice_string
         return
 
 
@@ -673,36 +674,41 @@ master. i.e. Internal or on a master edge'''
         return dir,max_s,min_s
        
 
+    def updateSurfacePoints(self,delta,slice_u,slice_v):
+        '''Update the control points on section 'section' along a 
+        normal to the surface'''
 
-    def updateSurfacePoints(self,delta):
-        '''Update the control points on surface deltas normal to the surface'''
-        update = zeros((self.Nctlu,self.Nctlv),self.dtype) 
-        exec('update'+self.slice_string+' = delta')
+        # Section refers to the 'free' control points
+       
+        # Full Control Point Size
+        update = zeros((self.Nctlu,self.Nctlv),self.dtype)         
+        temp =   zeros((self.Nctlu_free,self.Nctlv_free),self.dtype)
+        temp[slice_u,slice_v] = delta
+        update[self.slice_u,self.slice_v] = temp
 
-# ------------- Python Code ------------------------------------------------
-
-#         for i in xrange(self.Nctlu):
-#             for j in xrange(self.Nctlv):
-#                 # The coordinates where we get the normal are NOT
-#                 # stictly correct...the last ones will run out into
-#                 # the 1's at the end of the knot vector
-                
-#                 n = self.getNormal(self.tu[self.ku-2 + i],\
-#                                        self.tv[self.kv-2+j])
-                
-#                 self.coef[i,j] -= update[i,j] * n
-# #                 # The MINUS is because the surface normals MUST point inward
-                
-# #             # end for
-# #         # end for
-
-# -------------------------------------------------------------------------
-
-        # Call the fortran function instead - Much Faster
         self.coef = self.pyspline.updatesurfacepoints(\
-            self.coef,update,self.tu,self.tv,self.ku,self.kv)
+            self.coef,update,self.tu,self.tv,self.ku,self.kv).copy()
+        return 
 
-        return
+    def updateSurfacePointsDeriv(self,coef,delta,slice_u,slice_v):
+        '''This function is the same as above but returns the coefficients
+        instead of setting them in the spline object'''
+
+        # Section refers to the 'free' control points
+
+        # Full Control Point Size
+        update = zeros((self.Nctlu,self.Nctlv),self.dtype)         
+        temp =   zeros((self.Nctlu_free,self.Nctlv_free),self.dtype)
+        temp[slice_u,slice_v] = delta
+        update[self.slice_u,self.slice_v] = temp
+
+        temp = self.coef
+        temp[self.slice_u,self.slice_v] = coef
+
+        coef = pyspline_cs.updatesurfacepoints(\
+            temp,update,self.tu,self.tv,self.ku,self.kv).copy()
+        return coef[self.slice_u,self.slice_v]
+
 
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3 where
@@ -765,6 +771,7 @@ master. i.e. Internal or on a master edge'''
             self.coef[-1,:,:] = new_coef
         return
 
+    
     def getNormal(self,u,v):
         '''Get the normal at the surface point u,v'''
         du,dv = self.getDerivative(u,v)
@@ -963,7 +970,7 @@ master. i.e. Internal or on a master edge'''
         return u,v,x
 
 
-    def writeTecplot(self,handle,size=None):
+    def writeTecplotSurface(self,handle,size=None):
         '''Output this surface\'s data to a open file handle \'handle\''''
 
         if self.orig_data:
@@ -1772,3 +1779,97 @@ if __name__ == '__main__':
 #             # end if
 #         #end if
 #         return
+  #   def _getFreeIndex(self):
+#         '''This internal function gets string slice which tells
+#         various functions how to slice out control points or data that
+#         coorspond to master edges'''
+#         # Use a Binary Tree-Type Search -> Faster -> log n scaling 
+
+#         slice_string = ''
+#         us = None
+#         ue = None
+#         vs = None
+#         ve = None
+        
+#         if self.master_edge[0] == True:
+#             if self.master_edge[1] == True:
+#                 if self.master_edge[2] == True:
+#                     if self.master_edge[3] == True:
+#                         #[True,True,True,True]:
+#                         slice_string = '[:,:]'
+#                     else:
+#                         #[True,True,True,False]:
+#                          slice_string = '[0:-1,:]'
+#                     # end if
+#                 else:
+#                     if self.master_edge[3] == True:
+#                         #[True,True,False,True]:
+#                         slice_string = '[1:,:]'
+#                     else:
+#                         #[True,True,False,False]:
+#                         slice_string = '[1:-1,:]'
+#                     # end if
+#                 # end if
+#             else:
+#                 if self.master_edge[2] == True:
+
+#                     if self.master_edge[3] == True:
+#                         #[True,False,True,True]:
+#                         slice_string = '[:,0:-1]'
+#                     else:
+#                         #[True,False,True,False]:
+#                         slice_string = '[0:-1,0:-1]'
+#                     # end if
+#                 else:
+#                     if self.master_edge[3] == True:
+#                         #[True,False,False,True]:
+#                         slice_string = '[1:,0:-1]'
+#                     else:
+#                         #[True,False,False,False]:
+#                         slice_string = '[1:-1,0:-1]'
+#                     # end if
+#                 # end if
+#             # end if
+#         else:
+#             if self.master_edge[1] == True:
+#                 if self.master_edge[2] == True:
+#                     if self.master_edge[3] == True:
+#                         #[False,True,True,True]:
+#                         slice_string = '[:,1:]'
+#                     else:
+#                         #[False,True,True,False]:
+#                         slice_string = '[0:-1,1:]'
+#                     # end if
+#                 else:
+#                     if self.master_edge[3] == True:
+#                         # [False,True,False,True]:
+#                         slice_string = '[1:,1]'
+#                     else:
+#                         # [False,True,False,False]:
+#                         slice_string = '[1:-1,1:]'
+#                     # end if
+#                 # end if
+#             else:
+#                 if self.master_edge[2] == True:
+#                     if self.master_edge[3] == True:
+#                         #[False,False,True,True]:
+#                         slice_string = '[:,1:-1]'
+#                     else:
+#                         # [False,False,True,False]:
+#                         slice_string = '[0:-1:,1:-1]'
+#                     # end if
+#                 else:
+#                     if self.master_edge[3] == True:
+#                         #[False,False,False,True]:
+#                         slice_string = '[1:,1:-1]'
+#                     else:
+#                         # [False,False,False,False]:
+#                         slice_string = '[1:-1,1:-1]'
+#                     # end if
+#                 # end if
+#             # end if
+#         #end if
+
+#         self.slice_string = slice_string
+#         return
+

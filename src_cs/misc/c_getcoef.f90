@@ -64,8 +64,8 @@ subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny)
   complex*16 bvalu
   complex*16                :: work(3*2)
 
-  print *,'in getcoef'
-  
+  !print *,'in c_getcoef'
+  inbv = 1
   if (dir .eq. 1) then  ! Ref axis along V
      do j = 1,Ny
         !print *,'i,j,s_pos:',i,j,s_pos(1,j)
@@ -87,9 +87,6 @@ subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny)
         ! Z Rot:
         angle = bvalu(t,rot(:,3),nref,2,0,current_s,inbv,work)
         call zrot(angle*pi/180,matz)
-
-        rot_mat = matmul(maty,matmul(matx,matz))
-
 
         rot_mat = matmul(maty,matmul(matx,matz))
         

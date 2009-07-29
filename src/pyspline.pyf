@@ -118,8 +118,9 @@ python module pyspline ! in
           double precision dimension(nctl+k),intent(out),depend(nctl,k) :: t
         end subroutine knots
 
-        subroutine updatesurfacepoints(coef,update,tx,ty,kx,ky,nx,ny) ! in updateSurfacePoints.f90
-            double precision dimension(nx,ny,3),intent(in,out) :: coef
+        subroutine updatesurfacepoints(coef,coef_update,update,tx,ty,kx,ky,nx,ny) ! in updateSurfacePoints.f90
+            double precision dimension(nx,ny,3),intent(in) :: coef
+            double precision dimension(nx,ny,3),intent(out),depend(nx,ny) :: coef_update
             double precision dimension(nx,ny),intent(in),depend(nx,ny) :: update
             double precision dimension(kx+nx),intent(in),depend(kx,nx) :: tx
             double precision dimension(kx+ny),intent(in),depend(kx,ny) :: ty
@@ -128,6 +129,17 @@ python module pyspline ! in
             integer optional,check(shape(coef,0)==nx),depend(coef) :: nx=shape(coef,0)
             integer optional,check(shape(coef,1)==ny),depend(coef) :: ny=shape(coef,1)
         end subroutine updatesurfacepoints
+
+        subroutine getctlnormals(coef,tx,ty,kx,ky,nx,ny,normals)
+            double precision dimension(nx,ny,3),intent(in) :: coef
+            double precision dimension(kx+nx),intent(in),depend(kx,nx) :: tx
+            double precision dimension(kx+ny),intent(in),depend(kx,ny) :: ty
+            integer intent(in) :: kx
+            integer intent(in) :: ky
+            integer optional,check(shape(coef,0)==nx),depend(coef) :: nx=shape(coef,0)
+            integer optional,check(shape(coef,1)==ny),depend(coef) :: ny=shape(coef,1)
+            double precision dimension(nx,ny,3),intent(out),depend(nx,ny) :: normals
+          end subroutine getctlnormals
 
         subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny) ! in :test:getcoef.f90
             integer intent(in) :: dir
