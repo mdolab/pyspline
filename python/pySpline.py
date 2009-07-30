@@ -557,6 +557,19 @@ master. i.e. Internal or on a master edge'''
         # else:
 
 
+    def calcPtDeriv(self,u,v,i,j):
+        '''Calc the derivative of point u,v at control point i,j'''
+        coef = zeros((self.Nctlu,self.Nctlv))
+        #print 'u,v,i,j',u,v,i,j
+        coef[i,j] = 1
+        x = self.pyspline.b2val(\
+            u,v,0,0,self.tu,self.tv,self.ku,self.kv,coef)
+        
+        return x
+
+
+
+
     def _calcCtlDeriv(self,i,j):
         '''Calculate the derivative wrt control point i,j'''
         ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
