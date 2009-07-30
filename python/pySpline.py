@@ -101,6 +101,7 @@ class surf_spline():
         self.Nctlu_free = None
         self.Nctlv_free = None
         self.Nctl_free  = None
+        self.globalCtlIndex = None
         self.links = None
         self.ref_axis_dir = None
 
@@ -457,6 +458,26 @@ class surf_spline():
         self.slice_v = slice(vs,ve)
 
         return
+    def _assignGlobalIndex(self,current_index):
+
+        '''This function takes a current index counter and assigns EACH
+        control point in the full array its coorsponding driving
+        control point'''
+
+        self.globalCtlIndex = ones((self.Nctlu,self.Nctlv),int)
+
+        for i in xrange(self.Nctlu):
+            for j in xrange(self.Nctlv):
+                # Check the Current Point
+                pt_type,edge_info,node_info = self.checkCtl(i,j)
+                if pt_type == 0: # Its a regular Driving Node
+                    self.globalCtlIndex[i,j] = current_index
+                    current_index += 1
+                # end if
+            # end for
+        # end for
+        return current_index
+
 
 
     def _calcKnots(self):
@@ -560,14 +581,11 @@ master. i.e. Internal or on a master edge'''
     def calcPtDeriv(self,u,v,i,j):
         '''Calc the derivative of point u,v at control point i,j'''
         coef = zeros((self.Nctlu,self.Nctlv))
-        #print 'u,v,i,j',u,v,i,j
         coef[i,j] = 1
         x = self.pyspline.b2val(\
             u,v,0,0,self.tu,self.tv,self.ku,self.kv,coef)
         
         return x
-
-
 
 
     def _calcCtlDeriv(self,i,j):
@@ -710,14 +728,14 @@ master. i.e. Internal or on a master edge'''
         # Section refers to the 'free' control points
 
         # Full Control Point Size
-        update = zeros((self.Nctlu,self.Nctlv),self.dtype)         
-        temp =   zeros((self.Nctlu_free,self.Nctlv_free),self.dtype)
+        update = zeros((self.Nctlu,self.Nctlv),'D')
+        temp =   zeros((self.Nctlu_free,self.Nctlv_free),'D')
         temp[slice_u,slice_v] = delta
         update[self.slice_u,self.slice_v] = temp
 
-        temp = self.coef
+        temp = self.coef.astype('D')
         temp[self.slice_u,self.slice_v] = coef
-
+    
         coef = pyspline_cs.updatesurfacepoints(\
             temp,update,self.tu,self.tv,self.ku,self.kv).copy()
         return coef[self.slice_u,self.slice_v]
@@ -784,7 +802,71 @@ master. i.e. Internal or on a master edge'''
             self.coef[-1,:,:] = new_coef
         return
 
-    
+    def setCoefIndexCorner(self,node,global_index):
+
+        if node == 0:
+            self.globalCtlIndex[0,0] = global_index
+            return
+        if node == 1:
+            self.globalCtlIndex[self.Nctlu-1,0] = global_index
+            return
+        if node == 2:
+            self.globalCtlIndex[0,self.Nctlv-1] = global_index
+            return
+        if node == 3:
+            self.globalCtlIndex[self.Nctlu-1,self.Nctlv-1] = global_index
+            return
+        
+
+
+
+    def setCoefIndexEdge(self,edge,global_index,edge_index,dir):
+        if   edge == 0:
+            if dir == 1:
+                self.globalCtlIndex[edge_index,0] =\
+                    global_index
+            else:
+                self.globalCtlIndex[self.Nctlu-edge_index-1,0] =\
+                    global_index
+            # end if
+            return
+
+        if   edge == 1:
+            if dir == 1:
+                self.globalCtlIndex[edge_index,self.Nctlv-1] =\
+                    global_index
+            else:
+                self.globalCtlIndex[self.Nctlu-edge_index-1,self.Nctlv-1] = \
+                    global_index
+            # end if
+            return
+
+        if   edge == 2:
+            if dir == 1:
+                self.globalCtlIndex[0,edge_index] =\
+                    global_index
+            else:
+                self.globalCtlIndex[0,self.Nctlv-1-edge_index] =\
+                    global_index
+            # end if
+            return
+
+        if   edge == 3:
+            if dir == 1:
+                self.globalCtlIndex[self.Nctlu-1,edge_index] =\
+                    global_index
+            else:
+                self.globalCtlIndex[self.Nctlu-1,self.Nctlv-1-edge_index] = \
+                    global_index
+            # end if
+            return
+
+        return
+
+   
+
+
+
     def getNormal(self,u,v):
         '''Get the normal at the surface point u,v'''
         du,dv = self.getDerivative(u,v)
