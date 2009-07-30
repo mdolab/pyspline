@@ -155,6 +155,16 @@ python module pyspline ! in
             integer optional,check(shape(s_pos,0)==nx),depend(s_pos) :: nx=shape(s_pos,0)
             integer optional,check(shape(s_pos,1)==ny),depend(s_pos) :: ny=shape(s_pos,1)
         end subroutine getcoef
+
+        subroutine intrv(xt,lxt,x,ilo,ileft,mflag) ! in :test:intrv.f
+          double precision dimension(lxt),intent(in) :: xt
+          integer optional,check(len(xt)>=lxt),depend(xt) :: lxt=len(xt)
+          double precision,intent(in)  :: x
+          integer,intent(in) :: ilo
+          integer,intent(out) :: ileft
+          integer,intent(out) :: mflag
+        end subroutine intrv
+
     
      end interface
 end python module pyspline
