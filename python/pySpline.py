@@ -102,15 +102,13 @@ class surf_spline():
         self.Nctlv_free = None
         self.Nctl_free  = None
         self.globalCtlIndex = None
-        self.links = None
-        self.ref_axis_dir = None
 
         self.dtype = 'd' # Use real version by default
-        self.pyspline = pyspline
-        self.pyspline_cs = pyspline_cs
+        self.pyspline = pyspline # Real version of spline library
+        self.pyspline_cs = pyspline_cs # Complex version of spline library
 
         if 'complex' in kwargs:
-            self.pyspline = pyspline_cs
+            self.pyspline = pyspline_cs # Use the complex version for everything
             self.dtype = 'D'
         # end if
         if task == 'create':
@@ -144,6 +142,7 @@ class surf_spline():
 \'interpolate\''
 
             self.X  = kwargs['X']
+            self.orig_data = True
             self.Nu = self.X.shape[0]
             self.Nv = self.X.shape[1]
             self.nDim  = self.X.shape[2]
@@ -156,12 +155,18 @@ class surf_spline():
                 self.u = kwargs['u']
                 self.v = kwargs['v']
             else:
-                self._calcParameterization()
+                if nDim == 3:
+                    self._calcParameterization()
+                else:
+                    print 'Automatric parameterization of ONLY available\
+ for spatial data in 3 dimensions. Please supply u and v key word arguments\
+ otherwise.'
+                    sys.exit(1)
+                # end if
             # end if
 
             # Set a linear version of U and V
             [self.V, self.U] = meshgrid(self.v,self.u)
-            self.orig_data = True
             
             self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim),self.dtype)
             self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
@@ -169,7 +174,9 @@ class surf_spline():
             #Sanity check to make sure k is less than N
             if self.Nu <= self.ku:
                 self.ku = self.Nu
+                print 'Warning: ku has been set to Nu. ku is now %d'%(self.ku)
             if self.Nv <= self.kv:
+                print 'Warning: kv has been set to Nv. kv is now %d'%(self.kv)
                 self.kv = self.Nv
             
             timeA = time.time()
@@ -190,6 +197,7 @@ class surf_spline():
                    'Error: ku,kv,Nctlu,Nctlv and X MUST be defined for task lms'
 
             self.X  = kwargs['X']
+            self.orig_data = True
             self.Nu = self.X.shape[0]
             self.Nv = self.X.shape[1]
             self.nDim  = self.X.shape[2]
@@ -197,15 +205,25 @@ class surf_spline():
             self.Nctlv = kwargs['Nctlv']
             self.ku = kwargs['ku']
             self.kv = kwargs['kv']
-            self.orig_data = True
 
             # Sanity Check on Inputs
             if self.Nctlu > self.Nu:
                 self.Nctlu  = self.Nu
+                print 'Warning: Number of control points in u has been capped \
+to Nu: Nctlu = %d'%self.Nctlu
             if self.Nctlv > self.Nv:
                 self.Nctlv = self.Nv
+                print 'Warning: Number of control points in v has been capped \
+to Nv: Nctlv = %d'%self.Nctlv
             # end if
             
+            # Sanity check to make sure k is less than N
+            if self.Nu <= self.ku:
+                self.ku = self.Nu
+                print 'Warning: ku has been set to Nu. ku is now %d'%(self.ku)
+            if self.Nv <= self.kv:
+                print 'Warning: kv has been set to Nv. kv is now %d'%(self.kv)
+                self.kv = self.Nv
             if self.Nu <= self.ku:
                 self.ku = self.Nu
             if self.Nv <= self.kv:
@@ -215,7 +233,14 @@ class surf_spline():
                 self.u = kwargs['u']
                 self.v = kwargs['v']
             else:
-                self._calcParameterization()
+                if nDim == 3:
+                    self._calcParameterization()
+                else:
+                    print 'Automatric parameterization of ONLY available\
+ for spatial data in 3 dimensions. Please supply u and v key word arguments\
+ otherwise.'
+                    sys.exit(1)
+                # end if
             # end if
             
             self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
@@ -246,7 +271,7 @@ class surf_spline():
 
         print 'Error: task is not understood. Type must be \'lms\',\
 \'interpolate\' or \'create\''
-        sys.exit(0)
+        sys.exit(1)
         return
 
     def _calcParameterization(self):
@@ -345,13 +370,10 @@ class surf_spline():
         omits the data along edges which are not masters'''
         return X[self.slice_u,self.slice_v]
 
-
     def getFreeCtl(self):
 
         '''Return Free control Points'''
         return self.coef[self.slice_u,self.slice_v]
-        
-
 
     def setFreeCtl(self,coef):
 
@@ -371,13 +393,13 @@ class surf_spline():
         self.setFreeCtl(temp)
 
         return
-    
+   
 
     def _getFreeIndex(self):
         '''This internal function gets string slice which tells
         various functions how to slice out control points or data that
         coorspond to master edges'''
-        # Use a Binary Tree-Type Search -> Faster -> log n scaling 
+        # Use a Binary Tree-Type Search 
 
         if self.master_edge[0] == True:
             vs = 0
@@ -491,7 +513,6 @@ class surf_spline():
         self.tu = pyspline.knots(self.u,self.Nctlu,self.ku)
         self.tv = pyspline.knots(self.v,self.Nctlv,self.kv)
 
-        
         return
 
     def _calcJacobian(self):
@@ -816,8 +837,6 @@ master. i.e. Internal or on a master edge'''
         if node == 3:
             self.globalCtlIndex[self.Nctlu-1,self.Nctlv-1] = global_index
             return
-        
-
 
 
     def setCoefIndexEdge(self,edge,global_index,edge_index,dir):
@@ -863,21 +882,23 @@ master. i.e. Internal or on a master edge'''
 
         return
 
-   
-
-
 
     def getNormal(self,u,v):
         '''Get the normal at the surface point u,v'''
-        du,dv = self.getDerivative(u,v)
+        if self.nDim == 3:
+            du,dv = self.getDerivative(u,v)
 
-        # Now cross and normalize
-        n = zeros(3,self.dtype)
-        n[0] = du[1]*dv[2]-du[2]*dv[1]
-        n[1] = du[2]*dv[0]-du[0]*dv[2]
-        n[2] = du[0]*dv[1]-du[1]*dv[0]
-        
-        n/= sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])
+            # Now cross and normalize
+            n = zeros(3,self.dtype)
+            n[0] = du[1]*dv[2]-du[2]*dv[1]
+            n[1] = du[2]*dv[0]-du[0]*dv[2]
+            n[2] = du[0]*dv[1]-du[1]*dv[0]
+            
+            n/= sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])
+        else:
+            print 'Warning: getNormal is only defined for 3 spatial dimension'
+            sys.exit(1)
+        # end if
         return n
 
     def getValue(self,u,v):
