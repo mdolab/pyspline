@@ -46,6 +46,23 @@ python module pyspline ! in
           real*8,optional, dimension(2*k),depend(k) :: work
         end subroutine bintk
 
+        subroutine bint4(x,y,ndata,ibcl,ibcr,fbcl,fbcr,kntopt,t,bcoef,n,k,w) ! in :test:bint4.f
+            real*8,intent(in),dimension(ndata) :: x
+            real*8,intent(in),dimension(ndata),depend(ndata) :: y
+            integer optional,check(len(x)>=ndata),depend(x) :: ndata=len(x)
+            integer,intent(in) :: ibcl
+            integer,intent(in) :: ibcr
+            real*8,intent(in) :: fbcl
+            real*8,intent(in) :: fbcr
+            integer,intent(in) :: kntopt
+            real*8,intent(out), dimension(n+4),depend(n) :: t
+            real*8,intent(out), dimension(n),dpened(n) :: bcoef
+            integer,optional,intent(in),depend(ndata) :: n=ndata+2
+            integer,intent(out) :: k
+            real*8,optional,dimension(5,ndata+2),depend(ndata) :: w
+        end subroutine bint4
+
+
         function bvalu(t,a,n,k,ideriv,x,inbv,work) ! in bvalu.f
           real*8,intent(in), dimension(n+k),depend(k) :: t
           real*8,intent(in), dimension(n) :: a

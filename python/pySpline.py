@@ -155,7 +155,7 @@ class surf_spline():
                 self.u = kwargs['u']
                 self.v = kwargs['v']
             else:
-                if nDim == 3:
+                if self.nDim == 3:
                     self._calcParameterization()
                 else:
                     print 'Automatric parameterization of ONLY available\
@@ -233,7 +233,7 @@ to Nv: Nctlv = %d'%self.Nctlv
                 self.u = kwargs['u']
                 self.v = kwargs['v']
             else:
-                if nDim == 3:
+                if self.nDim == 3:
                     self._calcParameterization()
                 else:
                     print 'Automatric parameterization of ONLY available\
@@ -1129,6 +1129,10 @@ master. i.e. Internal or on a master edge'''
 
             v_plot = linspace(self.range[2],self.range[3],nv).astype('d')
 
+
+
+        u_plot = linspace(self.range[0],self.range[1],50).astype('d')
+        v_plot = linspace(self.range[2],self.range[3],50).astype('d')
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'\
                          %('interpolated',len(u_plot),len(v_plot)))
@@ -1393,26 +1397,71 @@ class linear_spline():
                     sys.exit(1)
                 # end if
             # end if
-                
-            self.Nctl = self.N
             self.range = array([self.s[0],self.s[-1]])
             self.orig_data = True
+            
+            if 'dx1' and 'dx2' in kwargs:
+                # We have defined a tangent vector at each end
 
-            # Sanity check to make sure k is less than N
-            if self.N <= self.k:
-                self.k = self.N
-            # end if
+                print 'dx1 and dx2 defined'
+          
+                self.Nctl = self.N + 2
+                dx1 = kwargs['dx1']
+                dx2 = kwargs['dx2']
+                ibcl = 1
+                ibcr = 1
+                kntopt = 1
+                assert len(dx1)==len(dx2)==self.nDim,'The length of the \
+derivative vectors must match the spatial dimension of the curve'
 
-            # Generate the knot vector
-            self.t = self.pyspline.bknot(self.s,self.k)
-            if self.nDim > 1:
-                self.coef = zeros((self.Nctl,self.nDim),self.dtype)
-                for idim in xrange(self.nDim):
-                    self.coef[:,idim]= \
-                        self.pyspline.bintk(self.s,self.X[:,idim],self.t,self.k)
-            else:
-                self.coef = self.pyspline.bintk(self.s,self.X,self.t,self.k)
-            # end if
+                if self.nDim > 1:
+                    self.coef = zeros((self.Nctl,self.nDim),self.dtype)
+
+                    for idim in xrange(self.nDim):
+                        fbcl = dx1[idim]
+                        fbcr = dx2[idim]
+#                         print 'input: s:',self.s
+#                         print 'input: X:',self.X[:,idim]
+#                         print 'fbcl:',fbcl
+#                         print 'fbcr:',fbcr
+                       
+                        #self.t,self.coef[:,idim],n,k = \
+                        #    self.pyspline.bint4(self.s,self.X[:,idim],\
+                                   #                 ibcl,ibcr,fbcl,fbcr,kntopt)
+
+                        self.t,self.coef[:,idim],k = \
+                            self.pyspline.bint4(self.s,self.X[:,idim],\
+                                                    ibcl,ibcr,fbcl,fbcr,kntopt)
+
+                else:
+                    print 'do something'
+                # end if
+
+
+                
+        # t,bcoef,k = bint4(x,y,ibcl,ibcr,fbcl,fbcr,kntopt,[ndata,n,w])
+        
+            else: # Do a regular fit
+                
+                self.Nctl = self.N
+
+
+                # Sanity check to make sure k is less than N
+                if self.N <= self.k:
+                    self.k = self.N
+                # end if
+
+                # Generate the knot vector
+                self.t = self.pyspline.bknot(self.s,self.k)
+
+                if self.nDim > 1:
+                    self.coef = zeros((self.Nctl,self.nDim),self.dtype)
+                    for idim in xrange(self.nDim):
+                        self.coef[:,idim]= \
+                            self.pyspline.bintk(self.s,self.X[:,idim],self.t,self.k)
+                else:
+                    self.coef = self.pyspline.bintk(self.s,self.X,self.t,self.k)
+                # end if
                 
             #end for
                 

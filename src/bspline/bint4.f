@@ -104,13 +104,9 @@ C
       REAL BCOEF,FBCL,FBCR,T, TOL,TXN,TX1,VNIKX,W,WDTOL,WORK,X, XL,
      1 Y
       REAL R1MACH
-      DIMENSION X(1), Y(1), T(1), BCOEF(1), W(5,1), VNIKX(4,4), WORK(15)
+      DIMENSION X(ndata), Y(ndata), T(n+4), BCOEF(n), W(5,ndata+2)
+      DIMENSION VNIKX(4,4), WORK(15)
 C***FIRST EXECUTABLE STATEMENT  BINT4
-!      print *,'weclome to bint4.f:'
-!      do i=1,ndata
-!         print *,'x,y:',x(i),y(i)
-!      end do
-
 
       WDTOL = R1MACH(4)
       TOL = SQRT(WDTOL)
