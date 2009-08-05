@@ -1403,8 +1403,8 @@ class linear_spline():
             if 'dx1' and 'dx2' in kwargs:
                 # We have defined a tangent vector at each end
 
-                print 'dx1 and dx2 defined'
-          
+                #print 'dx1 and dx2 defined'
+                
                 self.Nctl = self.N + 2
                 dx1 = kwargs['dx1']
                 dx2 = kwargs['dx2']
