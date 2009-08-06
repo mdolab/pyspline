@@ -117,6 +117,7 @@ class surf_spline():
                 'Error: ku,kv,tu,tv,coef and range MUST be defined for task=\
 \'create\''
             sys.stdout.write('\n')
+            self.task = task
             self.u = None
             self.v = None
             self.X = None
@@ -140,7 +141,7 @@ class surf_spline():
             assert 'ku' in kwargs and 'kv' and 'X' in kwargs,\
                 'Error: ku,kv,u,v and X MUST be defined for task \
 \'interpolate\''
-
+            self.task = task
             self.X  = kwargs['X']
             self.orig_data = True
             self.Nu = self.X.shape[0]
@@ -195,7 +196,7 @@ class surf_spline():
             assert 'ku' in kwargs and 'kv' in kwargs and \
                    'Nctlu' in kwargs and 'Nctlv' in kwargs and 'X' in kwargs, \
                    'Error: ku,kv,Nctlu,Nctlv and X MUST be defined for task lms'
-
+            self.task = task
             self.X  = kwargs['X']
             self.orig_data = True
             self.Nu = self.X.shape[0]
@@ -273,6 +274,25 @@ to Nv: Nctlv = %d'%self.Nctlv
 \'interpolate\' or \'create\''
         sys.exit(1)
         return
+
+
+    def recompute(self):
+        '''Recompute the surface if the knot vector has changed:'''
+
+        assert self.orig_data,'Only surface initialization with original \
+data can be recomputed'
+        if self.task == 'lms':
+            self._calcJacobian()
+            self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim],self.dtype)
+            for idim in xrange(self.nDim):
+                self.coef[:,:,idim] =\
+                    reshape(lstsq(self.J,self.X[:,:,idim].flatten())[0]\
+                                ,[self.Nctlu,self.Nctlv])
+            # end for
+        # end if
+        
+
+
 
     def _calcParameterization(self):
 
@@ -763,8 +783,8 @@ master. i.e. Internal or on a master edge'''
 
 
     def getValueEdge(self,edge,s):
-        '''Get the value of the spline on edge, edge=0,1,2,3 where
-        edges are oriented in the standard counter-clockwise fashion.'''
+        '''Get the value of the spline on edge, edge=0,1,2,3'''
+
 
         if edge == 0:
             return self.getValue(s,0)
@@ -779,6 +799,38 @@ master. i.e. Internal or on a master edge'''
             sys.exit(1)
             return
         #end if 
+        
+    def getOrigValuesEdge(self,edge):
+        ''' Get the values of the original data on edge. edge = 0,1,2,3'''
+        if edge == 0:
+            if mod(self.Nu,2) == 1: # Its odd
+                mid = (self.Nu-1)/2
+                return self.X[0,0],self.X[mid,0],self.X[-1,0]
+            else:
+                Xmid = 0.5 *(self.X[self.Nu/2,0] + self.X[self.Nu/2 - 1,0])
+                return self.X[0,0],Xmid,self.X[-1,0]
+        if edge == 1:
+            if mod(self.Nu,2) == 1: # Its odd
+                mid = (self.Nu-1)/2
+                return self.X[0,-1],self.X[mid,-1],self.X[-1,-1]
+            else:
+                Xmid = 0.5 *(self.X[self.Nu/2,-1] + self.X[self.Nu/2 - 1,-1])
+                return self.X[0,-1],Xmid,self.X[-1,-1]
+        if edge == 2:
+            if mod(self.Nv,2) == 1: # Its odd
+                mid = (self.Nv-1)/2
+                return self.X[0,0],self.X[0,mid],self.X[0,-1]
+            else:
+                Xmid = 0.5 *(self.X[0,self.Nv/2] + self.X[0,self.Nv/2 - 1])
+                return self.X[0,0],Xmid,self.X[0,-1]
+        if edge == 3:
+            if mod(self.Nv,2) == 1: # Its odd
+                mid = (self.Nv-1)/2
+                return self.X[-1,0],self.X[-1,mid],self.X[-1,-1]
+            else:
+                Xmid = 0.5 *(self.X[-1,self.Nv/2] + self.X[-1,self.Nv/2 - 1])
+                return self.X[-1,0],Xmid,self.X[-1,-1]
+
 
     def getValueCorner(self,corner):
         '''Get the value of the spline on corner i where nodes are oriented in
@@ -1131,8 +1183,8 @@ master. i.e. Internal or on a master edge'''
 
 
 
-        u_plot = linspace(self.range[0],self.range[1],50).astype('d')
-        v_plot = linspace(self.range[2],self.range[3],50).astype('d')
+        u_plot = linspace(self.range[0],self.range[1],40).astype('d')
+        v_plot = linspace(self.range[2],self.range[3],40).astype('d')
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'\
                          %('interpolated',len(u_plot),len(v_plot)))
