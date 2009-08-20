@@ -86,24 +86,8 @@ class surf_spline():
 '''
         sys.stdout.write('pySpline Type: %s. '%(task))
 
-        # This is the optional additional info required for use with pyGeo
-        self.edge_con = [ [], [], [], []] #Is edge connected to another edge 
-        # Is edge a Master Edge?...it is unless it its driven
-        self.master_edge = [True,True,True,True] 
-        self.dir = [None,None,None,None]
-        self.edge_type = [None,None,None,None]
-        self.node_con = [[],[],[],[]]
-        self.master_node = [None,None,None,None] # Is each node a master node?
-
-        self.Nu_free = None
-        self.Nv_free = None
-        self.N_free  = None
-        self.Nctlu_free = None
-        self.Nctlv_free = None
-        self.Nctl_free  = None
-        self.globalCtlIndex = None
-
         self.dtype = 'd' # Use real version by default
+        
         self.pyspline = pyspline # Real version of spline library
         self.pyspline_cs = pyspline_cs # Complex version of spline library
 
@@ -130,6 +114,7 @@ class surf_spline():
             self.coef = array(kwargs['coef'],self.dtype)
             self.Nctlu = self.coef.shape[0]
             self.Nctlv = self.coef.shape[1]
+            self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
             self.orig_data = False
             self.range = kwargs['range']
             self.nDim = self.coef.shape[2]
@@ -149,6 +134,7 @@ class surf_spline():
             self.nDim  = self.X.shape[2]
             self.Nctlu = self.Nu
             self.Nctlv = self.Nv
+            self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
             self.ku = kwargs['ku']
             self.kv = kwargs['kv']
 
@@ -218,6 +204,8 @@ to Nu: Nctlu = %d'%self.Nctlu
 to Nv: Nctlv = %d'%self.Nctlv
             # end if
             
+            self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
+
             # Sanity check to make sure k is less than N
             if self.Nu <= self.ku:
                 self.ku = self.Nu
@@ -343,182 +331,131 @@ data can be recomputed'
 
         return
 
-    def _calcNFree(self):
-        
-        '''Internal function to calculate how many "free" control points we
-        have. i.e. the master edges'''
-        Nctlu = self.Nctlu
-        Nctlv = self.Nctlv
-        Nu    = self.Nu
-        Nv    = self.Nv
-       
-        if Nu == None:
-            Nu = 0
-        if Nv == None:
-            Nv = 0
+    def getRefAxisDir(self,ref_axis,coef):
+        '''Determine the primary orientation of a ref_axis'''
 
-        if self.master_edge[0] == False:
-            Nv -= 1
-            Nctlv -= 1
-            
-        if self.master_edge[1] == False:
-            Nv -= 1
-            Nctlv -= 1
+        # Note: We pass the coef we want BACK in. This allows for a
+        # section of the coefficients to be used
 
-        if self.master_edge[2] == False:
-            Nu -= 1
-            Nctlu -= 1
+        # We need to deduce along which direction (u or v) the
+        # reference axis is directed.  First estimate Over what
+        # portion the surface and ref axis co-inside
 
-        if self.master_edge[3] == False:
-            Nu -= 1
-            Nctlu -= 1
-  
-        self.Nu_free = Nu
-        self.Nv_free = Nv
-        self.N_free = Nu*Nv
+        # Find the s range for the 4 corners
 
-        self.Nctlu_free = Nctlu
-        self.Nctlv_free = Nctlv
-        self.Nctl_free = Nctlu*Nctlv
-        return
+        p = zeros(4,self.dtype)
+        p[0],conv,D,esp = ref_axis.xs.projectPoint(coef[0 , 0])
+        p[1],conv,D,esp = ref_axis.xs.projectPoint(coef[0 ,-1])
+        p[2],conv,D,esp = ref_axis.xs.projectPoint(coef[-1, 0])
+        p[3],conv,D,esp = ref_axis.xs.projectPoint(coef[-1,-1])
 
-    def _getCropData(self,X):
-        '''This internal function gets the original data coorsponding but
-        omits the data along edges which are not masters'''
-        return X[self.slice_u,self.slice_v]
+        min_s = min(p)
+        max_s = max(p)
 
-    def getFreeCtl(self):
+        # Now we know over what portion of the ref axis we are dealing
+        # with.  Take 3 Normal Vectors
+        N = 3
+        sn = linspace(min_s,max_s,N)
+        dn = zeros((N,3),self.dtype)
+        for i in xrange(N):
+            dn[i,:] = ref_axis.xs.getDerivative(sn[i])
+        # end if
 
-        '''Return Free control Points'''
-        return self.coef[self.slice_u,self.slice_v]
+        # Now Do two tests: Take three points in u and test 3 groups
+        # against dn and take three points in v and test the  3 groups
+        # again
 
-    def setFreeCtl(self,coef):
+        u_dot_tot = 0
+        s = linspace(0,1,N)
 
-        '''Sets Free control Points'''
-        # See getFreeCtl for how this works
-
-        self.coef[self.slice_u,self.slice_v] = coef
-
-        return 
-
-    def setFreeCtlSection(self,coef,slice_u,slice_v):
-
-        '''Set a section of the free control points'''
-        
-        temp = self.getFreeCtl()
-        temp[slice_u,slice_v] = coef
-        self.setFreeCtl(temp)
-
-        return
-   
-
-    def _getFreeIndex(self):
-        '''This internal function gets string slice which tells
-        various functions how to slice out control points or data that
-        coorspond to master edges'''
-        # Use a Binary Tree-Type Search 
-
-        if self.master_edge[0] == True:
-            vs = 0
-            if self.master_edge[1] == True:
-                ve = self.Nctlv
-                if self.master_edge[2] == True:
-                    us = 0
-                    if self.master_edge[3] == True:
-                        ue = self.Nctlu
-                    else:
-                        ue = self.Nctlu-1
-                    # end if
-                else:
-                    us = 1
-                    if self.master_edge[3] == True:
-                        ue = self.Nctlu
-                    else:
-                        ue = self.Nctlu-1
-                    # end if
-                # end if
-            else:
-                ve = self.Nctlv-1
-                if self.master_edge[2] == True:
-                    us = 0
-                    if self.master_edge[3] == True:
-                        ue = self.Nctlu
-                    else:
-                        ue = self.Nctlu-1
-                    # end if
-                else:
-                    us = 1
-                    if self.master_edge[3] == True:
-                        ue = self.Nctlu
-                    else:
-                        ue = self.Nctlu-1
-                    # end if
-                # end if
-            # end if
-        else:
-            vs = 1
-            if self.master_edge[1] == True:
-                ve = self.Nctlv
-                if self.master_edge[2] == True:
-                    us = 0
-                    if self.master_edge[3] == True:
-                        ue = self.Nctlu
-                    else:
-                        ue = self.Nctlu-1
-                    # end if
-                else:
-                    us = 1
-                    if self.master_edge[3] == True:
-                        ue = self.Nctlu
-                    else:
-                        ue = self.Nctlu-1
-                    # end if
-                # end if
-            else:
-                ve = self.Nctlv-1
-                if self.master_edge[2] == True:
-                    us = 0
-                    if self.master_edge[3] == True:
-                        ue = self.Nctlu
-                    else:
-                        ue = self.Nctlu-1
-                    # end if
-                else:
-                    us = 1
-                    if self.master_edge[3] == True:
-                        ue = self.Nctlu
-                    else:
-                        ue = self.Nctlu-1
-                    # end if
-                # end if
-            # end if
-        #end if
-        self.slice_u = slice(us,ue)
-        self.slice_v = slice(vs,ve)
-
-        return
-
-    def _assignGlobalIndex(self,current_index):
-
-        '''This function takes a current index counter and assigns EACH
-        control point in the full array its coorsponding driving
-        control point'''
-
-        self.globalCtlIndex = ones((self.Nctlu,self.Nctlv),int)
-
-        for i in xrange(self.Nctlu):
-            for j in xrange(self.Nctlv):
-                # Check the Current Point
-                pt_type,edge_info,node_info = self.checkCtl(i,j)
-                if pt_type == 0: # Its a regular Driving Node
-                    self.globalCtlIndex[i,j] = current_index
-                    current_index += 1
-                # end if
+        for i in xrange(N):
+            for n in xrange(N):
+                du,dv = self.getDerivative(s[i],s[n])
+                u_dot_tot += dot(du,dn[n,:])
             # end for
         # end for
-        return current_index
+
+        v_dot_tot = 0
+        for j in xrange(N):
+            for n in xrange(N):
+                du,dv = self.getDerivative(s[n],s[j])
+                v_dot_tot += dot(dv,dn[n,:])
+            # end for
+        # end for
+
+        if v_dot_tot > u_dot_tot:
+            dir = 1
+        else:
+            dir = 0
+        return dir,max_s,min_s
 
 
+#     def _getCropData(self,X):
+#         '''This internal function gets the original data coorsponding but
+#         omits the data along edges which are not masters'''
+#         return X[self.slice_u,self.slice_v]
+
+    def getCtlSlice(self,slice_u,slice_v):
+        return self.coef[slice_u,slice_v]
+
+#     def getFreeCtl(self):
+
+#         '''Return Free control Points'''
+#         return self.coef[self.slice_u,self.slice_v]
+
+   #  def setFreeCtl(self,coef):
+
+#         '''Sets Free control Points'''
+#         # See getFreeCtl for how this works
+
+#         self.coef[self.slice_u,self.slice_v] = coef
+
+#         return 
+
+#     def setFreeCtlSection(self,coef,slice_u,slice_v):
+
+#         '''Set a section of the free control points'''
+        
+#         temp = self.getFreeCtl()
+#         temp[slice_u,slice_v] = coef
+#         self.setFreeCtl(temp)
+
+#         return
+
+    def getGlobalIndexEdge(self,edge,index,dir):
+        '''Get the global index value from edge,index,dir information'''
+        Nctlu = self.Nctlu
+        Nctlv = self.Nctlv
+        if edge == 0:
+            if dir == 1:
+                return self.globalCtlIndex[index,0],index,0
+            else:
+                return self.globalCtlIndex[Nctlu-1-index,0],Nctlu-1-index,0
+            # end if
+        elif edge == 1:
+            if dir == 1:
+                return self.globalCtlIndex[index,Nctlv-1],index,Nctlv-1
+            else:
+                return self.globalCtlIndex[Nctlu-1-index,Nctlv-1],Nctlu-1,Nctlv-1
+            # end if
+        elif edge == 2:
+            if dir == 1:
+                return self.globalCtlIndex[0,index],0,index
+            else:
+                return self.globalCtlIndex[0,Nctlv-1-index],0,Nctlv-1-index
+            # end if
+        elif edge == 3:
+            if dir == 1:
+                return self.globalCtlIndex[Nctlu-1,index],Nctlu-1,index
+            else:
+                return self.globalCtlIndex[Nctlu-1,Nctlv-1-index],Nctlu-1,Nctlv-1-index
+            # end if
+        # end if
+        else:
+            print 'Edge Must be between 0 and 3'
+            sys.exit(0)
+        # end if
+        return
 
     def _calcKnots(self):
 
@@ -552,75 +489,10 @@ data can be recomputed'
         # end for
         return
 
-    def checkCtl(self,i,j):
-        ''' This function checks to see if a control point is a
-master. i.e. Internal or on a master edge'''
-
-        if i > 0 and i < self.Nctlu-1 and j > 0 and j < self.Nctlv-1:
-            #This is the internal case...
-            return 0,None,None
-
-        # Now we need to check if its on a master edge (but not a corner)
-        
-        if j == 0 and i > 0 and i < self.Nctlu-1:
-            if self.master_edge[0]:
-                return 0,[self.edge_con[0],i,self.dir[0],\
-                              self.edge_type[0]],None  #Face,Edge,Node
-            else:
-                return 1,None,None
-        
-        if j == self.Nctlv-1 and i > 0 and i < self.Nctlu-1:
-            if self.master_edge[1]:
-                return 0,[self.edge_con[1],i,self.dir[1],\
-                              self.edge_type[1]],None  #Face,Edge,Node
-            else:
-                return 1,None,None
-
-        if i == 0 and j > 0 and j < self.Nctlv-1:
-            if self.master_edge[2]:
-                return 0,[self.edge_con[2],j,self.dir[2],\
-                              self.edge_type[2]],None  #Face,Edge,Node
-            else:
-                return 1,None,None
-        if i == self.Nctlu-1 and j > 0 and j < self.Nctlv-1 :
-            if self.master_edge[3]:
-                return 0,[self.edge_con[3],j,self.dir[3],\
-                              self.edge_type[3]],None  #Face,Edge,Node
-            else:
-                return 1,None,None
-        
-        # Now check Corners...Must be on BOTH master edges
-
-        if j == 0 and i == 0:
-            if self.master_node[0]:
-                return 0,None,self.node_con[0]
-            else:
-                return 1,None,None
-            
-        if j == 0 and i == self.Nctlu-1:
-            if self.master_node[1]:
-                return 0,None,self.node_con[1]
-            else:
-                return 1,None,None
-            
-        if j == self.Nctlv-1 and i == 0:
-            if self.master_node[2]:
-                return 0,None,self.node_con[2]
-            else:
-                return 1, None, None
-
-        if j == self.Nctlv-1 and i == self.Nctlu-1:
-            if self.master_node[3]:
-                return 0,None,self.node_con[3]
-            else:
-                return 1, None, None
-        # else:
-
-
     def calcPtDeriv(self,u,v,i,j):
         '''Calc the derivative of point u,v at control point i,j'''
         coef = zeros((self.Nctlu,self.Nctlv))
-        coef[i,j] = 1
+        coef[i,j] = 1.0
         x = self.pyspline.b2val(\
             u,v,0,0,self.tu,self.tv,self.ku,self.kv,coef)
         
@@ -684,105 +556,46 @@ master. i.e. Internal or on a master edge'''
                                      self.ku,self.kv,ctl)).flatten()
 
 
-    def getRefAxisDir(self,ref_axis,coef):
-        '''Determine the primary orientation of a ref_axis'''
-
-        # Note: We pass the coef we want BACK in. This allows for a
-        # section of the coefficients to be used
-
-        # We need to deduce along which direction (u or v) the
-        # reference axis is directed.  First estimate Over what
-        # portion the surface and ref axis co-inside
-        
-        # Find the s range for the 4 corners
-
-        p = zeros(4,self.dtype)
-        
-        p[0],conv,D,esp = ref_axis.xs.projectPoint(coef[0 , 0])
-        p[1],conv,D,esp = ref_axis.xs.projectPoint(coef[0 ,-1])
-        p[2],conv,D,esp = ref_axis.xs.projectPoint(coef[-1, 0])
-        p[3],conv,D,esp = ref_axis.xs.projectPoint(coef[-1,-1])
-
-        min_s = min(p)
-        max_s = max(p)
-       
-        # Now we know over what portion of the ref axis we are dealing
-        # with.  Take 3 Normal Vectors
-        N = 3
-        sn = linspace(min_s,max_s,N)
-        dn = zeros((N,3),self.dtype)
-        for i in xrange(N):
-            dn[i,:] = ref_axis.xs.getDerivative(sn[i])
-        # end if
-
-        # Now Do two tests: Take three points in u and test 3 groups
-        # against dn and take three points in v and test the  3 groups
-        # again
-    
-        u_dot_tot = 0
-        s = linspace(0,1,N)
-    
-        for i in xrange(N):
-            for n in xrange(N):
-                du,dv = self.getDerivative(s[i],s[n])
-                u_dot_tot += dot(du,dn[n,:])
-            # end for
-        # end for
-
-        v_dot_tot = 0
-        for j in xrange(N):
-            for n in xrange(N):
-                du,dv = self.getDerivative(s[n],s[j])
-                v_dot_tot += dot(dv,dn[n,:])
-            # end for
-        # end for
-        
-        if v_dot_tot > u_dot_tot:
-            dir = 1
-        else:
-            dir = 0
-        return dir,max_s,min_s
        
 
-    def updateSurfacePoints(self,delta,slice_u,slice_v):
-        '''Update the control points on section 'section' along a 
-        normal to the surface'''
+  #   def updateSurfacePoints(self,delta,slice_u,slice_v):
+#         '''Update the control points on section 'section' along a 
+#         normal to the surface'''
 
-        # Section refers to the 'free' control points
+#         # Section refers to the 'free' control points
        
-        # Full Control Point Size
-        update = zeros((self.Nctlu,self.Nctlv),self.dtype)         
-        temp =   zeros((self.Nctlu_free,self.Nctlv_free),self.dtype)
-        temp[slice_u,slice_v] = delta
-        update[self.slice_u,self.slice_v] = temp
+#         # Full Control Point Size
+#         update = zeros((self.Nctlu,self.Nctlv),self.dtype)         
+#         temp =   zeros((self.Nctlu_free,self.Nctlv_free),self.dtype)
+#         temp[slice_u,slice_v] = delta
+#         update[self.slice_u,self.slice_v] = temp
 
-        self.coef = self.pyspline.updatesurfacepoints(\
-            self.coef,update,self.tu,self.tv,self.ku,self.kv).copy()
-        return 
+#         self.coef = self.pyspline.updatesurfacepoints(\
+#             self.coef,update,self.tu,self.tv,self.ku,self.kv).copy()
+#         return 
 
-    def updateSurfacePointsDeriv(self,coef,delta,slice_u,slice_v):
-        '''This function is the same as above but returns the coefficients
-        instead of setting them in the spline object'''
+#     def updateSurfacePointsDeriv(self,coef,delta,slice_u,slice_v):
+   #      '''This function is the same as above but returns the coefficients
+#         instead of setting them in the spline object'''
 
-        # Section refers to the 'free' control points
+#         # Section refers to the 'free' control points
 
-        # Full Control Point Size
-        update = zeros((self.Nctlu,self.Nctlv),'D')
-        temp =   zeros((self.Nctlu_free,self.Nctlv_free),'D')
-        temp[slice_u,slice_v] = delta
-        update[self.slice_u,self.slice_v] = temp
+#         # Full Control Point Size
+#         update = zeros((self.Nctlu,self.Nctlv),'D')
+#         temp =   zeros((self.Nctlu_free,self.Nctlv_free),'D')
+#         temp[slice_u,slice_v] = delta
+#         update[self.sliceu,self.slice_v] = temp
 
-        temp = self.coef.astype('D')
-        temp[self.slice_u,self.slice_v] = coef
+#         temp = self.coef.astype('D')
+#         temp[self.slice_u,self.slice_v] = coef
     
-        coef = pyspline_cs.updatesurfacepoints(\
-            temp,update,self.tu,self.tv,self.ku,self.kv).copy()
-        return coef[self.slice_u,self.slice_v]
+#         coef = pyspline_cs.updatesurfacepoints(\
+#             temp,update,self.tu,self.tv,self.ku,self.kv).copy()
+#         return coef[self.slice_u,self.slice_v]
 
 
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3'''
-
 
         if edge == 0:
             return self.getValue(s,0)
@@ -872,66 +685,6 @@ master. i.e. Internal or on a master edge'''
         else:
             self.coef[-1,:,:] = new_coef
         return
-
-    def setCoefIndexCorner(self,node,global_index):
-
-        if node == 0:
-            self.globalCtlIndex[0,0] = global_index
-            return
-        if node == 1:
-            self.globalCtlIndex[self.Nctlu-1,0] = global_index
-            return
-        if node == 2:
-            self.globalCtlIndex[0,self.Nctlv-1] = global_index
-            return
-        if node == 3:
-            self.globalCtlIndex[self.Nctlu-1,self.Nctlv-1] = global_index
-            return
-
-
-    def setCoefIndexEdge(self,edge,global_index,edge_index,dir):
-        if   edge == 0:
-            if dir == 1:
-                self.globalCtlIndex[edge_index,0] =\
-                    global_index
-            else:
-                self.globalCtlIndex[self.Nctlu-edge_index-1,0] =\
-                    global_index
-            # end if
-            return
-
-        if   edge == 1:
-            if dir == 1:
-                self.globalCtlIndex[edge_index,self.Nctlv-1] =\
-                    global_index
-            else:
-                self.globalCtlIndex[self.Nctlu-edge_index-1,self.Nctlv-1] = \
-                    global_index
-            # end if
-            return
-
-        if   edge == 2:
-            if dir == 1:
-                self.globalCtlIndex[0,edge_index] =\
-                    global_index
-            else:
-                self.globalCtlIndex[0,self.Nctlv-1-edge_index] =\
-                    global_index
-            # end if
-            return
-
-        if   edge == 3:
-            if dir == 1:
-                self.globalCtlIndex[self.Nctlu-1,edge_index] =\
-                    global_index
-            else:
-                self.globalCtlIndex[self.Nctlu-1,self.Nctlv-1-edge_index] = \
-                    global_index
-            # end if
-            return
-
-        return
-
 
     def getNormal(self,u,v):
         '''Get the normal at the surface point u,v'''
@@ -1188,21 +941,6 @@ master. i.e. Internal or on a master edge'''
                          %('interpolated',len(u_plot),len(v_plot)))
         handle.write('DATAPACKING=POINT\n')
 
-        # ---------------------------------------------------------------
-        # NOTE: The section section has fewer fortran calls and is faster
-        # ---------------------------------------------------------------
-     #    for j in xrange(len(v_plot)):
-#             for i in xrange(len(u_plot)):
-#                 for idim in xrange(self.nDim):
-# #                     handle.write('%f '%(pyspline.b2val(\
-# #                                 u_plot[i],v_plot[j],0,0,self.tu.astype('d'),\
-# #                                     self.tv.astype('d'),self.ku,self.kv,\
-# #                                     self.coef[:,:,idim].astype('d'))))
-# #                 # end for 
-# #                 handle.write('\n')
-#             # end for
-#         # end for
-# ---------------------------------------------------------------------
         [V_plot,U_plot] = meshgrid(v_plot,u_plot)
         X = self.getValueM( U_plot,V_plot)
         for j in xrange(len(v_plot)):
@@ -1857,234 +1595,4 @@ if __name__ == '__main__':
 #         # end for
 #         return ctl
 
-
-
-
-        #X = zeros([self.Nu_free,self.Nv_free,3])
-        
-        # There is no easy way of doing this to my knowlege. There are
-        # 16 combination of Master/Slave  edges (2^4) And each results
-        # in a different section of  the matrix X being returned. Here
-        # we will simply hard code the 16 combination 
-#        master_edge = self.master_edge
-# --------------------------------------------------------
-#         # All Master (zero Slave)
-#         if self.master_edge == [True,True,True,True]:
-#             return X
-
-#         # Three Master/1 Slave
-#         elif master_edge == [False,True,True,True]:
-#             return X[:,1:]
-#         elif master_edge == [True,False,True,True]:
-#             return X[:,0:-1]
-#         elif master_edge == [True,True,False,True]:
-#             return X[1:,:]
-#         elif master_edge == [True,True,True,False]:
-#             return X[0:-1,:]
-
-#         # Two Master / Two Slave
-#         elif master_edge == [True,True,False,False]:
-#             return X[1:-1,:]
-#         elif master_edge == [False,False,True,True]:
-#             return X[:,1:-1]
-
-#         elif master_edge == [True,False,False,True]:
-#             return X[1:,0:-1]
-#         elif master_edge == [False,True,False,True]:
-#             return X[1:,1]
-#         elif master_edge == [False,True,True,False]:
-#             return X[0:-1,1:]
-#         elif master_edge == [True,False,True,False]:
-#             return X[0:-1,0:-1]
-        
-#         # One Master / Three Slave
-#         elif master_edge == [True,False,False,False]:
-#             return X[1:-1,0:-1]
-#         elif master_edge == [False,True,False,False]:
-#             return X[1:-1,1:]
-#         elif master_edge == [False,False,True,False]:
-#             return X[0:-1:,1:-1]
-#         elif master_edge == [False,False,False,True]:
-#             return X[1:,1:-1]
-
-#         # Zero Master / All Slave
-#         elif master_edge == [False,False,False,False]:
-#             return X[1:-1,1:-1]
-
-# --------------------------------------------------------
-
-##  Use a Binary Tree-Type Search -> Faster -> log n scaling 
-
-#         if self.master_edge[0] == True:
-#             if self.master_edge[1] == True:
-#                 if self.master_edge[2] == True:
-#                     if self.master_edge[3] == True:
-#                         #[True,True,True,True]:
-#                         return X
-#                     else:
-#                         #[True,True,True,False]:
-#                         return X[0:-1,:]
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         #[True,True,False,True]:
-#                         return X[1:,:]
-#                     else:
-#                         #[True,True,False,False]:
-#                         return X[1:-1,:]
-#                     # end if
-#                 # end if
-#             else:
-#                 if self.master_edge[2] == True:
-
-#                     if self.master_edge[3] == True:
-#                         #[True,False,True,True]:
-#                         return X[:,0:-1]
-#                     else:
-#                         #[True,False,True,False]:
-#                         return X[0:-1,0:-1]
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         #[True,False,False,True]:
-#                         return X[1:,0:-1]
-#                     else:
-#                         #[True,False,False,False]:
-#                         return X[1:-1,0:-1]
-#                     # end if
-#                 # end if
-#             # end if
-#         else:
-#             if self.master_edge[1] == True:
-#                 if self.master_edge[2] == True:
-#                     if self.master_edge[3] == True:
-#                         #[False,True,True,True]:
-#                         return X[:,1:]
-#                     else:
-#                         #[False,True,True,False]:
-#                         return X[0:-1,1:]
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         # [False,True,False,True]:
-#                         return X[1:,1]
-#                     else:
-#                         # [False,True,False,False]:
-#                         return X[1:-1,1:]
-#                     # end if
-#                 # end if
-#             else:
-#                 if self.master_edge[2] == True:
-#                     if self.master_edge[3] == True:
-#                         #[False,False,True,True]:
-#                         return X[:,1:-1]
-#                     else:
-#                         # [False,False,True,False]:
-#                         return X[0:-1:,1:-1]
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         #[False,False,False,True]:
-#                         return X[1:,1:-1]
-#                     else:
-#                         # [False,False,False,False]:
-#                         return X[1:-1,1:-1]
-#                     # end if
-#                 # end if
-#             # end if
-#         #end if
-#         return
-  #   def _getFreeIndex(self):
-#         '''This internal function gets string slice which tells
-#         various functions how to slice out control points or data that
-#         coorspond to master edges'''
-#         # Use a Binary Tree-Type Search -> Faster -> log n scaling 
-
-#         slice_string = ''
-#         us = None
-#         ue = None
-#         vs = None
-#         ve = None
-        
-#         if self.master_edge[0] == True:
-#             if self.master_edge[1] == True:
-#                 if self.master_edge[2] == True:
-#                     if self.master_edge[3] == True:
-#                         #[True,True,True,True]:
-#                         slice_string = '[:,:]'
-#                     else:
-#                         #[True,True,True,False]:
-#                          slice_string = '[0:-1,:]'
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         #[True,True,False,True]:
-#                         slice_string = '[1:,:]'
-#                     else:
-#                         #[True,True,False,False]:
-#                         slice_string = '[1:-1,:]'
-#                     # end if
-#                 # end if
-#             else:
-#                 if self.master_edge[2] == True:
-
-#                     if self.master_edge[3] == True:
-#                         #[True,False,True,True]:
-#                         slice_string = '[:,0:-1]'
-#                     else:
-#                         #[True,False,True,False]:
-#                         slice_string = '[0:-1,0:-1]'
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         #[True,False,False,True]:
-#                         slice_string = '[1:,0:-1]'
-#                     else:
-#                         #[True,False,False,False]:
-#                         slice_string = '[1:-1,0:-1]'
-#                     # end if
-#                 # end if
-#             # end if
-#         else:
-#             if self.master_edge[1] == True:
-#                 if self.master_edge[2] == True:
-#                     if self.master_edge[3] == True:
-#                         #[False,True,True,True]:
-#                         slice_string = '[:,1:]'
-#                     else:
-#                         #[False,True,True,False]:
-#                         slice_string = '[0:-1,1:]'
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         # [False,True,False,True]:
-#                         slice_string = '[1:,1]'
-#                     else:
-#                         # [False,True,False,False]:
-#                         slice_string = '[1:-1,1:]'
-#                     # end if
-#                 # end if
-#             else:
-#                 if self.master_edge[2] == True:
-#                     if self.master_edge[3] == True:
-#                         #[False,False,True,True]:
-#                         slice_string = '[:,1:-1]'
-#                     else:
-#                         # [False,False,True,False]:
-#                         slice_string = '[0:-1:,1:-1]'
-#                     # end if
-#                 else:
-#                     if self.master_edge[3] == True:
-#                         #[False,False,False,True]:
-#                         slice_string = '[1:,1:-1]'
-#                     else:
-#                         # [False,False,False,False]:
-#                         slice_string = '[1:-1,1:-1]'
-#                     # end if
-#                 # end if
-#             # end if
-#         #end if
-
-#         self.slice_string = slice_string
-#         return
 
