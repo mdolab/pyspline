@@ -290,9 +290,6 @@ data can be recomputed'
                                 ,[self.Nctlu,self.Nctlv])
             # end for
         # end if
-        
-
-
 
     def _calcParameterization(self):
 
@@ -500,6 +497,7 @@ data can be recomputed'
         self.slice_v = slice(vs,ve)
 
         return
+
     def _assignGlobalIndex(self,current_index):
 
         '''This function takes a current index counter and assigns EACH

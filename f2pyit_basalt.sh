@@ -1,4 +1,4 @@
-#/bin/bash
+ #/bin/bash
 #Makefile for pySpline
 
 #First make the source files for the real version
