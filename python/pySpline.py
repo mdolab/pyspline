@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 '''
 pySpline
 
@@ -159,10 +158,10 @@ class surf_spline():
             self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
 
             #Sanity check to make sure k is less than N
-            if self.Nu <= self.ku:
+            if self.Nu < self.ku:
                 self.ku = self.Nu
                 print 'Warning: ku has been set to Nu. ku is now %d'%(self.ku)
-            if self.Nv <= self.kv:
+            if self.Nv < self.kv:
                 print 'Warning: kv has been set to Nv. kv is now %d'%(self.kv)
                 self.kv = self.Nv
             
@@ -424,7 +423,7 @@ data can be recomputed'
 
     def getGlobalIndexEdge(self,edge,index,dir):
         '''Get the global index value from edge,index,dir information'''
-        Nctlu = self.Nctlu
+        Nctlu = self.Nctlu # Temp Values
         Nctlv = self.Nctlv
         if edge == 0:
             if dir == 1:
@@ -643,48 +642,48 @@ data can be recomputed'
                 return self.X[-1,0],Xmid,self.X[-1,-1]
 
 
-    def getValueCorner(self,corner):
-        '''Get the value of the spline on corner i where nodes are oriented in
-        the standard counter-clockwise fashion.'''
+#     def getValueCorner(self,corner):
+#         '''Get the value of the spline on corner i where nodes are oriented in
+#         the standard counter-clockwise fashion.'''
 
-        if corner == 0:
-            return self.getValue(0,0)
-        elif corner == 1:
-            return self.getValue(1,0)
-        elif corner == 2:
-            return self.getValue(1,1)
-        elif corner ==3:
-            return self.getValue(0,1)
-        else:
-            print 'Corner must be between 0 and 3'
-            sys.exit(1)
-            return
-        #end if 
+#         if corner == 0:
+#             return self.getValue(0,0)
+#         elif corner == 1:
+#             return self.getValue(1,0)
+#         elif corner == 2:
+#             return self.getValue(1,1)
+#         elif corner ==3:
+#             return self.getValue(0,1)
+#         else:
+#             print 'Corner must be between 0 and 3'
+#             sys.exit(1)
+#             return
+#         #end if 
 
-    def getCoefEdge(self,edge):
-        '''Get Coef along edge edge'''
+#     def getCoefEdge(self,edge):
+#         '''Get Coef along edge edge'''
 
-        if   edge == 0:
-            return self.coef[:,0,:]
-        elif edge == 1:
-            return self.coef[:,-1,:]
-        elif edge == 2:
-            return self.coef[0,:,:]
-        else:
-            return self.coef[-1,:,:]
+#         if   edge == 0:
+#             return self.coef[:,0,:]
+#         elif edge == 1:
+#             return self.coef[:,-1,:]
+#         elif edge == 2:
+#             return self.coef[0,:,:]
+#         else:
+#             return self.coef[-1,:,:]
         
-    def setCoefEdge(self,edge,new_coef):
-        '''Set Coef along edge edge'''
+#     def setCoefEdge(self,edge,new_coef):
+#         '''Set Coef along edge edge'''
 
-        if   edge == 0:
-            self.coef[:,0,:] = new_coef
-        elif edge == 1:
-            self.coef[:,-1,:] = new_coef
-        elif edge == 2:
-            self.coef[0,:,:] = new_coef
-        else:
-            self.coef[-1,:,:] = new_coef
-        return
+#         if   edge == 0:
+#             self.coef[:,0,:] = new_coef
+#         elif edge == 1:
+#             self.coef[:,-1,:] = new_coef
+#         elif edge == 2:
+#             self.coef[0,:,:] = new_coef
+#         else:
+#             self.coef[-1,:,:] = new_coef
+#         return
 
     def getNormal(self,u,v):
         '''Get the normal at the surface point u,v'''
@@ -767,53 +766,61 @@ data can be recomputed'
 
         # We will use a starting point u0,v0 if given
 
-        # Check we have the same dimension:
-        assert len(x0) == self.nDim,'Dimension of x0 and the dimension\
- of spline must be the same'
-        converged = False
-        #print 'x0:',x0
-        for i in xrange(Niter):
-            D = x0 - self.getValue(u0,v0)
-            Ydotu,Ydotv = self.getDerivative(u0,v0)
-            updateu = dot(D,Ydotu)/(sqrt(dot(Ydotu,Ydotu)))#/self.length
-            updatev = dot(D,Ydotv)/(sqrt(dot(Ydotv,Ydotv)))#/self.length
-            # Check to see if update went too far
+        u0,v0,D,converged = self.pyspline.projectpoint(\
+            self.coef,self.ku,self.kv,self.tu,self.tv,x0,u0,v0,Niter,tol)
 
-            if u0+updateu > self.range[1]:
-                updateu = self.range[1]-u0
-            elif u0+updateu< self.range[0]:
-                # Only put the update up to the end
-                updateu = self.range[0]-u0
-            # end if
+     #    print 'u0,v0,d,converged fortran',u0,v0,d,converged
+#         # Check we have the same dimension:
+#         assert len(x0) == self.nDim,'Dimension of x0 and the dimension\
+#  of spline must be the same'
+#         converged = False
+#         #print 'x0:',x0
+#         for i in xrange(Niter):
+#             D = x0 - self.getValue(u0,v0)
+#             Ydotu,Ydotv = self.getDerivative(u0,v0)
+#             print 'Ydotu,Ydotv:',Ydotu,Ydotv,u0,v0
+#             updateu = dot(D,Ydotu)/(sqrt(dot(Ydotu,Ydotu)))#/self.length
+#             updatev = dot(D,Ydotv)/(sqrt(dot(Ydotv,Ydotv)))#/self.length
+#             # Check to see if update went too far
+#             print 'updateu,updatev:',updateu,updatev
 
-            if v0+updatev > self.range[3]:
-                updatev = self.range[3]-v0
-            elif v0+updatev< self.range[2]:
-                # Only put the update up to the end
-                updatev = self.range[2]-v0
-            # end if
+#             if u0+updateu > self.range[1]:
+#                 updateu = self.range[1]-u0
+#             elif u0+updateu< self.range[0]:
+#                 # Only put the update up to the end
+#                 updateu = self.range[0]-u0
+#             # end if
+
+#             if v0+updatev > self.range[3]:
+#                 updatev = self.range[3]-v0
+#             elif v0+updatev< self.range[2]:
+#                 # Only put the update up to the end
+#                 updatev = self.range[2]-v0
+#             # end if
                                 
-            D2 = x0-self.getValue(u0+updateu,v0+updatev)
-            if abs(dot(D2,D2)) > abs(dot(D,D)):
-                #print 'half update'
-                updateu /= 2
-                updatev /= 2
-            # end if
+#             D2 = x0-self.getValue(u0+updateu,v0+updatev)
+#             if abs(dot(D2,D2)) > abs(dot(D,D)):
+#                 #print 'half update'
+#                 updateu /= 2
+#                 updatev /= 2
+#             # end if
 
-            if abs(updateu)<tol and abs(updatev)<tol:
-                u0 += updateu
-                v0 += updatev
+#             if abs(updateu)<tol and abs(updatev)<tol:
+#                 u0 += updateu
+#                 v0 += updatev
                 
-                converged=True
-                D = x0-self.getValue(u0,v0) # Get the final Difference
-                break
-            else:
-                u0 += updateu
-                v0 += updatev
+#                 converged=True
+#                 D = x0-self.getValue(u0,v0) # Get the final Difference
+#                 break
+#             else:
+#                 u0 += updateu
+#                 v0 += updatev
 
-            # end if
-        # end for
-        #print 'Took %d iterations'%(i)
+#             # end if
+#         # end for
+#         #print 'Took %d iterations'%(i)
+#         print 'u0,v0,d,converged python',u0,v0,d,converged
+        
         return u0,v0,D,converged
 
 
