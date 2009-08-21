@@ -182,7 +182,23 @@ python module pyspline ! in
           integer,intent(out) :: mflag
         end subroutine intrv
 
-    
+       subroutine projectpoint(coef,kx,ky,nx,ny,tx,ty,x0,u0,v0,niter,tol,d,converged) ! in :test:projectpoint.f90
+            double precision dimension(nx,ny,3),intent(in) :: coef
+            integer intent(in) :: kx
+            integer intent(in) :: ky
+            integer optional,intent(in),check(shape(coef,0)==nx),depend(coef) :: nx=shape(coef,0)
+            integer optional,intent(in),check(shape(coef,1)==ny),depend(coef) :: ny=shape(coef,1)
+            double precision dimension(kx+nx),intent(in),depend(kx,nx) :: tx
+            double precision dimension(kx+ny),intent(in),depend(kx,ny) :: ty
+            double precision dimension(3),intent(in) :: x0
+            double precision intent(in,out) :: u0
+            double precision intent(in,out) :: v0
+            integer intent(in) :: niter
+            double precision intent(in) :: tol
+            double precision dimension(3),intent(out) :: d
+            integer intent(out) :: converged
+        end subroutine projectpoint    
+
      end interface
 end python module pyspline
 

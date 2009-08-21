@@ -48,7 +48,8 @@ OBJ =   bspline/bfqad.o\
 	misc/b2valV.o\
 	misc/updateSurfacePoints.o\
 	misc/getcoef.o\
-	misc/getctlnormals.o
+	misc/getctlnormals.o\
+	misc/projectpoint.o
 
 
 ###================================================

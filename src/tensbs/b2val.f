@@ -108,8 +108,6 @@ C
 C
 C***FIRST EXECUTABLE STATEMENT
       B2VAL = 0.0E0
-      
-      
 
       CALL INTRV(TY,NY+KY,YVAL,ILOY,LEFTY,MFLAG)
       IF (MFLAG .NE. 0)  then
