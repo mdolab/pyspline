@@ -48,101 +48,64 @@ subroutine projectpoint(coef,kx,ky,nx,ny,tx,ty,x0,u0,v0,Niter,tol,D,converged)
   double precision, intent(out)    :: D(3)
   integer         , intent(out)    :: converged
 
-  double precision                 :: dx(3),dy(3),n,norm
+  double precision                 :: dx(3),dy(3),n(3)
   double precision                 :: u_length,v_length,updateu,updatev
   double precision                 :: D2(3)
   double precision                 :: D_norm,D2_norm
   double precision                 :: WORK(3*MAX(KX,KY)+KY+KX)
-
+  double precision                 :: distance,base_point(3),norm,cur_point(3)
   double precision b2val
 
   converged = -1
 
-  !print *,'Welcome to projectpoint!'
+!   print *,'Welcome to projectpoint!'
+!   print *,'u0,v0:',u0,v0
+!   print *,'nx,ny,kx,ky:',nx,ny,kx,ky
  
   do i =1,Niter
 
      do idim =1,3
-        dx(idim) = b2val(x0,y0,1,0,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
-        dy(idim) = b2val(x0,y0,0,1,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
+        dx(idim) = b2val(u0,v0,1,0,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
+        dy(idim) = b2val(u0,v0,0,1,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
      end do
 
-     ! Now get the cross product 
-
-     n(1) = dx(2)*dy(3)-dx(3)*dy(2)
-     n(2) = dx(3)*dy(1)-dx(1)*dy(3)
-     n(3) = dx(1)*dy(2)-dx(2)*dy(1)
-
-     ! Normalizet the cross product
-     norm = sqrt(n(1)*n(1) + n(2)*n(2) + n(3)*n(3))
-     if (norm .ne. 0) then
-        n = n /norm
-     else
-        print *,'The Normal Vector to the surface is ill-defined at'
-        print *,'x = ',x0
-        print *,'y = ',y0
-        stop
-     end if
-
-
-
      do idim =1,3
-        D(idim) = x0(idim) - b2val(u0,v0,0,0,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
-     end d
+        cur_point(idim) = b2val(u0,v0,0,0,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
+     end do
      
+      D = x0-cur_point
 
+     ! We Need to project D onto dx and dy
 
-     u_length = sqrt(Ydotu(1)*Ydotu(1) + Ydotu(2)*Ydotu(2) + Ydotu(3)*Ydotu(3))
-     v_length = sqrt(Ydotv(1)*Ydotv(1) + Ydotv(2)*Ydotv(2) + Ydotv(3)*Ydotv(3))
+     updateu = dot_product(D,dx)/(dx(1)*dx(1) + dx(2)*dx(2) + dx(3)*dx(3))
+     updatev = dot_product(D,dy)/(dy(1)*dy(1) + dy(2)*dy(2) + dy(3)*dy(3))
 
-     updateu = 0
-     updatev = 0
-     do idim = 1,3
-        if (Ydotu(idim) .ne. 0 .and. u_length .ne. 0) then
-           updateu = updateu + D(idim)*Ydotu(idim)/u_length
-        end if
-        if (Ydotv(idim) .ne. 0 .and. v_length .ne. 0) then
-           updatev = updatev + D(idim)*Ydotv(idim)/v_length
-        end if
-     end do
-           
-     if (u0+updateu > tx(nx+kx)) then
-        updateu = tx(nx+kx) - u0
+     if (u0 + updateu > tx(nx+Kx)) then
+        u0 = tx(nx + kx)
+        updateu = 0
      else if (u0 + updateu < tx(1)) then
-        updateu = tx(1) - u0
+        u0 = tx(1)
+        updateu = 0
+     else
+        u0 = u0 + updateu
      end if
-           
-     if (v0+updatev > ty(ny+ky)) then
-        updatev = ty(ny+ky) -v0
+
+     if (v0 + updatev > ty(ny+ky)) then
+        v0 = ty(ny + ky)
+        updatev = 0
      else if (v0 + updatev < ty(1)) then
-        updatev = ty(1) - v0
-     end if
-
-     do idim =1,3
-        D2(idim) = x0(idim) - b2val(u0+updateu,v0+updatev,0,0,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
-     end do
-
-     D2_norm = sqrt(D2(1)*D2(1) + D2(2)*D2(2) + D2(3)*D2(3))
-     D_norm  = sqrt(D (1)*D (1) + D (2)*D (2) + D (3)*D (3))
-
-     if (abs(D2_norm)>abs(D_norm)) then
-        !  Half Update
-        updateu = updateu/4
-        updatev = updatev/4
+        v0 = ty(1)
+        updatev = 0
+     else
+        v0 = v0 + updatev
      end if
 
      if (abs(updateu)<tol .and. abs(updatev)<tol) then
-        u0 = u0 + updateu
-        v0 = v0 + updatev
         converged = 1
-
-        do idim =1,3 ! Get the final Difference
-           D(idim) = x0(idim) - b2val(u0,v0,0,0,tx,ty,nx,ny,kx,ky,coef(:,:,idim),work)
-        end do
-      else
-        u0 = u0 + updateu
-        v0 = v0 + updatev
+        exit
      end if
+        
+
   end do
   
 end subroutine projectpoint
