@@ -117,7 +117,7 @@ class surf_spline():
             self.orig_data = False
             self.range = kwargs['range']
             self.nDim = self.coef.shape[2]
-
+            self.updated=zeros((self.Nctlu,self.Nctlv))
             return
      
         if task == 'interpolate':
@@ -260,6 +260,7 @@ to Nv: Nctlv = %d'%self.Nctlv
         print 'Error: task is not understood. Type must be \'lms\',\
 \'interpolate\' or \'create\''
         sys.exit(1)
+        
         return
 
 
