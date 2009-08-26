@@ -112,49 +112,40 @@ python module pyspline_cs ! in
           complex*16,intent(out), dimension(n),depend(n) :: z
         end subroutine b2valv
 
-        subroutine updatesurfacepoints(coef,coef_update,update,tx,ty,kx,ky,nx,ny) ! in updateSurfacePoints.f90
-            complex*16 dimension(nx,ny,3),intent(in) :: coef
-            complex*16 dimension(nx,ny,3),intent(out),depend(nx,ny) :: coef_update
-            complex*16 dimension(nx,ny),intent(in),depend(nx,ny) :: update
+
+        subroutine updatesurfacepoints(coef,l_index,g_index,update,s_coef,tx,ty,kx,ky,nx,ny,ncoef,n)
+            complex*16 dimension(ncoef,3),intent(in,out) :: coef
+            integer    dimension(n,2),intent(in)           :: l_index
+            integer    dimension(n), intent(in), depend(n) :: g_index
+            complex*16 dimension(n),intent(in),depend(n) :: update
+            complex*16 dimension(nx,ny,3),intent(in) :: s_coef
             complex*16 dimension(kx+nx),intent(in),depend(kx,nx) :: tx
-            complex*16 dimension(kx+ny),intent(in),depend(kx,ny) :: ty
+            complex*16 dimension(ky+ny),intent(in),depend(ky,ny) :: ty
             integer intent(in) :: kx
             integer intent(in) :: ky
-            integer optional,check(shape(coef,0)==nx),depend(coef) :: nx=shape(coef,0)
-            integer optional,check(shape(coef,1)==ny),depend(coef) :: ny=shape(coef,1)
-        end subroutine updatesurfacepoints
-        
+            integer optional,check(shape(s_coef,0)==nx),depend(s_coef) :: nx=shape(s_coef,0)
+            integer optional,check(shape(s_coef,1)==ny),depend(s_coef) :: ny=shape(s_coef,1)
+            integer optional,check(shape(coef,0)==ncoef),depend(coef) :: ncoef = shape(coef,0)
+            integer optional,check(shape(l_index,0)==n),depend(l_index) :: nc = shape(l_index,0)
 
-        subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny) ! in :test:getcoef.f90
-            integer intent(in) :: dir
+        end subroutine updatesurfacepoints
+       
+
+        subroutine getcomplexcoef(s_pos,links,coef,indicies,s,t,x,rot,scale,nref,ns,ncoef) ! in :test:getcoef.f90
+            complex*16 dimension(ns),intent(in) :: s_pos
+            complex*16 dimension(ns,3),intent(in),depend(ns) :: links
+            complex*16 dimension(ncoef,3),intent(in,out),depend(ns) :: coef
+            integer          dimension(ns), intent(in), depend(ns) :: indicies
             complex*16 dimension(nref),intent(in) :: s
             complex*16 dimension(nref + 2),intent(in),depend(nref) :: t
             complex*16 dimension(nref,3),intent(in),depend(nref) :: x
             complex*16 dimension(nref,3),intent(in),depend(nref) :: rot
             complex*16 dimension(nref),intent(in),depend(nref) :: scale
-            complex*16 dimension(nx,ny),intent(in) :: s_pos
-            complex*16 dimension(nx,ny,3),intent(in),depend(nx,ny) :: links
-            complex*16 dimension(nx,ny,3),intent(out),depend(nx,ny) :: coef
             integer optional,check(len(s)>=nref),depend(s) :: nref=len(s)
-            integer optional,check(shape(s_pos,0)==nx),depend(s_pos) :: nx=shape(s_pos,0)
-            integer optional,check(shape(s_pos,1)==ny),depend(s_pos) :: ny=shape(s_pos,1)
-        end subroutine getcoef
+            integer optional,check(len(s_pos)>=ns),depend(s_pos) :: ns=len(s_pos)
+            integer optional,check(shape(coef,0)==ncoef),depend(coef) :: ncoef=shape(coef,0)
+          end subroutine getcomplexcoef
 
-!         subroutine getcomplexcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,ns,nx,ny) ! in :test:getComplexCoef.f90
-!             integer intent(in) :: dir
-!             complex*16 dimension(nref),intent(in) :: s
-!             complex*16 dimension(nref + 2),intent(in),depend(nref) :: t
-!             complex*16 dimension(nref,3),intent(in),depend(nref) :: x
-!             complex*16 dimension(nref,3),intent(in),depend(nref) :: rot
-!             complex*16 dimension(nref),intent(in),depend(nref) :: scale
-!             complex*16 dimension(ns),intent(in) :: s_pos
-!             complex*16 dimension(ns,3),intent(in),depend(ns) :: links
-!             complex*16 dimension(nx,ny,3),intent(out),depend(nx,ny) :: coef
-!             integer optional,check(len(s)>=nref),depend(s) :: nref=len(s)
-!             integer optional,check(len(s_pos)>=ns),depend(s_pos) :: ns=len(s_pos)
-!             integer :: nx
-!             integer :: ny
-!         end subroutine getcomplexcoef
 
     end interface 
 end python module pyspline_cs
