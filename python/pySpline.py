@@ -36,7 +36,7 @@ from numpy.linalg import lstsq
 
 import pyspline
 import pyspline_cs
-
+import pyspline as pyspline_real
 # =============================================================================
 # pySpline class
 # =============================================================================
@@ -80,8 +80,6 @@ class surf_spline():
             u, real, array: list of u values 
             v, real, array: list of v values
             X, real, array, size(len(u),len(v),nDim):Array of data points to fit
-      
-            
 '''
         sys.stdout.write('pySpline Type: %s. '%(task))
 
@@ -118,7 +116,6 @@ class surf_spline():
             self.orig_data = False
             self.range = kwargs['range']
             self.nDim = self.coef.shape[2]
-            self.updated=zeros((self.Nctlu,self.Nctlv))
             return
      
         if task == 'interpolate':

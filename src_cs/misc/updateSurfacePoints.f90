@@ -1,5 +1,4 @@
-subroutine updateSurfacePoints(coef,l_index,g_index,update,s_coef,tx,ty,kx,ky,nx,ny,ncoef,n)
-
+subroutine updateSurfacePoints(coef,l_index,g_index,update,c_index,tx,ty,kx,ky,nx,ny,ncoef,n)
 
 !*** DESCRIPTION
 !
@@ -16,7 +15,8 @@ subroutine updateSurfacePoints(coef,l_index,g_index,update,s_coef,tx,ty,kx,ky,nx
 !     l_index - Integer, List of x-y positions on surface each control point 
 !               refers to. size, n by 2
 !     g_index - Integer, List of positions of 'coef' in the global coef array
-!     s_coef  - Real, matrix size nx by ny: Coefficients for the spline surface
+!     c_index - Integer, matrix size nx by ny: Index of coefficients for hte 
+!               spline surface
 !     tx      - Real, vector of knots in x, size nx + kx
 !     ty      - Real, vector of knots in y, size ny + ky
 !     nx      - Integer, The number of control points in x
@@ -33,12 +33,13 @@ subroutine updateSurfacePoints(coef,l_index,g_index,update,s_coef,tx,ty,kx,ky,nx
   integer   , intent(in)     :: l_index(n,2)
   integer   , intent(in)     :: g_index(n)
   complex*16, intent(in)     :: update(n)
-  complex*16, intent(in)     :: s_coef(nx,ny,3)
+  integer   , intent(in)     :: c_index(nx,ny)
   integer,    intent(in)     :: kx,ky
   complex*16, intent(in)     :: tx(kx+nx)
   complex*16, intent(in)     :: ty(ky+ny)
 
   ! Local
+  complex*16                 :: s_coef(nx,ny,3)
   complex*16                 :: dx(3)
   complex*16                 :: dy(3)
   complex*16                 :: normal(3)
@@ -46,7 +47,16 @@ subroutine updateSurfacePoints(coef,l_index,g_index,update,s_coef,tx,ty,kx,ky,nx
 
   complex*16 b2val
 
-  do icoef = 1,N
+!  print *,'In Update Surface Points'
+
+  ! Copy to the coefficient matrix
+  do i=1,nx
+     do j =1,ny
+        s_coef(i,j,:) = coef(c_index(i,j)+1,:)
+     end do
+  end do
+
+  do icoef = 1,n
      
      ! Get the normal for the current point:
      ! First get the directional derivatives 
@@ -69,7 +79,7 @@ subroutine updateSurfacePoints(coef,l_index,g_index,update,s_coef,tx,ty,kx,ky,nx
 
      ! Move control point along the normal vector
      do idim = 1,3
-        coef(g_index(icoef+1),idim) = coef(g_index(icoef+1),idim) - update(icoef)*normal(idim)
+        coef(g_index(icoef)+1,idim) = coef(g_index(icoef)+1,idim) - update(icoef)*normal(idim)
      end do
   end do
 end subroutine updateSurfacePoints

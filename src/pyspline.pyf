@@ -62,7 +62,6 @@ python module pyspline ! in
             real*8,optional,dimension(5,ndata+2),depend(ndata) :: w
         end subroutine bint4
 
-
         function bvalu(t,a,n,k,ideriv,x,inbv,work) ! in bvalu.f
           real*8,intent(in), dimension(n+k),depend(k) :: t
           real*8,intent(in), dimension(n) :: a
@@ -135,44 +134,6 @@ python module pyspline ! in
           double precision dimension(nctl+k),intent(out),depend(nctl,k) :: t
         end subroutine knots
 
-        subroutine updatesurfacepoints(coef,coef_update,update,tx,ty,kx,ky,nx,ny) ! in updateSurfacePoints.f90
-            double precision dimension(nx,ny,3),intent(in) :: coef
-            double precision dimension(nx,ny,3),intent(out),depend(nx,ny) :: coef_update
-            double precision dimension(nx,ny),intent(in),depend(nx,ny) :: update
-            double precision dimension(kx+nx),intent(in),depend(kx,nx) :: tx
-            double precision dimension(kx+ny),intent(in),depend(kx,ny) :: ty
-            integer intent(in) :: kx
-            integer intent(in) :: ky
-            integer optional,check(shape(coef,0)==nx),depend(coef) :: nx=shape(coef,0)
-            integer optional,check(shape(coef,1)==ny),depend(coef) :: ny=shape(coef,1)
-        end subroutine updatesurfacepoints
-
-        subroutine getctlnormals(coef,tx,ty,kx,ky,nx,ny,normals)
-            double precision dimension(nx,ny,3),intent(in) :: coef
-            double precision dimension(kx+nx),intent(in),depend(kx,nx) :: tx
-            double precision dimension(kx+ny),intent(in),depend(kx,ny) :: ty
-            integer intent(in) :: kx
-            integer intent(in) :: ky
-            integer optional,check(shape(coef,0)==nx),depend(coef) :: nx=shape(coef,0)
-            integer optional,check(shape(coef,1)==ny),depend(coef) :: ny=shape(coef,1)
-            double precision dimension(nx,ny,3),intent(out),depend(nx,ny) :: normals
-          end subroutine getctlnormals
-
-        subroutine getcoef(s_pos,links,coef,indicies,s,t,x,rot,scale,nref,ns,ncoef) ! in :test:getcoef.f90
-            complex*16 dimension(ns),intent(in) :: s_pos
-            complex*16 dimension(ns,3),intent(in),depend(ns) :: links
-            complex*16 dimension(ncoef,3),intent(in,out),depend(ns) :: coef
-            integer          dimension(ns), intent(in), depend(ns) :: indicies
-            complex*16 dimension(nref),intent(in) :: s
-            complex*16 dimension(nref + 2),intent(in),depend(nref) :: t
-            complex*16 dimension(nref,3),intent(in),depend(nref) :: x
-            complex*16 dimension(nref,3),intent(in),depend(nref) :: rot
-            complex*16 dimension(nref),intent(in),depend(nref) :: scale
-            integer optional,check(len(s)>=nref),depend(s) :: nref=len(s)
-            integer optional,check(len(s_pos)>=ns),depend(s_pos) :: ns=len(s_pos)
-            integer optional,check(shape(coef,0)==ncoef),depend(coef) :: ncoef=shape(coef,0)
-        end subroutine getcoef
-
         subroutine intrv(xt,lxt,x,ilo,ileft,mflag) ! in :test:intrv.f
           double precision dimension(lxt),intent(in) :: xt
           integer optional,check(len(xt)>=lxt),depend(xt) :: lxt=len(xt)
@@ -198,6 +159,23 @@ python module pyspline ! in
             double precision dimension(3),intent(out) :: d
             integer intent(out) :: converged
         end subroutine projectpoint    
+
+        subroutine getctlnormals(coef,l_index,g_index,normals,c_index,tx,ty,kx,ky,nx,ny,ncoef,n)
+            double precision dimension(ncoef,3),intent(in) :: coef
+            integer    dimension(n,2),intent(in)           :: l_index
+            integer    dimension(n), intent(in), depend(n) :: g_index
+            double precision dimension(n,3),intent(out),depend(n) :: normals
+            integer    dimension(nx,ny),intent(in) :: c_index
+            double precision dimension(kx+nx),intent(in),depend(kx,nx) :: tx
+            double precision dimension(ky+ny),intent(in),depend(ky,ny) :: ty
+            integer intent(in) :: kx
+            integer intent(in) :: ky
+            integer optional,check(shape(c_index,0)==nx),depend(c_index) :: nx=shape(c_index,0)
+            integer optional,check(shape(c_index,1)==ny),depend(c_index) :: ny=shape(c_index,1)
+            integer optional,check(shape(coef,0)==ncoef),depend(coef) :: ncoef = shape(coef,0)
+            integer optional,check(shape(l_index,0)==n),depend(l_index) :: n = shape(l_index,0)
+          end subroutine getctlnormals
+        
 
      end interface
 end python module pyspline
