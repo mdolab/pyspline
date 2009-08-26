@@ -5,7 +5,7 @@
 
 RM  	        = /bin/rm -rf
 
-TENSBS_LIB = libtensbs_cs.a
+SPLINE_LIB = libspline_cs.a
 
 OBJ = 	complexify.o \
 	bspline/c_bfqad.o\
@@ -60,7 +60,7 @@ FFLAGS = -O2 -r8
 AR       = ar
 AR_FLAGS = -rvs
 
-default: libtensbs_cs
+default: libspline_cs
 
 clean:
 	@echo "Removing .o files in ./"
@@ -78,10 +78,10 @@ clean:
 	@echo "Removing .o files in misc"
 	$(RM) misc/*.o
 	@echo "Removing library"
-	$(RM) libtensbs_cs.a
+	$(RM) libspline_cs.a
 
-libtensbs_cs: $(OBJ) 
-	$(AR) $(AR_FLAGS) $(TENSBS_LIB) $(OBJ)
+libspline_cs: $(OBJ) 
+	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(OBJ)
 
 
 .SUFFIXES: .o .f .f90 

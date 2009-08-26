@@ -5,7 +5,7 @@
 
 RM  	        = /bin/rm -rf
 
-TENSBS_LIB = libtensbs.a
+SPLINE_LIB = libspline.a
 
 OBJ =   bspline/bfqad.o\
 	bspline/bint4.o\
@@ -61,7 +61,7 @@ FFLAGS = -O2 -r8
 AR       = ar
 AR_FLAGS = -rvs
 
-default: libtensbs
+default: libspline
 
 clean:
 	@echo "Removing .o files in bspline"
@@ -79,10 +79,10 @@ clean:
 	@echo "Removing .o files in lmsfit"
 	$(RM) lmsfit/*.o
 	@echo "Removing library"
-	$(RM) libtensbs.a
+	$(RM) libspline.a
 
-libtensbs: $(OBJ) 
-	$(AR) $(AR_FLAGS) $(TENSBS_LIB) $(OBJ)
+libspline: $(OBJ) 
+	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(OBJ)
 
 
 .SUFFIXES: .o .f .f90
