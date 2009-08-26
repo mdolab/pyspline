@@ -158,19 +158,19 @@ python module pyspline ! in
             double precision dimension(nx,ny,3),intent(out),depend(nx,ny) :: normals
           end subroutine getctlnormals
 
-        subroutine getcoef(dir,s,t,x,rot,scale,s_pos,links,coef,nref,nx,ny) ! in :test:getcoef.f90
-            integer intent(in) :: dir
-            double precision dimension(nref),intent(in) :: s
-            double precision dimension(nref + 2),intent(in),depend(nref) :: t
-            double precision dimension(nref,3),intent(in),depend(nref) :: x
-            double precision dimension(nref,3),intent(in),depend(nref) :: rot
-            double precision dimension(nref),intent(in),depend(nref) :: scale
-            double precision dimension(nx,ny),intent(in) :: s_pos
-            double precision dimension(nx,ny,3),intent(in),depend(nx,ny) :: links
-            double precision dimension(nx,ny,3),intent(out),depend(nx,ny) :: coef
+        subroutine getcoef(s_pos,links,coef,indicies,s,t,x,rot,scale,nref,ns,ncoef) ! in :test:getcoef.f90
+            complex*16 dimension(ns),intent(in) :: s_pos
+            complex*16 dimension(ns,3),intent(in),depend(ns) :: links
+            complex*16 dimension(ncoef,3),intent(in,out),depend(ns) :: coef
+            integer          dimension(ns), intent(in), depend(ns) :: indicies
+            complex*16 dimension(nref),intent(in) :: s
+            complex*16 dimension(nref + 2),intent(in),depend(nref) :: t
+            complex*16 dimension(nref,3),intent(in),depend(nref) :: x
+            complex*16 dimension(nref,3),intent(in),depend(nref) :: rot
+            complex*16 dimension(nref),intent(in),depend(nref) :: scale
             integer optional,check(len(s)>=nref),depend(s) :: nref=len(s)
-            integer optional,check(shape(s_pos,0)==nx),depend(s_pos) :: nx=shape(s_pos,0)
-            integer optional,check(shape(s_pos,1)==ny),depend(s_pos) :: ny=shape(s_pos,1)
+            integer optional,check(len(s_pos)>=ns),depend(s_pos) :: ns=len(s_pos)
+            integer optional,check(shape(coef,0)==ncoef),depend(coef) :: ncoef=shape(coef,0)
         end subroutine getcoef
 
         subroutine intrv(xt,lxt,x,ilo,ileft,mflag) ! in :test:intrv.f

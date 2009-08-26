@@ -85,14 +85,15 @@ class surf_spline():
 '''
         sys.stdout.write('pySpline Type: %s. '%(task))
 
-        self.dtype = 'd' # Use real version by default
-        
-        self.pyspline = pyspline # Real version of spline library
+        self.pyspline_real = pyspline # Real version of spline library
         self.pyspline_cs = pyspline_cs # Complex version of spline library
-
+        # sef.
         if 'complex' in kwargs:
-            self.pyspline = pyspline_cs # Use the complex version for everything
+            self.pyspline = self.pyspline_cs # Use the complex version for everything
             self.dtype = 'D'
+        else:
+            self.pyspline = self.pyspline_real
+            self.dtype = 'd'
         # end if
         if task == 'create':
             assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
@@ -206,15 +207,11 @@ to Nv: Nctlv = %d'%self.Nctlv
             self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
 
             # Sanity check to make sure k is less than N
-            if self.Nu <= self.ku:
+            if self.Nu < self.ku:
                 self.ku = self.Nu
                 print 'Warning: ku has been set to Nu. ku is now %d'%(self.ku)
-            if self.Nv <= self.kv:
+            if self.Nv < self.kv:
                 print 'Warning: kv has been set to Nv. kv is now %d'%(self.kv)
-                self.kv = self.Nv
-            if self.Nu <= self.ku:
-                self.ku = self.Nu
-            if self.Nv <= self.kv:
                 self.kv = self.Nv
 
             if 'u' in kwargs and 'v' in kwargs:
@@ -238,8 +235,6 @@ to Nv: Nctlv = %d'%self.Nctlv
 
            #Calculate the knot vector and Jacobian
             sys.stdout.write(' Calculating: knots, ')
-
-
             self._calcKnots()
 
             sys.stdout.write(' jacobian, ')
@@ -331,124 +326,33 @@ data can be recomputed'
 
         return
 
-    def getRefAxisDir(self,ref_axis,coef):
-        '''Determine the primary orientation of a ref_axis'''
-
-        # Note: We pass the coef we want BACK in. This allows for a
-        # section of the coefficients to be used
-
-        # We need to deduce along which direction (u or v) the
-        # reference axis is directed.  First estimate Over what
-        # portion the surface and ref axis co-inside
-
-        # Find the s range for the 4 corners
-
-        p = zeros(4,self.dtype)
-        p[0],conv,D,esp = ref_axis.xs.projectPoint(coef[0 , 0])
-        p[1],conv,D,esp = ref_axis.xs.projectPoint(coef[0 ,-1])
-        p[2],conv,D,esp = ref_axis.xs.projectPoint(coef[-1, 0])
-        p[3],conv,D,esp = ref_axis.xs.projectPoint(coef[-1,-1])
-
-        min_s = min(p)
-        max_s = max(p)
-
-        # Now we know over what portion of the ref axis we are dealing
-        # with.  Take 3 Normal Vectors
-        N = 3
-        sn = linspace(min_s,max_s,N)
-        dn = zeros((N,3),self.dtype)
-        for i in xrange(N):
-            dn[i,:] = ref_axis.xs.getDerivative(sn[i])
-        # end if
-
-        # Now Do two tests: Take three points in u and test 3 groups
-        # against dn and take three points in v and test the  3 groups
-        # again
-
-        u_dot_tot = 0
-        s = linspace(0,1,N)
-
-        for i in xrange(N):
-            for n in xrange(N):
-                du,dv = self.getDerivative(s[i],s[n])
-                u_dot_tot += dot(du,dn[n,:])
-            # end for
-        # end for
-
-        v_dot_tot = 0
-        for j in xrange(N):
-            for n in xrange(N):
-                du,dv = self.getDerivative(s[n],s[j])
-                v_dot_tot += dot(dv,dn[n,:])
-            # end for
-        # end for
-
-        if v_dot_tot > u_dot_tot:
-            dir = 1
-        else:
-            dir = 0
-        return dir,max_s,min_s
-
-
-#     def _getCropData(self,X):
-#         '''This internal function gets the original data coorsponding but
-#         omits the data along edges which are not masters'''
-#         return X[self.slice_u,self.slice_v]
-
-    def getCtlSlice(self,slice_u,slice_v):
-        return self.coef[slice_u,slice_v]
-
-#     def getFreeCtl(self):
-
-#         '''Return Free control Points'''
-#         return self.coef[self.slice_u,self.slice_v]
-
-   #  def setFreeCtl(self,coef):
-
-#         '''Sets Free control Points'''
-#         # See getFreeCtl for how this works
-
-#         self.coef[self.slice_u,self.slice_v] = coef
-
-#         return 
-
-#     def setFreeCtlSection(self,coef,slice_u,slice_v):
-
-#         '''Set a section of the free control points'''
-        
-#         temp = self.getFreeCtl()
-#         temp[slice_u,slice_v] = coef
-#         self.setFreeCtl(temp)
-
-#         return
-
     def getGlobalIndexEdge(self,edge,index,dir):
         '''Get the global index value from edge,index,dir information'''
         Nctlu = self.Nctlu # Temp Values
         Nctlv = self.Nctlv
         if edge == 0:
             if dir == 1:
-                return self.globalCtlIndex[index,0],index,0
+                return self.globalCtlIndex[index,0]
             else:
-                return self.globalCtlIndex[Nctlu-1-index,0],Nctlu-1-index,0
+                return self.globalCtlIndex[Nctlu-1-index,0]
             # end if
         elif edge == 1:
             if dir == 1:
-                return self.globalCtlIndex[index,Nctlv-1],index,Nctlv-1
+                return self.globalCtlIndex[index,Nctlv-1]
             else:
-                return self.globalCtlIndex[Nctlu-1-index,Nctlv-1],Nctlu-1,Nctlv-1
+                return self.globalCtlIndex[Nctlu-1-index,Nctlv-1]
             # end if
         elif edge == 2:
             if dir == 1:
-                return self.globalCtlIndex[0,index],0,index
+                return self.globalCtlIndex[0,index]
             else:
-                return self.globalCtlIndex[0,Nctlv-1-index],0,Nctlv-1-index
+                return self.globalCtlIndex[0,Nctlv-1-index]
             # end if
         elif edge == 3:
             if dir == 1:
-                return self.globalCtlIndex[Nctlu-1,index],Nctlu-1,index
+                return self.globalCtlIndex[Nctlu-1,index]
             else:
-                return self.globalCtlIndex[Nctlu-1,Nctlv-1-index],Nctlu-1,Nctlv-1-index
+                return self.globalCtlIndex[Nctlu-1,Nctlv-1-index]
             # end if
         # end if
         else:
@@ -498,102 +402,6 @@ data can be recomputed'
         
         return x
 
-
-    def _calcCtlDeriv(self,i,j):
-        '''Calculate the derivative wrt control point i,j'''
-        ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
-        ctl[i,j] += 1
-        
-        return self._getCropData(\
-            self.pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,\
-                                     self.ku,self.kv,ctl)).flatten()
-
-    def _calcCtlDerivNode(self,node):
-        '''Calculate the derivative wrt control point i,j'''
-        ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
-        if node == 0:
-            ctl[0,0] += 1
-        elif node == 1:
-            ctl[-1,0] += 1
-        elif node == 2:
-            ctl[0,-1] += 1
-        else:
-            ctl[-1,-1] += 1
-        
-        return self._getCropData(\
-            self.pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,\
-                                     self.ku,self.kv,ctl)).flatten()
-
-    def _calcCtlDerivEdge(self,edge,index,dir):
-        '''Calculate the derivative wrt control point i,j'''
-        ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
-        if edge == 0:
-            if dir==1:
-                ctl[index,0] += 1
-            else:
-                ctl[self.Nctlu-index-1,0] += 1
-
-        elif edge == 1:
-            if dir ==1:
-                ctl[index,-1] += 1
-            else:
-                ctl[self.Nctlu-index-1,-1] += 1
-
-        elif edge == 2:
-            if dir == 1:
-                ctl[0,index] += 1
-            else:
-                ctl[0,self.Nctlv-index-1] += 1
-        else:
-            if dir == 1:
-                ctl[-1,index] += 1
-            else:
-                clt[-1,self.Nctlv-index-1] += 1
-        
-        
-        return self._getCropData(\
-            self.pyspline.b2valm(self.U,self.V,0,0,self.tu,self.tv,\
-                                     self.ku,self.kv,ctl)).flatten()
-
-
-       
-
-  #   def updateSurfacePoints(self,delta,slice_u,slice_v):
-#         '''Update the control points on section 'section' along a 
-#         normal to the surface'''
-
-#         # Section refers to the 'free' control points
-       
-#         # Full Control Point Size
-#         update = zeros((self.Nctlu,self.Nctlv),self.dtype)         
-#         temp =   zeros((self.Nctlu_free,self.Nctlv_free),self.dtype)
-#         temp[slice_u,slice_v] = delta
-#         update[self.slice_u,self.slice_v] = temp
-
-#         self.coef = self.pyspline.updatesurfacepoints(\
-#             self.coef,update,self.tu,self.tv,self.ku,self.kv).copy()
-#         return 
-
-#     def updateSurfacePointsDeriv(self,coef,delta,slice_u,slice_v):
-   #      '''This function is the same as above but returns the coefficients
-#         instead of setting them in the spline object'''
-
-#         # Section refers to the 'free' control points
-
-#         # Full Control Point Size
-#         update = zeros((self.Nctlu,self.Nctlv),'D')
-#         temp =   zeros((self.Nctlu_free,self.Nctlv_free),'D')
-#         temp[slice_u,slice_v] = delta
-#         update[self.sliceu,self.slice_v] = temp
-
-#         temp = self.coef.astype('D')
-#         temp[self.slice_u,self.slice_v] = coef
-    
-#         coef = pyspline_cs.updatesurfacepoints(\
-#             temp,update,self.tu,self.tv,self.ku,self.kv).copy()
-#         return coef[self.slice_u,self.slice_v]
-
-
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3'''
 
@@ -610,7 +418,25 @@ data can be recomputed'
             sys.exit(1)
             return
         #end if 
-        
+
+    def getValueCorner(self,corner):
+        '''Get the value of the spline on corner i where nodes are oriented in
+        the standard counter-clockwise fashion.'''
+
+        if corner == 0:
+            return self.getValue(0,0)
+        elif corner == 1:
+            return self.getValue(1,0)
+        elif corner == 2:
+            return self.getValue(1,1)
+        elif corner ==3:
+            return self.getValue(0,1)
+        else:
+            print 'Corner must be between 0 and 3'
+            sys.exit(1)
+            return
+        #end if
+
     def getOrigValuesEdge(self,edge):
         ''' Get the values of the original data on edge. edge = 0,1,2,3'''
         if edge == 0:
@@ -642,49 +468,7 @@ data can be recomputed'
                 Xmid = 0.5 *(self.X[-1,self.Nv/2] + self.X[-1,self.Nv/2 - 1])
                 return self.X[-1,0],Xmid,self.X[-1,-1]
 
-
-#     def getValueCorner(self,corner):
-#         '''Get the value of the spline on corner i where nodes are oriented in
-#         the standard counter-clockwise fashion.'''
-
-#         if corner == 0:
-#             return self.getValue(0,0)
-#         elif corner == 1:
-#             return self.getValue(1,0)
-#         elif corner == 2:
-#             return self.getValue(1,1)
-#         elif corner ==3:
-#             return self.getValue(0,1)
-#         else:
-#             print 'Corner must be between 0 and 3'
-#             sys.exit(1)
-#             return
-#         #end if 
-
-#     def getCoefEdge(self,edge):
-#         '''Get Coef along edge edge'''
-
-#         if   edge == 0:
-#             return self.coef[:,0,:]
-#         elif edge == 1:
-#             return self.coef[:,-1,:]
-#         elif edge == 2:
-#             return self.coef[0,:,:]
-#         else:
-#             return self.coef[-1,:,:]
-        
-#     def setCoefEdge(self,edge,new_coef):
-#         '''Set Coef along edge edge'''
-
-#         if   edge == 0:
-#             self.coef[:,0,:] = new_coef
-#         elif edge == 1:
-#             self.coef[:,-1,:] = new_coef
-#         elif edge == 2:
-#             self.coef[0,:,:] = new_coef
-#         else:
-#             self.coef[-1,:,:] = new_coef
-#         return
+ 
 
     def getNormal(self,u,v):
         '''Get the normal at the surface point u,v'''
@@ -770,61 +554,7 @@ data can be recomputed'
         u0,v0,D,converged = self.pyspline.projectpoint(\
             self.coef,self.ku,self.kv,self.tu,self.tv,x0,u0,v0,Niter,tol)
 
-     #    print 'u0,v0,d,converged fortran',u0,v0,d,converged
-#         # Check we have the same dimension:
-#         assert len(x0) == self.nDim,'Dimension of x0 and the dimension\
-#  of spline must be the same'
-#         converged = False
-#         #print 'x0:',x0
-#         for i in xrange(Niter):
-#             D = x0 - self.getValue(u0,v0)
-#             Ydotu,Ydotv = self.getDerivative(u0,v0)
-#             print 'Ydotu,Ydotv:',Ydotu,Ydotv,u0,v0
-#             updateu = dot(D,Ydotu)/(sqrt(dot(Ydotu,Ydotu)))#/self.length
-#             updatev = dot(D,Ydotv)/(sqrt(dot(Ydotv,Ydotv)))#/self.length
-#             # Check to see if update went too far
-#             print 'updateu,updatev:',updateu,updatev
-
-#             if u0+updateu > self.range[1]:
-#                 updateu = self.range[1]-u0
-#             elif u0+updateu< self.range[0]:
-#                 # Only put the update up to the end
-#                 updateu = self.range[0]-u0
-#             # end if
-
-#             if v0+updatev > self.range[3]:
-#                 updatev = self.range[3]-v0
-#             elif v0+updatev< self.range[2]:
-#                 # Only put the update up to the end
-#                 updatev = self.range[2]-v0
-#             # end if
-                                
-#             D2 = x0-self.getValue(u0+updateu,v0+updatev)
-#             if abs(dot(D2,D2)) > abs(dot(D,D)):
-#                 #print 'half update'
-#                 updateu /= 2
-#                 updatev /= 2
-#             # end if
-
-#             if abs(updateu)<tol and abs(updatev)<tol:
-#                 u0 += updateu
-#                 v0 += updatev
-                
-#                 converged=True
-#                 D = x0-self.getValue(u0,v0) # Get the final Difference
-#                 break
-#             else:
-#                 u0 += updateu
-#                 v0 += updatev
-
-#             # end if
-#         # end for
-#         #print 'Took %d iterations'%(i)
-#         print 'u0,v0,d,converged python',u0,v0,d,converged
-        
         return u0,v0,D,converged
-
-
 
     def findUV(self,x0,r,u0,v0):
         ''' Try to find the parametric u-v coordinate of the spline
