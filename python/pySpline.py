@@ -323,41 +323,6 @@ data can be recomputed'
 
         return
 
-    def getGlobalIndexEdge(self,edge,index,dir):
-        '''Get the global index value from edge,index,dir information'''
-        Nctlu = self.Nctlu # Temp Values
-        Nctlv = self.Nctlv
-        if edge == 0:
-            if dir == 1:
-                return self.globalCtlIndex[index,0]
-            else:
-                return self.globalCtlIndex[Nctlu-1-index,0]
-            # end if
-        elif edge == 1:
-            if dir == 1:
-                return self.globalCtlIndex[index,Nctlv-1]
-            else:
-                return self.globalCtlIndex[Nctlu-1-index,Nctlv-1]
-            # end if
-        elif edge == 2:
-            if dir == 1:
-                return self.globalCtlIndex[0,index]
-            else:
-                return self.globalCtlIndex[0,Nctlv-1-index]
-            # end if
-        elif edge == 3:
-            if dir == 1:
-                return self.globalCtlIndex[Nctlu-1,index]
-            else:
-                return self.globalCtlIndex[Nctlu-1,Nctlv-1-index]
-            # end if
-        # end if
-        else:
-            print 'Edge Must be between 0 and 3'
-            sys.exit(0)
-        # end if
-        return
-
     def _calcKnots(self):
 
         '''Find the initial knot vector for this problem'''
