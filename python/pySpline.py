@@ -450,10 +450,13 @@ data can be recomputed'
         # end if
         return n
 
-    def getValue(self,u,v):
+    def getValue(self,u,v,x=None):
         
         '''Get the value of the spline at point u,v'''
-        x = zeros((self.nDim),self.dtype)
+        if x == None:
+            x = zeros((self.nDim),self.dtype)
+        # end
+        
         for idim in xrange(self.nDim):
             x[idim] = self.pyspline.b2val(\
                 u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
@@ -1099,13 +1102,16 @@ derivative vectors must match the spatial dimension of the curve'
         return x
 
    
-    def getValue(self,s):
+    def getValue(self,s,x=None):
         
         '''Get the value of the spline at point u,v'''
         if self.nDim == 1:
             x = self.pyspline.bvalu(self.t,self.coef,self.k,0,s)
         else:
-            x = zeros((self.nDim),self.dtype)
+            if ( x == None ):
+                x = zeros((self.nDim),self.dtype)
+            # end
+            
             for idim in xrange(self.nDim):
                 x[idim] = self.pyspline.bvalu(\
                     self.t,self.coef[:,idim],self.k,0,s)
