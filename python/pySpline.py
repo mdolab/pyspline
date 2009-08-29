@@ -93,18 +93,22 @@ class surf_spline():
             self.pyspline = self.pyspline_real
             self.dtype = 'd'
         # end if
+
+        # Defaults
+        self.task = task
+        self.X    = None
+        self.u    = None
+        self.v    = None
+        self.Nu   = None
+        self.Nv   = None
+        self.orig_data = False
+
         if task == 'create':
             assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
-                and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs, \
+                and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs,\
                 'Error: ku,kv,tu,tv,coef and range MUST be defined for task=\
 \'create\''
             sys.stdout.write('\n')
-            self.task = task
-            self.u = None
-            self.v = None
-            self.X = None
-            self.Nu = None
-            self.Nv = None
             self.ku = kwargs['ku'] 
             self.kv = kwargs['kv']
             self.tu = array(kwargs['tu'],self.dtype)
@@ -113,80 +117,33 @@ class surf_spline():
             self.Nctlu = self.coef.shape[0]
             self.Nctlv = self.coef.shape[1]
             self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
-            self.orig_data = False
-            self.range = kwargs['range']
+            self.range = array(kwargs['range'],self.dtype)
             self.nDim = self.coef.shape[2]
             return
      
-        if task == 'interpolate':
-            
-            assert 'ku' in kwargs and 'kv' and 'X' in kwargs,\
-                'Error: ku,kv,u,v and X MUST be defined for task \
-\'interpolate\''
-            self.task = task
-            self.X  = kwargs['X']
-            self.orig_data = True
-            self.Nu = self.X.shape[0]
-            self.Nv = self.X.shape[1]
-            self.nDim  = self.X.shape[2]
-            self.Nctlu = self.Nu
-            self.Nctlv = self.Nv
-            self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
-            self.ku = kwargs['ku']
-            self.kv = kwargs['kv']
-
-            if 'u' in kwargs and 'v' in kwargs:
-                self.u = kwargs['u']
-                self.v = kwargs['v']
-            else:
-                if self.nDim == 3:
-                    self._calcParameterization()
-                else:
-                    print 'Automatric parameterization of ONLY available\
- for spatial data in 3 dimensions. Please supply u and v key word arguments\
- otherwise.'
-                    sys.exit(1)
-                # end if
-            # end if
-
-            # Set a linear version of U and V
-            [self.V, self.U] = meshgrid(self.v,self.u)
-            
-            self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim),self.dtype)
-            self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
-
-            #Sanity check to make sure k is less than N
-            if self.Nu < self.ku:
-                self.ku = self.Nu
-                print 'Warning: ku has been set to Nu. ku is now %d'%(self.ku)
-            if self.Nv < self.kv:
-                print 'Warning: kv has been set to Nv. kv is now %d'%(self.kv)
-                self.kv = self.Nv
-            
-            timeA = time.time()
-            for idim in xrange(self.nDim):
-                self.tu,self.tv,self.coef[:,:,idim]= \
-                    self.pyspline.b2ink(self.u,self.v,self.X[:,:,idim],\
-                                            self.ku,self.kv)
-            #end for
-            
-            sys.stdout.write(' Interpolate Time: %6.5f s\n'%(time.time()-timeA))
-            return
-           
-        elif task == 'lms':
+        elif task == 'interpolate' or task == 'lms':
             # Do some checking on the number of control points
-
-            assert 'ku' in kwargs and 'kv' in kwargs and \
-                   'Nctlu' in kwargs and 'Nctlv' in kwargs and 'X' in kwargs, \
-                   'Error: ku,kv,Nctlu,Nctlv and X MUST be defined for task lms'
+            if task == 'lms':
+                assert 'ku' in kwargs and 'kv' in kwargs and \
+                    'Nctlu' in kwargs and 'Nctlv' in kwargs and 'X' in kwargs, \
+                    'Error: ku,kv,Nctlu,Nctlv and X MUST be defined for task lms'
+                self.Nctlu = kwargs['Nctlu']
+                self.Nctlv = kwargs['Nctlv']
+            else:
+                assert 'ku' in kwargs and 'kv' in kwargs and \
+                   'X' in kwargs,'Error: ku,kv,and X MUST be defined for task \
+interpolate'
+                self.Nctlu = kwargs['X'].shape[0]
+                self.Nctlv = kwargs['X'].shape[1]
+            # end if
+                
             self.task = task
             self.X  = kwargs['X']
             self.orig_data = True
             self.Nu = self.X.shape[0]
             self.Nv = self.X.shape[1]
             self.nDim  = self.X.shape[2]
-            self.Nctlu = kwargs['Nctlu']
-            self.Nctlv = kwargs['Nctlv']
+           
             self.ku = kwargs['ku']
             self.kv = kwargs['kv']
 
@@ -233,7 +190,7 @@ to Nv: Nctlv = %d'%self.Nctlv
            #Calculate the knot vector and Jacobian
             sys.stdout.write(' Calculating: knots, ')
             self._calcKnots()
-
+            self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
             sys.stdout.write(' jacobian, ')
             self._calcJacobian()
 
@@ -255,13 +212,12 @@ to Nv: Nctlv = %d'%self.Nctlv
         
         return
 
-
     def recompute(self):
         '''Recompute the surface if the knot vector has changed:'''
 
         assert self.orig_data,'Only surface initialization with original \
 data can be recomputed'
-        if self.task == 'lms':
+        if self.task == 'lms' or self.task == 'interpolate':
             self._calcJacobian()
             self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim],self.dtype)
             for idim in xrange(self.nDim):
@@ -341,7 +297,6 @@ data can be recomputed'
         # Calculate the jacobian J, for fixed t and s
         self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv],self.dtype)
         ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
-
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
                 ctl[i,j] += 1
@@ -354,6 +309,60 @@ data can be recomputed'
             # end for 
         # end for
         return
+
+    def checkCoef(self):
+        '''This function determines if there are crossed control points which
+        could result in an invalid mesh'''
+        # This function can easily migrate to fortran
+        counter = 0
+        # Loop over number of "elements or patches"
+        for i in xrange(self.Nctlu-1):
+            for j in xrange(self.Nctlv-1):
+                # First find normal of "patch" by taking cross product
+                # of the diagonals
+                d1 = self.coef[i+1,j+1]-self.coef[i,j]
+                d2 = self.coef[i,j+1]-self.coef[i+1,j]
+                normal = cross(d1,d2)
+                normal /= sqrt(dot(normal,normal))
+                v1 = self.coef[i+1,j  ]-self.coef[i  ,j  ]
+                v2 = self.coef[i+1,j+1]-self.coef[i+1,j  ]
+                v3 = self.coef[i  ,j+1]-self.coef[i+1,j+1]
+                v4 = self.coef[i  ,j  ]-self.coef[i  ,j+1]
+
+                v1 /=sqrt(dot(v1,v1))
+                v2 /=sqrt(dot(v2,v2))
+                v3 /=sqrt(dot(v3,v3))
+                v4 /=sqrt(dot(v4,v4))
+
+                # Now cross normal with all the vectors
+                values = zeros(4)
+                values[0] = dot(cross(v1,v2),normal)
+                values[1] = dot(cross(v2,v3),normal)
+                values[2] = dot(cross(v3,v4),normal)
+                values[3] = dot(cross(v4,v1),normal)
+#                print values
+                for ii in xrange(4):
+                    if abs(values[ii]) < 1e-3:
+                        values[ii] = 0
+                    # end if
+                # end for
+
+                if values[0] >=0 and values[1] >= 0 and values[2]>=0 and values[3]>=0:
+                    pass
+                else:
+                    if values[0]<=0 and values[1]<=0 and values[2]<=0 and values[3]<=0:
+                        pass
+                    else:
+                        print 'values:',values,i,j
+#                         print 'normal:',normal
+#                         print 'v:',v1,v2,v3,v4
+                        counter += 1
+                    # end if
+                # end if
+            # end for
+        # end for
+        return counter 
+
 
     def calcPtDeriv(self,u,v,i,j):
         '''Calc the derivative of point u,v at control point i,j'''
@@ -368,13 +377,13 @@ data can be recomputed'
         '''Get the value of the spline on edge, edge=0,1,2,3'''
 
         if edge == 0:
-            return self.getValue(s,0)
+            return self.getValue(s,self.range[2])
         elif edge == 1:
-            return self.getValue(s,1)
+            return self.getValue(s,self.range[3])
         elif edge == 2:
-            return self.getValue(0,s)
+            return self.getValue(self.range[0],s)
         elif edge ==3:
-            return self.getValue(1,s)
+            return self.getValue(self.range[1],s)
         else:
             print 'Edge must be between 0 and 3'
             sys.exit(1)
@@ -386,13 +395,13 @@ data can be recomputed'
         the standard counter-clockwise fashion.'''
 
         if corner == 0:
-            return self.getValue(0,0)
+            return self.getValue(self.range[0],self.range[2])
         elif corner == 1:
-            return self.getValue(1,0)
+            return self.getValue(self.range[1],self.range[2])
         elif corner == 2:
-            return self.getValue(1,1)
+            return self.getValue(self.range[1],self.range[3])
         elif corner ==3:
-            return self.getValue(0,1)
+            return self.getValue(self.range[0],self.range[3])
         else:
             print 'Corner must be between 0 and 3'
             sys.exit(1)
@@ -401,6 +410,12 @@ data can be recomputed'
 
     def getOrigValuesEdge(self,edge):
         ''' Get the values of the original data on edge. edge = 0,1,2,3'''
+        if self.orig_data == False:
+            print 'Error: No original data exists for this surface. The \
+initialization type for this spline class was \'create\''
+            sys.exit(1)
+        # end if
+
         if edge == 0:
             if mod(self.Nu,2) == 1: # Its odd
                 mid = (self.Nu-1)/2
@@ -408,32 +423,35 @@ data can be recomputed'
             else:
                 Xmid = 0.5 *(self.X[self.Nu/2,0] + self.X[self.Nu/2 - 1,0])
                 return self.X[0,0],Xmid,self.X[-1,0]
-        if edge == 1:
+        elif edge == 1:
             if mod(self.Nu,2) == 1: # Its odd
                 mid = (self.Nu-1)/2
                 return self.X[0,-1],self.X[mid,-1],self.X[-1,-1]
             else:
                 Xmid = 0.5 *(self.X[self.Nu/2,-1] + self.X[self.Nu/2 - 1,-1])
                 return self.X[0,-1],Xmid,self.X[-1,-1]
-        if edge == 2:
+        elif edge == 2:
             if mod(self.Nv,2) == 1: # Its odd
                 mid = (self.Nv-1)/2
                 return self.X[0,0],self.X[0,mid],self.X[0,-1]
             else:
                 Xmid = 0.5 *(self.X[0,self.Nv/2] + self.X[0,self.Nv/2 - 1])
                 return self.X[0,0],Xmid,self.X[0,-1]
-        if edge == 3:
+        elif edge == 3:
             if mod(self.Nv,2) == 1: # Its odd
                 mid = (self.Nv-1)/2
                 return self.X[-1,0],self.X[-1,mid],self.X[-1,-1]
             else:
                 Xmid = 0.5 *(self.X[-1,self.Nv/2] + self.X[-1,self.Nv/2 - 1])
                 return self.X[-1,0],Xmid,self.X[-1,-1]
-
+        else:
+            print 'Error: edge must be between 0 and 3'
+            sys.exit(1)
+        # end if
  
 
     def getNormal(self,u,v):
-        '''Get the normal at the surface point u,v'''
+        '''Get the normalized normal at the surface point u,v'''
         if self.nDim == 3:
             du,dv = self.getDerivative(u,v)
 
@@ -453,29 +471,36 @@ data can be recomputed'
     def getValue(self,u,v,x=None):
         
         '''Get the value of the spline at point u,v'''
-        if x == None:
+        if not x:
             x = zeros((self.nDim),self.dtype)
-        # end
-        
+        # end if
         for idim in xrange(self.nDim):
             x[idim] = self.pyspline.b2val(\
                 u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         
         return x
 
-    def getValueV(self,u,v):
+    def getValueV(self,u,v,x=None):
         '''Get the value of a spline at vector of points u,v'''
+        # Note: If the user is passing in x, it must already be the
+        # right shape/size
         assert u.shape == v.shape, 'u and v must be the same length'
-        x = zeros((len(u),self.nDim),self.dtype)
+        if not x:
+            x = zeros((len(u),self.nDim),self.dtype)
+        # end if
+
         for idim in xrange(self.nDim):
             x[:,idim] = self.pyspline.b2valv(\
                 u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+
         return x
 
-    def getValueM(self,u,v):
+    def getValueM(self,u,v,x=None):
         '''Get the value of a spline at matrix of points u,v'''
         assert u.shape == v.shape, 'u and v must be the same shape'
-        x = zeros((u.shape[0],u.shape[1],self.nDim),self.dtype)
+        if not x:
+            x = zeros((u.shape[0],u.shape[1],self.nDim),self.dtype)
+        # end if
         for idim in xrange(self.nDim):
             x[:,:,idim] = self.pyspline.b2valm(\
                 u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
@@ -511,8 +536,9 @@ data can be recomputed'
 
     def projectPoint(self,x0,u0=0.5,v0=0.5,Niter=25,tol=1e-6):
 
-        '''Project a point x0 onto the surface. i.e. Find the point on
-        the surface that minimizes the distance from x0 to surface(u,v)'''
+        '''Project a point x0 onto the surface. i.e. Find the point on the
+        surface that minimizes the distance from x0 to
+        surface(u,v). See the fortran function project point.'''
 
         # We will use a starting point u0,v0 if given
 
@@ -1148,7 +1174,7 @@ derivative vectors must match the spatial dimension of the curve'
         # Calculate the jacobian J, for fixed t and s
         self.J = zeros((self.N,self.Nctl),self.dtype)
         ctl = zeros((self.Nctl),self.dtype)
-
+        
         for i in xrange(self.Nctl):
             ctl[i] += 1
             self.J[:,i] = self.pyspline.bvaluv(self.t,ctl,self.k,0,self.s)
