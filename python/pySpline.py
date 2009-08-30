@@ -450,7 +450,40 @@ initialization type for this spline class was \'create\''
             print 'Error: edge must be between 0 and 3'
             sys.exit(1)
         # end if
- 
+
+    def checkDegenerateEdge(self,edge):
+        
+        '''Check to see if the values on edge \'edge\' are degenerate'''
+        
+        degen = False
+
+        if edge == 0:
+            values = self.X[:,0]
+        elif edge == 1:
+            values = self.X[:,-1]
+        elif edge == 2:
+            values = self.X[0,:]
+        elif edge == 3:
+            values = self.X[-1,:]
+        else:
+            print 'Error: Edge must be between 0 and 3'
+            sys.exit(1)
+        # end if
+
+        # Now loop over edge to see if its degenerate
+        N = len(values)
+        length = zeros(N)
+        for i in xrange(N-1):
+            length[i+1] = length[i] + self._e_dist(values[i+1],values[i])
+        # end for
+        
+        if abs(length[-1]) < 1e-12:
+            print 'We have a degenerate edge'
+            degen = True
+        # end if
+
+        return degen
+
 
     def getNormal(self,u,v):
         '''Get the normalized normal at the surface point u,v'''
