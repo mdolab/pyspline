@@ -116,6 +116,7 @@ class surf_spline():
             self.coef = array(kwargs['coef'],self.dtype)
             self.Nctlu = self.coef.shape[0]
             self.Nctlv = self.coef.shape[1]
+            self.Nctl  = self.Nctlu*self.Nctlv
             self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
             self.range = array(kwargs['range'],self.dtype)
             self.nDim = self.coef.shape[2]
@@ -157,7 +158,8 @@ to Nu: Nctlu = %d'%self.Nctlu
                 print 'Warning: Number of control points in v has been capped \
 to Nv: Nctlv = %d'%self.Nctlv
             # end if
-            
+
+            self.Nctl  = self.Nctlu*self.Nctlv
             self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
 
             # Sanity check to make sure k is less than N
@@ -471,7 +473,7 @@ initialization type for this spline class was \'create\''
     def getValue(self,u,v,x=None):
         
         '''Get the value of the spline at point u,v'''
-        if not x:
+        if x == None:
             x = zeros((self.nDim),self.dtype)
         # end if
         for idim in xrange(self.nDim):
@@ -485,7 +487,7 @@ initialization type for this spline class was \'create\''
         # Note: If the user is passing in x, it must already be the
         # right shape/size
         assert u.shape == v.shape, 'u and v must be the same length'
-        if not x:
+        if x == None:
             x = zeros((len(u),self.nDim),self.dtype)
         # end if
 
@@ -498,7 +500,7 @@ initialization type for this spline class was \'create\''
     def getValueM(self,u,v,x=None):
         '''Get the value of a spline at matrix of points u,v'''
         assert u.shape == v.shape, 'u and v must be the same shape'
-        if not x:
+        if x == None:
             x = zeros((u.shape[0],u.shape[1],self.nDim),self.dtype)
         # end if
         for idim in xrange(self.nDim):
@@ -633,7 +635,7 @@ initialization type for this spline class was \'create\''
             # end for 
         # end if
                 
-        if not size:
+        if size == None:
             u_plot = linspace(self.range[0],self.range[1],50).astype('d')
             v_plot = linspace(self.range[2],self.range[3],50).astype('d')
         else:
@@ -663,8 +665,8 @@ initialization type for this spline class was \'create\''
 
 
 
-        u_plot = linspace(self.range[0],self.range[1],40).astype('d')
-        v_plot = linspace(self.range[2],self.range[3],40).astype('d')
+        u_plot = linspace(self.range[0],self.range[1],100).astype('d')
+        v_plot = linspace(self.range[2],self.range[3],100).astype('d')
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'\
                          %('interpolated',len(u_plot),len(v_plot)))
@@ -1239,12 +1241,7 @@ if __name__ == '__main__':
     print 'There is an example in the ./example directory'
 
 
-
-
-
-
-
-        
+       
 
 #     def __objcon(self,x):
 #         '''Get the rms error for the given set of design variables'''
