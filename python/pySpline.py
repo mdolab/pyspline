@@ -117,7 +117,6 @@ class surf_spline():
             self.Nctlu = self.coef.shape[0]
             self.Nctlv = self.coef.shape[1]
             self.Nctl  = self.Nctlu*self.Nctlv
-            self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
             self.range = array(kwargs['range'],self.dtype)
             self.nDim = self.coef.shape[2]
             return
@@ -160,7 +159,6 @@ to Nv: Nctlv = %d'%self.Nctlv
             # end if
 
             self.Nctl  = self.Nctlu*self.Nctlv
-            self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
 
             # Sanity check to make sure k is less than N
             if self.Nu < self.ku:
@@ -192,7 +190,6 @@ to Nv: Nctlv = %d'%self.Nctlv
            #Calculate the knot vector and Jacobian
             sys.stdout.write(' Calculating: knots, ')
             self._calcKnots()
-            self.globalCtlIndex = -1*ones((self.Nctlu,self.Nctlv),'intc')
             sys.stdout.write(' jacobian, ')
             self._calcJacobian()
 
