@@ -219,6 +219,7 @@ to Nv: Nctlv = %d'%self.Nctlv
 
         assert self.orig_data,'Only surface initialization with original \
 data can be recomputed'
+
         if self.task == 'lms' or self.task == 'interpolate':
             self._calcJacobian()
             self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim],self.dtype)
@@ -295,7 +296,7 @@ data can be recomputed'
         return
 
     def _calcJacobian(self):
-        
+
         # Calculate the jacobian J, for fixed t and s
         self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv],self.dtype)
         ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
@@ -478,11 +479,10 @@ initialization type for this spline class was \'create\''
         # end for
         
         if abs(length[-1]) < 1e-12:
-            print 'We have a degenerate edge'
             degen = True
         # end if
 
-        return degen
+        return degen,values[0]
 
 
     def getNormal(self,u,v):
@@ -692,14 +692,20 @@ initialization type for this spline class was \'create\''
             nu=int(floor(real(u_len/size)))
             nv=int(floor(real(v_len/size)))
             
-            u_plot = linspace(self.range[0],self.range[1],nu).astype('d')
+            if nu > 100: nu = 100
+            if nu < 5:   nu = 5
+            if nv > 100: nv = 100
+            if nv < 5:   nv = 5
 
+            
+            
+            u_plot = linspace(self.range[0],self.range[1],nu).astype('d')
             v_plot = linspace(self.range[2],self.range[3],nv).astype('d')
 
 
 
-        u_plot = linspace(self.range[0],self.range[1],100).astype('d')
-        v_plot = linspace(self.range[2],self.range[3],100).astype('d')
+        #u_plot = linspace(self.range[0],self.range[1],40).astype('d')
+        #v_plot = linspace(self.range[2],self.range[3],40).astype('d')
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'\
                          %('interpolated',len(u_plot),len(v_plot)))
