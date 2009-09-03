@@ -295,6 +295,7 @@ data can be recomputed'
     def _calcJacobian(self):
 
         # Calculate the jacobian J, for fixed t and s
+
         self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv],self.dtype)
         ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
         for j in xrange(self.Nctlv):
@@ -448,6 +449,23 @@ initialization type for this spline class was \'create\''
             print 'Error: edge must be between 0 and 3'
             sys.exit(1)
         # end if
+
+    def getOrigValueCorner(self,node):
+        ''' Get the values of the original data on edge. edge = 0,1,2,3'''
+        if self.orig_data == False:
+            print 'Error: No original data exists for this surface. The \
+initialization type for this spline class was \'create\''
+            sys.exit(1)
+        # end if
+
+        if node == 0:
+            return self.X[0,0]
+        elif node == 1:
+            return self.X[-1,0]
+        elif node == 2:
+            return self.X[0,-1]
+        elif node == 3:
+            return self.X[-1,-1]
 
     def checkDegenerateEdge(self,edge):
         
@@ -701,8 +719,8 @@ initialization type for this spline class was \'create\''
 
 
 
-        #u_plot = linspace(self.range[0],self.range[1],40).astype('d')
-        #v_plot = linspace(self.range[2],self.range[3],40).astype('d')
+        u_plot = linspace(self.range[0],self.range[1],40).astype('d')
+        v_plot = linspace(self.range[2],self.range[3],40).astype('d')
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'\
                          %('interpolated',len(u_plot),len(v_plot)))
