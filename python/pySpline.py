@@ -231,7 +231,6 @@ data can be recomputed'
 
         u = zeros(self.Nu,self.dtype)
         singular_counter = 0
-
         # loop over each v, and average the 'u' parameter 
         for j in xrange(self.Nv): 
             temp = zeros(self.Nu,self.dtype)
@@ -317,23 +316,44 @@ data can be recomputed'
         # This function can easily migrate to fortran
         counter = 0
         # Loop over number of "elements or patches"
-        for i in xrange(self.Nctlu-1):
-            for j in xrange(self.Nctlv-1):
+        ustart = 0
+        uend = self.Nctlu - 1
+        vstart = 0
+        vend = self.Nctlv - 1
+
+
+        for i in xrange(ustart,uend):
+            for j in xrange(vstart,vend):
                 # First find normal of "patch" by taking cross product
                 # of the diagonals
                 d1 = self.coef[i+1,j+1]-self.coef[i,j]
                 d2 = self.coef[i,j+1]-self.coef[i+1,j]
                 normal = cross(d1,d2)
                 normal /= sqrt(dot(normal,normal))
+                if sqrt(dot(normal,normal)) == 0:
+                    print 'ha ha '
+                    sys.exit(0)
                 v1 = self.coef[i+1,j  ]-self.coef[i  ,j  ]
                 v2 = self.coef[i+1,j+1]-self.coef[i+1,j  ]
                 v3 = self.coef[i  ,j+1]-self.coef[i+1,j+1]
                 v4 = self.coef[i  ,j  ]-self.coef[i  ,j+1]
-
-                v1 /=sqrt(dot(v1,v1))
-                v2 /=sqrt(dot(v2,v2))
-                v3 /=sqrt(dot(v3,v3))
-                v4 /=sqrt(dot(v4,v4))
+                if sqrt(dot(v1,v1)) == 0:
+                    v1 = zeros(3)
+                else:
+                    v1 /=sqrt(dot(v1,v1))
+                if sqrt(dot(v2,v2)) == 0:
+                    v2 = zeros(3)
+                else:
+                    v2 /=sqrt(dot(v2,v2))
+                if sqrt(dot(v3,v3)) == 0:
+                    v3 = zeros(3)
+                else:
+                    v3 /=sqrt(dot(v3,v3))
+                if sqrt(dot(v4,v4)) == 0:
+                    v4 = zeros(3)
+                else:
+                    v4 /=sqrt(dot(v4,v4))
+          
 
                 # Now cross normal with all the vectors
                 values = zeros(4)
