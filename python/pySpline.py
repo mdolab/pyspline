@@ -81,7 +81,14 @@ class surf_spline():
             v, real, array: list of v values
             X, real, array, size(len(u),len(v),nDim):Array of data points to fit
 '''
-        sys.stdout.write('pySpline Type: %s. '%(task))
+        if 'no_print' in kwargs:
+            self.NO_PRINT = kwargs['no_print']
+        else:
+            self.NO_PRINT = False
+        # end if      
+
+        if not self.NO_PRINT:
+            sys.stdout.write('pySpline Type: %s. '%(task))
 
         self.pyspline_real = pyspline # Real version of spline library
         self.pyspline_cs = pyspline_cs # Complex version of spline library
@@ -108,7 +115,8 @@ class surf_spline():
                 and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs,\
                 'Error: ku,kv,tu,tv,coef and range MUST be defined for task=\
 \'create\''
-            sys.stdout.write('\n')
+            if not self.NO_PRINT:
+                sys.stdout.write('\n')
             self.ku = kwargs['ku'] 
             self.kv = kwargs['kv']
             self.tu = array(kwargs['tu'],self.dtype)
@@ -188,9 +196,11 @@ to Nv: Nctlv = %d'%self.Nctlv
             [self.V, self.U] = meshgrid(self.v,self.u)
 
            #Calculate the knot vector and Jacobian
-            sys.stdout.write(' Calculating: knots, ')
+            if not self.NO_PRINT:
+                sys.stdout.write(' Calculating: knots, ')
             self._calcKnots()
-            sys.stdout.write(' jacobian, ')
+            if not self.NO_PRINT:
+                sys.stdout.write(' jacobian, ')
             self._calcJacobian()
 
 #             # Lets do a lms 
@@ -200,8 +210,8 @@ to Nv: Nctlv = %d'%self.Nctlv
                 self.coef[:,:,idim] =\
                     reshape(lstsq(self.J,self.X[:,:,idim].flatten())[0]\
                                 ,[self.Nctlu,self.Nctlv])
-
-            sys.stdout.write(' LMS Fit Time: %6.5f s\n'%(time.time()-timeA))
+            if not self.NO_PRINT:
+                sys.stdout.write(' LMS Fit Time: %6.5f s\n'%(time.time()-timeA))
             
             return 
 
@@ -789,6 +799,22 @@ initialization type for this spline class was \'create\''
         # end for
         return
 
+    def writeDirections(self,handle,isurf):
+        '''Write out and indication of the surface direction'''
+        handle.write('Zone T=\"surface%d direction\" I=4\n'%(isurf))
+        if self.Nctlu >= 3 and self.Nctlv >=3:
+            handle.write('%f,%f,%f \n'%(self.coef[1,2,0],self.coef[1,2,1],self.coef[1,2,2]))
+            handle.write('%f,%f,%f \n'%(self.coef[1,1,0],self.coef[1,1,1],self.coef[1,1,2]))
+            handle.write('%f,%f,%f \n'%(self.coef[2,1,0],self.coef[2,1,1],self.coef[2,1,2]))
+            handle.write('%f,%f,%f \n'%(self.coef[3,1,0],self.coef[3,1,1],self.coef[3,1,2]))
+        else:
+            print 'Not Enough control points to output direction indicator'
+        #end if
+        return 
+                     
+
+
+
     def writeIGES_directory(self,handle,Dcount,Pcount):
 
         '''Write the IGES file header information (Directory Entry Section)
@@ -937,7 +963,6 @@ class linear_spline():
 
         self.pyspline = pyspline
         self.dtype = 'd'
-
         if 'complex' in kwargs:
             self.pyspline = pyspline_cs
             self.dtype = 'D'
@@ -962,7 +987,6 @@ class linear_spline():
             return
              
         if task == 'interpolate':
-
             assert 'k' in kwargs and 'X' in kwargs, \
                 'Error: k, and X MUST be defined for task \'interpolate\''
 
