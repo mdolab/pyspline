@@ -6,7 +6,7 @@
 RM  	        = /bin/rm -rf
 
 SPLINE_LIB = libspline_cs.a
-
+SPLINE_LIB_SHARED = libspline_cs.so
 OBJ = 	complexify.o \
 	bspline/c_bfqad.o\
 	bspline/c_bint4.o\
@@ -79,10 +79,10 @@ clean:
 	$(RM) misc/*.o
 	@echo "Removing library"
 	$(RM) libspline_cs.a
-
+	$(RM) libspline_cs.so
 libspline_cs: $(OBJ) 
 	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(OBJ)
-
+	$(FC)  -shared $(OBJ) -o $(SPLINE_LIB_SHARED) 	
 
 .SUFFIXES: .o .f .f90 
 

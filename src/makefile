@@ -6,7 +6,7 @@
 RM  	        = /bin/rm -rf
 
 SPLINE_LIB = libspline.a
-
+SPLINE_LIB_SHARED = libspline.so
 OBJ =   bspline/bfqad.o\
 	bspline/bint4.o\
 	bspline/bintk.o\
@@ -80,9 +80,12 @@ clean:
 	$(RM) lmsfit/*.o
 	@echo "Removing library"
 	$(RM) libspline.a
+	$(RM) libspline.so
 
 libspline: $(OBJ) 
 	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(OBJ)
+	$(FC)  -shared $(OBJ) -o $(SPLINE_LIB_SHARED) 
+
 
 
 .SUFFIXES: .o .f .f90
