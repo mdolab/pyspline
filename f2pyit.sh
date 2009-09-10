@@ -14,7 +14,7 @@ cd ../
 #Now f2py just the functions we need in the pyf
 f2py  --fcompiler=intel --f90flags=-r8 -c -m pyspline src/pyspline.pyf src/libspline.a
 
-#Now make the source files for the complex version
+# #Now make the source files for the complex version
 
 mv pyspline.so ./python
 

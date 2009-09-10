@@ -46,13 +46,6 @@
       EXTERNAL bvalu
       INBV = 1
       do I = 1,NX
-         if (X(I) .gt. T(N+k)) then
-            X(I) = T(N+k)
-         end if
-         if (X(I) .lt. T(1)) then
-            X(I) = T(1)
-         end if
-         
          Y(I)= BVALU(T,A,N,K,IDERIV,X(I),INBV,WORK)         
       end do
       
