@@ -60,8 +60,7 @@ C***ROUTINES CALLED  INTRV,XERROR
 C***END PROLOGUE  BVALU
 C
 C
-	use complexify 
-	implicit complex*16(a-h, o-z) 
+      use complexify
       INTEGER I,IDERIV,IDERP1,IHI,IHMKMJ,ILO,IMK,IMKPJ, INBV, IPJ,
      1 IP1, IP1MJ, J, JJ, J1, J2, K, KMIDER, KMJ, KM1, KPK, MFLAG, N
       complex*16 A, FKMJ, T, WORK, X
@@ -71,29 +70,26 @@ C***FIRST EXECUTABLE STATEMENT  BVALU
       BVALU = 0.0E0
       IF(K.LT.1) GO TO 102
       IF(N.LT.K) GO TO 101
+
       IF(IDERIV.LT.0 .OR. IDERIV.GE.K) GO TO 110
       KMIDER = K - IDERIV
-C
+C     
 C *** FIND *I* IN (K,N) SUCH THAT T(I) .LE. X .LT. T(I+1)
 C     (OR, .LE. T(I+1) IF T(I) .LT. T(I+1) = T(N+1)).
       KM1 = K - 1
+
       CALL INTRV(T, N+1, X, INBV, I, MFLAG)
-      IF (X.LT.T(K)) GO TO 120
-      IF (MFLAG.ceq.0) GO TO 20
-!      IF (X.GT.T(I)) GO TO 130
-      if(X.GT.T(I)) then
-
-         print *,'Tried to evaluate X outside range'
-         print *,'X = ',X
-         print *,'I:',I
-         print *,'T(I):',T(I)
-         goto 130
+      if (MFLAG .ceq. -1) THEN
+         I = K
+         GO TO 20
+      else if (MFLAG .ceq. 0) THEN
+         GO TO 20
       end if
-
 
    10 IF (I.ceq.K) GO TO 140
       I = I - 1
       IF (X.ceq.T(I)) GO TO 10
+      
 C
 C *** DIFFERENCE THE COEFFICIENTS *IDERIV* TIMES
 C     WORK(I) = AJ(I), WORK(K+I) = DP(I), WORK(K+K+I) = DM(I), I=1.K
@@ -102,7 +98,7 @@ C
       DO 30 J=1,K
         IMKPJ = IMK + J
         WORK(J) = A(IMKPJ)
-   30 CONTINUE
+ 30   CONTINUE
       IF (IDERIV.ceq.0) GO TO 60
       DO 50 J=1,IDERIV
         KMJ = K - J
@@ -166,3 +162,7 @@ C
      1 T(K)',     57, 2, 1)
       RETURN
       END
+
+
+
+

@@ -78,30 +78,17 @@ C     (OR, .LE. T(I+1) IF T(I) .LT. T(I+1) = T(N+1)).
       KM1 = K - 1
 
       CALL INTRV(T, N+1, X, INBV, I, MFLAG)
-
-
-      IF (X.LT.T(K)) GO TO 120
-      IF (MFLAG.EQ.0) GO TO 20
-!      IF (X.GT.T(I)) GO TO 130
-
-      if(X.GT.T(I)) then
-         X = T(I)
+      if (MFLAG .EQ. -1) THEN
+         I = K
+         GO TO 20
+      else if (MFLAG .EQ. 0) THEN
+         GO TO 20
       end if
-      
-c$$$         print *,'in bvalu'
-c$$$         print *,'N:',N
-c$$$         print *,'K:',K
-c$$$         do j=1,N+K
-c$$$            print *,'T(i)',j,T(j)
-c$$$         end do
-c$$$         print *,'I:',I
-c$$$         print *,'now youre really fucked'
-c$$$         print *,'X,T(I)',X,T(I)
-c$$$         GO TO 130
 
    10 IF (I.EQ.K) GO TO 140
       I = I - 1
       IF (X.EQ.T(I)) GO TO 10
+      
 C
 C *** DIFFERENCE THE COEFFICIENTS *IDERIV* TIMES
 C     WORK(I) = AJ(I), WORK(K+I) = DP(I), WORK(K+K+I) = DM(I), I=1.K
@@ -110,7 +97,7 @@ C
       DO 30 J=1,K
         IMKPJ = IMK + J
         WORK(J) = A(IMKPJ)
-   30 CONTINUE
+ 30   CONTINUE
       IF (IDERIV.EQ.0) GO TO 60
       DO 50 J=1,IDERIV
         KMJ = K - J
