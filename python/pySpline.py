@@ -1155,17 +1155,18 @@ derivative vectors must match the spatial dimension of the curve'
         converged = False
 
         for i in xrange(Niter):
+            #print 's0:',s0
             D = x0 - self.getValue(s0)
             Ydot = self.getDerivative(s0)
             update = dot(D,Ydot)/(sqrt(dot(Ydot,Ydot)))/self.length
 
             # Check to see if update went too far
 
-            if s0+update > self.range[1]:
-                update = self.range[1]-s0
-            elif s0+update< self.range[0]:
-                # Only put the update up to the end
-                update = self.range[0]-s0
+           #  if s0+update > self.range[1]:
+#                 update = self.range[1]-s0
+#             elif s0+update< self.range[0]:
+#                 # Only put the update up to the end
+#                 update = self.range[0]-s0
                                 
             D2 = x0-self.getValue(s0+update)            
             if abs(dot(D2,D2)) > abs(dot(D,D)):

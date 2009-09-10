@@ -61,6 +61,7 @@ C***END PROLOGUE  BVALU
 C
 C
       use complexify
+      implicit complex*16(a-h, o-z) 
       INTEGER I,IDERIV,IDERP1,IHI,IHMKMJ,ILO,IMK,IMKPJ, INBV, IPJ,
      1 IP1, IP1MJ, J, JJ, J1, J2, K, KMIDER, KMJ, KM1, KPK, MFLAG, N
       complex*16 A, FKMJ, T, WORK, X
