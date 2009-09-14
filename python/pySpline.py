@@ -422,8 +422,7 @@ data can be recomputed'
         #end if 
 
     def getValueCorner(self,corner):
-        '''Get the value of the spline on corner i where nodes are oriented in
-        the standard counter-clockwise fashion.'''
+        '''Get the value of the spline on corner i '''
 
         if corner == 0:
             return self.getValue(self.range[0],self.range[2])
@@ -701,6 +700,9 @@ initialization type for this spline class was \'create\''
     def writeTecplotSurface(self,handle,size=None):
         '''Output this surface\'s data to a open file handle \'handle\''''
 
+        MAX_SIZE = 100
+        MIN_SIZE = 5
+
         if self.orig_data:
             handle.write('Zone T=%s I=%d J=%d\n'%('orig_data',self.Nu,self.Nv))
             handle.write('DATAPACKING=POINT\n')
@@ -737,20 +739,14 @@ initialization type for this spline class was \'create\''
             nu=int(floor(real(u_len/size)))
             nv=int(floor(real(v_len/size)))
             
-            if nu > 100: nu = 100
-            if nu < 5:   nu = 5
-            if nv > 100: nv = 100
-            if nv < 5:   nv = 5
-
-            
+            if nu > MAX_SIZE: nu = MAX_SIZE
+            if nu < MIN_SIZE: nu = MIN_SIZE
+            if nv > MAX_SIZE: nv = MAX_SIZE
+            if nv < MIN_SIZE: nv = MIN_SIZE
             
             u_plot = linspace(self.range[0],self.range[1],nu).astype('d')
             v_plot = linspace(self.range[2],self.range[3],nv).astype('d')
 
-
-
-        u_plot = linspace(self.range[0],self.range[1],40).astype('d')
-        v_plot = linspace(self.range[2],self.range[3],40).astype('d')
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'\
                          %('interpolated',len(u_plot),len(v_plot)))
