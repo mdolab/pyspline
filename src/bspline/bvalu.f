@@ -76,8 +76,8 @@ C
 C *** FIND *I* IN (K,N) SUCH THAT T(I) .LE. X .LT. T(I+1)
 C     (OR, .LE. T(I+1) IF T(I) .LT. T(I+1) = T(N+1)).
       KM1 = K - 1
-
       CALL INTRV(T, N+1, X, INBV, I, MFLAG)
+      
       if (MFLAG .EQ. -1) THEN
          I = K
          GO TO 20

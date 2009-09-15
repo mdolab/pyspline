@@ -175,7 +175,23 @@ python module pyspline ! in
             integer optional,check(shape(coef,0)==ncoef),depend(coef) :: ncoef = shape(coef,0)
             integer optional,check(shape(l_index,0)==n),depend(l_index) :: n = shape(l_index,0)
           end subroutine getctlnormals
-        
+
+         subroutine mincurvedistance(t1,k1,coef1,t2,k2,coef2,n1,n2,s,t,niter,tol,d,converged) ! in :test:mincurvedistance.f90
+            double precision dimension(n1+k1),intent(in),depend(k1,n1) :: t1
+            integer intent(in) :: k1
+            double precision dimension(n1,3),intent(in) :: coef1
+            double precision dimension(n2+k2),intent(in),depend(k2,n2) :: t2
+            integer intent(in) :: k2
+            double precision dimension(n2,3),intent(in) :: coef2
+            integer optional,intent(in),check(len(coef1)>=n1),depend(coef1) :: n1=len(coef1)
+            integer optional,intent(in),check(len(coef2)>=n2),depend(coef2) :: n2=len(coef2)
+            double precision intent(in,out) :: s
+            double precision intent(in,out) :: t
+            integer intent(in) :: niter
+            double precision intent(in) :: tol
+            double precision intent(out) :: d
+            integer intent(out) :: converged
+        end subroutine mincurvedistance
 
      end interface
 end python module pyspline
