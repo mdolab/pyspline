@@ -34,7 +34,6 @@ from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
 import numpy.linalg
 from numpy.linalg import lstsq
 
-import pyspline
 import pyspline_cs
 import pyspline as pyspline_real
 # =============================================================================
@@ -90,7 +89,7 @@ class surf_spline():
         if not self.NO_PRINT:
             sys.stdout.write('pySpline Type: %s. '%(task))
 
-        self.pyspline_real = pyspline # Real version of spline library
+        self.pyspline_real = pyspline_real # Real version of spline library
         self.pyspline_cs = pyspline_cs # Complex version of spline library
         # sef.
         if 'complex' in kwargs:
@@ -957,11 +956,15 @@ class linear_spline():
 '''
         #print 'pySpline Class Initialization Type: %s'%(task)
 
-        self.pyspline = pyspline
+        self.pyspline_real = pyspline_real
+        self.pyspline_cs   = pyspline_cs
         self.dtype = 'd'
         if 'complex' in kwargs:
             self.pyspline = pyspline_cs
             self.dtype = 'D'
+        else:
+            self.pyspline = pyspline_real
+            self.dtype = 'd'
         # end if
 
         if task == 'create':
@@ -1079,11 +1082,9 @@ derivative vectors must match the spatial dimension of the curve'
             #end for
                 
         if task == 'lms':
-
             assert 'k' in kwargs and 'X' in kwargs and 'Nctl' in kwargs , \
                 'Error: k, X and Nctl MUST be defined for task \'interpolate\''
            
-
             self.X  = kwargs['X']
             if len(self.X.shape) == 1:
                 self.nDim = 1
@@ -1110,7 +1111,6 @@ derivative vectors must match the spatial dimension of the curve'
                 # end if
             # end if
                 
-            self.Nctl = self.N
             self.range = array([self.s[0],self.s[-1]])
             self.orig_data = True
 
@@ -1123,7 +1123,7 @@ derivative vectors must match the spatial dimension of the curve'
                 self.Nctl  = self.N
 
             # Generate the knot vector
-            self.t = self.pyspline.bknot(self.s,self.k)
+            self.t = self.pyspline_real.knots(self.s,self.Nctl,self.k)
             if self.nDim > 1:
                 # Calculate the Jacobian
                 self._calcJacobian()
@@ -1223,6 +1223,14 @@ derivative vectors must match the spatial dimension of the curve'
             # end for
         # end if
         return x
+
+    def minDistance(self,curve,s=0,t=0,Niter=5,tol=1e-6):
+
+        '''Find the minimum distance between this curve (self) and a second
+        curve passed in (curve)'''
+        return self.pyspline_real.mincurvedistance(self.t,self.k,self.coef,
+                                         curve.t,curve.k,curve.coef,
+                                         s,t,Niter,tol)
 
    
     def getValue(self,s,x=None):

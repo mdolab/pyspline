@@ -48,6 +48,7 @@ OBJ =   bspline/bfqad.o\
 	misc/b2valV.o\
 	misc/projectpoint.o\
 	misc/getctlnormals.o\
+	misc/mincurvedistance.o
 
 
 ###================================================
