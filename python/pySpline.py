@@ -1307,14 +1307,14 @@ derivative vectors must match the spatial dimension of the curve'
         else:
             s_plot = linspace(self.range[0],self.range[1],25).astype('d')
         # end if 
-
+        
         # Dump re-interpolated spline
         handle.write('Zone T=%s I=%d \n'%('interpolated',len(s_plot)))
         handle.write('DATAPACKING=POINT\n')
         for i in xrange(len(s_plot)):
             for idim in xrange(self.nDim):
                 handle.write('%f '%(\
-                        pyspline.bvalu(self.t.astype('d'),\
+                        pyspline_real.bvalu(self.t.astype('d'),\
                                            self.coef[:,idim].astype('d'),\
                                            self.k,0,s_plot[i])))
             # end for 
@@ -1322,9 +1322,10 @@ derivative vectors must match the spatial dimension of the curve'
         # end for 
 
         # Dump Control Points (Always have these :-) ) 
-        handle.write('Zone T=%s I = %d\n'%('control_pts',self.N))
+        handle.write('Zone T=%s I = %d\n'%('control_pts',self.Nctl))
         handle.write('DATAPACKING=POINT\n')
-        for i in xrange(self.N):
+
+        for i in xrange(self.Nctl):
             for idim in xrange(self.nDim):
                 handle.write('%f '%(real(self.coef[i,idim])))
             # end for
