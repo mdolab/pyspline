@@ -295,8 +295,8 @@ data can be recomputed'
         #self.tu = self.pyspline.knots(self.u,self.Nctlu,self.ku)
         #self.tv = self.pyspline.knots(self.v,self.Nctlv,self.kv)
 
-        self.tu = pyspline.knots(self.u,self.Nctlu,self.ku)
-        self.tv = pyspline.knots(self.v,self.Nctlv,self.kv)
+        self.tu = pyspline_real.knots(self.u,self.Nctlu,self.ku)
+        self.tv = pyspline_real.knots(self.v,self.Nctlv,self.kv)
 
         return
 
