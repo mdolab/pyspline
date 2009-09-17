@@ -29,7 +29,7 @@ import os, sys, string, time, copy
 # External Python modules
 # =============================================================================
 from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
-    array, real, reshape, meshgrid, dot, cross, mod, floor
+    array, real, reshape, meshgrid, dot, cross, mod, floor, mat
 
 import numpy.linalg
 from numpy.linalg import lstsq
@@ -625,7 +625,7 @@ initialization type for this spline class was \'create\''
 
         return u0,v0,D,converged
 
-    def findUV(self,x0,r,u0,v0):
+    def findUV(self,x0,r,u0=0.5,v0=0.5):
         ''' Try to find the parametric u-v coordinate of the spline
         which coorsponds to the intersection of the directed vector 
         v = x0 + r*s where x0 is a basepoint, r  is a direction vector
@@ -1224,7 +1224,7 @@ derivative vectors must match the spatial dimension of the curve'
         # end if
         return x
 
-    def minDistance(self,curve,s=0,t=0,Niter=5,tol=1e-6):
+    def minDistance(self,curve,s=0,t=0,Niter=25,tol=1e-6):
 
         '''Find the minimum distance between this curve (self) and a second
         curve passed in (curve)'''
