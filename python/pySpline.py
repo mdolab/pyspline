@@ -695,13 +695,7 @@ initialization type for this spline class was \'create\''
 
         return u,v,x
 
-
-    def writeTecplotSurface(self,handle,size=None):
-        '''Output this surface\'s data to a open file handle \'handle\''''
-
-        MAX_SIZE = 100
-        MIN_SIZE = 5
-
+    def writeTecplotOrigData(self,handle):
         if self.orig_data:
             handle.write('Zone T=%s I=%d J=%d\n'%('orig_data',self.Nu,self.Nv))
             handle.write('DATAPACKING=POINT\n')
@@ -710,9 +704,16 @@ initialization type for this spline class was \'create\''
                     handle.write('%f %f %f \n'%(\
                             self.X[i,j,0].astype('d'),self.X[i,j,1].astype('d')\
                                 ,self.X[i,j,2].astype('d')))
-                # end for
+                    # end for
             # end for 
         # end if
+
+
+    def writeTecplotSurface(self,handle,size=None):
+        '''Output this surface\'s data to a open file handle \'handle\''''
+
+        MAX_SIZE = 100
+        MIN_SIZE = 5
                 
         if size == None:
             u_plot = linspace(self.range[0],self.range[1],50).astype('d')
@@ -759,10 +760,9 @@ initialization type for this spline class was \'create\''
                 # end if
             # end if
         # end if
-        #sys.exit(0)
-        # ---------------------------------------------------------------------
-        
-        # Dump Control Points (Always have these :-) ) 
+    
+    def writeTecplotCoef(self,handle):
+
         handle.write('Zone T=%s I=%d J = %d\n'\
                          %('control_pts',self.Nctlu,self.Nctlv))
         handle.write('DATAPACKING=POINT\n')
