@@ -625,6 +625,33 @@ initialization type for this spline class was \'create\''
 
         return u0,v0,D,converged
 
+    def projectCurveEdge(self,curve,edge,s0=0.5,Niter=25,tol=1e-6):
+        '''Project a pySpline Curve, 'curve', onto edge 'edge' . We will
+        simply create a curve from the given edge and then use the
+        min_distance algorithim from the linear_spline class'''
+
+        if edge == 0:
+            edge_curve=pySpline.linear_spline(task='create',k=self.ku,t=self.tu,
+                                              coef=self.coef[:,0],
+                                              range=self.range[0:2])
+        elif edge == 1:
+            edge_curve=pySpline.linear_spline(task='create',k=self.ku,t=self.tu,
+                                              coef=self.coef[:,-1],
+                                              range=self.range[0:2])
+        elif edge == 2:
+            edge_curve=pySpline.linear_spline(task='create',k=self.kv,t=self.tv,
+                                              coef=self.coef[0,:],
+                                              range=self.range[2:])
+        elif edge == 3:
+            edge_curve=pySpline.linear_spline(task='create',k=self.kv,t=self.tv,
+                                              coef=self.coef[-1,:],
+                                              range=self.range[2:])
+        # end if
+
+        s,t,d,conv= edge_curve.minDistance(curve,s=s0,t=s0,Niter=Niter,tol=1e-6)
+        # Return the parameter on the edge_curve, s (calling function)
+        return s
+
     def findUV(self,x0,r,u0=0.5,v0=0.5):
         ''' Try to find the parametric u-v coordinate of the spline
         which coorsponds to the intersection of the directed vector 
