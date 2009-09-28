@@ -236,6 +236,7 @@ data can be recomputed'
             # end for
         # end if
 
+
     def _calcParameterization(self):
 
         u = zeros(self.Nu,self.dtype)
