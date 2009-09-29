@@ -429,9 +429,9 @@ data can be recomputed'
         elif corner == 1:
             return self.getValue(self.range[1],self.range[2])
         elif corner == 2:
-            return self.getValue(self.range[1],self.range[3])
-        elif corner ==3:
             return self.getValue(self.range[0],self.range[3])
+        elif corner ==3:
+            return self.getValue(self.range[1],self.range[3])
         else:
             print 'Corner must be between 0 and 3'
             sys.exit(1)
