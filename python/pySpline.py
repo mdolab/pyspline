@@ -663,6 +663,22 @@ initialization type for this spline class was \'create\''
         # Return the parameter on the edge_curve, s (calling function)
         return s
 
+    def getCurveEdge(self,edge):
+        '''Return a linear pyspline object for the edge edge'''
+        if edge == 0:
+            return linear_spline(task='create',k=self.ku,t=self.tu,
+                                     coef=self.coef[:,0],range=self.range[0:2])
+        if edge == 1:
+            return linear_spline(task='create',k=self.ku,t=self.tu,
+                                     coef=self.coef[:,-1],range=self.range[0:2])
+        if edge == 2:
+            return linear_spline(task='create',k=self.kv,t=self.tv,
+                                   coef=self.coef[0,:],range=self.range[2:])
+        if edge == 3:
+            return linear_spline(task='create',k=self.kv,t=self.tv,
+                                   coef=self.coef[-1,:],range=self.range[2:])
+
+
     def findUV(self,x0,r,u0=0.5,v0=0.5):
         ''' Try to find the parametric u-v coordinate of the spline
         which coorsponds to the intersection of the directed vector 
@@ -690,10 +706,10 @@ initialization type for this spline class was \'create\''
         for iter in xrange(maxIter):
 
             #just in case, force crop u,v to [-1,1]
-            if u<-1: u = -1
-            if u>1 : u =  1
-            if v<-1: v = -1
-            if v>1 : v =  1
+            if u<0: u = 0
+            if u>1: u =  1
+            if v<0: v = 0
+            if v>1: v =  1
 
             x = self.getValue(u,v) #x contains the x,y,z coordinates 
 
@@ -723,6 +739,9 @@ initialization type for this spline class was \'create\''
             s = s + x_up[2]
 
             if numpy.linalg.norm(x_up) < 1e-12:
+                if u<0 or v <0:
+                    print 'u,v:',u,v
+                    print x_up
                 return u,v,x
 
         # end for
