@@ -170,10 +170,11 @@ to Nv: Nctlv = %d'%self.Nctlv
             # Sanity check to make sure k is less than N
             if self.Nu < self.ku:
                 self.ku = self.Nu
-                print 'Warning: ku has been set to Nu. ku is now %d'%(self.ku)
+                print 'Warning: Nu<ku. ku is now %d'%(self.ku)
             if self.Nv < self.kv:
-                print 'Warning: kv has been set to Nv. kv is now %d'%(self.kv)
                 self.kv = self.Nv
+                print 'Warning: Nv<kv. kv is now %d'%(self.kv)
+                
 
             if 'u' in kwargs and 'v' in kwargs:
                 self.u = kwargs['u']
@@ -992,7 +993,7 @@ class linear_spline():
             X, real, array, size(len(u),len(v),nDim): Array of data to fit
 '''
         #print 'pySpline Class Initialization Type: %s'%(task)
-
+        
         self.pyspline_real = pyspline_real
         self.pyspline_cs   = pyspline_cs
         self.dtype = 'd'
@@ -1117,10 +1118,10 @@ derivative vectors must match the spatial dimension of the curve'
                 # end if
                 
             #end for
-                
+
         if task == 'lms':
             assert 'k' in kwargs and 'X' in kwargs and 'Nctl' in kwargs , \
-                'Error: k, X and Nctl MUST be defined for task \'interpolate\''
+                'Error: k, X and Nctl MUST be defined for task lms'
            
             self.X  = kwargs['X']
             if len(self.X.shape) == 1:
@@ -1169,6 +1170,7 @@ derivative vectors must match the spatial dimension of the curve'
                     self.coef[:,idim] = lstsq(self.J,self.X[:,idim])[0]
                 # end for
             else:
+                self._calcJacobian()
                 self.coef = lstsq(self.J,self.X)[0]
             # end if
 
@@ -1314,6 +1316,7 @@ derivative vectors must match the spatial dimension of the curve'
     def _calcJacobian(self):
         
         # Calculate the jacobian J, for fixed t and s
+
         self.J = zeros((self.N,self.Nctl),self.dtype)
         ctl = zeros((self.Nctl),self.dtype)
         
