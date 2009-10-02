@@ -769,12 +769,12 @@ initialization type for this spline class was \'create\''
     def writeTecplotSurface(self,handle,size=None):
         '''Output this surface\'s data to a open file handle \'handle\''''
 
-        MAX_SIZE = 100
+        MAX_SIZE = 800
         MIN_SIZE = 5
                 
         if size == None:
-            u_plot = linspace(self.range[0],self.range[1],50).astype('d')
-            v_plot = linspace(self.range[2],self.range[3],50).astype('d')
+            u_plot = linspace(self.range[0],self.range[1],2000).astype('d')
+            v_plot = linspace(self.range[2],self.range[3],5).astype('d')
         else:
 
             # Cheaply calculate the length of each size of the surface
