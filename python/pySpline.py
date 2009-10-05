@@ -773,8 +773,8 @@ initialization type for this spline class was \'create\''
         MIN_SIZE = 5
                 
         if size == None:
-            u_plot = linspace(self.range[0],self.range[1],40).astype('d')
-            v_plot = linspace(self.range[2],self.range[3],40).astype('d')
+            u_plot = linspace(self.range[0],self.range[1],60).astype('d')
+            v_plot = linspace(self.range[2],self.range[3],60).astype('d')
         else:
 
             # Cheaply calculate the length of each size of the surface
