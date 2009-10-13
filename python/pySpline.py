@@ -29,7 +29,7 @@ import os, sys, string, time, copy
 # External Python modules
 # =============================================================================
 from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
-    array, real, reshape, meshgrid, dot, cross, mod, floor, mat
+    array, real, reshape, meshgrid, dot, cross, mod, floor, mat, empty
 
 import numpy.linalg
 from numpy.linalg import lstsq
@@ -321,79 +321,7 @@ data can be recomputed'
         # end for
         return
 
-    def checkCoef(self):
-        '''This function determines if there are crossed control points which
-        could result in an invalid mesh'''
-        # This function can easily migrate to fortran
-        counter = 0
-        # Loop over number of "elements or patches"
-        ustart = 0
-        uend = self.Nctlu - 1
-        vstart = 0
-        vend = self.Nctlv - 1
-
-
-        for i in xrange(ustart,uend):
-            for j in xrange(vstart,vend):
-                # First find normal of "patch" by taking cross product
-                # of the diagonals
-                d1 = self.coef[i+1,j+1]-self.coef[i,j]
-                d2 = self.coef[i,j+1]-self.coef[i+1,j]
-                normal = cross(d1,d2)
-                normal /= sqrt(dot(normal,normal))
-                if sqrt(dot(normal,normal)) == 0:
-                    print 'ha ha '
-                    sys.exit(0)
-                v1 = self.coef[i+1,j  ]-self.coef[i  ,j  ]
-                v2 = self.coef[i+1,j+1]-self.coef[i+1,j  ]
-                v3 = self.coef[i  ,j+1]-self.coef[i+1,j+1]
-                v4 = self.coef[i  ,j  ]-self.coef[i  ,j+1]
-                if sqrt(dot(v1,v1)) == 0:
-                    v1 = zeros(3)
-                else:
-                    v1 /=sqrt(dot(v1,v1))
-                if sqrt(dot(v2,v2)) == 0:
-                    v2 = zeros(3)
-                else:
-                    v2 /=sqrt(dot(v2,v2))
-                if sqrt(dot(v3,v3)) == 0:
-                    v3 = zeros(3)
-                else:
-                    v3 /=sqrt(dot(v3,v3))
-                if sqrt(dot(v4,v4)) == 0:
-                    v4 = zeros(3)
-                else:
-                    v4 /=sqrt(dot(v4,v4))
-          
-
-                # Now cross normal with all the vectors
-                values = zeros(4)
-                values[0] = dot(cross(v1,v2),normal)
-                values[1] = dot(cross(v2,v3),normal)
-                values[2] = dot(cross(v3,v4),normal)
-                values[3] = dot(cross(v4,v1),normal)
-#                print values
-                for ii in xrange(4):
-                    if abs(values[ii]) < 1e-3:
-                        values[ii] = 0
-                    # end if
-                # end for
-
-                if values[0] >=0 and values[1] >= 0 and values[2]>=0 and values[3]>=0:
-                    pass
-                else:
-                    if values[0]<=0 and values[1]<=0 and values[2]<=0 and values[3]<=0:
-                        pass
-                    else:
-                        print 'values:',values,i,j
-#                         print 'normal:',normal
-#                         print 'v:',v1,v2,v3,v4
-                        counter += 1
-                    # end if
-                # end if
-            # end for
-        # end for
-        return counter 
+  
 
 
     def calcPtDeriv(self,u,v,i,j):
@@ -404,6 +332,18 @@ data can be recomputed'
             u,v,0,0,self.tu,self.tv,self.ku,self.kv,coef)
         
         return x
+
+    def calcDerivativeDeriv(self,u,v,i,j):
+        '''Calc the derivative of the derivaive at point u,v by control point i,j'''
+        coef = zeros((self.Nctlu,self.Nctlv))
+        coef[i,j] = 1.0
+        du = self.pyspline.b2val(\
+            u,v,1,0,self.tu,self.tv,self.ku,self.kv,coef)
+        dv = self.pyspline.b2val(\
+            u,v,0,1,self.tu,self.tv,self.ku,self.kv,coef)
+
+        return du,dv
+
 
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3'''
@@ -497,39 +437,6 @@ initialization type for this spline class was \'create\''
         elif node == 3:
             return self.X[-1,-1]
 
-    def checkDegenerateEdge(self,edge):
-        
-        '''Check to see if the values on edge \'edge\' are degenerate'''
-        
-        degen = False
-
-        if edge == 0:
-            values = self.X[:,0]
-        elif edge == 1:
-            values = self.X[:,-1]
-        elif edge == 2:
-            values = self.X[0,:]
-        elif edge == 3:
-            values = self.X[-1,:]
-        else:
-            print 'Error: Edge must be between 0 and 3'
-            sys.exit(1)
-        # end if
-
-        # Now loop over edge to see if its degenerate
-        N = len(values)
-        length = zeros(N)
-        for i in xrange(N-1):
-            length[i+1] = length[i] + self._e_dist(values[i+1],values[i])
-        # end for
-        
-        if abs(length[-1]) < 1e-12:
-            degen = True
-        # end if
-
-        return degen,values[0]
-
-
     def getNormal(self,u,v):
         '''Get the normalized normal at the surface point u,v'''
         if self.nDim == 3:
@@ -587,6 +494,29 @@ initialization type for this spline class was \'create\''
 
         return x
 
+    def getGrevillePoints(self,edge):
+        '''Return the Greville points for edge 0'''
+
+        if edge in [0,1]:
+            gpts = zeros(self.Nctlu)
+            for i in xrange(self.Nctlu):
+                for n in xrange(self.ku-1): #degree n loop
+                    gpts[i] += self.tu[i+n+1]
+                # end for
+                gpts[i] /= (self.ku-1)
+            # end for
+        else: # edge in [2,3]:
+            gpts = zeros(self.Nctlv)
+            for i in xrange(self.Nctlv):
+                for n in xrange(self.kv-1): #degree n loop
+                    gpts[i] += self.tv[i+n+1]
+                # end for
+                gpts[i] /= (self.kv-1)
+            # end for
+        # end if
+        return gpts
+
+    
     def getDerivative(self,u,v):
         
         '''Get the value of the derivative of spline at point u,v'''
@@ -598,6 +528,18 @@ initialization type for this spline class was \'create\''
             dv[idim] = self.pyspline.b2val(\
                 u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         return du,dv
+    
+    def getSecondDerivative(self,u,v):
+        
+        '''Get the value of the second derivative of spline at point u,v'''
+        d2u = zeros(self.nDim,self.dtype)
+        d2v = zeros(self.nDim,self.dtype)
+        for idim in xrange(self.nDim):
+            d2u[idim] = self.pyspline.b2val(\
+                u,v,2,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+            d2v[idim] = self.pyspline.b2val(\
+                u,v,0,2,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
+        return d2u,d2v
 
 
     def getJacobian(self,u,v):
@@ -622,10 +564,8 @@ initialization type for this spline class was \'create\''
 
         # We will use a starting point u0,v0 if given
 
-        u0,v0,D,converged = self.pyspline.projectpoint(\
+        return  self.pyspline.projectpoint(
             self.coef,self.ku,self.kv,self.tu,self.tv,x0,u0,v0,Niter,tol)
-
-        return u0,v0,D,converged
 
     def projectCurveEdge(self,curve,edge,s0=0.5,Niter=25,tol=1e-6):
         '''Project a pySpline Curve, 'curve', onto edge 'edge' . We will
@@ -768,13 +708,16 @@ initialization type for this spline class was \'create\''
 
     def writeTecplotSurface(self,handle,size=None):
         '''Output this surface\'s data to a open file handle \'handle\''''
+        def e_dist(x1,x2):
+            '''Get the eculidean distance between two points'''
+            return sqrt((x1[0]-x2[0])**2 + (x1[1]-x2[1])**2 + (x1[2]-x2[2])**2)
 
         MAX_SIZE = 100
         MIN_SIZE = 5
                 
         if size == None:
-            u_plot = linspace(self.range[0],self.range[1],50).astype('d')
-            v_plot = linspace(self.range[2],self.range[3],50).astype('d')
+            u_plot = linspace(self.range[0],self.range[1],500).astype('d')
+            v_plot = linspace(self.range[2],self.range[3],20).astype('d')
         else:
 
             # Cheaply calculate the length of each size of the surface
@@ -785,13 +728,11 @@ initialization type for this spline class was \'create\''
             v = array([0,0,0,0.5,1,1,1,0.5])
             val = self.getValueV(u,v)
 
-            u_len = (self._e_dist(val[0],val[1])+self._e_dist(val[1],val[2])+\
-                         self._e_dist(val[4],val[5])+\
-                         self._e_dist(val[5],val[6]))/2
+            u_len = (e_dist(val[0],val[1])+e_dist(val[1],val[2])+
+                     e_dist(val[4],val[5])+e_dist(val[5],val[6]))/2
             
-            v_len = (self._e_dist(val[2],val[3])+self._e_dist(val[3],val[4])+\
-                         self._e_dist(val[6],val[7])+\
-                         self._e_dist(val[7],val[0]))/2
+            v_len = (e_dist(val[2],val[3])+e_dist(val[3],val[4])+
+                     e_dist(val[6],val[7])+e_dist(val[7],val[0]))/2
             
             nu=int(floor(real(u_len/size)))
             nv=int(floor(real(v_len/size)))
@@ -803,6 +744,7 @@ initialization type for this spline class was \'create\''
             
             u_plot = linspace(self.range[0],self.range[1],nu).astype('d')
             v_plot = linspace(self.range[2],self.range[3],nv).astype('d')
+        # end if
 
         # Dump re-interpolated surface
         handle.write('Zone T=%s I=%d J = %d\n'\
@@ -977,11 +919,6 @@ initialization type for this spline class was \'create\''
         Pcount += 2
         return Pcount,counter
 
-    def _e_dist(self,x1,x2):
-        '''Get the eculidean distance between two points'''
-        return sqrt((x1[0]-x2[0])**2 + (x1[1]-x2[1])**2 + (x1[2]-x2[2])**2)
-
-
 class linear_spline():
 
     def __init__(self,task='create',*args,**kwargs):
@@ -1118,7 +1055,6 @@ derivative vectors must match the spatial dimension of the curve'
                 
                 self.Nctl = self.N
 
-
                 # Sanity check to make sure k is less than N
                 if self.N <= self.k:
                     self.k = self.N
@@ -1239,7 +1175,6 @@ derivative vectors must match the spatial dimension of the curve'
         
         return s0,D,converged,update
 
-
     def _getParameterization(self):
         # We need to parameterize the curve
         self.s = zeros(self.N,self.dtype);
@@ -1253,6 +1188,7 @@ derivative vectors must match the spatial dimension of the curve'
         # end for
         self.length = self.s[-1]
         self.s /= self.s[-1]
+
         return
 
     def _getLength(self):
@@ -1267,6 +1203,7 @@ derivative vectors must match the spatial dimension of the curve'
             # end for
         # end for
         self.length = s[-1]
+    
         return
 
     def __call__(self,s):
@@ -1280,6 +1217,7 @@ derivative vectors must match the spatial dimension of the curve'
                     self.t,self.coef[:,idim],self.k,0,s)
             # end for
         # end if
+   
         return x
 
     def minDistance(self,curve,s=0,t=0,Niter=25,tol=1e-6):
@@ -1289,7 +1227,6 @@ derivative vectors must match the spatial dimension of the curve'
         return self.pyspline_real.mincurvedistance(self.t,self.k,self.coef,
                                          curve.t,curve.k,curve.coef,
                                          s,t,Niter,tol)
-
    
     def getValue(self,s,x=None):
         
@@ -1306,6 +1243,7 @@ derivative vectors must match the spatial dimension of the curve'
                     self.t,self.coef[:,idim],self.k,0,s)
             # end for
         # end if
+
         return x
 
     def getValueV(self,s):
@@ -1319,8 +1257,8 @@ derivative vectors must match the spatial dimension of the curve'
                     self.t,self.coef[:,idim],self.k,0,s)
             # end for
         # end if
-        return x
 
+        return x
  
     def getDerivative(self,s):
         
@@ -1330,7 +1268,6 @@ derivative vectors must match the spatial dimension of the curve'
             x[idim] = self.pyspline.bvalu(self.t,self.coef[:,idim],self.k,1,s)
             
         return x        
-
 
     def _calcJacobian(self):
         
@@ -1346,7 +1283,6 @@ derivative vectors must match the spatial dimension of the curve'
         # end for
             
         return
-
 
     def writeTecplot(self,handle):
         '''Output this line\'s data to a open file handle \'handle\''''
@@ -1404,87 +1340,78 @@ if __name__ == '__main__':
     print 'There is an example in the ./example directory'
 
 
-       
 
-#     def __objcon(self,x):
-#         '''Get the rms error for the given set of design variables'''
-#         # Unpack the x-values
-#         Bcon  = self.Bcon
-#         ctl = self.__unpack_x(x)
-
-#         total = 0.0
-
-#         for idim in xrange(self.nDim):
-#             total += sum((dot(self.J,ctl[:,:,idim].flatten()) - self.X[:,:,idim].flatten())**2)
-#         # end for 
-#         fcon = dot(Bcon,x)
-#         index = 4*self.nDim + 2*self.Nctlv*self.nDim
-
-#        #  # Calculate the LE constraint
-#         for j in xrange(self.Nctlv):
-
-#             A = ctl[0,0,j,:] # Root LE (upper)
-#             B = ctl[0,1,j,:] # Root LE upper +1
-#             C = ctl[1,-2,j,:]# Root LE lower +1
-
-#             # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
-
-#             A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
-#             A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
-#             A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
-
-#             fcon[index:index+3] = array([A1,A2,A3])
-#             index += 3
-#         # end for
-
-#         return total,fcon,False
+# Functions to Eliminate Possibly
+#   def checkCoef(self):
+#         '''This function determines if there are crossed control points which
+#         could result in an invalid mesh'''
+#         # This function can easily migrate to fortran
+#         counter = 0
+#         # Loop over number of "elements or patches"
+#         ustart = 0
+#         uend = self.Nctlu - 1
+#         vstart = 0
+#         vend = self.Nctlv - 1
 
 
-#     def __sens(self,x,f_obj,f_con):
+#         for i in xrange(ustart,uend):
+#             for j in xrange(vstart,vend):
+#                 # First find normal of "patch" by taking cross product
+#                 # of the diagonals
+#                 d1 = self.coef[i+1,j+1]-self.coef[i,j]
+#                 d2 = self.coef[i,j+1]-self.coef[i+1,j]
+#                 normal = cross(d1,d2)
+#                 normal /= sqrt(dot(normal,normal))
+#                 if sqrt(dot(normal,normal)) == 0:
+#                     print 'ha ha '
+#                     sys.exit(0)
+#                 v1 = self.coef[i+1,j  ]-self.coef[i  ,j  ]
+#                 v2 = self.coef[i+1,j+1]-self.coef[i+1,j  ]
+#                 v3 = self.coef[i  ,j+1]-self.coef[i+1,j+1]
+#                 v4 = self.coef[i  ,j  ]-self.coef[i  ,j+1]
+#                 if sqrt(dot(v1,v1)) == 0:
+#                     v1 = zeros(3)
+#                 else:
+#                     v1 /=sqrt(dot(v1,v1))
+#                 if sqrt(dot(v2,v2)) == 0:
+#                     v2 = zeros(3)
+#                 else:
+#                     v2 /=sqrt(dot(v2,v2))
+#                 if sqrt(dot(v3,v3)) == 0:
+#                     v3 = zeros(3)
+#                 else:
+#                     v3 /=sqrt(dot(v3,v3))
+#                 if sqrt(dot(v4,v4)) == 0:
+#                     v4 = zeros(3)
+#                 else:
+#                     v4 /=sqrt(dot(v4,v4))
+          
 
-#         ndv = len(x)
-#         g_obj = zeros(ndv)
-#          # Unpack the x-values
-#         ctl = self.__unpack_x(x)
-#         N = self.Nctlu*self.Nctlv
+#                 # Now cross normal with all the vectors
+#                 values = zeros(4)
+#                 values[0] = dot(cross(v1,v2),normal)
+#                 values[1] = dot(cross(v2,v3),normal)
+#                 values[2] = dot(cross(v3,v4),normal)
+#                 values[3] = dot(cross(v4,v1),normal)
+# #                print values
+#                 for ii in xrange(4):
+#                     if abs(values[ii]) < 1e-3:
+#                         values[ii] = 0
+#                     # end if
+#                 # end for
 
-#         for idim in xrange(self.nDim):
-#             g_obj[self.nDim*N + idim*N :  self.nDim*N + idim*N + N] = \
-#                 2*dot(dot(self.J,ctl[:,:,idim].flatten())-self.X[:,:,idim].flatten(),self.J)
-#         # end for 
-
-#         g_con = self.Bcon
-#         h = 1.0e-40j
-#         x = array(x,'D')
-
-#         for i in xrange(ndv):
-#             index = 4*self.nDim + 2*self.Nctlv*self.nDim
-#             x[i] += h
-#             ctl = self.__unpack_x(x,'D')
-#             for j in xrange(self.Nctlv):
-#                 A = ctl[0,0,j,:] # Root LE (upper)
-#                 B = ctl[0,1,j,:] # Root LE upper +1
-#                 C = ctl[1,-2,j,:]# Root LE lower +1
-
-#                 # Area = 0.5*abs( xA*yC - xAyB + xByA - xByC + xCyB - xCyA )
-
-#                 A1 = A[0]*C[1] - A[0]*B[1] + B[0]*A[1] -B[0]*C[1] + C[0]*B[1] - C[0]*A[1]
-#                 A2 = A[1]*C[2] - A[1]*B[2] + B[1]*A[2] -B[1]*C[2] + C[1]*B[2] - C[1]*A[2]
-#                 A3 = A[0]*C[2] - A[0]*B[2] + B[0]*A[2] -B[0]*C[2] + C[0]*B[2] - C[0]*A[2]
-
-#                 g_con[index:index+3,i] = imag(array([A1,A2,A3]))/imag(h)
-#                 index += 3
+#                 if values[0] >=0 and values[1] >= 0 and values[2]>=0 and values[3]>=0:
+#                     pass
+#                 else:
+#                     if values[0]<=0 and values[1]<=0 and values[2]<=0 and values[3]<=0:
+#                         pass
+#                     else:
+#                         print 'values:',values,i,j
+# #                         print 'normal:',normal
+# #                         print 'v:',v1,v2,v3,v4
+#                         counter += 1
+#                     # end if
+#                 # end if
 #             # end for
-#             x[i] -= h
 #         # end for
-#         return g_obj,g_con,False
-
-#     def __unpack_x(self,x,dtype='d'):
-#         ctl = zeros((self.Nctlu,self.Nctlv,self.nDim),dtype)
-#         N = self.Nctlu*self.Nctlv
-#         for idim in xrange(self.nDim):
-#             ctl[:,:,idim] = reshape(x[self.nDim*N + idim*N : self.nDim*N + idim*N + N],[self.Nctlu,self.Nctlv])
-#         # end for
-#         return ctl
-
-
+#         return counter 
