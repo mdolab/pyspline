@@ -321,9 +321,6 @@ data can be recomputed'
         # end for
         return
 
-  
-
-
     def calcPtDeriv(self,u,v,i,j):
         '''Calc the derivative of point u,v at control point i,j'''
         coef = zeros((self.Nctlu,self.Nctlv))
@@ -716,8 +713,8 @@ initialization type for this spline class was \'create\''
         MIN_SIZE = 5
                 
         if size == None:
-            u_plot = linspace(self.range[0],self.range[1],500).astype('d')
-            v_plot = linspace(self.range[2],self.range[3],20).astype('d')
+            u_plot = linspace(self.range[0],self.range[1],550).astype('d')
+            v_plot = linspace(self.range[2],self.range[3],50).astype('d')
         else:
 
             # Cheaply calculate the length of each size of the surface
