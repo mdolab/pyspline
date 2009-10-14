@@ -330,16 +330,7 @@ data can be recomputed'
         
         return x
 
-    def calcDerivativeDeriv(self,u,v,i,j):
-        '''Calc the derivative of the derivaive at point u,v by control point i,j'''
-        coef = zeros((self.Nctlu,self.Nctlv))
-        coef[i,j] = 1.0
-        du = self.pyspline.b2val(\
-            u,v,1,0,self.tu,self.tv,self.ku,self.kv,coef)
-        dv = self.pyspline.b2val(\
-            u,v,0,1,self.tu,self.tv,self.ku,self.kv,coef)
-
-        return du,dv
+   
 
 
     def getValueEdge(self,edge,s):
@@ -526,6 +517,16 @@ initialization type for this spline class was \'create\''
                 u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
         return du,dv
     
+    def calcDerivativeDeriv(self,u,v,i,j):
+        '''Calc the derivative of the derivaive at point u,v by control point i,j'''
+        coef = zeros((self.Nctlu,self.Nctlv))
+        coef[i,j] = 1.0
+        du = self.pyspline.b2val(\
+            u,v,1,0,self.tu,self.tv,self.ku,self.kv,coef)
+        dv = self.pyspline.b2val(\
+            u,v,0,1,self.tu,self.tv,self.ku,self.kv,coef)
+
+        return du,dv
     def getSecondDerivative(self,u,v):
         
         '''Get the value of the second derivative of spline at point u,v'''
