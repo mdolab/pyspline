@@ -505,7 +505,7 @@ initialization type for this spline class was \'create\''
         # Now double them up
         new_gpts = []
         for i in xrange(len(gpts)-1):
-            new_gpt.append(gpts[i])
+            new_gpts.append(gpts[i])
             new_gpts.append((2.0/3.0)*gpts[i] + (1.0/3.0)*gpts[i+1])
             new_gpts.append((1.0/3.0)*gpts[i] + (2.0/3.0)*gpts[i+1])
         # end for
@@ -831,11 +831,11 @@ initialization type for this spline class was \'create\''
         # 5.3 Manual paraEntries = 13 + Knotsu + Knotsv + Weights +
         # control points
         assert self.nDim == 3, 'Must have 3 dimensions to write to IGES file'
-        paraEntries = 13 + (len(self.tu)) + (len(self.tv)) +\
+        paraEntries = 13 + (len(self.tu)) + (len(self.tv)) + \
             self.Nctlu*self.Nctlv + 3*self.Nctlu*self.Nctlv+1
 
-        paraLines = paraEntries / 5
-        if mod(paraEntries,5) != 0: paraLines += 1
+        paraLines = (paraEntries-10) / 3 + 2
+        if mod(paraEntries-10,3) != 0: paraLines += 1
 
         handle.write('     128%8d       0       0       1       0       0       000000001D%7d\n'%(Pcount,Dcount))
         handle.write('     128       0       2%8d       0                               0D%7d\n'%(paraLines,Dcount+1))
@@ -859,9 +859,9 @@ initialization type for this spline class was \'create\''
 
         for i in xrange(len(self.tu)):
             pos_counter += 1
-            handle.write('%12.6g,'%(real(self.tu[i])))
-            if mod(pos_counter,5) == 0:
-                handle.write('%7dP%7d\n'%(Pcount,counter))
+            handle.write('%20.12g,'%(real(self.tu[i])))
+            if mod(pos_counter,3) == 0:
+                handle.write('  %7dP%7d\n'%(Pcount,counter))
                 counter += 1
                 pos_counter = 0
             # end if
@@ -869,9 +869,9 @@ initialization type for this spline class was \'create\''
 
         for i in xrange(len(self.tv)):
             pos_counter += 1
-            handle.write('%12.6g,'%(real(self.tv[i])))
-            if mod(pos_counter,5) == 0:
-                handle.write('%7dP%7d\n'%(Pcount,counter))
+            handle.write('%20.12g,'%(real(self.tv[i])))
+            if mod(pos_counter,3) == 0:
+                handle.write('  %7dP%7d\n'%(Pcount,counter))
                 counter += 1
                 pos_counter = 0
             # end if
@@ -879,9 +879,9 @@ initialization type for this spline class was \'create\''
 
         for i in xrange(self.Nctlu*self.Nctlv):
             pos_counter += 1
-            handle.write('%12.6g,'%(1.0))
-            if mod(pos_counter,5) == 0:
-                handle.write('%7dP%7d\n'%(Pcount,counter))
+            handle.write('%20.12g,'%(1.0))
+            if mod(pos_counter,3) == 0:
+                handle.write('  %7dP%7d\n'%(Pcount,counter))
                 counter += 1
                 pos_counter = 0
             # end if
@@ -891,9 +891,9 @@ initialization type for this spline class was \'create\''
             for i in xrange(self.Nctlu):
                 for idim in xrange(3):
                     pos_counter += 1
-                    handle.write('%12.6g,'%(real(self.coef[i,j,idim])))
-                    if mod(pos_counter,5) == 0:
-                        handle.write('%7dP%7d\n'%(Pcount,counter))
+                    handle.write('%20.12g,'%(real(self.coef[i,j,idim])))
+                    if mod(pos_counter,3) == 0:
+                        handle.write('  %7dP%7d\n'%(Pcount,counter))
                         counter += 1
                         pos_counter = 0
                     # end if
@@ -905,25 +905,25 @@ initialization type for this spline class was \'create\''
         for  i in xrange(4):
             pos_counter += 1
             if i == 0:
-                handle.write('%12.6g,'%(real(self.tu[0])))
+                handle.write('%20.12g,'%(real(self.tu[0])))
             if i == 1:
-                handle.write('%12.6g,'%(real(self.tu[-1])))
+                handle.write('%20.12g,'%(real(self.tu[-1])))
             if i == 2:
-                handle.write('%12.6g,'%(real(self.tv[0])))
+                handle.write('%20.12g,'%(real(self.tv[0])))
             if i == 3:
                 # semi-colon for the last entity
-                handle.write('%12.6g;'%(real(self.tv[-1]))) 
-            if mod(pos_counter,5)==0:
-                handle.write('%7dP%7d\n'%(Pcount,counter))
+                handle.write('%20.12g;'%(real(self.tv[-1]))) 
+            if mod(pos_counter,3)==0:
+                handle.write('  %7dP%7d\n'%(Pcount,counter))
                 counter += 1
                 pos_counter = 0
             else: # We have to close it up anyway
                 if i ==3:
-                    for j  in xrange(5-pos_counter):
+                    for j  in xrange(3-pos_counter):
                         handle.write('%13s'%(' '))
                     # end for
                     pos_counter = 0
-                    handle.write('%7dP%7d\n'%(Pcount,counter))
+                    handle.write('  %7dP%7d\n'%(Pcount,counter))
                     counter += 1
                 # end if
             # end if
