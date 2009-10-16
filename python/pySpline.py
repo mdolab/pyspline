@@ -296,7 +296,6 @@ data can be recomputed'
         # ADD COMPLEX VERSION OF KNOTS
         #self.tu = self.pyspline.knots(self.u,self.Nctlu,self.ku)
         #self.tv = self.pyspline.knots(self.v,self.Nctlv,self.kv)
-
         self.tu = pyspline_real.knots(self.u,self.Nctlu,self.ku)
         self.tv = pyspline_real.knots(self.v,self.Nctlv,self.kv)
 
