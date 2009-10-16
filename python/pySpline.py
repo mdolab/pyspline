@@ -505,7 +505,7 @@ initialization type for this spline class was \'create\''
         # Now double them up
         new_gpts = []
         for i in xrange(len(gpts)-1):
-            new_gpts.append(gpts[i])
+            new_gpt.append(gpts[i])
             new_gpts.append((2.0/3.0)*gpts[i] + (1.0/3.0)*gpts[i+1])
             new_gpts.append((1.0/3.0)*gpts[i] + (2.0/3.0)*gpts[i+1])
         # end for
