@@ -508,7 +508,7 @@ initialization type for this spline class was \'create\''
             new_gpts.append(gpts[i])
             new_gpts.append((2.0/3.0)*gpts[i] + (1.0/3.0)*gpts[i+1])
             new_gpts.append((1.0/3.0)*gpts[i] + (2.0/3.0)*gpts[i+1])
-        # end for
+        # en for
         new_gpts.append(gpts[-1])
 
         return new_gpts
@@ -726,8 +726,8 @@ initialization type for this spline class was \'create\''
             u_plot = linspace(self.range[0],self.range[1],1000).astype('d')
             v_plot = linspace(self.range[2],self.range[3],25).astype('d')
 
-            u_plot = 0.5*(1-cos(linspace(0,pi,25)))
-            v_plot = 0.5*(1-cos(linspace(0,pi,25)))
+            u_plot = 0.5*(1-cos(linspace(0,pi,250)))
+            v_plot = 0.5*(1-cos(linspace(0,pi,250)))
 
         else:
 
