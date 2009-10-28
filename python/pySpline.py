@@ -626,7 +626,7 @@ initialization type for this spline class was \'create\''
                                    coef=self.coef[-1,:],range=self.range[2:])
 
 
-    def findUV(self,x0,r,u0=0.5,v0=0.5):
+    def findUV(self,x0,r,u0=0.5,v0=0.5,NO_PRINT=False):
         ''' Try to find the parametric u-v coordinate of the spline
         which coorsponds to the intersection of the directed vector 
         v = x0 + r*s where x0 is a basepoint, r  is a direction vector
@@ -649,7 +649,7 @@ initialization type for this spline class was \'create\''
         u = u0
         v = v0
         s = 0 #Start at the basepoint
-
+        A = mat(zeros((3,3),self.dtype))
         for iter in xrange(maxIter):
 
             #just in case, force crop u,v to [-1,1]
@@ -666,7 +666,7 @@ initialization type for this spline class was \'create\''
             f[2] = x[2]-(x0[2]+r[2]*s)
 
             J = self.getJacobian(u,v)
-            A = mat(zeros((3,3),self.dtype))
+        
             A[:,0:2] = J
             A[0,2]   = -r[0]
             A[1,2]   = -r[1]
@@ -676,8 +676,8 @@ initialization type for this spline class was \'create\''
 
             # Add a little error checking here:
             
-            if u + x_up[0] < -1 or u + x_up[0] > 1 or \
-               v + x_up[1] < -1 or v + x_up[1] > 1:
+            if u + x_up[0] < 0 or u + x_up[0] > 1 or \
+               v + x_up[1] < 0 or v + x_up[1] > 1:
                 #Cut the size of the step in 1/2
                 x_up /= 2
 
@@ -692,10 +692,12 @@ initialization type for this spline class was \'create\''
                 return u,v,x
 
         # end for
-
-        print 'Warning: Newton Iteration for u,v,s did not converge:'
-        print 'u = %f, v = %f, s = %f\n'%(u,v,s)
-        print 'Norm of update:',numpy.linalg.norm(x_up)
+        u = u - x_up[0]
+        v = v - x_up[1]
+        if not NO_PRINT:
+            print 'Warning: Newton Iteration for u,v,s did not converge:'
+            print 'u = %f, v = %f, s = %f\n'%(u,v,s)
+            print 'Norm of update:',numpy.linalg.norm(x_up)
 
         return u,v,x
 
