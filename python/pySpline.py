@@ -36,6 +36,8 @@ from numpy.linalg import lstsq
 
 import pyspline_cs
 import pyspline as pyspline_real
+
+from geo_utils import *
 # =============================================================================
 # pySpline class
 # =============================================================================
@@ -86,8 +88,7 @@ class surf_spline():
             self.NO_PRINT = False
         # end if      
 
-        if not self.NO_PRINT:
-            sys.stdout.write('pySpline Type: %s. '%(task))
+        mpiPrint('pySpline Type: %s. '%(task),self.NO_PRINT)
 
         self.pyspline_real = pyspline_real # Real version of spline library
         self.pyspline_cs = pyspline_cs # Complex version of spline library
@@ -114,8 +115,6 @@ class surf_spline():
                 and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs,\
                 'Error: ku,kv,tu,tv,coef and range MUST be defined for task=\
 \'create\''
-            if not self.NO_PRINT:
-                sys.stdout.write('\n')
             self.ku = kwargs['ku'] 
             self.kv = kwargs['kv']
             self.tu = array(kwargs['tu'],self.dtype)
@@ -196,11 +195,7 @@ to Nv: Nctlv = %d'%self.Nctlv
             [self.V, self.U] = meshgrid(self.v,self.u)
 
            #Calculate the knot vector and Jacobian
-            if not self.NO_PRINT:
-                sys.stdout.write(' Calculating: knots, ')
             self._calcKnots()
-            if not self.NO_PRINT:
-                sys.stdout.write(' jacobian, ')
             self._calcJacobian()
 
 #             # Lets do a lms 
@@ -210,8 +205,7 @@ to Nv: Nctlv = %d'%self.Nctlv
                 self.coef[:,:,idim] =\
                     reshape(lstsq(self.J,self.X[:,:,idim].flatten())[0]\
                                 ,[self.Nctlu,self.Nctlv])
-            if not self.NO_PRINT:
-                sys.stdout.write(' LMS Fit Time: %6.5f s\n'%(time.time()-timeA))
+            mpiPrint(' LMS Fit Time: %6.5f s\n'%(time.time()-timeA),self.NO_PRINT)
             
             return 
 
@@ -920,7 +914,7 @@ initialization type for this spline class was \'create\''
             else: # We have to close it up anyway
                 if i ==3:
                     for j  in xrange(3-pos_counter):
-                        handle.write('%13s'%(' '))
+                        handle.write('%21s'%(' '))
                     # end for
                     pos_counter = 0
                     handle.write('  %7dP%7d\n'%(Pcount,counter))
