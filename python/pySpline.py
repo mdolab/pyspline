@@ -722,8 +722,8 @@ initialization type for this spline class was \'create\''
             u_plot = linspace(self.range[0],self.range[1],1000).astype('d')
             v_plot = linspace(self.range[2],self.range[3],25).astype('d')
 
-            u_plot = 0.5*(1-cos(linspace(0,pi,75)))
-            v_plot = 0.5*(1-cos(linspace(0,pi,75)))
+            u_plot = 0.5*(1-cos(linspace(0,pi,25)))
+            v_plot = 0.5*(1-cos(linspace(0,pi,25)))
 
         else:
 
