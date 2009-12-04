@@ -323,7 +323,25 @@ data can be recomputed'
         
         return x
 
-   
+    def getEdgeLength(self,edge):
+        '''Return the Physical Length of edge edge'''
+        # First create a 1-D version of the edge
+        if edge == 0:
+            edge_curve=linear_spline(task='create',k=self.ku,t=self.tu,
+                                     coef=self.coef[:,0],range=self.range[0:2])
+        elif edge == 1:
+            edge_curve=linear_spline(task='create',k=self.ku,t=self.tu,
+                                     coef=self.coef[:,-1], range=self.range[0:2])
+        elif edge == 2:
+            edge_curve=linear_spline(task='create',k=self.kv,t=self.tv,
+                                     coef=self.coef[0,:],range=self.range[2:])
+        elif edge == 3:
+            edge_curve=linear_spline(task='create',k=self.kv,t=self.tv,
+                                     coef=self.coef[-1,:], range=self.range[2:])
+        # end if
+
+        return edge_curve.getLength()
+
 
 
     def getValueEdge(self,edge,s):
@@ -1212,6 +1230,30 @@ derivative vectors must match the spatial dimension of the curve'
         self.length = s[-1]
     
         return
+
+    def getLength(self):
+        # Get the length of the actual Curve
+        # Use the greville points for the positions
+        
+        points = self.getValueV(self.getGrevillePoints()) # These are physical
+        length = 0
+        for i in xrange(len(points)-1):
+            length += e_dist(points[i],points[i+1])
+        # end for
+
+        return length
+
+    def getGrevillePoints(self):
+        '''Return the Greville points for edge 0'''
+        # Interpolate
+        gpts = zeros(self.Nctl)
+        for i in xrange(self.Nctl):
+            for n in xrange(self.k-1): #degree n loop
+                gpts[i] += self.t[i+n+1]
+            # end for
+            gpts[i] /= (self.k-1)
+        # end for
+        return gpts
 
     def __call__(self,s):
 
