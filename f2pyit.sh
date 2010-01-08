@@ -17,14 +17,14 @@ mv pyspline.so ./python
 
 # #Now make the source files for the complex version
 
-cd src_cs
+# cd src_cs
 
-make
-if [ ! $? -eq 0 ]; then
-    exit
-fi
+# make
+# if [ ! $? -eq 0 ]; then
+#     exit
+# fi
 
-cd ../
+# cd ../
 
-f2py  --fcompiler=intel --f90flags=-r8 -I./src_cs -c -m pyspline_cs src_cs/pyspline_cs.pyf src_cs/libspline_cs.a 
-mv pyspline_cs.so ./python
+# f2py  --fcompiler=intel --f90flags=-r8 -I./src_cs -c -m pyspline_cs src_cs/pyspline_cs.pyf src_cs/libspline_cs.a 
+# mv pyspline_cs.so ./python
