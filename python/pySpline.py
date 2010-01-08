@@ -19,7 +19,6 @@ History
 
 __version__ = '$Revision: $'
 
-
 # =============================================================================
 # Standard Python modules
 # =============================================================================
@@ -37,7 +36,8 @@ from numpy.linalg import lstsq
 import pyspline_cs
 import pyspline as pyspline_real
 
-from geo_utils import *
+from mdo_import_helper import *
+
 # =============================================================================
 # pySpline class
 # =============================================================================
@@ -725,10 +725,11 @@ initialization type for this spline class was \'create\''
                     # end for
             # end for 
         # end if
-
+        
+        return
 
     def writeTecplotSurface(self,handle,size=None):
-        '''Output this surface\'s data to a open file handle \'handle\''''
+        '''Output this surface\'s data to a open file handle \'handle\' '''
         def e_dist(x1,x2):
             '''Get the eculidean distance between two points'''
             return sqrt((x1[0]-x2[0])**2 + (x1[1]-x2[1])**2 + (x1[2]-x2[2])**2)
@@ -737,9 +738,8 @@ initialization type for this spline class was \'create\''
         MIN_SIZE = 5
                 
         if size == None:
-            u_plot = linspace(self.range[0],self.range[1],1000).astype('d')
-            v_plot = linspace(self.range[2],self.range[3],25).astype('d')
 
+            # This works really well actually
             u_plot = 0.5*(1-cos(linspace(0,pi,25)))
             v_plot = 0.5*(1-cos(linspace(0,pi,25)))
 
@@ -785,10 +785,11 @@ initialization type for this spline class was \'create\''
             # end if
         # end if
     
+        return
+                    
     def writeTecplotCoef(self,handle):
 
-        handle.write('Zone T=%s I=%d J = %d\n'\
-                         %('control_pts',self.Nctlu,self.Nctlv))
+        handle.write('Zone T=%s I=%d J = %d\n'%('control_pts',self.Nctlu,self.Nctlv))
         handle.write('DATAPACKING=POINT\n')
         for j in xrange(self.Nctlv):
             for i in xrange(self.Nctlu):
@@ -799,7 +800,6 @@ initialization type for this spline class was \'create\''
         # end for 
 
         return
-
 
     def writeTecplotEdge(self,handle,edge,*args,**kwargs):
         '''Dump out a linear zone along edge used for visualizing edge
@@ -829,10 +829,8 @@ initialization type for this spline class was \'create\''
         else:
             print 'Not Enough control points to output direction indicator'
         #end if
+
         return 
-                     
-
-
 
     def writeIGES_directory(self,handle,Dcount,Pcount):
 
@@ -853,8 +851,8 @@ initialization type for this spline class was \'create\''
         handle.write('     128       0       2%8d       0                               0D%7d\n'%(paraLines,Dcount+1))
         Dcount += 2
         Pcount += paraLines
-        return Pcount , Dcount
 
+        return Pcount , Dcount
 
     def writeIGES_parameters(self,handle,Pcount,counter):
         '''Write the IGES parameter information for this surface'''
@@ -866,7 +864,6 @@ initialization type for this spline class was \'create\''
         handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'\
                          %(0,0,1,0,0,Pcount,counter))
         counter += 1
-        
         pos_counter = 0
 
         for i in xrange(len(self.tu)):
@@ -942,38 +939,33 @@ initialization type for this spline class was \'create\''
         # end for
 
         Pcount += 2
+
         return Pcount,counter
 
 class linear_spline():
 
     def __init__(self,task='create',*args,**kwargs):
 
-        '''Create an instance of a b-spline surface. There are three ways to
-        initialize the class as determined by the task flag:
+        '''Create an instance of a b-spline curve. There are three
+        ways to initialize the class as determined by the task flag:
 
         task = \'create\': Create an instance of the spline class
         directly by supplying the required information. **kwargs MUST
         contain the folloiwng information:
 
-            ku, integer: Order for u
-            kv, integer: Order for v
-            Nctlu, integer: Number of u control points
-            Nctlv, integer: Number of v control points
-            tu, real array: Knot vector for u
-            tv, real array: Knot vector for v
-            coef, real array size(Nctlu,Nctlv,nDim): Array of control points
+            k, integer: Order for spline
+            Nctu, integer: Number of u control points
+            t, real array: Knot vector 
+            coef, real array size(Nctl,nDim): Array of control points
 
         task = \'interpolate\': Create an instance of the spline class
-        by using an nterpolating spline to given data points. **kwarg
+        by using an interpolating spline to given data points. **kwarg
         MUST contain the following information:
 
-            ku, integer: Order for u
-            kv, integer: Order for v
-            u, real, array: Array of u values 
-            v, real, array: Array of v values
-            X, real, array, size(len(u),len(v),nDim): Array of data to fit
+            k, integer: Order for spline
+            s, real, array: Array of s values 
+            X, real, array, size(len(s),nDim): Array of data to fit
 '''
-        #print 'pySpline Class Initialization Type: %s'%(task)
         
         self.pyspline_real = pyspline_real
         self.pyspline_cs   = pyspline_cs
@@ -995,8 +987,8 @@ class linear_spline():
             self.X = None
             self.N = None
             self.k = kwargs['k'] 
-            self.t = kwargs['t']
-            self.coef = kwargs['coef']
+            self.t = array(kwargs['t'])
+            self.coef = array(kwargs['coef'])
             self.Nctl = self.coef.shape[0]
             self.orig_data = False
             self.range = kwargs['range']
@@ -1008,7 +1000,7 @@ class linear_spline():
             assert 'k' in kwargs and 'X' in kwargs, \
                 'Error: k, and X MUST be defined for task \'interpolate\''
 
-            self.X  = kwargs['X']
+            self.X  = array(kwargs['X'])
             if len(self.X.shape) == 1:
                 self.nDim = 1
             else:
@@ -1055,14 +1047,6 @@ derivative vectors must match the spatial dimension of the curve'
                     for idim in xrange(self.nDim):
                         fbcl = dx1[idim]
                         fbcr = dx2[idim]
-#                         print 'input: s:',self.s
-#                         print 'input: X:',self.X[:,idim]
-#                         print 'fbcl:',fbcl
-#                         print 'fbcr:',fbcr
-                       
-                        #self.t,self.coef[:,idim],n,k = \
-                        #    self.pyspline.bint4(self.s,self.X[:,idim],\
-                                   #                 ibcl,ibcr,fbcl,fbcr,kntopt)
 
                         self.t,self.coef[:,idim],k = \
                             self.pyspline.bint4(self.s,self.X[:,idim],\
@@ -1071,10 +1055,6 @@ derivative vectors must match the spatial dimension of the curve'
                 else:
                     print 'do something'
                 # end if
-
-
-                
-        # t,bcoef,k = bint4(x,y,ibcl,ibcr,fbcl,fbcr,kntopt,[ndata,n,w])
         
             else: # Do a regular fit
                 
@@ -1096,7 +1076,6 @@ derivative vectors must match the spatial dimension of the curve'
                 else:
                     self.coef = self.pyspline.bintk(self.s,self.X,self.t,self.k)
                 # end if
-                
             #end for
 
         if task == 'lms':
@@ -1156,14 +1135,12 @@ derivative vectors must match the spatial dimension of the curve'
 
         return
 
-
     def projectPoint(self,x0,s0=0,Niter=20,tol=1e-8):
         '''Project a point x0 onto the curve and return parametric position
         giving minimum distance. This should also work if point is
         already on the curve as well'''
 
         # We will use a starting point s0 if given
-
         # Check we have the same dimension:
         assert len(x0) == self.nDim,'Dimension of x0 and the dimension of\
  spline must be the same'
@@ -1177,12 +1154,6 @@ derivative vectors must match the spatial dimension of the curve'
 
             # Check to see if update went too far
 
-           #  if s0+update > self.range[1]:
-#                 update = self.range[1]-s0
-#             elif s0+update< self.range[0]:
-#                 # Only put the update up to the end
-#                 update = self.range[0]-s0
-                                
             D2 = x0-self.getValue(s0+update)            
             if abs(dot(D2,D2)) > abs(dot(D,D)):
                 update /= 2
@@ -1235,6 +1206,8 @@ derivative vectors must match the spatial dimension of the curve'
         # Get the length of the actual Curve
         # Use the greville points for the positions
         
+        # We should do this with exact gaussian integration 
+
         points = self.getValueV(self.getGrevillePoints()) # These are physical
         length = 0
         for i in xrange(len(points)-1):
@@ -1274,12 +1247,12 @@ derivative vectors must match the spatial dimension of the curve'
         '''Find the minimum distance between this curve (self) and a second
         curve passed in (curve)'''
         return self.pyspline_real.mincurvedistance(self.t,self.k,self.coef,
-                                         curve.t,curve.k,curve.coef,
-                                         s,t,Niter,tol)
+                                                   curve.t,curve.k,curve.coef,
+                                                   s,t,Niter,tol)
    
     def getValue(self,s,x=None):
-        
         '''Get the value of the spline at point u,v'''
+        
         if self.nDim == 1:
             x = self.pyspline.bvalu(self.t,self.coef,self.k,0,s)
         else:
@@ -1334,7 +1307,7 @@ derivative vectors must match the spatial dimension of the curve'
         return
 
     def writeTecplot(self,handle):
-        '''Output this line\'s data to a open file handle \'handle\''''
+        '''Output this line\'s data to a open file handle \'handle\' '''
 
         if self.orig_data:
             handle.write('Zone T=%s I=%d \n'%('orig_data',self.N))
@@ -1377,7 +1350,6 @@ derivative vectors must match the spatial dimension of the curve'
         # end for
 
         return
-
 
 #==============================================================================
 # Class Test

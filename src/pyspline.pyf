@@ -191,8 +191,27 @@ python module pyspline ! in
             double precision intent(in) :: tol
             double precision intent(out) :: d
             integer intent(out) :: converged
-        end subroutine mincurvedistance
-
+          end subroutine mincurvedistance
+          subroutine curve_stiffness(t,n,k,alpha,beta,gpts,k0) ! in :test:curve_stiffness.f90
+            double precision dimension(n+k),intent(in),depend(n,k) :: t
+            integer optional,intent(in),check(len(gpts)>=n),depend(gpts) :: n=len(gpts)
+            integer intent(in) :: k
+            double precision intent(in) :: alpha
+            double precision intent(in) :: beta
+            double precision dimension(n),intent(in) :: gpts
+            double precision dimension(n,n),intent(out),depend(n,n) :: k0
+        end subroutine curve_stiffness
+        subroutine apply_constr(t,n,k,kstiff,constr,ndim,nconstr,knew,f) ! in :test:apply_constr.f90
+            double precision dimension(n+k),intent(in),depend(n,k) :: t
+            integer optional,intent(in),check(shape(kstiff,0)==n),depend(kstiff) :: n=shape(kstiff,0)
+            integer intent(in) :: k
+            double precision dimension(n,n),intent(in) :: kstiff
+            double precision dimension(nconstr,ndim + 2),intent(in) :: constr
+            integer optional,intent(in),check((shape(constr,1)-2)==ndim),depend(constr) :: ndim=(shape(constr,1)-2)
+            integer optional,intent(in),check(shape(constr,0)==nconstr),depend(constr) :: nconstr=shape(constr,0)
+            double precision dimension(n,n),intent(out),depend(n,n) :: knew
+            double precision dimension(n,ndim),intent(out),depend(n,ndim) :: f
+        end subroutine apply_constr
      end interface
 end python module pyspline
 
