@@ -7,33 +7,16 @@ RM  	        = /bin/rm -rf
 
 SPLINE_LIB = libspline.a
 SPLINE_LIB_SHARED = libspline.so
-OBJ =   bspline/bfqad.o\
-	bspline/bint4.o\
-	bspline/bintk.o\
-	bspline/bnfac.o\
-	bspline/bnslv.o\
-	bspline/bsgq8.o\
-	bspline/bspdr.o\
-	bspline/bspev.o\
-	bspline/bsppp.o\
-	bspline/bspvd.o\
-	bspline/bspvn.o\
-	bspline/bsqad.o\
+OBJ =	misc/eval_curve.o\
+	misc/eval_curve_deriv.o\
+	misc/compute_curve.o\
 	bspline/bvalu.o\
 	bspline/intrv.o\
-	bspline/pfqad.o\
-	bspline/ppgq8.o\
-	bspline/ppqad.o\
-	bspline/ppval.o\
-	machcon/i1mach.o\
-	machcon/r1mach.o\
-	tensbs/b2ink.o\
-	tensbs/b2val.o\
-	tensbs/b3ink.o\
-	tensbs/b3val.o\
+	bspline/bspvn.o\
 	tensbs/bknot.o\
 	tensbs/knots.o\
-	tensbs/btpcf.o\
+	machcon/i1mach.o\
+	machcon/r1mach.o\
 	xerror/fdump.o\
 	xerror/j4save.o\
 	xerror/xerabt.o\
@@ -43,15 +26,40 @@ OBJ =   bspline/bfqad.o\
 	xerror/xerrwv.o\
 	xerror/xersav.o\
 	xerror/xgetua.o\
-	misc/bvaluV.o\
-	misc/b2valM.o\
-	misc/b2valV.o\
-	misc/projectpoint.o\
-	misc/getctlnormals.o\
-	misc/mincurvedistance.o\
-	misc/getbasis.o\
-	misc/curve_stiffness.o\
-	misc/apply_constr.o
+
+
+# 	bspline/bfqad.o\
+# 	bspline/bint4.o\
+# 	bspline/bintk.o\
+# 	bspline/bnfac.o\
+# 	bspline/bnslv.o\
+# 	bspline/bsgq8.o\
+# 	bspline/bspdr.o\
+# 	bspline/bspev.o\
+# 	bspline/bsppp.o\
+# 	bspline/bspvd.o\
+# 	bspline/bspvn.o\
+# 	bspline/bsqad.o\
+# 	bspline/pfqad.o\
+# 	bspline/ppgq8.o\
+# 	bspline/ppqad.o\
+# 	bspline/ppval.o\
+
+# 	tensbs/b2ink.o\
+# 	tensbs/b2val.o\
+# 	tensbs/b3ink.o\
+# 	tensbs/b3val.o\
+# 	tensbs/btpcf.o\
+
+# 	misc/bvaluV.o\
+# 	misc/b2valM.o\
+# 	misc/b2valV.o\
+# 	misc/projectpoint.o\
+# 	misc/getctlnormals.o\
+# 	misc/mincurvedistance.o\
+# 	misc/getbasis.o\
+# 	misc/curve_stiffness.o\
+# 	misc/apply_constr.o
 
 
 ###================================================
@@ -60,7 +68,7 @@ OBJ =   bspline/bfqad.o\
 ### Intel Fortran Compiler
 FC = ifort
 
-FFLAGS = -O2 -r8
+FFLAGS = -O2 -r8 -llapack
 #FFLAGS = -O2 -fdefault-real-8
 AR       = ar
 AR_FLAGS = -rvs
