@@ -27,17 +27,20 @@ import os, sys, string, time, copy
 # =============================================================================
 # External Python modules
 # =============================================================================
-from numpy import linspace, cos, pi, hstack, zeros, ones, sqrt, imag, interp, \
-    array, real, reshape, meshgrid, dot, cross, mod, floor, mat, empty
+from numpy import linspace, cos, pi, zeros, sqrt, array, reshape, \
+    meshgrid, dot,  mod, floor
 
 import numpy.linalg
-from numpy.linalg import lstsq
 
 import pyspline_cs
 import pyspline as pyspline_real
 
 from mdo_import_helper import *
 
+# =============================================================================
+def e_dist(x1,x2):
+    '''Get the eculidean distance between two points'''
+    return sqrt((x1[0]-x2[0])**2 + (x1[1]-x2[1])**2 + (x1[2]-x2[2])**2)
 # =============================================================================
 # pySpline class
 # =============================================================================
@@ -55,8 +58,6 @@ class surf_spline():
 
             ku, integer: Order for u
             kv, integer: Order for v
-            Nctlu, integer: Number of u control points
-            Nctlv, integer: Number of v control points
             tu, real array: Knot vector for u
             tv, real array: Knot vector for v
             coef, real array size(Nctlu,Nctlv,nDim): Array of control point 
@@ -68,8 +69,8 @@ class surf_spline():
 
             ku, integer: Order for u
             kv, integer: Order for v
-            u, real, array: list of u values 
-            v, real, array: list of v values
+            u, real, array: list of u values (Optional for ndim=3,required otherwise)
+            v, real, array: list of v values (Optional for ndim=3,required otherwise)
             X, real, array, size(len(u),len(v),nDim):Array of data points to fit
 
         task = \'lms\': Create an instance of the spline class using a
@@ -78,8 +79,10 @@ class surf_spline():
 
             ku, integer: Order for u
             kv, integer: Order for v
-            u, real, array: list of u values 
-            v, real, array: list of v values
+            Nctlu, integer: Number of control points for u
+            Nctlv, integer: Number of control points for v
+            u, real, array: list of u values (Optional for ndim=3,required otherwise)
+            v, real, array: list of v values (Optional for ndim=3,required otherwise)
             X, real, array, size(len(u),len(v),nDim):Array of data points to fit
 '''
         if 'no_print' in kwargs:
@@ -92,7 +95,7 @@ class surf_spline():
 
         self.pyspline_real = pyspline_real # Real version of spline library
         self.pyspline_cs = pyspline_cs # Complex version of spline library
-        # sef.
+
         if 'complex' in kwargs:
             self.pyspline = self.pyspline_cs # Use the complex version for everything
             self.dtype = 'D'
@@ -115,15 +118,18 @@ class surf_spline():
                 and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs,\
                 'Error: ku,kv,tu,tv,coef and range MUST be defined for task=\
 \'create\''
-            self.ku = kwargs['ku'] 
-            self.kv = kwargs['kv']
+            self.ku = int(kwargs['ku'])
+            self.kv = int(kwargs['kv'])
             self.tu = array(kwargs['tu'],self.dtype)
             self.tv = array(kwargs['tv'],self.dtype)
             self.coef = array(kwargs['coef'],self.dtype)
             self.Nctlu = self.coef.shape[0]
             self.Nctlv = self.coef.shape[1]
-            self.Nctl  = self.Nctlu*self.Nctlv
-            self.range = array(kwargs['range'],self.dtype)
+            self.umin = kwargs['range'][0]
+            self.umax = kwargs['range'][1]
+            self.vmin = kwargs['range'][2]
+            self.vmax = kwargs['range'][3]
+
             self.nDim = self.coef.shape[2]
             return
      
@@ -133,25 +139,26 @@ class surf_spline():
                 assert 'ku' in kwargs and 'kv' in kwargs and \
                     'Nctlu' in kwargs and 'Nctlv' in kwargs and 'X' in kwargs, \
                     'Error: ku,kv,Nctlu,Nctlv and X MUST be defined for task lms'
-                self.Nctlu = kwargs['Nctlu']
-                self.Nctlv = kwargs['Nctlv']
+                self.Nctlu = int(kwargs['Nctlu'])
+                self.Nctlv = int(kwargs['Nctlv'])
+                self.X = array(kwargs['X'])
             else:
                 assert 'ku' in kwargs and 'kv' in kwargs and \
                    'X' in kwargs,'Error: ku,kv,and X MUST be defined for task \
 interpolate'
-                self.Nctlu = kwargs['X'].shape[0]
-                self.Nctlv = kwargs['X'].shape[1]
+                
+                self.X = array(kwargs['x'])
+                self.Nctlu = self.X.shape[0]
+                self.Nctlv = self.X.shape[1]
             # end if
                 
-            self.task = task
-            self.X  = kwargs['X']
             self.orig_data = True
             self.Nu = self.X.shape[0]
             self.Nv = self.X.shape[1]
             self.nDim  = self.X.shape[2]
            
-            self.ku = kwargs['ku']
-            self.kv = kwargs['kv']
+            self.ku = int(kwargs['ku'])
+            self.kv = int(kwargs['kv'])
 
             # Sanity Check on Inputs
             if self.Nctlu > self.Nu:
@@ -164,16 +171,16 @@ to Nu: Nctlu = %d'%self.Nctlu
 to Nv: Nctlv = %d'%self.Nctlv
             # end if
 
-            self.Nctl  = self.Nctlu*self.Nctlv
-
             # Sanity check to make sure k is less than N
             if self.Nu < self.ku:
                 self.ku = self.Nu
                 print 'Warning: Nu<ku. ku is now %d'%(self.ku)
+            # end if
+
             if self.Nv < self.kv:
                 self.kv = self.Nv
                 print 'Warning: Nv<kv. kv is now %d'%(self.kv)
-                
+            # end if
 
             if 'u' in kwargs and 'v' in kwargs:
                 self.u = kwargs['u']
@@ -188,25 +195,29 @@ to Nv: Nctlv = %d'%self.Nctlv
                     sys.exit(1)
                 # end if
             # end if
-            
-            self.range = array([self.u[0],self.u[-1],self.v[0],self.v[-1]])
+            self.umin = u[0]
+            self.umax = u[-1]
+            self.vmin = v[0]
+            self.vmax = v[-1]
 
-            # Set a linear version of U and V
-            [self.V, self.U] = meshgrid(self.v,self.u)
-
-           #Calculate the knot vector and Jacobian
+            # Calculate the knot vector and Jacobian
             self._calcKnots()
             self._calcJacobian()
 
-#             # Lets do a lms 
+            # Lets do a lms 
             timeA = time.time()
             self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim],self.dtype)
+
+            res = numpy.linalg.lstsq(self.J,self.X.reshape[self.Nu*self.Nv,self.nDim])
             for idim in xrange(self.nDim):
-                self.coef[:,:,idim] =\
-                    reshape(lstsq(self.J,self.X[:,:,idim].flatten())[0]\
-                                ,[self.Nctlu,self.Nctlv])
+                self.coef[:,:,idim] = reshape(res[0][idim],self.Nctlu,self.Nctlv)
+            # end for
+                
             mpiPrint(' LMS Fit Time: %6.5f s\n'%(time.time()-timeA),self.NO_PRINT)
             
+            # Finally, set edges as linear splines
+            self._setEdgeCurves()
+
             return 
 
         print 'Error: task is not understood. Type must be \'lms\',\
@@ -218,19 +229,16 @@ to Nv: Nctlv = %d'%self.Nctlv
     def recompute(self):
         '''Recompute the surface if the knot vector has changed:'''
 
-        assert self.orig_data,'Only surface initialization with original \
-data can be recomputed'
+        assert self.orig_data,'Only surface initialization with original data can be recomputed'
 
-        if self.task == 'lms' or self.task == 'interpolate':
-            self._calcJacobian()
-            self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim],self.dtype)
-            for idim in xrange(self.nDim):
-                self.coef[:,:,idim] =\
-                    reshape(lstsq(self.J,self.X[:,:,idim].flatten())[0]\
-                                ,[self.Nctlu,self.Nctlv])
-            # end for
-        # end if
-
+        self._calcJacobian()
+        res = numpy.linalg.lstsq(self.J,self.X.reshape[self.Nu*self.Nv,self.nDim])
+        self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim],self.dtype)
+        for idim in xrange(self.nDim):
+            self.coef[:,:,idim] = reshape(res[0][idim],self.Nctlu,self.Nctlv)
+        # end for
+        
+        return
 
     def _calcParameterization(self):
 
@@ -241,9 +249,7 @@ data can be recomputed'
             temp = zeros(self.Nu,self.dtype)
 
             for i in xrange(self.Nu-1):
-                temp[i+1] = temp[i] + sqrt((self.X[i+1,j,0]-self.X[i,j,0])**2 +\
-                                           (self.X[i+1,j,1]-self.X[i,j,1])**2 +\
-                                           (self.X[i+1,j,2]-self.X[i,j,2])**2)
+                temp[i+1] = temp[i] + e_dist(X[i,j],X[i+1,j])
             # end for
 
             if temp[-1] == 0: # We have a singular point
@@ -254,10 +260,8 @@ data can be recomputed'
             # end if
 
             u += temp #accumulate the u-parameter calcs for each j
-            
         # end for 
-        u/=(self.Nv-singular_counter) #divide by the number of 'j's we had
-        self.u = u
+        self.u =u/(self.Nv-singular_counter) #divide by the number of 'j's we had
         
         v = zeros(self.Nv,self.dtype)
         singular_counter = 0
@@ -265,9 +269,7 @@ data can be recomputed'
         for i in xrange(self.Nu): 
             temp = zeros(self.Nv,self.dtype)
             for j in xrange(self.Nv-1):
-                temp[j+1] = temp[j] + sqrt((self.X[i,j+1,0]-self.X[i,j,0])**2 +\
-                                           (self.X[i,j+1,1]-self.X[i,j,1])**2 +\
-                                           (self.X[i,j+1,2]-self.X[i,j,2])**2)
+                temp[j+1] = temp[j] + e_dist(X[i,j],X[i,j+1])
             # end for
             if temp[-1] == 0: #We have a singular point
                 singular_counter += 1
@@ -278,8 +280,7 @@ data can be recomputed'
 
             v += temp #accumulate the v-parameter calcs for each i
         # end for 
-        v/=(self.Nu-singular_counter) #divide by the number of 'i's we had
-        self.v = v
+        self.v = v/(self.Nu-singular_counter) #divide by the number of 'i's we had
 
         return
 
@@ -298,6 +299,9 @@ data can be recomputed'
     def _calcJacobian(self):
 
         # Calculate the jacobian J, for fixed t and s
+        
+        # Set a linear version of U and V
+        [V, U] = meshgrid(self.v,self.u)
 
         self.J = zeros([self.Nu*self.Nv,self.Nctlu*self.Nctlv],self.dtype)
         ctl = zeros([self.Nctlu,self.Nctlv],self.dtype)
@@ -305,86 +309,63 @@ data can be recomputed'
             for i in xrange(self.Nctlu):
                 ctl[i,j] += 1
                 self.J[:,i*self.Nctlv + j] = \
-                    self.pyspline.b2valv(\
-                    self.U.flatten(),self.V.flatten(),0,0,\
-                        self.tu,self.tv,self.ku,self.kv,ctl)
+                    self.pyspline.b2valv(U.flatten(),V.flatten(),0,0,\
+                                             self.tu,self.tv,self.ku,self.kv,ctl)
                 ctl[i,j] -= 1
                 # end for
             # end for 
         # end for
         return
 
+    def _setEdgeCurves(self):
+        '''Create linear spline objects for each of the edges'''
+        self.edge_curves = []
+        self.edge_curves.append(linear_spline(task='create',k=self.ku,t=self.tu,
+                                              coef=self.coef[:,0],range=[self.umin,self.umax]))
+        self.edge_curves.append(linear_spline(task='create',k=self.ku,t=self.tu,
+                                              coef=self.coef[:,-1],range=[self.umin,self.umax]))
+        self.edge_curves.append(linear_spline(task='create',k=self.kv,t=self.tv,
+                                              coef=self.coef[0,:],range=[self.vmin,self.vmax]))
+        self.edge_curves.append(linear_spline(task='create',k=self.kv,t=self.tv,
+                                              coef=self.coef[-1,:],range=[self.vmin,self.vmax]))
+        return
+
     def calcPtDeriv(self,u,v,i,j):
         '''Calc the derivative of point u,v at control point i,j'''
         coef = zeros((self.Nctlu,self.Nctlv))
         coef[i,j] = 1.0
-        x = self.pyspline.b2val(\
-            u,v,0,0,self.tu,self.tv,self.ku,self.kv,coef)
+        x = self.pyspline.b2val(u,v,0,0,self.tu,self.tv,self.ku,self.kv,coef)
         
         return x
 
     def getEdgeLength(self,edge):
         '''Return the Physical Length of edge edge'''
         # First create a 1-D version of the edge
-        if edge == 0:
-            edge_curve=linear_spline(task='create',k=self.ku,t=self.tu,
-                                     coef=self.coef[:,0],range=self.range[0:2])
-        elif edge == 1:
-            edge_curve=linear_spline(task='create',k=self.ku,t=self.tu,
-                                     coef=self.coef[:,-1], range=self.range[0:2])
-        elif edge == 2:
-            edge_curve=linear_spline(task='create',k=self.kv,t=self.tv,
-                                     coef=self.coef[0,:],range=self.range[2:])
-        elif edge == 3:
-            edge_curve=linear_spline(task='create',k=self.kv,t=self.tv,
-                                     coef=self.coef[-1,:], range=self.range[2:])
-        # end if
-
-        return edge_curve.getLength()
-
-
+        assert edge in [0,1,2,3],'Error, getEdgeLength: Edge must in range 0->3'
+        return self.edge_curves[edge].getLength()
 
     def getValueEdge(self,edge,s):
         '''Get the value of the spline on edge, edge=0,1,2,3'''
-
-        if edge == 0:
-            return self.getValue(s,self.range[2])
-        elif edge == 1:
-            return self.getValue(s,self.range[3])
-        elif edge == 2:
-            return self.getValue(self.range[0],s)
-        elif edge ==3:
-            return self.getValue(self.range[1],s)
-        else:
-            print 'Edge must be between 0 and 3'
-            sys.exit(1)
-            return
-        #end if 
+        assert edge in [0,1,2,3],'Error, getValueEdge: Edge must be in range 0->3'
+        return self.edge_curves[edge](s)
 
     def getValueCorner(self,corner):
         '''Get the value of the spline on corner i '''
-
+        assert corner in [0,1,2,3],'Error, getValueCorner: Corner must be in range 0->3'
         if corner == 0:
-            return self.getValue(self.range[0],self.range[2])
+            return self.getValue(self.umin,self.vmin)
         elif corner == 1:
-            return self.getValue(self.range[1],self.range[2])
+            return self.getValue(self.umax,self.vmin)
         elif corner == 2:
-            return self.getValue(self.range[0],self.range[3])
+            return self.getValue(self.umin,self.vamx)
         elif corner ==3:
-            return self.getValue(self.range[1],self.range[3])
-        else:
-            print 'Corner must be between 0 and 3'
-            sys.exit(1)
-            return
+            return self.getValue(self.umax,self.vmax)
         #end if
 
     def getOrigValuesEdge(self,edge):
         ''' Get the values of the original data on edge. edge = 0,1,2,3'''
-        if self.orig_data == False:
-            print 'Error: No original data exists for this surface. The \
-initialization type for this spline class was \'create\''
-            sys.exit(1)
-        # end if
+        assert edge in [0,1,2,3] and self.orig_data == True,'Error, getOrigValuesEdge: No \
+original data for this surface or edge is not in range 0->3'
 
         if edge == 0:
             if mod(self.Nu,2) == 1: # Its odd
@@ -414,18 +395,12 @@ initialization type for this spline class was \'create\''
             else:
                 Xmid = 0.5 *(self.X[-1,self.Nv/2] + self.X[-1,self.Nv/2 - 1])
                 return self.X[-1,0],Xmid,self.X[-1,-1]
-        else:
-            print 'Error: edge must be between 0 and 3'
-            sys.exit(1)
         # end if
 
     def getOrigValueCorner(self,node):
         ''' Get the values of the original data on edge. edge = 0,1,2,3'''
-        if self.orig_data == False:
-            print 'Error: No original data exists for this surface. The \
-initialization type for this spline class was \'create\''
-            sys.exit(1)
-        # end if
+        assert node in [0,1,2,3] and self.orig_data == True,'Error, getOrigValueCorner: No \
+original data for this surface or node is not in range 0->3'
 
         if node == 0:
             return self.X[0,0]
@@ -436,108 +411,64 @@ initialization type for this spline class was \'create\''
         elif node == 3:
             return self.X[-1,-1]
 
+    def __call__(self,u,v):
+        self.getValue(u,v)
+
+    def getValue(self,u,v):
+        '''Get the value of the spline at point(s) u,v'''
+        #Assure u,v are numpy arrays
+        u = array(u)
+        v = array(v)
+        assert u.shape == v.shape,'Error, getValue: u and v must have the same shape'
+        if len(u.shape) == 0:
+            return self.pyspline.eval_surf(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        elif len(u.shape) == 1:
+            return self.pyspline.eval_surf_V(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        elif len(u.shape) == 2:
+            return self.pyspline.eval_surf_M(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+ 
+    def getDerivative(self,u,v):
+        '''Get the value of the derivative of spline at point(s) u,v'''
+        u = array(u)
+        v = array(v)
+        assert u.shape == v.shape,'Error, getDerivative: u and v must have the same shape'
+        if len(u.shape) == 0:
+            return self.pyspline.eval_surf_deriv(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        elif len(u.shape) == 1:
+            return self.pyspline.eval_surf_deriv_V(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        elif len(u.shape) == 2:
+            return self.pyspline.eval_surf_deriv_M(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        
     def getNormal(self,u,v):
-        '''Get the normalized normal at the surface point u,v'''
-        if self.nDim == 3:
-            du,dv = self.getDerivative(u,v)
+        '''Get the normalized normal at the surface point(s) u,v'''
+        u = array(u)
+        v = array(v)
+        assert self.nDim == 3,'Error, getNormal is only defined for three spatial dimensions'
+        assert u.shape == v.shape,'Error, getNormal: u and v must have the same shape'
+        if len(u.shape) == 0:
+            return self.pyspline.eval_surf_normal(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        elif len(u.shape) == 1:
+            return self.pyspline.eval_surf_normal_V(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        elif len(u.shape) == 2:
+            return self.pyspline.eval_surf_normal_M(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
 
-            # Now cross and normalize
-            n = zeros(3,self.dtype)
-            n[0] = du[1]*dv[2]-du[2]*dv[1]
-            n[1] = du[2]*dv[0]-du[0]*dv[2]
-            n[2] = du[0]*dv[1]-du[1]*dv[0]
-            
-            n/= sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])
-        else:
-            print 'Warning: getNormal is only defined for 3 spatial dimension'
-            sys.exit(1)
-        # end if
-        return n
-
-    def getValue(self,u,v,x=None):
-        
-        '''Get the value of the spline at point u,v'''
-        if x == None:
-            x = zeros((self.nDim),self.dtype)
-        # end if
-        for idim in xrange(self.nDim):
-            x[idim] = self.pyspline.b2val(\
-                u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-        
-        return x
-
-    def getValueV(self,u,v,x=None):
-        '''Get the value of a spline at vector of points u,v'''
-        # Note: If the user is passing in x, it must already be the
-        # right shape/size
-        assert u.shape == v.shape, 'u and v must be the same length'
-        if x == None:
-            x = zeros((len(u),self.nDim),self.dtype)
-        # end if
-
-        for idim in xrange(self.nDim):
-            x[:,idim] = self.pyspline.b2valv(\
-                u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-
-        return x
-
-    def getValueM(self,u,v,x=None):
-        '''Get the value of a spline at matrix of points u,v'''
-        assert u.shape == v.shape, 'u and v must be the same shape'
-        if x == None:
-            x = zeros((u.shape[0],u.shape[1],self.nDim),self.dtype)
-        # end if
-        for idim in xrange(self.nDim):
-            x[:,:,idim] = self.pyspline.b2valm(\
-                u,v,0,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-
-        return x
+    def getSecondDerivative(self,u,v):
+        '''Get the value of the second derivative (d2u2,d2v2,d2uv) of spline at point(s) u,v'''
+        u = array(u)
+        v = array(v)
+        assert u.shape == v.shape,'Error, getSecondDerivative: u and v must have the same shape'
+        if len(u.shape) == 0:
+            return self.pyspline.eval_surf_2deriv(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        elif len(u.shape) == 1:
+            return self.pyspline.eval_surf_2deriv_V(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        elif len(u.shape) == 2:
+            return self.pyspline.eval_surf_2deriv_M(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
 
     def getGrevillePoints(self,edge):
-        '''Return the Greville points for edge 0'''
-        # Interpolate
+        '''Return the Greville points for edge'''
+        assert edge in [0,1,2,3],'Error, getGrevillePoints: Edge must be in range 0->3'
+        return self.edge_curves[edge].getGrevillePoints()
 
-        if edge in [0,1]:
-            gpts = zeros(self.Nctlu)
-            for i in xrange(self.Nctlu):
-                for n in xrange(self.ku-1): #degree n loop
-                    gpts[i] += self.tu[i+n+1]
-                # end for
-                gpts[i] /= (self.ku-1)
-            # end for
-        else: # edge in [2,3]:
-            gpts = zeros(self.Nctlv)
-            for i in xrange(self.Nctlv):
-                for n in xrange(self.kv-1): #degree n loop
-                    gpts[i] += self.tv[i+n+1]
-                # end for
-                gpts[i] /= (self.kv-1)
-            # end for
-        # end if
-        # Now double them up
-        new_gpts = []
-        for i in xrange(len(gpts)-1):
-            new_gpts.append(gpts[i])
-            new_gpts.append((2.0/3.0)*gpts[i] + (1.0/3.0)*gpts[i+1])
-            new_gpts.append((1.0/3.0)*gpts[i] + (2.0/3.0)*gpts[i+1])
-        # en for
-        new_gpts.append(gpts[-1])
-
-        return new_gpts
-
-    
-    def getDerivative(self,u,v):
-        
-        '''Get the value of the derivative of spline at point u,v'''
-        du = zeros(self.nDim,self.dtype)
-        dv = zeros(self.nDim,self.dtype)
-        for idim in xrange(self.nDim):
-            du[idim] = self.pyspline.b2val(\
-                u,v,1,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-            dv[idim] = self.pyspline.b2val(\
-                u,v,0,1,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-        return du,dv
-    
     def calcDerivativeDeriv(self,u,v,i,j):
         '''Calc the derivative of the derivaive at point u,v by control point i,j'''
         coef = zeros((self.Nctlu,self.Nctlv))
@@ -548,19 +479,7 @@ initialization type for this spline class was \'create\''
             u,v,0,1,self.tu,self.tv,self.ku,self.kv,coef)
 
         return du,dv
-    def getSecondDerivative(self,u,v):
-        
-        '''Get the value of the second derivative of spline at point u,v'''
-        d2u = zeros(self.nDim,self.dtype)
-        d2v = zeros(self.nDim,self.dtype)
-        for idim in xrange(self.nDim):
-            d2u[idim] = self.pyspline.b2val(\
-                u,v,2,0,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-            d2v[idim] = self.pyspline.b2val(\
-                u,v,0,2,self.tu,self.tv,self.ku,self.kv,self.coef[:,:,idim])
-        return d2u,d2v
-
-
+  
     def getJacobian(self,u,v):
         
         '''Get the jacobian at point u,v'''
@@ -587,58 +506,27 @@ initialization type for this spline class was \'create\''
             self.coef,self.ku,self.kv,self.tu,self.tv,x0,u0,v0,Niter,tol)
 
     def projectCurveEdge(self,curve,edge,s0=0.5,Niter=25,tol=1e-6):
-        '''Project a pySpline Curve, 'curve', onto edge 'edge' . We will
-        simply create a curve from the given edge and then use the
-        min_distance algorithim from the linear_spline class
-        We will return the u,v Coordinates of the point (on the edge) we found '''
+        '''Project a pySpline Curve, 'curve', onto edge 'edge' . We
+        will use the min_distance algorithim from the linear_spline
+        class We will return the u,v Coordinates of the point (on the
+        edge) we found'''
 
+        s,t,d,conv = self.edge_curves[edge].minDistance(curve,s=s0,t=s0,Niter=Niter,tol=tol)
+        
         if edge == 0:
-            edge_curve=linear_spline(task='create',k=self.ku,t=self.tu,
-                                              coef=self.coef[:,0],range=self.range[0:2])
-            s,t,d,conv= edge_curve.minDistance(curve,s=s0,t=s0,Niter=Niter,tol=1e-6)
-            return s,self.range[2]
-            
-            
+            return s,self.vmin
         elif edge == 1:
-            edge_curve=linear_spline(task='create',k=self.ku,t=self.tu,
-                                              coef=self.coef[:,-1], range=self.range[0:2])
-            s,t,d,conv= edge_curve.minDistance(curve,s=s0,t=s0,Niter=Niter,tol=1e-6)
-            return s,self.range[3]
+             return s,self.vmax
         elif edge == 2:
-            edge_curve=linear_spline(task='create',k=self.kv,t=self.tv,
-                                              coef=self.coef[0,:],
-                                              range=self.range[2:])
-            s,t,d,conv= edge_curve.minDistance(curve,s=s0,t=s0,Niter=Niter,tol=1e-6)
-            return self.range[0],s
+            return self.umin,s
         elif edge == 3:
-            edge_curve=linear_spline(task='create',k=self.kv,t=self.tv,
-                                              coef=self.coef[-1,:],
-                                              range=self.range[2:])
-            s,t,d,conv= edge_curve.minDistance(curve,s=s0,t=s0,Niter=Niter,tol=1e-6)
-            return self.range[1],s
+            return self.umax,s
         # end if
-
-
-        # Return the parameter on the edge_curve, s (calling function)
-        return s
-
-    def getCurveEdge(self,edge):
-        '''Return a linear pyspline object for the edge edge'''
-        if edge == 0:
-            return linear_spline(task='create',k=self.ku,t=self.tu,
-                                     coef=self.coef[:,0],range=self.range[0:2])
-        if edge == 1:
-            return linear_spline(task='create',k=self.ku,t=self.tu,
-                                     coef=self.coef[:,-1],range=self.range[0:2])
-        if edge == 2:
-            return linear_spline(task='create',k=self.kv,t=self.tv,
-                                   coef=self.coef[0,:],range=self.range[2:])
-        if edge == 3:
-            return linear_spline(task='create',k=self.kv,t=self.tv,
-                                   coef=self.coef[-1,:],range=self.range[2:])
-
+        
+        return
 
     def findUV(self,x0,r,u0=0.5,v0=0.5,NO_PRINT=False):
+         # -------------- REWRITE IN FORTRAN -----------
         ''' Try to find the parametric u-v coordinate of the spline
         which coorsponds to the intersection of the directed vector 
         v = x0 + r*s where x0 is a basepoint, r  is a direction vector
@@ -661,7 +549,7 @@ initialization type for this spline class was \'create\''
         u = u0
         v = v0
         s = 0 #Start at the basepoint
-        A = mat(zeros((3,3),self.dtype))
+        A = zeros((3,3),self.dtype)
         for iter in xrange(maxIter):
 
             #just in case, force crop u,v to [-1,1]
@@ -672,7 +560,7 @@ initialization type for this spline class was \'create\''
 
             x = self.getValue(u,v) #x contains the x,y,z coordinates 
 
-            f = mat(zeros((3,1),self.dtype))
+            f = zeros((3,1),self.dtype)
             f[0] = x[0]-(x0[0]+r[0]*s)
             f[1] = x[1]-(x0[1]+r[1]*s)
             f[2] = x[2]-(x0[2]+r[2]*s)
@@ -713,38 +601,38 @@ initialization type for this spline class was \'create\''
 
         return u,v,x
 
+    def _writeTecplot2D(self,handle,name,x):
+         '''A Generic write tecplot zone to file'''
+         nx = data.shape[0]
+         ny = data.shape[1]
+         handle.write('Zone T=%s I=%d J=%d\n'%(name,nx,ny))
+         handle.write('DATAPACKING=POINT\n')
+         for j in xrange(ny):
+             for i in xrange(nx):
+                 handle.write('%f %f %f \n'%(x[i,j,0].astype('d'),x[i,j,1].astype('d'),x[i,j,2].astype('d')))
+             # end for
+         # end for 
+         
+         return
+
     def writeTecplotOrigData(self,handle):
         if self.orig_data:
-            handle.write('Zone T=%s I=%d J=%d\n'%('orig_data',self.Nu,self.Nv))
-            handle.write('DATAPACKING=POINT\n')
-            for j in xrange(self.Nv):
-                for i in xrange(self.Nu):
-                    handle.write('%f %f %f \n'%(\
-                            self.X[i,j,0].astype('d'),self.X[i,j,1].astype('d')\
-                                ,self.X[i,j,2].astype('d')))
-                    # end for
-            # end for 
+            self._writeTecplot2D(handle,'orig_data',self.X)
         # end if
-        
+
         return
 
     def writeTecplotSurface(self,handle,size=None):
         '''Output this surface\'s data to a open file handle \'handle\' '''
-        def e_dist(x1,x2):
-            '''Get the eculidean distance between two points'''
-            return sqrt((x1[0]-x2[0])**2 + (x1[1]-x2[1])**2 + (x1[2]-x2[2])**2)
-
+       
         MAX_SIZE = 100
         MIN_SIZE = 5
                 
         if size == None:
-
             # This works really well actually
             u_plot = 0.5*(1-cos(linspace(0,pi,25)))
             v_plot = 0.5*(1-cos(linspace(0,pi,25)))
-
         else:
-
             # Cheaply calculate the length of each size of the surface
             # to determine its lenght and then use the size parameter 
             # to determine the number of points to use
@@ -772,50 +660,22 @@ initialization type for this spline class was \'create\''
         # end if
 
         # Dump re-interpolated surface
-        handle.write('Zone T=%s I=%d J = %d\n'\
-                         %('interpolated',len(u_plot),len(v_plot)))
-        handle.write('DATAPACKING=POINT\n')
-
         [V_plot,U_plot] = meshgrid(v_plot,u_plot)
         X = self.getValueM( U_plot,V_plot)
-        for j in xrange(len(v_plot)):
-            for i in xrange(len(u_plot)):
-                    handle.write('%f %f %f \n'%(X[i,j,0],X[i,j,1],X[i,j,2]))
-                # end if
-            # end if
-        # end if
+        self._writeTecplot2D(handle,'interpolated',self.coef)
     
         return
                     
     def writeTecplotCoef(self,handle):
-
-        handle.write('Zone T=%s I=%d J = %d\n'%('control_pts',self.Nctlu,self.Nctlv))
-        handle.write('DATAPACKING=POINT\n')
-        for j in xrange(self.Nctlv):
-            for i in xrange(self.Nctlu):
-                handle.write('%f %f %f \n'%(self.coef[i,j,0].astype('d'),\
-                                                self.coef[i,j,1].astype('d'),\
-                                                self.coef[i,j,2].astype('d')))
-            # end for
-        # end for 
+        '''Write the Spline coefficients to handle'''
+        self._writeTecplot2D(handle,'control_pts',self.coef)
 
         return
 
     def writeTecplotEdge(self,handle,edge,*args,**kwargs):
-        '''Dump out a linear zone along edge used for visualizing edge
-        connections'''
+        '''Dump out a linear zone along edge used for visualizing edge connections'''
+        self.edge_curves[edge].writeTecplotEdge(handle,*args,**kwargs)
 
-        N = 25
-        if 'name' in kwargs:
-            handle.write('Zone T=%s I=%d\n'%(kwargs['name'],N))
-        else:
-            handle.write('Zone T=%s I=%d\n'%('edge',N))
-        handle.write('DATAPACKING=POINT\n')
-        s = linspace(0,1,N)
-        for i in xrange(N):
-            value = self.getValueEdge(edge,s[i]).astype('d')
-            handle.write('%f %f %f \n'%(value[0],value[1],value[2]))
-        # end for
         return
 
     def writeDirections(self,handle,isurf):
@@ -914,14 +774,14 @@ initialization type for this spline class was \'create\''
         for  i in xrange(4):
             pos_counter += 1
             if i == 0:
-                handle.write('%20.12g,'%(real(self.tu[0])))
+                handle.write('%20.12g,'%(real(self.umin)))
             if i == 1:
-                handle.write('%20.12g,'%(real(self.tu[-1])))
+                handle.write('%20.12g,'%(real(self.umax)))
             if i == 2:
-                handle.write('%20.12g,'%(real(self.tv[0])))
+                handle.write('%20.12g,'%(real(self.vmin)))
             if i == 3:
                 # semi-colon for the last entity
-                handle.write('%20.12g;'%(real(self.tv[-1]))) 
+                handle.write('%20.12g;'%(real(self.vmax)))
             if mod(pos_counter,3)==0:
                 handle.write('  %7dP%7d\n'%(Pcount,counter))
                 counter += 1
@@ -942,11 +802,13 @@ initialization type for this spline class was \'create\''
 
         return Pcount,counter
 
+
 class linear_spline():
 
     def __init__(self,task='create',*args,**kwargs):
 
-        '''Create an instance of a b-spline curve. There are three
+        '''
+        Create an instance of a b-spline curve. There are three
         ways to initialize the class as determined by the task flag:
 
         task = \'create\': Create an instance of the spline class
@@ -956,20 +818,25 @@ class linear_spline():
             k, integer: Order for spline
             Nctu, integer: Number of u control points
             t, real array: Knot vector 
-            coef, real array size(Nctl,nDim): Array of control points
+            coef, real array size(Nctl,nDim+1): Array of control points and weights
 
         task = \'interpolate\': Create an instance of the spline class
         by using an interpolating spline to given data points. **kwarg
         MUST contain the following information:
 
             k, integer: Order for spline
-            s, real, array: Array of s values 
             X, real, array, size(len(s),nDim): Array of data to fit
-'''
-        
+            s, real, array: (OPTIONAL for nDim >=2 ) Array of s values 
+
+       task = \'lms\': Create an instance of the spline class using a lms spline.
+       **kwargs MUST contain the following information:
+            k, integer: Order for spline
+            s, real, array: (OPTIONAL for nDIM >=2) Array of s values 
+            X, real, array, size(len(s),nDim): Array of data to fit
+            Nctl, integer: The number of control points
+    '''
         self.pyspline_real = pyspline_real
         self.pyspline_cs   = pyspline_cs
-        self.dtype = 'd'
         if 'complex' in kwargs:
             self.pyspline = pyspline_cs
             self.dtype = 'D'
@@ -979,167 +846,103 @@ class linear_spline():
         # end if
 
         if task == 'create':
-            assert 'k' in kwargs and 't' in kwargs and \
-                'coef' in kwargs and 'range' in kwargs, \
+            assert 'k' in kwargs and 't' in kwargs and 'coef' in kwargs and 'range' in kwargs, \
                 'Error: k,t,coef, and range MUST be defined for task=\'create\''
             
             self.s = None
             self.X = None
             self.N = None
-            self.k = kwargs['k'] 
+            self.k = int(kwargs['k'] )
             self.t = array(kwargs['t'])
             self.coef = array(kwargs['coef'])
             self.Nctl = self.coef.shape[0]
             self.orig_data = False
-            self.range = kwargs['range']
-            self.nDim = self.coef.shape[1]
+            self.smin = kwargs['range'][0]
+            self.smax = kwargs['range'][1]
+            self.nDim = self.coef.shape[1]-1
 
             return
              
-        if task == 'interpolate':
-            assert 'k' in kwargs and 'X' in kwargs, \
-                'Error: k, and X MUST be defined for task \'interpolate\''
+        elif task=='interpolate' or task == 'lms':
+            if task == 'interpolate':
+                assert 'k' in kwargs and 'X' in kwargs,'Error: k, and X MUST be defined for task \'interpolate\''
+            else:
+                assert 'k' in kwargs and 'X' in kwargs and 'Nctl' in kwargs , \
+                    'Error: k, X and Nctl MUST be defined for task lms'
+            # end if
 
             self.X  = array(kwargs['X'])
-            if len(self.X.shape) == 1:
-                self.nDim = 1
-            else:
-                self.nDim  = self.X.shape[1]
-            # end if
-
+            self.nDim = len(self.X.shape)
             self.N = self.X.shape[0]
             self.k = kwargs['k']
             
             if 's' in kwargs:
                 self.s = kwargs['s']
-                if self.nDim > 1:
-                    self._getLength()
-                # end if
             else:
-                if self.nDim > 1:
-                    self._getParameterization()
-                else:
-                    print 'Erorr: For 1D mapping splines, the basis, s,\
- must be given as input'
-                    sys.exit(1)
-                # end if
+                assert self.nDim > 1,'Error, pySpline: For 1D splines, the basis, s must be given'
+                self._getParameterization()
             # end if
-            self.range = array([self.s[0],self.s[-1]])
+
+            self.smin = self.s[0]
+            self.smax = self.s[-1]
             self.orig_data = True
             
-            if 'dx1' and 'dx2' in kwargs:
-                # We have defined a tangent vector at each end
-
-                #print 'dx1 and dx2 defined'
-                
-                self.Nctl = self.N + 2
-                dx1 = kwargs['dx1']
-                dx2 = kwargs['dx2']
-                ibcl = 1
-                ibcr = 1
-                kntopt = 1
-                assert len(dx1)==len(dx2)==self.nDim,'The length of the \
-derivative vectors must match the spatial dimension of the curve'
-
-                if self.nDim > 1:
-                    self.coef = zeros((self.Nctl,self.nDim),self.dtype)
-
-                    for idim in xrange(self.nDim):
-                        fbcl = dx1[idim]
-                        fbcr = dx2[idim]
-
-                        self.t,self.coef[:,idim],k = \
-                            self.pyspline.bint4(self.s,self.X[:,idim],\
-                                                    ibcl,ibcr,fbcl,fbcr,kntopt)
-
-                else:
-                    print 'do something'
-                # end if
-        
-            else: # Do a regular fit
-                
-                self.Nctl = self.N
-
-                # Sanity check to make sure k is less than N
-                if self.N <= self.k:
-                    self.k = self.N
-                # end if
-
-                # Generate the knot vector
-                self.t = self.pyspline.bknot(self.s,self.k)
-
-                if self.nDim > 1:
-                    self.coef = zeros((self.Nctl,self.nDim),self.dtype)
-                    for idim in xrange(self.nDim):
-                        self.coef[:,idim]= \
-                            self.pyspline.bintk(self.s,self.X[:,idim],self.t,self.k)
-                else:
-                    self.coef = self.pyspline.bintk(self.s,self.X,self.t,self.k)
-                # end if
-            #end for
-
-        if task == 'lms':
-            assert 'k' in kwargs and 'X' in kwargs and 'Nctl' in kwargs , \
-                'Error: k, X and Nctl MUST be defined for task lms'
-           
-            self.X  = kwargs['X']
-            if len(self.X.shape) == 1:
-                self.nDim = 1
+            if task == 'interpolate':
+                self.Nctl = self.N       
             else:
-                self.nDim  = self.X.shape[1]
+                self.Nctl = kwargs['Nctl']
+                if self.Nctl > self.N:
+                    self.Nctl  = self.N
             # end if
-
-            self.N = self.X.shape[0]
-            self.k = kwargs['k']
-            self.Nctl = kwargs['Nctl']
-
-            if 's' in kwargs:
-                self.s = kwargs['s']
-                if self.nDim > 1:
-                    self._getLength()
-                # end if
-            else:
-                if self.nDim > 1:
-                    self._getParameterization()
-                else:
-                    print 'Erorr: For 1D mapping splines, the basis, s,\
- must be given as input'
-                    sys.exit(1)
-                # end if
-            # end if
-                
-            self.range = array([self.s[0],self.s[-1]])
-            self.orig_data = True
 
             # Sanity check to make sure k is less than N
             if self.N <= self.k:
                 self.k = self.N
             # end if
 
-            if self.Nctl > self.N:
-                self.Nctl  = self.N
-
             # Generate the knot vector
-            self.t = self.pyspline_real.knots(self.s,self.Nctl,self.k)
-            if self.nDim > 1:
-                # Calculate the Jacobian
-                self._calcJacobian()
-                self.coef = zeros((self.Nctl,self.nDim),self.dtype)
-                for idim in xrange(self.nDim):
-                    self.coef[:,idim] = lstsq(self.J,self.X[:,idim])[0]
-                # end for
-            else:
-                self._calcJacobian()
-                self.coef = lstsq(self.J,self.X)[0]
-            # end if
+            self.t = self.pyspline.knots(self.s,k)
+            self.coef = self.pyspline.compute_curve(self.s,self.X,self.t,self.k)
+        # end if
+                        
+        return
 
+    def _getParameterization(self):
+        # We need to parameterize the curve
+        self.s = zeros(self.N,self.dtype);
+        for i in xrange(self.N-1):
+            dist = 0
+            for idim in xrange(self.nDim):
+                dist += (self.X[i+1,idim] - self.X[i,idim])**2
+                # end for
+            self.s[i+1] = self.s[i] + sqrt(dist)
+            # end for
+        # end for
+        self.length = self.s[-1]
+        self.s /= self.s[-1]
+
+        return
+
+    def _calcJacobian(self):
+        
+        # Calculate the jacobian J, for fixed t and s
+
+        self.J = zeros((self.N,self.Nctl),self.dtype)
+        ctl = zeros((self.Nctl),self.dtype)
+        
+        for i in xrange(self.Nctl):
+            ctl[i] += 1
+            self.J[:,i] = self.pyspline.bvaluv(self.t,ctl,self.k,0,self.s)
+            ctl[i] -= 1
+        # end for
+            
         return
 
     def projectPoint(self,x0,s0=0,Niter=20,tol=1e-8):
         '''Project a point x0 onto the curve and return parametric position
         giving minimum distance. This should also work if point is
         already on the curve as well'''
-
+        # DO IN FORTRAN
         # We will use a starting point s0 if given
         # Check we have the same dimension:
         assert len(x0) == self.nDim,'Dimension of x0 and the dimension of\
@@ -1170,38 +973,7 @@ derivative vectors must match the spatial dimension of the curve'
         # end for
         
         return s0,D,converged,update
-
-    def _getParameterization(self):
-        # We need to parameterize the curve
-        self.s = zeros(self.N,self.dtype);
-        for i in xrange(self.N-1):
-            dist = 0
-            for idim in xrange(self.nDim):
-                dist += (self.X[i+1,idim] - self.X[i,idim])**2
-                # end for
-                self.s[i+1] = self.s[i] + sqrt(dist)
-            # end for
-        # end for
-        self.length = self.s[-1]
-        self.s /= self.s[-1]
-
-        return
-
-    def _getLength(self):
-        # We need to the length of the curve
-        s = zeros(self.N,self.dtype);
-        for i in xrange(self.N-1):
-            dist = 0
-            for idim in xrange(self.nDim):
-                dist += (self.X[i+1,idim] - self.X[i,idim])**2
-                # end for
-                s[i+1] = s[i] + sqrt(dist)
-            # end for
-        # end for
-        self.length = s[-1]
-    
-        return
-
+ 
     def getLength(self):
         # Get the length of the actual Curve
         # Use the greville points for the positions
@@ -1229,83 +1001,33 @@ derivative vectors must match the spatial dimension of the curve'
         return gpts
 
     def __call__(self,s):
-
-        if self.nDim == 1:
-            x = self.pyspline.bvalu(self.t,self.coef,self.k,0,s)
-        else:
-            x = zeros((self.nDim),self.dtype)
-            for idim in xrange(self.nDim):
-                x[idim] = self.pyspline.bvalu(\
-                    self.t,self.coef[:,idim],self.k,0,s)
-            # end for
-        # end if
-   
+        return getValue(s)
+    
+    def getValue(self,s):
+        '''Get The value of the spline'''
+        s = array(s)
+        if len(u.shape) == 0:
+            return pyspline.eval_curve(s,self.t,self.k,self.coef)
+        elif len(u.shape) == 1:
+            return pyspline.eval_curve_V(s,self.t,self.k,self.coef)
         return x
+
+    def getDerivative(self,s):
+        '''Get the value of the derivatve of the spline'''
+        s = array(s)
+        if len(u.shape) == 0:
+            return pyspline.eval_curve_deriv(s,self.t,self.k,self.coef)
+        elif len(u.shape) == 1:
+            return pyspline.eval_curve_deriv_V(s,self.t,self.k,self.coef)
+        
 
     def minDistance(self,curve,s=0,t=0,Niter=25,tol=1e-6):
 
         '''Find the minimum distance between this curve (self) and a second
         curve passed in (curve)'''
-        return self.pyspline_real.mincurvedistance(self.t,self.k,self.coef,
-                                                   curve.t,curve.k,curve.coef,
-                                                   s,t,Niter,tol)
+        return self.pyspline_real.mincurvedistance(
+            self.t,self.k,self.coef,curve.t,curve.k,curve.coef,s,t,Niter,tol)
    
-    def getValue(self,s,x=None):
-        '''Get the value of the spline at point u,v'''
-        
-        if self.nDim == 1:
-            x = self.pyspline.bvalu(self.t,self.coef,self.k,0,s)
-        else:
-            if ( x == None ):
-                x = zeros((self.nDim),self.dtype)
-            # end
-            
-            for idim in xrange(self.nDim):
-                x[idim] = self.pyspline.bvalu(\
-                    self.t,self.coef[:,idim],self.k,0,s)
-            # end for
-        # end if
-
-        return x
-
-    def getValueV(self,s):
-        '''Get the value of a spline at vector of points s'''
-        if self.nDim == 1:
-            x = self.pyspline.bvaluv(self.t,self.coef,self.k,0,s)
-        else:
-            x = zeros((len(s),self.nDim),self.dtype)
-            for idim in xrange(self.nDim):
-                x[:,idim] = self.pyspline.bvaluv(\
-                    self.t,self.coef[:,idim],self.k,0,s)
-            # end for
-        # end if
-
-        return x
- 
-    def getDerivative(self,s):
-        
-        '''Get the value of the derivative of spline at point u,v'''
-        x = zeros(self.nDim,self.dtype)
-        for idim in xrange(self.nDim):
-            x[idim] = self.pyspline.bvalu(self.t,self.coef[:,idim],self.k,1,s)
-            
-        return x        
-
-    def _calcJacobian(self):
-        
-        # Calculate the jacobian J, for fixed t and s
-
-        self.J = zeros((self.N,self.Nctl),self.dtype)
-        ctl = zeros((self.Nctl),self.dtype)
-        
-        for i in xrange(self.Nctl):
-            ctl[i] += 1
-            self.J[:,i] = self.pyspline.bvaluv(self.t,ctl,self.k,0,self.s)
-            ctl[i] -= 1
-        # end for
-            
-        return
-
     def writeTecplot(self,handle):
         '''Output this line\'s data to a open file handle \'handle\' '''
 
@@ -1436,3 +1158,33 @@ if __name__ == '__main__':
 #             # end for
 #         # end for
 #         return counter 
+
+
+#    if 'dx1' and 'dx2' in kwargs:
+#                 # We have defined a tangent vector at each end
+
+#                 #print 'dx1 and dx2 defined'
+                
+#                 self.Nctl = self.N + 2
+#                 dx1 = kwargs['dx1']
+#                 dx2 = kwargs['dx2']
+#                 ibcl = 1
+#                 ibcr = 1
+#                 kntopt = 1
+#                 assert len(dx1)==len(dx2)==self.nDim,'The length of the \
+# derivative vectors must match the spatial dimension of the curve'
+
+#                 if self.nDim > 1:
+#                     self.coef = zeros((self.Nctl,self.nDim),self.dtype)
+
+#                     for idim in xrange(self.nDim):
+#                         fbcl = dx1[idim]
+#                         fbcr = dx2[idim]
+
+#                         self.t,self.coef[:,idim],k = \
+#                             self.pyspline.bint4(self.s,self.X[:,idim],\
+#                                                     ibcl,ibcr,fbcl,fbcr,kntopt)
+
+#                 else:
+#                     print 'do something'
+#                 # end if
