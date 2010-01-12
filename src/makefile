@@ -8,6 +8,7 @@ RM  	        = /bin/rm -rf
 SPLINE_LIB = libspline.a
 SPLINE_LIB_SHARED = libspline.so
 OBJ =	misc/eval_curve.o\
+	misc/eval_curve_V.o\
 	misc/eval_curve_deriv.o\
 	misc/compute_curve.o\
 	bspline/bvalu.o\
