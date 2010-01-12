@@ -36,13 +36,13 @@ subroutine eval_curve_V(s,t,k,coef,nctl,ndim,n,val)
 
   do i=1,n
      ! Evaluate the weight first
-     weight = bvalu(t,coef(:,ndim+1),nctl,k,0,s,inbv,work)
+     weight = bvalu(t,coef(:,ndim+1),nctl,k,0,s(i),inbv,work)
 
      do idim=1,ndim
-        val(i,idim) = bvalu(t,coef(:,idim)*coef(:,ndim+1),nctl,k,0,s,inbv,work)
+        val(i,idim) = bvalu(t,coef(:,idim)*coef(:,ndim+1),nctl,k,0,s(i),inbv,work)
      end do
 
-     val(i) = val(i)/weight
+     val(i,:) = val(i,:)/weight
   end do
 
 end subroutine eval_curve_V
