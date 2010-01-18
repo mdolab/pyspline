@@ -36,7 +36,11 @@ import pyspline_cs
 import pyspline as pyspline_real
 
 from mdo_import_helper import *
-exec(import_modules('petsc4py'))
+str = import_modules('petsc4py')
+print 'fuckoff'
+print str
+sys.exit(0)
+from petsc4py import PETSc
 
 # =============================================================================
 def e_dist(x1,x2):
@@ -46,14 +50,14 @@ def e_dist(x1,x2):
 # pySpline class
 # =============================================================================
 
-class surf_spline():
+class surface():
 
-    def __init__(self,task='create',*args,**kwargs):
+    def __init__(self,*args,**kwargs):
 
         '''Create an instance of a b-spline surface. There are three ways to
-        initialize the class as determined by the task flag:
+        initialize the class as determined by the first argument:
 
-        task = \'create\': Create an instance of the spline class
+        args[0] = \'create\': Create an instance of the spline class
         directly by supplying the required information. **kwargs MUST
         contain the folloiwng information:
 
@@ -64,7 +68,7 @@ class surf_spline():
             coef, real array size(Nctlu,Nctlv,nDim): Array of control point 
                                                      values
 
-        task = \'interpolate\': Create an instance of the spline class
+        args[0] = \'interpolate\': Create an instance of the spline class
         by using an interpolating spline to given data points. **kwarg
         MUST contain the following information:
 
@@ -74,7 +78,7 @@ class surf_spline():
             v, real, array: list of v values (Optional for ndim=3,required otherwise)
             X, real, array, size(len(u),len(v),nDim):Array of data points to fit
 
-        task = \'lms\': Create an instance of the spline class using a
+        args[0] \'lms\': Create an instance of the spline class using a
         Least-Mean-Squares fit to the spline. . **kwargs MUST contain
         the following information:
 
@@ -86,12 +90,13 @@ class surf_spline():
             v, real, array: list of v values (Optional for ndim=3,required otherwise)
             X, real, array, size(len(u),len(v),nDim):Array of data points to fit
 '''
+
         if 'no_print' in kwargs:
             self.NO_PRINT = kwargs['no_print']
         else:
             self.NO_PRINT = False
         # end if      
-
+        task = args[0]
         mpiPrint('pySpline Type: %s. '%(task),self.NO_PRINT)
 
         self.pyspline_real = pyspline_real # Real version of spline library
@@ -117,7 +122,7 @@ class surf_spline():
         if task == 'create':
             assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
                 and 'tv' in kwargs and 'coef' in kwargs and 'range' in kwargs,\
-                'Error: ku,kv,tu,tv,coef and range MUST be defined for task=\
+               'Error: ku,kv,tu,tv,coef and range MUST be defined for task=\
 \'create\''
             self.ku = int(kwargs['ku'])
             self.kv = int(kwargs['kv'])
@@ -147,7 +152,6 @@ class surf_spline():
                 assert 'ku' in kwargs and 'kv' in kwargs and \
                    'X' in kwargs,'Error: ku,kv,and X MUST be defined for task \
 interpolate'
-                
                 self.X = array(kwargs['X'])
                 self.Nctlu = self.X.shape[0]
                 self.Nctlv = self.X.shape[1]
@@ -189,12 +193,18 @@ to Nv: Nctlv = %d'%self.Nctlv
                 self.rel_tol = 5e-4
             # end if
 
+            if 'niter' in kwargs:
+                self.niter = kwargs['niter']
+            else:
+                self.niter = 1000
+            # end if
+
             if 'u' in kwargs and 'v' in kwargs:
-                self.u = kwargs['u']
-                self.v = kwargs['v']
+                u = kwargs['u']
+                v = kwargs['v']
             else:
                 if self.nDim == 3:
-                    self._calcParameterization()
+                    u,v = self._calcParameterization()
                 else:
                     print 'Automatric parameterization of ONLY available\
  for spatial data in 3 dimensions. Please supply u and v key word arguments\
@@ -202,77 +212,77 @@ to Nv: Nctlv = %d'%self.Nctlv
                     sys.exit(1)
                 # end if
             # end if
-            self.umin = self.u[0]
-            self.umax = self.u[-1]
-            self.vmin = self.v[0]
-            self.vmax = self.v[-1]
-            self.tu = self.pyspline.knots(self.u,self.Nctlu,self.ku)
-            self.tv = self.pyspline.knots(self.v,self.Nctlv,self.kv)
-            
-            [V,U] = meshgrid(self.v,self.u)
-            self.rel_tol
+            self.umin = u[0]
+            self.umax = u[-1]
+            self.vmin = v[0]
+            self.vmax = v[-1]
+            self.tu = self.pyspline.knots(u,self.Nctlu,self.ku)
+            self.tv = self.pyspline.knots(v,self.Nctlv,self.kv)
 
-            self.coef = zeros((self.Nctlu*self.Nctlv,self.nDim))
-            if USE_PETSC:
+            [self.V,self.U] = meshgrid(u,v)
+            self.recompute(1)
 
-                J = PETSc.Mat().create(PETSc.COMM_SELF)
-                J.setSizes([self.Nu*self.Nv,self.Nctlu*self.Nctlv])
-                J.setType(PETSc.Mat.Type.SEQAIJ)
-                rhs = PETSc.Vec().createSeq(self.Nu*self.Nv)
-                temp = PETSc.Vec().createSeq(self.Nctlu*self.Nctlv)
-                
-                ksp = PETSc.KSP()
-                ksp.create(PETSc.COMM_WORLD)
-                ksp.getPC().setType('none')
-                ksp.setType('lsqr')
-                ksp.setConvergenceTest(self._converge_test)
-                self.niter = 1000
-                for j in xrange(self.niter):
-                    J.zeroEntries()
+        # end if (init type)
+        return
 
-                    rows,cols,vals = self.pyspline.surface_jacobian_linear(
-                        U,V,self.tu,self.tv,self.ku,self.kv,
-                        self.Nctlu,self.Nctlv)
-                    timeA = time.time()
-                    for i in xrange(len(rows)):
-                        J.setValue(rows[i],cols[i],vals[i],PETSc.InsertMode.INSERT_VALUES)
-                    # end for
-                    print 'python loop time:',time.time()-timeA
-                    J.assemble()
-                    ksp.setOperators(J)
 
-                    for idim in xrange(self.nDim): # Solve for each RHS
-                        rhs[:] = self.X[:,:,idim]
-                        ksp.solve(rhs, temp)
-                        self.coef[:,idim] = temp[:]
-                    # end for
-                    U,V,rms = self.pyspline.surface_para_corr(
-                        self.tu,self.tv,self.ku,self.kv,U,V,
-                        self.coef.reshape((self.Nctlu,self.Nctlv,self.nDim)),
-                        self.X)
+    def recompute(self,niter=1000):
+        '''Recompute the surface if the knot vector has changed:'''
+        print 'recomputing'
+        self.coef = zeros((self.Nctlu*self.Nctlv,self.nDim))
+        if USE_PETSC:
+            J = PETSc.Mat().create(PETSc.COMM_SELF)
+            J.setSizes([self.Nu*self.Nv,self.Nctlu*self.Nctlv])
+            J.setType(PETSc.Mat.Type.SEQAIJ)
+            rhs = PETSc.Vec().createSeq(self.Nu*self.Nv)
+            sol = PETSc.Vec().createSeq(self.Nctlu*self.Nctlv)
 
-                    # Convergence Checks
-                    if j == 0:
-                        self.old_rms = rms
-                        rms0 = rms
-                    else:
-                        val = abs((rms-self.old_rms)/self.old_rms)
-                        #print 'iter,rms:',j,rms,val
-                        self.old_rms = rms
-                        if val < self.rel_tol or rms <1e-12:
-                            break
-                        # end if
-                    # end if
+            ksp = PETSc.KSP()
+            ksp.create(PETSc.COMM_WORLD)
+            ksp.getPC().setType('none')
+            ksp.setType('lsqr')
+            ksp.setConvergenceTest(self._converge_test)
+           
+            for iter in xrange(self.niter):
+                J.zeroEntries()
+
+                rows,cols,vals = self.pyspline.surface_jacobian_linear(
+                    U,V,self.tu,self.tv,self.ku,self.kv,
+                    self.Nctlu,self.Nctlv)
+
+                for i in xrange(len(rows)):
+                    J.setValue(rows[i],cols[i],vals[i],PETSc.InsertMode.INSERT_VALUES)
                 # end for
-            else: # Use Numpy
-                print 'Not implemented yet'
-                pass
+                J.assemble()
+                ksp.setOperators(J)
 
+                for idim in xrange(self.nDim): # Solve for each RHS
+                    rhs[:] = self.X[:,:,idim]
+                    ksp.solve(rhs, sol)
+                    self.coef[:,idim] = sol[:]
+                # end for
+                U,V,rms = self.pyspline.surface_para_corr(
+                    self.tu,self.tv,self.ku,self.kv,U,V,
+                    self.coef,self.X)
 
-        # end if
+                # Convergence Checks
+                if iter == 0:
+                    self.old_rms = rms
+                    rms0 = rms
+                else:
+                    rel_change = abs((rms-self.old_rms)/self.old_rms)
+                    self.old_rms = rms
+                    if rel_change < self.rel_tol or rms <1e-12:
+                        break
+                    # end if
+                # end if
+            # end for
+        else: # Use Numpy
+            print 'Surfacing Fitting with Numpy Not implemented yet'
+            pass
 
         self.coef = self.coef.reshape((self.Nctlu,self.Nctlv,self.nDim))
-        
+
         return
 
     def _converge_test(self,ksp,iter,rnorm):
@@ -290,19 +300,6 @@ to Nv: Nctlv = %d'%self.Nctlv
             # end if
         # end if
 
-    def recompute(self):
-        '''Recompute the surface if the knot vector has changed:'''
-
-        assert self.orig_data,'Only surface initialization with original data can be recomputed'
-
-        self._calcJacobian()
-        res = numpy.linalg.lstsq(self.J,self.X.reshape[self.Nu*self.Nv,self.nDim])
-        self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim],self.dtype)
-        for idim in xrange(self.nDim):
-            self.coef[:,:,idim] = reshape(res[0][idim],self.Nctlu,self.Nctlv)
-        # end for
-        
-        return
 
     def _calcParameterization(self):
 
@@ -325,7 +322,7 @@ to Nv: Nctlv = %d'%self.Nctlv
 
             u += temp #accumulate the u-parameter calcs for each j
         # end for 
-        self.u =u/(self.Nv-singular_counter) #divide by the number of 'j's we had
+        u =u/(self.Nv-singular_counter) #divide by the number of 'j's we had
         
         v = zeros(self.Nv,self.dtype)
         singular_counter = 0
@@ -344,9 +341,9 @@ to Nv: Nctlv = %d'%self.Nctlv
 
             v += temp #accumulate the v-parameter calcs for each i
         # end for 
-        self.v = v/(self.Nu-singular_counter) #divide by the number of 'i's we had
+        v = v/(self.Nu-singular_counter) #divide by the number of 'i's we had
 
-        return
+        return u,v
 
 #     def _calcJacobian(self):
 
