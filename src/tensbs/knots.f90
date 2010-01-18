@@ -14,8 +14,8 @@ subroutine knots(X,N,Nctl,K,T)
   !
   ! LOCAL VARIABLES
   !
-  double precision frac,s,temp
-  INTEGER  I, J, Nremain, istart, highI,lowI,mid,index
+  double precision d,alpha
+  INTEGER  I, J
   ! ----------------------------
   !  PUT K KNOTS AT EACH ENDPOINT -- Knot a knot conditions
   !  ----------------------------
@@ -26,70 +26,82 @@ subroutine knots(X,N,Nctl,K,T)
      T(Nctl+J) = X(N) ! right
   end do
 
-  if (Nctl == N) then
-     call bknot(X,N,K,T)
-     return
-  end if
+  d = dble(N/(Nctl-k+1.0))
 
-  ! We now have Nctl-K knots left to distribute
-  ! We wich to distribute them according to positions of data
-  ! 
-  Nremain = Nctl-K
+  do j=1,Nctl-k+1
+     i = floor(j*d)
+     alpha = j*d-i
+     T(k+j) = (1-alpha)*X(i) + alpha*X(i+1)
+  end do
 
-  if (Nremain == 0) then
-     return
-  else
+end subroutine knots
+
+
+
+!   if (Nctl == N) then
+!      call bknot(X,N,K,T)
+!      return
+!   end if
+
+!   ! We now have Nctl-K knots left to distribute
+!   ! We wich to distribute them according to positions of data
+!   ! 
+!   Nremain = Nctl-K
+
+!   if (Nremain == 0) then
+!      return
+!   else
      
-     if (mod(Nremain,2) == 0) then
-        !print *,'even remaining'
+!      if (mod(Nremain,2) == 0) then
+!         !print *,'even remaining'
 
-        istart = (Nctl+k)/2 
+!         istart = (Nctl+k)/2 
 
-        frac = 1.0/(Nremain + 1)
-        do i =1,Nremain/2
-           ! Lower
-           temp = frac*i*N
-           index = int(floor(temp))
-           s = temp-index
+!         frac = 1.0/(Nremain + 1)
+!         do i =1,Nremain/2
+!            ! Lower
+!            temp = frac*i*N
+!            index = int(floor(temp))
+!            s = temp-index
 
-           T(k+i) = X(index)+ s*(X(index+1)-X(index))
+!            T(k+i) = X(index)+ s*(X(index+1)-X(index))
 
-           ! Upper
-           temp =(1-frac*i)*N+1
-           index = int(floor(temp))
-           s = temp-index
+!            ! Upper
+!            temp =(1-frac*i)*N+1
+!            index = int(floor(temp))
+!            s = temp-index
 
-           T(Nctl-i+1) = X(index) + s*(X(index+1)-X(index))
-        end do
-     else
-        !print *,'odd remaining'
+!            T(Nctl-i+1) = X(index) + s*(X(index+1)-X(index))
+!         end do
+!      else
+!         !print *,'odd remaining'
         
-        istart= (Nctl+k+1)/2
-        frac = 1.0/(Nremain + 1)
+!         istart= (Nctl+k+1)/2
+!         frac = 1.0/(Nremain + 1)
 
-        ! Do The middle...always at FRAC=0.5
-        temp = 0.5*N+0.5
-        index = int(floor(temp))
-        s = temp-index
-        T(istart) = X(temp) + s*(X(temp+1)-X(temp))
+!         ! Do The middle...always at FRAC=0.5
+!         temp = 0.5*N+0.5
+!         index = int(floor(temp))
+!         s = temp-index
+!         T(istart) = X(temp) + s*(X(temp+1)-X(temp))
 
-        do i =1,(Nremain-1)/2
+!         do i =1,(Nremain-1)/2
 
-           ! Lower
-           temp = (0.5-frac*i)*N
-           index = int(floor(temp))
-           s = temp-index
+!            ! Lower
+!            temp = (0.5-frac*i)*N
+!            index = int(floor(temp))
+!            s = temp-index
 
-           T(istart-i) = X(index)+ s*(X(index+1)-X(index))
+!            T(istart-i) = X(index)+ s*(X(index+1)-X(index))
 
-           ! Upper
-           temp = (0.5+frac*i)*N
-           index = int(floor(temp))
-           s = temp-index
+!            ! Upper
+!            temp = (0.5+frac*i)*N
+!            index = int(floor(temp))
+!            s = temp-index
 
-           T(istart+i) = X(index)+ s*(X(index+1)-X(index))
+!            T(istart+i) = X(index)+ s*(X(index+1)-X(index))
 
-        end do
-     end if
-  end if
- end subroutine knots
+!         end do
+!      end if
+!   end if
+! end subroutine knots

@@ -1,123 +1,123 @@
-subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef)
+! ubroutine compute_curve(s,X,t,k,n,nctl,ndim,coef)
 
-  !***DESCRIPTION
-  !
-  !     Written by Gaetan Kenway
-  !
-  !     Abstract: compute_curve is the main function for the
-  !               generation fo NURBS curves It does both
-  !               interpolating and LMS fits, variable NURBS weights
-  !               as well as Hoschek's Parameter Correction.
-  !
-  !     Description of Arguments
-  !     Input
-  !     s       - Real, Vector of s coordinates, length n
-  !     X       - Real, Array of X values to fit, Size (n,ndim)
-  !     t       - Real,Knot vector. Length nctl+k
-  !     k       - Integer,order of spline
-  !     nctl    - Integer,Number of control points
-  !     ndim    - Integer, spatial dimension of curve
-  !
-  !     Ouput coef - Real,Array of NURBS coefficients and
-  !     weights. Size (nctl,ndim+1)
+!   !***DESCRIPTION
+!   !
+!   !     Written by Gaetan Kenway
+!   !
+!   !     Abstract: compute_curve is the main function for the
+!   !               generation fo NURBS curves It does both
+!   !               interpolating and LMS fits, variable NURBS weights
+!   !               as well as Hoschek's Parameter Correction.
+!   !
+!   !     Description of Arguments
+!   !     Input
+!   !     s       - Real, Vector of s coordinates, length n
+!   !     X       - Real, Array of X values to fit, Size (n,ndim)
+!   !     t       - Real,Knot vector. Length nctl+k
+!   !     k       - Integer,order of spline
+!   !     nctl    - Integer,Number of control points
+!   !     ndim    - Integer, spatial dimension of curve
+!   !
+!   !     Ouput coef - Real,Array of NURBS coefficients and
+!   !     weights. Size (nctl,ndim+1)
 
-  implicit none
+!   implicit none
   
-  ! Input
-  integer         , intent(in)          :: k,nctl,ndim,n
-  double precision, intent(in)          :: X(n,ndim)
-  double precision, intent(inout)       :: s(n)
-  double precision, intent(in)          :: t(nctl+k)
+!   ! Input
+!   integer         , intent(in)          :: k,nctl,ndim,n
+!   double precision, intent(in)          :: X(n,ndim)
+!   double precision, intent(inout)       :: s(n)
+!   double precision, intent(in)          :: t(nctl+k)
 
-  ! Output
-  double precision, intent(out)         :: coef(nctl,ndim+1)
+!   ! Output
+!   double precision, intent(out)         :: coef(nctl,ndim+1)
 
-  ! Working
-  integer                               :: i,idim,inbv,iter,nrow
-  integer                               :: niter,rank
-  double precision                      :: work(3*k)
-  double precision                      :: weight
-  double precision                      :: Xcopy(n,ndim)
-  integer                               :: info,lwork,ncol
-  double precision                      :: length,res,norm,rms,val(ndim)
+!   ! Working
+!   integer                               :: i,idim,inbv,iter,nrow
+!   integer                               :: niter,rank
+!   double precision                      :: work(3*k)
+!   double precision                      :: weight
+!   double precision                      :: Xcopy(n,ndim)
+!   integer                               :: info,lwork,ncol
+!   double precision                      :: length,res,norm,rms,val(ndim)
 
-  double precision ,allocatable,dimension(:) :: work2,Svd
-  double precision ,allocatable,dimension(:,:) :: Jac
-  double precision ,allocatable,dimension(:) :: rhs
+!   double precision ,allocatable,dimension(:) :: work2,Svd
+!   double precision ,allocatable,dimension(:,:) :: Jac
+!   double precision ,allocatable,dimension(:) :: rhs
   
-  ! Functions called
-  double precision                      :: compute_lms_norm,poly_length
+!   ! Functions called
+!   double precision                      :: compute_lms_norm,poly_length
   
-  print *,'Welcome to Compute Curve'
-  !Initialization
-  niter = 1
-  coef(:,:) =  0.0
-  coef(:,ndim+1) = 1.0 ! Initialize all the weights to 1
-  length = poly_length(X,n,ndim)  
+!   print *,'Welcome to Compute Curve'
+!   !Initialization
+!   niter = 1
+!   coef(:,:) =  0.0
+!   coef(:,ndim+1) = 1.0 ! Initialize all the weights to 1
+!   length = poly_length(X,n,ndim)  
 
-  ! Determine the work size (for the non-linear case)
-  lwork = -1
-  ncol = nctl*(ndim+1)-1
-  nrow = n*ndim
-  call DGELSS(nrow,ncol,ndim,Jac,nrow,Xcopy,max(nrow,ncol),Svd,-1,rank,work,lwork,info)
-  lwork = work(1)
-  allocate(work2(lwork))
-  print *,'lwork',lwork
-  ! Do one LMS fit to get the Initial Starting Point
-  ncol = nctl
-  nrow = n
-  allocate(Jac(nrow,ncol),Svd(min(nrow,ncol)))
-  call curve_jacobian_linear(Jac,nrow,ncol,ndim,t,k,s)
-  Xcopy(:,:) = X(:,:)
-  call DGELSS(nrow,ncol,ndim,Jac,nrow,Xcopy,max(nrow,ncol),Svd,-1,rank,work2,lwork,info)
-  coef(:,1:2) = Xcopy(1:ncol,:)
-  deallocate(Jac,Svd)
+!   ! Determine the work size (for the non-linear case)
+!   lwork = -1
+!   ncol = nctl*(ndim+1)-1
+!   nrow = n*ndim
+!   call DGELSS(nrow,ncol,ndim,Jac,nrow,Xcopy,max(nrow,ncol),Svd,-1,rank,work,lwork,info)
+!   lwork = work(1)
+!   allocate(work2(lwork))
+!   print *,'lwork',lwork
+!   ! Do one LMS fit to get the Initial Starting Point
+!   ncol = nctl
+!   nrow = n
+!   allocate(Jac(nrow,ncol),Svd(min(nrow,ncol)))
+!   call curve_jacobian_linear(Jac,nrow,ncol,ndim,t,k,s)
+!   Xcopy(:,:) = X(:,:)
+!   call DGELSS(nrow,ncol,ndim,Jac,nrow,Xcopy,max(nrow,ncol),Svd,-1,rank,work2,lwork,info)
+!   coef(:,1:2) = Xcopy(1:ncol,:)
+!   deallocate(Jac,Svd)
 
-  rms = sqrt(compute_lms_norm(Xcopy,nrow,ncol,ndim)/n)  
-  print *,'Linear LMS RMS:',rms
+!   rms = sqrt(compute_lms_norm(Xcopy,nrow,ncol,ndim)/n)  
+!   print *,'Linear LMS RMS:',rms
   
-  ! Now do non-linear LMS fitting for NURBS with parameter correction
-  ncol = nctl*(ndim+1)
-  nrow = n*ndim
+!  !  ! Now do non-linear LMS fitting for NURBS with parameter correction
+! !   ncol = nctl*(ndim+1)
+! !   nrow = n*ndim
   
-  allocate(Jac(nrow,ncol),Svd(min(nrow,ncol)),rhs(nrow))
-  call curve_jacobian_non_linear(Jac,nrow,ncol,n,nctl,ndim,t,k,s,coef)
-  print *,'nrow,ncol:',nrow,ncol
-  !print *,'Jac',Jac
-   do iter=1,niter
-      print *,'iter:',iter
-     ! Compute the RHS
-      do i=1,n
-         call eval_curve(s(i),t,k,coef,nctl,ndim,val  )
-         do idim=1,ndim
-            rhs((i-1)*ndim + idim) = X(i,idim)-val(idim)
-         end do
-      end do
-      print *,'rhs:',rhs
+! !   allocate(Jac(nrow,ncol),Svd(min(nrow,ncol)),rhs(nrow))
+! !   call curve_jacobian_non_linear(Jac,nrow,ncol,n,nctl,ndim,t,k,s,coef)
+! !   print *,'nrow,ncol:',nrow,ncol
+! !   !print *,'Jac',Jac
+! !    do iter=1,niter
+! !       print *,'iter:',iter
+! !      ! Compute the RHS
+! !       do i=1,n
+! !          call eval_curve(s(i),t,k,coef,nctl,ndim,val  )
+! !          do idim=1,ndim
+! !             rhs((i-1)*ndim + idim) = X(i,idim)-val(idim)
+! !          end do
+! !       end do
+! !       print *,'rhs:',rhs
      
-      call DGELSS(nrow,ncol,1,Jac,nrow,rhs,max(nrow,ncol),Svd,-1,rank,work2,lwork,info)
-      !    DGELSS(M,  N, NRHS,A  ,LDA,B  ,LDB, S,RCOND,RANK,WORK,LWORK,INFO)
-      ! Update the coefficients
+! !       call DGELSS(nrow,ncol,1,Jac,nrow,rhs,max(nrow,ncol),Svd,-1,rank,work2,lwork,info)
+! !       !    DGELSS(M,  N, NRHS,A  ,LDA,B  ,LDB, S,RCOND,RANK,WORK,LWORK,INFO)
+! !       ! Update the coefficients
 
-      do i=1,nctl
-         do idim=1,ndim+1
-            coef(i,idim) = coef(i,idim) + rhs((i-1)*(ndim+1)+idim)
-            print *,'i,idim,delta:',i,idim,rhs((i-1)*(ndim+1)+idim)
-         end do
-      end do
+! !       do i=1,nctl
+! !          do idim=1,ndim+1
+! !             coef(i,idim) = coef(i,idim) + rhs((i-1)*(ndim+1)+idim)
+! !             print *,'i,idim,delta:',i,idim,rhs((i-1)*(ndim+1)+idim)
+! !          end do
+! !       end do
 
-      coef(:,ndim+1) = 1.0
-     rms = sqrt(compute_lms_norm(rhs,nrow,ncol,1)/(nrow))
-     print *,'Non-Linear LMS RMS:',rms
+! !       coef(:,ndim+1) = 1.0
+! !      rms = sqrt(compute_lms_norm(rhs,nrow,ncol,1)/(nrow))
+! !      print *,'Non-Linear LMS RMS:',rms
      
-     !call curve_para_corr(t,k,coef,nctl,ndim,s,length,n,X)
-     !call curve_jacobian_non_linear(Jac,nrow,ncol,n,nctl,ndim,t,k,s,coef)
-   end do
-  print *,'done all'
-     
-  deallocate(work2)
-  deallocate(Jac,Svd,rhs)
-end subroutine compute_curve
+! !      !call curve_para_corr(t,k,coef,nctl,ndim,s,length,n,X)
+! !      !call curve_jacobian_non_linear(Jac,nrow,ncol,n,nctl,ndim,t,k,s,coef)
+! !    end do
+! !   print *,'done all'
+! !   deallocate(Jac,Svd,rhs)     
+!    deallocate(work2)
+
+! end subroutine compute_curve
 
 subroutine curve_jacobian_non_linear(Jac,nrow,ncol,n,nctl,ndim,t,k,s,coef)
 
@@ -242,19 +242,23 @@ end subroutine curve_jacobian_non_linear
 ! end subroutine curve_jacobian_non_linear
 
 
-subroutine curve_jacobian_linear(Jac,n,nctl,ndim,t,k,s)
+subroutine curve_jacobian_linear(t,k,s,n,nctl,rows,cols,vals)
 
   implicit none
-  integer                               :: k,nctl,ndim,n
-  double precision                      :: Jac(n,nctl)
-  double precision                      :: s(n)
-  double precision                      :: t(nctl+k)
+  ! Input
+  double precision     ,intent(in)      :: t(nctl+k)
+  double precision     ,intent(in)      :: s(n)
+  integer              ,intent(in)      :: k,nctl,n
+  ! Output
+  double precision     ,intent(out)     :: vals(n*k)
+  integer              ,intent(out)     :: rows(n*k),cols(n*k)
+  ! Working
   double precision                      :: vnikx(k),work(2*k)
-  integer                               :: i,j
+  integer                               :: i,j,counter
   integer                               :: ilo,ileft,mflag,iwork
   
-  Jac(:,:) = 0.0
   ilo = 1
+  counter = 1
   do i=1,n
      call intrv(t,nctl+k,s(i),ilo,ileft,mflag)
      if (mflag == 0) then
@@ -266,7 +270,10 @@ subroutine curve_jacobian_linear(Jac,n,nctl,ndim,t,k,s)
      end if
 
      do j=1,k
-        Jac(i,ileft-k+j) = vnikx(j)
+        rows(counter) = i-1
+        cols(counter) = ileft-k+j-1
+        vals(counter) = vnikx(j)
+        counter = counter + 1
      end do
   end do
 
@@ -275,9 +282,10 @@ end subroutine curve_jacobian_linear
 function poly_length(X,n,ndim)
   ! Compute the length of the spatial polygon
   implicit none
-
-  double precision                :: X(n,ndim)
-  integer                         :: n,ndim,i,idim
+  !Input
+  double precision ,intent(in)    :: X(n,ndim)
+  integer          ,intent(in)    :: n,ndim
+  integer                         :: i,idim
   double precision                :: dist
   double precision poly_length
   poly_length = 0.0
@@ -293,153 +301,140 @@ end function poly_length
 
 
 
-function norm(X,n)
-  ! Compute the L2 nomr of X
-  implicit none
-  double precision       :: X(n)
-  double precision       :: norm
-  integer                :: i,n
-  norm = 0.0
-  do i=1,n
-     norm = norm + X(i)**2
-  end do
-  norm = sqrt(norm)
-end function norm
+subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X,rms)
 
-
-subroutine curve_para_corr(t,k,coef,nctl,ndim,s,length,n,X)
   ! Do Hoschek parameter correction
   implicit none
-  double precision                   :: t(k+nctl)
-  double precision                   :: coef(nctl,ndim+1)
-  double precision                   :: s(n)
-  double precision                   :: length
-  double precision                   :: X(n,ndim)
-  integer                            :: k,nctl,ndim,n,i,j,max_inner_iter
-
-  double precision                   :: D(ndim),D2(ndim),val(ndim),deriv(ndim)
+  ! Input/Output
+  double precision  ,intent(in)      :: t(k+nctl)
+  double precision  ,intent(inout)   :: s(n)
+  double precision  ,intent(in)      :: coef(nctl,ndim)
+  integer           ,intent(in)      :: k,nctl,ndim,n
+  double precision  ,intent(in)      :: X(n,ndim)
+  double precision  ,intent(in)      :: length
+  double precision  ,intent(out)     :: rms
+  ! Working
+  integer                            :: i,j,max_inner_iter
+  double precision                   :: D(ndim),D2(ndim),Dnorm,D2norm
+  double precision                   :: val(ndim),deriv(ndim)
   double precision                   :: c,s_tilde,norm
 
   max_inner_iter = 10
-
+  rms = 0.0
   do i=2,n-1
      call eval_curve(s(i),t,k,coef,nctl,ndim,val)
      call eval_curve_deriv(s(i),t,k,coef,nctl,ndim,deriv)
-     
+          
      D = X(i,:)-val
      c = dot_product(D,deriv)/norm(deriv,ndim)
-     
+
      inner_loop: do j=1,max_inner_iter
 
         s_tilde = s(i)+ c*(t(nctl+k)-t(1))/length
         call eval_curve(s_tilde,t,k,coef,nctl,ndim,val)
         D2 = X(i,:)-val
-
         if (norm(D,ndim) .ge. norm(D2,ndim)) then
            s(i) = s_tilde
+           rms = rms + dot_product(D2,D2)
            exit inner_loop
         else
            c = c*0.5
+           if (j==max_inner_iter) then
+              rms = rms + dot_product(D2,D2)
+           end if
         end if
      end do inner_loop
- 
   end do
+
+  ! Add the first and Last
+  call eval_curve(s(1),t,k,coef,nctl,ndim,val)
+  rms = rms + dot_product(X(1,:)-val,X(1,:)-val)
+  call eval_curve(s(n),t,k,coef,nctl,ndim,val)
+  rms = rms + dot_product(X(n,:)-val,X(n,:)-val)
+   rms = sqrt(rms/n)
 end subroutine curve_para_corr
 
-! subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,Jac)
+subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef)
 
-!   !***DESCRIPTION
-!   !
-!   !     Written by Gaetan Kenway
-!   !
-!   !     Abstract: compute_curve is the main function for the
-!   !               generation fo NURBS curves It does both
-!   !               interpolating and LMS fits, variable NURBS weights
-!   !               as well as Hoschek's Parameter Correction.
-!   !
-!   !     Description of Arguments
-!   !     Input
-!   !     s       - Real, Vector of s coordinates, length n
-!   !     X       - Real, Array of X values to fit, Size (n,ndim)
-!   !     t       - Real,Knot vector. Length nctl+k
-!   !     k       - Integer,order of spline
-!   !     nctl    - Integer,Number of control points
-!   !     ndim    - Integer, spatial dimension of curve
-!   !
-!   !     Ouput coef - Real,Array of NURBS coefficients and
-!   !     weights. Size (nctl,ndim+1)
+  !***DESCRIPTION
+  !
+  !     Written by Gaetan Kenway
+  !
+  !     Abstract: compute_curve is the main function for the
+  !               generation fo NURBS curves It does both
+  !               interpolating and LMS fits, variable NURBS weights
+  !               as well as Hoschek's Parameter Correction.
+  !
+  !     Description of Arguments
+  !     Input
+  !     s       - Real, Vector of s coordinates, length n
+  !     X       - Real, Array of X values to fit, Size (n,ndim)
+  !     t       - Real,Knot vector. Length nctl+k
+  !     k       - Integer,order of spline
+  !     nctl    - Integer,Number of control points
+  !     ndim    - Integer, spatial dimension of curve
+  !
+  !     Ouput coef - Real,Array of NURBS coefficients and
+  !     weights. Size (nctl,ndim+1)
 
-!   implicit none
+  implicit none
   
-!   ! Input
-!   integer         , intent(in)          :: k,nctl,ndim,n
-!   double precision, intent(in)          :: X(n,ndim)
-!   double precision, intent(inout)       :: s(n)
-!   double precision, intent(in)          :: t(nctl+k)
+  ! Input
+  integer         , intent(in)          :: k,nctl,ndim,n
+  double precision, intent(in)          :: X(n,ndim)
+  double precision, intent(inout)       :: s(n)
+  double precision, intent(inout)       :: t(nctl+k)
 
-!   ! Output
-!   double precision, intent(out)         :: coef(nctl,ndim+1)
+  ! Output
+  double precision, intent(out)         :: coef(nctl,ndim)
 
-!   ! Working
-!   integer                               :: i,idim,inbv,iter
-!   integer                               :: niter,rank
-!   double precision                      :: work(3*k)
-!   double precision                      :: weight
-!   double precision                      :: Xcopy(n,ndim)
-!   double precision   ,intent(out)       :: Jac(n,nctl)
-!   double precision                      :: Svd(nctl)
-!   integer                               :: info,lwork
-!   double precision                      :: length,res,norm,tot,val(ndim)
+  ! Working
+  integer                               :: i,idim,inbv,iter
+  integer                               :: niter,rank
+  double precision                      :: work(3*k)
+  double precision                      :: weight
+  double precision                      :: Xcopy(n,ndim)
+  double precision                      :: Jac(n,nctl)
+  double precision                      :: Svd(nctl)
+  integer                               :: info,lwork
+  double precision                      :: length,res,norm,tot,val(ndim),rms
 
-!   double precision ,allocatable,dimension(:) :: work2
+  double precision ,allocatable,dimension(:) :: work2
   
-!   ! Functions called
-!   double precision                      :: compute_lms_norm,poly_length
+  ! Functions called
+  double precision                      :: compute_lms_norm,poly_length
 
-!   print *,'Welcome to Compute Curve'
+  !print *,'Welcome to Compute Curve'
 
-!   ! Determine the work size
-!   lwork = -1
-!   call DGELSS(n,nctl,ndim,Jac,n,Xcopy,n, Svd, -1 , rank,work,lwork,info)
-!   lwork = work(1)
-!   allocate(work2(lwork))
+  ! Determine the work size
+  lwork = -1
+  call DGELSS(n,nctl,ndim,Jac,n,Xcopy,n, Svd, -1 , rank,work,lwork,info)
+  lwork = work(1)
+  allocate(work2(lwork))
      
-!   !Initialization
-!   niter = 1000
-!   coef(:,:) =  0.0
-!   coef(:,ndim+1) = 1.0 ! Initialize all the weights to 1
+  !Initialization
+  niter = 2500
+  coef(:,:) =  0.0
+  length = poly_length(X,n,ndim)  
 
-!   length = poly_length(X,n,ndim)  
-
-!   call curve_jacobian(Jac,n,nctl,ndim,t,k,s,coef)
+  call curve_jacobian_linear2(Jac,n,nctl,ndim,t,k,s)
   
-!   do iter=1,niter
-!      Xcopy(:,:) = X(:,:)
-!      call DGELSS(n,nctl,ndim,Jac,n,Xcopy,n, Svd, -1 , rank,work2,lwork,info)
-!      !    DGELSS(M,  N, NRHS,A  ,LDA,B  ,LDB, S,RCOND,RANK,WORK,LWORK,INFO)
+  do iter=1,niter
+     Xcopy(:,:) = X(:,:)
+     call DGELSS(n,nctl,ndim,Jac,n,Xcopy,n, Svd, -1 , rank,work2,lwork,info)
+     !    DGELSS(M,  N, NRHS,A  ,LDA,B  ,LDB, S,RCOND,RANK,WORK,LWORK,INFO)
 
-!      do i=1,nctl
-!         do idim=1,ndim
-!            coef(i,idim) = Xcopy(i,idim)
-!         end do
-!      end do
+     do i=1,nctl
+        do idim=1,ndim
+           coef(i,idim) = Xcopy(i,idim)
+        end do
+     end do
      
-!      call curve_para_corr(t,k,coef,nctl,ndim,s,length,n,X)
-     
-!      ! Check the actual deltas
-!      tot = 0.0
-!      do i=1,n
-!         call eval_curve(s(i),t,k,coef,nctl,ndim,val)
-!         tot = tot + (val(1)-X(i,1))**2  + (val(2)-X(i,2))**2
-!      end do
-
-!      if (mod(iter,100) == 0) then
-!         print *,'iter,rms:',iter,sqrt(tot/n)
-!      end if
-!      call curve_jacobian(Jac,n,nctl,ndim,t,k,s,coef)     
-!   end do
-!   deallocate(work2)
-! end subroutine compute_curve
+     call curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X,rms)
+     call curve_jacobian_linear2(Jac,n,nctl,ndim,t,k,s)
+  end do
+  deallocate(work2)
+end subroutine compute_curve
 
 
 ! subroutine curve_jacobian(Jac,n,nctl,ndim,t,k,s,coef)
@@ -491,3 +486,48 @@ function compute_lms_norm(X,m,n,ndim)
      end do
   end do
 end function compute_lms_norm
+
+
+
+subroutine curve_jacobian_linear2(Jac,n,nctl,ndim,t,k,s)
+
+  implicit none
+  integer                               :: k,nctl,ndim,n
+  double precision                      :: Jac(n,nctl)
+  double precision                      :: s(n)
+  double precision                      :: t(nctl+k)
+  double precision                      :: vnikx(k),work(2*k)
+  integer                               :: i,j
+  integer                               :: ilo,ileft,mflag,iwork
+  
+  Jac(:,:) = 0.0
+  ilo = 1
+  do i=1,n
+     call intrv(t,nctl+k,s(i),ilo,ileft,mflag)
+     if (mflag == 0) then
+        call bspvn(t,k,k,1,s(i),ileft,vnikx,work,iwork)
+     else if (mflag == 1) then
+        ileft = nctl
+        vnikx(:) = 0.0
+        vnikx(k) = 1.0
+     end if
+
+     do j=1,k
+        Jac(i,ileft-k+j) = vnikx(j)
+     end do
+  end do
+
+end subroutine curve_jacobian_linear2
+
+function norm(X,n)
+  ! Compute the L2 nomr of X
+  implicit none
+  double precision       :: X(n)
+  double precision       :: norm
+  integer                :: i,n
+  norm = 0.0
+  do i=1,n
+     norm = norm + X(i)**2
+  end do
+  norm = sqrt(norm)
+end function norm

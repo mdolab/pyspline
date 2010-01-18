@@ -7,15 +7,19 @@ RM  	        = /bin/rm -rf
 
 SPLINE_LIB = libspline.a
 SPLINE_LIB_SHARED = libspline.so
-OBJ =	misc/eval_curve.o\
-	misc/eval_curve_V.o\
+OBJ =	misc/compute_curve.o\
+	misc/eval_curve.o\
 	misc/eval_curve_deriv.o\
-	misc/compute_curve.o\
+	misc/eval_curve_deriv2.o\
+	misc/project_point_curve.o\
+	misc/compute_surface.o\
+	misc/eval_surface.o\
+	misc/eval_surface_deriv.o\
 	bspline/bvalu.o\
 	bspline/intrv.o\
 	bspline/bspvn.o\
-	tensbs/bknot.o\
 	tensbs/knots.o\
+	tensbs/b2val.o\
 	machcon/i1mach.o\
 	machcon/r1mach.o\
 	xerror/fdump.o\
