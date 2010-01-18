@@ -1,180 +1,232 @@
-!    -*- f90 -*-
-! Note: the context of this file is case sensitive.
+  !    -*- f90 -*-
+  ! Note: the context of this file is case sensitive.
+  
+  python module pyspline ! in 
+  interface  ! in :pyspline
 
-python module pyspline ! in 
-    interface  ! in :pyspline
-        subroutine compute_curve(s,x,t,k,n,nctl,ndim,coef) ! in :test:compute_curve.f90
-            double precision dimension(n),intent(in,out) :: s
-            double precision dimension(n,ndim),intent(in),depend(n) :: x
-            double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
-            integer intent(in) :: k
-            integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
-            integer intent(in) :: nctl
-            integer optional,intent(in),check(shape(x,1)==ndim),depend(x) :: ndim=shape(x,1)
-            double precision dimension(nctl,ndim + 1),intent(out),depend(nctl,ndim) :: coef
-        end subroutine compute_curve
+     ! --------------------- Curve Functions ------------------
+     subroutine compute_curve(s,x,t,k,n,nctl,ndim,coef) ! in :test:compute_curve.f90
+       double precision dimension(n),intent(in,out) :: s
+       double precision dimension(n,ndim),intent(in),depend(n) :: x
+       double precision dimension(nctl+k),intent(in,out),depend(k,nctl) :: t
+       integer intent(in) :: k
+       integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+       integer intent(in) :: nctl
+       integer optional,intent(in),check(shape(x,1)==ndim),depend(x) :: ndim=shape(x,1)
+       double precision dimension(nctl,ndim),intent(out),depend(nctl,ndim) :: coef
+     end subroutine compute_curve
 
-       subroutine eval_curve(s,t,k,coef,nctl,ndim,val) ! in :test:eval_curve.f90
-            double precision intent(in) :: s
-            double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
-            integer intent(in) :: k
-            double precision dimension(nctl,ndim + 1),intent(in) :: coef
-            integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
-            integer optional,intent(in),check((shape(coef,1)-1)==ndim),depend(coef) :: ndim=(shape(coef,1)-1)
-            double precision dimension(ndim),intent(out),depend(ndim) :: val
-        end subroutine eval_curve
+     subroutine eval_curve(s,t,k,coef,nctl,ndim,val) ! in :test:eval_curve.f90
+       double precision intent(in) :: s
+       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       double precision dimension(nctl,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+       integer optional,intent(in),check((shape(coef,1))==ndim),depend(coef) :: ndim=(shape(coef,1))
+       double precision dimension(ndim),intent(out),depend(ndim) :: val
+     end subroutine eval_curve
 
-       subroutine eval_curve_deriv(s,t,k,coef,nctl,ndim,val) ! in :test:eval_curve_deriv.f90
-            double precision intent(in) :: s
-            double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
-            integer intent(in) :: k
-            double precision dimension(nctl,ndim + 1),intent(in) :: coef
-            integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
-            integer optional,intent(in),check((shape(coef,1)-1)==ndim),depend(coef) :: ndim=(shape(coef,1)-1)
-            double precision dimension(ndim),intent(out),depend(ndim) :: val
-       end subroutine eval_curve_deriv
+     subroutine eval_curve_v(s,t,k,coef,nctl,ndim,n,val) ! in :test:eval_curve_V.f90
+       double precision dimension(n),intent(in) :: s
+       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       double precision dimension(nctl,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==ndim),depend(coef) :: ndim=shape(coef,1)
+       integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+       double precision dimension(n,ndim),intent(out),depend(n,ndim) :: val
+     end subroutine eval_curve_v
 
-!         subroutine b2ink(x,nx,y,ny,fcn,ldf,kx,ky,tx,ty,bcoef,work,iflag) ! in :pyspline:b2ink.f
-!             real*8, intent(in), dimension(nx) :: x
-!             integer optional,check(len(x)>=nx),depend(x) :: nx=len(x)
-!             real*8, intent(in),dimension(ny) :: y
-!             integer optional,check(len(y)>=ny),depend(y) :: ny=len(y)
-!             real*8, intent(in), dimension(ldf,ny),depend(ny) :: fcn
-!             integer optional,check(shape(fcn,0)==ldf),depend(fcn) :: ldf=shape(fcn,0)
-!             integer, intent(in) :: kx
-!             integer, intent(in) :: ky
-!             real*8, intent(out),dimension(nx+kx) :: tx
-!             real*8, intent(out),dimension(ny+ky) :: ty
-!             real*8, intent(out), dimension(nx,ny),depend(nx,ny) :: bcoef
-!             real*8, optional, dimension(nx*ny + MAX(2*kx*(nx+1),2*ky*(ny+1))) ::work
-!             integer,optional,intent(in) :: iflag=0
-!         end subroutine b2ink
-        
-!         function b2val(xval,yval,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,work) ! in :pyspline:b2val.f
-!             real*8,intent(in) :: xval
-!             real*8,intent(in) :: yval
-!             integer,intent(in) :: idx
-!             integer,intent(in) :: idy
-!             real*8,intent(in), dimension(nx+kx) :: tx
-!             real*8,intent(in), dimension(ny+ky) :: ty
-!             integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
-!             integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
-!             integer,intent(in) :: kx
-!             integer,intent(in) :: ky
-!             real*8,intent(in), dimension(nx,ny) :: bcoef
-!             real*8,optional, dimension(3*MAX(kx,ky)+ky) :: work
-!             real*8,intent(out) :: b2val
-!         end function b2val
+     subroutine eval_curve_deriv(s,t,k,coef,nctl,ndim,val) ! in :test:eval_curve_deriv.f90
+       double precision intent(in) :: s
+       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       double precision dimension(nctl,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+       integer optional,intent(in),check((shape(coef,1))==ndim),depend(coef) :: ndim=(shape(coef,1))
+       double precision dimension(ndim),intent(out),depend(ndim) :: val
+     end subroutine eval_curve_deriv
 
-!         subroutine bintk(x,y,t,n,k,bcoef,q,work) ! in bintk.f
-!           real*8,intent(in), dimension(n) :: x
-!           real*8,intent(in), dimension(n),depend(n) :: y
-!           real*8,intent(in), dimension(n+k) :: t
-!           integer optional,check(len(x)>=n),depend(x) :: n=len(x)
-!           integer,intent(in) :: k
-!           real*8,intent(out), dimension(n),depend(n) :: bcoef
-!           real*8,optional, dimension((2*k-1)*n) :: q
-!           real*8,optional, dimension(2*k),depend(k) :: work
-!         end subroutine bintk
+     subroutine eval_curve_deriv_v(s,t,k,coef,nctl,ndim,n,val) ! in :test:eval_curve_V.f90
+       double precision dimension(n),intent(in) :: s
+       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       double precision dimension(nctl,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==ndim),depend(coef) :: ndim=shape(coef,1)
+       integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+       double precision dimension(n,ndim),intent(out),depend(n,ndim) :: val
+     end subroutine eval_curve_deriv_v
 
-!         subroutine bint4(x,y,ndata,ibcl,ibcr,fbcl,fbcr,kntopt,t,bcoef,n,k,w) ! in :test:bint4.f
-!             real*8,intent(in),dimension(ndata) :: x
-!             real*8,intent(in),dimension(ndata),depend(ndata) :: y
-!             integer optional,check(len(x)>=ndata),depend(x) :: ndata=len(x)
-!             integer,intent(in) :: ibcl
-!             integer,intent(in) :: ibcr
-!             real*8,intent(in) :: fbcl
-!             real*8,intent(in) :: fbcr
-!             integer,intent(in) :: kntopt
-!             real*8,intent(out), dimension(n+4),depend(n) :: t
-!             real*8,intent(out), dimension(n),dpened(n) :: bcoef
-!             integer,optional,intent(in),depend(ndata) :: n=ndata+2
-!             integer,intent(out) :: k
-!             real*8,optional,dimension(5,ndata+2),depend(ndata) :: w
-!         end subroutine bint4
+     subroutine eval_curve_deriv2(s,t,k,coef,nctl,ndim,val) ! in :test:eval_curve_deriv.f90
+       double precision intent(in) :: s
+       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       double precision dimension(nctl,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+       integer optional,intent(in),check((shape(coef,1))==ndim),depend(coef) :: ndim=(shape(coef,1))
+       double precision dimension(ndim),intent(out),depend(ndim) :: val
+     end subroutine eval_curve_deriv2
 
-        function bvalu(t,a,n,k,ideriv,x,inbv,work) ! in bvalu.f
-          real*8,intent(in), dimension(n+k),depend(k) :: t
-          real*8,intent(in), dimension(n) :: a
-          integer optional,check(len(a)>=n),depend(a) :: n=len(a)
-          integer ,intent(in):: k
-          integer ,intent(in):: ideriv
-          real*8 ,intent(in):: x
-          integer,optional :: inbv
-          real*8,optional, dimension(3*k),depend(k) :: work
-          real*8, intent(out):: bvalu
-        end function bvalu
+     subroutine eval_curve_deriv2_v(s,t,k,coef,nctl,ndim,n,val) ! in :test:eval_curve_V.f90
+       double precision dimension(n),intent(in) :: s
+       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       double precision dimension(nctl,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==ndim),depend(coef) :: ndim=shape(coef,1)
+       integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+       double precision dimension(n,ndim),intent(out),depend(n,ndim) :: val
+     end subroutine eval_curve_deriv2_v
 
-        subroutine bknot(x,n,k,t) ! in bknot.f
-          real*8,intent(in), dimension(n) :: x
-          integer optional,check(len(x)>=n),depend(x) :: n=len(x)
-          integer,intent(in) :: k
-          real*8,intent(out), dimension(n+k),depend(n,k) :: t
-        end subroutine bknot
+     subroutine curve_jacobian_linear(t,k,s,n,nctl,rows,cols,vals) ! in :test:compute_curve.f90
+       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       double precision dimension(n),intent(in) :: s
+       integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+       integer intent(in) :: nctl
+       integer dimension(n*k),intent(out),depend(k,n) :: rows
+       integer dimension(n*k),intent(out),depend(k,n) :: cols
+       double precision dimension(n*k),intent(out),depend(k,n) :: vals
+     end subroutine curve_jacobian_linear
 
-    !     subroutine bvaluv(t,a,n,k,ideriv,x,y,nx,work) ! in bvaluV.f
-!           real*8,intent(in), dimension(n+k),depend(n,k) :: t
-!           real*8,intent(in), dimension(n) :: a
-!           integer optional,check(len(a)>=n),depend(a) :: n=len(a)
-!           integer, intent(in) :: k
-!           integer,intent(in) :: ideriv
-!           real*8,intent(in), dimension(nx) :: x
-!           real*8,intent(out), dimension(nx),depend(nx) :: y
-!           integer optional,check(len(x)>=nx),depend(x) :: nx=len(x)
-!           real*8,optional, dimension(3 * k),depend(k) :: work
-!         end subroutine bvaluv
+     subroutine project_point_curve(x0,t,k,coef,nctl,ndim,niter,eps1,eps2,s) ! in :test:project_point_curve.f90
+       double precision dimension(ndim),intent(in) :: x0
+       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       double precision dimension(nctl,ndim),intent(in),depend(ndim) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+       integer optional,intent(in),check(len(x0)>=ndim),depend(x0) :: ndim=len(x0)
+       double precision intent(in) :: niter
+       double precision intent(in) :: eps1
+       double precision intent(in) :: eps2
+       double precision intent(out) :: s
+       double precision dimension(ndim),intent(out), depend(ndim) :: diff
+     end subroutine project_point_curve
 
-!         subroutine b2valm(x,y,n,m,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,z) ! in b2valM.f90
-!           real*8,intent(in),dimension(n,m) :: x
-!           real*8,intent(in),dimension(n,m),depend(n,m) :: y
-!           integer optional,check(shape(x,0)==n),depend(x) :: n=shape(x,0)
-!           integer optional,check(shape(x,1)==m),depend(x) :: m=shape(x,1)
-!           integer,intent(in) :: idx
-!           integer,intent(in) :: idy
-!           real*8,intent(in), dimension(nx+kx),depend(nx,kx) :: tx
-!           real*8,intent(in), dimension(ny+ky),depend(ny,ky) :: ty
-!           integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
-!           integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
-!           integer,intent(in) :: kx
-!           integer,intent(in) :: ky
-!           real*8,intent(in), dimension(nx,ny) :: bcoef
-!           real*8,intent(out), dimension(n,m),depend(n,m) :: z
-!         end subroutine b2valm
+     subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,x,rms) ! in :test:compute_curve.f90
+       double precision dimension(k+nctl),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       double precision dimension(n),intent(in,out) :: s
+       double precision dimension(nctl,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==ndim),depend(coef) :: ndim=shape(coef,1)
+       double precision intent(in) :: length
+       integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+       double precision dimension(n,ndim),intent(in),depend(n,ndim) :: x
+       double precision intent(out) :: rms
+     end subroutine curve_para_corr
 
-!         subroutine b2valv(x,y,n,idx,idy,tx,ty,nx,ny,kx,ky,bcoef,z) ! in c_b2valV.f90
-!           real*8,intent(in), dimension(n) :: x
-!           real*8,intent(in), dimension(n),depend(n) :: y
-!           integer optional,check(len(x)>=n),depend(x) :: n=len(x)
-!           integer,intent(in) :: idx
-!           integer,intent(in) :: idy
-!           real*8 dimension(nx+kx),depend(nx,kx) :: tx
-!           real*8 dimension(ny+ky),depend(ny,ky) :: ty
-!           integer optional,check(shape(bcoef,0)==nx),depend(bcoef) :: nx=shape(bcoef,0)
-!           integer optional,check(shape(bcoef,1)==ny),depend(bcoef) :: ny=shape(bcoef,1)
-!           integer,intent(in) :: kx
-!           integer,intent(in) :: ky
-!           real*8,intent(in), dimension(nx,ny) :: bcoef
-!           real*8,intent(out), dimension(n),depend(n) :: z
-!         end subroutine b2valv
+     ! --------------------- Surface Function -----------------
+     subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val) ! in :test:eval_surface.f90
+       double precision intent(in) :: u
+       double precision intent(in) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nctlu,nctlv,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,2)==ndim),depend(coef) :: ndim=shape(coef,2)
+       double precision dimension(ndim),intent(out),depend(ndim) :: val
+     end subroutine eval_surface
 
-        subroutine knots(x,n,nctl,k,t) ! in knots.f90
-          double precision dimension(n),intent(in) :: x
-          integer optional,intent(in),check(len(x)>=n),depend(x) :: n=len(x)
-          integer intent(in) :: nctl
-          integer intent(in) :: k
-          double precision dimension(nctl+k),intent(out),depend(nctl,k) :: t
-        end subroutine knots
+     subroutine eval_surface_v(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val) ! in :test:eval_surface.f90
+       double precision dimension(n),intent(in) :: u
+       double precision dimension(n),intent(in),depend(n) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nctlu,nctlv,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,2)==ndim),depend(coef) :: ndim=shape(coef,2)
+       integer optional,intent(in),check(len(u)>=n),depend(u) :: n=len(u)
+       double precision dimension(n,ndim),intent(out),depend(n,ndim) :: val
+     end subroutine eval_surface_v
 
-        subroutine intrv(xt,lxt,x,ilo,ileft,mflag) ! in :test:intrv.f
-          double precision dimension(lxt),intent(in) :: xt
-          integer optional,check(len(xt)>=lxt),depend(xt) :: lxt=len(xt)
-          double precision,intent(in)  :: x
-          integer,intent(in) :: ilo
-          integer,intent(out) :: ileft
-          integer,intent(out) :: mflag
-        end subroutine intrv
+     subroutine eval_surface_m(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val) ! in :test:eval_surface.f90
+       double precision dimension(n,m),intent(in) :: u
+       double precision dimension(n,m),intent(in),depend(n,m) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nctlu,nctlv,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,2)==ndim),depend(coef) :: ndim=shape(coef,2)
+       integer optional,intent(in),check(shape(u,0)==n),depend(u) :: n=shape(u,0)
+       integer optional,intent(in),check(shape(u,1)==m),depend(u) :: m=shape(u,1)
+       double precision dimension(n,m,ndim),intent(out),depend(n,m,ndim) :: val
+     end subroutine eval_surface_m
 
-     !   subroutine projectpoint(coef,kx,ky,nx,ny,tx,ty,x0,u0,v0,niter,tol,d,converged) ! in :test:projectpoint.f90
+
+     subroutine surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,rows,cols,vals) ! in :test:compute_surface.f90
+       double precision dimension(nu,nv),intent(in) :: u
+       double precision dimension(nu,nv),intent(in),depend(nu,nv) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       integer intent(in) :: nctlu
+       integer intent(in) :: nctlv
+       integer optional,intent(in),check(shape(u,0)==nu),depend(u) :: nu=shape(u,0)
+       integer optional,intent(in),check(shape(u,1)==nv),depend(u) :: nv=shape(u,1)
+       integer dimension(nu*nv*ku*kv),intent(out),depend(ku,kv,nu,nv) :: rows
+       integer dimension(nu*nv*ku*kv),intent(out),depend(ku,kv,nu,nv) :: cols
+       double precision dimension(nu*nv*ku*kv),intent(out),depend(ku,kv,nu,nv) :: vals
+     end subroutine surface_jacobian_linear
+
+     subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,x,rms) ! in :test:compute_surface.f90
+       double precision dimension(ku+nctlu),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(kv+nctlv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nu,nv),intent(in,out) :: u
+       double precision dimension(nu,nv),intent(in,out),depend(nu,nv) :: v
+       double precision dimension(nctlu,nctlv,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,2)==ndim),depend(coef) :: ndim=shape(coef,2)
+       integer optional,intent(in),check(shape(u,0)==nu),depend(u) :: nu=shape(u,0)
+       integer optional,intent(in),check(shape(u,1)==nv),depend(u) :: nv=shape(u,1)
+       double precision dimension(nu,nv,ndim),intent(in),depend(nu,nv,ndim) :: x
+       double precision intent(out) :: rms
+     end subroutine surface_para_corr
+
+     ! ----------------- Misc Functions -----------------------------
+
+     function poly_length(x,n,ndim) ! in :test:compute_curve.f90
+       double precision dimension(n,ndim),intent(in) :: x
+       integer optional,intent(in),check(shape(x,0)==n),depend(x) :: n=shape(x,0)
+       integer optional,intent(in),check(shape(x,1)==ndim),depend(x) :: ndim=shape(x,1)
+       double precision :: poly_length
+     end function poly_length
+
+     subroutine knots(x,n,nctl,k,t) ! in knots.f90
+       double precision dimension(n),intent(in) :: x
+       integer optional,intent(in),check(len(x)>=n),depend(x) :: n=len(x)
+       integer intent(in) :: nctl
+       integer intent(in) :: k
+       double precision dimension(nctl+k),intent(out),depend(nctl,k) :: t
+     end subroutine knots
+
+     subroutine intrv(xt,lxt,x,ilo,ileft,mflag) ! in :test:intrv.f
+       double precision dimension(lxt),intent(in) :: xt
+       integer optional,check(len(xt)>=lxt),depend(xt) :: lxt=len(xt)
+       double precision,intent(in)  :: x
+       integer,intent(in) :: ilo
+       integer,intent(out) :: ileft
+       integer,intent(out) :: mflag
+     end subroutine intrv
+  end interface
+end programpyspline
+
+
+!   subroutine projectpoint(coef,kx,ky,nx,ny,tx,ty,x0,u0,v0,niter,tol,d,converged) ! in :test:projectpoint.f90
 !             double precision dimension(nx,ny,3),intent(in) :: coef
 !             integer intent(in) :: kx
 !             integer intent(in) :: ky
@@ -243,8 +295,6 @@ python module pyspline ! in
 !             double precision dimension(n,n),intent(out),depend(n,n) :: knew
 !             double precision dimension(n,ndim),intent(out),depend(n,ndim) :: f
 !         end subroutine apply_constr
-     end interface
-end python module pyspline
 
 ! This file was auto-generated with f2py (version:2_4422).
 ! See http://cens.ioc.ee/projects/f2py2e/
