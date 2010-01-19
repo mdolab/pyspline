@@ -1,10 +1,11 @@
-subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
+subroutine eval_surface_deriv2(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
 
   !***DESCRIPTION
   !
   !     Written by Gaetan Kenway
   !
-  !     Abstract eval_surface evaluates the n-dimensional b-spline surface
+  !     Abstract eval_surface_deriv2 evaluates the 2nd directional
+  !     derivatives on surface (scalar version)
   !
   !     Description of Arguments
   !     Input
@@ -20,9 +21,8 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   !     ndim    - Integer, Spatial Dimension
   !
   !     Ouput 
-  !     val     - Real, Evaluated point, size ndim
-  
-  
+  !     val     - Real, Evaluated derivatives (d2u2,dudv,d2v2), size (2,2,ndim)
+    
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim
   double precision, intent(in)          :: u,v
@@ -30,7 +30,7 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   double precision, intent(in)          :: coef(nctlu,nctlv,ndim)
 
   ! Output
-  double precision, intent(out)         :: val(ndim)
+  double precision, intent(out)         :: val(2,2,ndim)
 
   ! Working
   integer                               :: idim
@@ -39,18 +39,20 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   double precision b2val
 
   do idim=1,ndim
-     val(idim) = b2val(u,v,0,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+     val(1,1,idim) = b2val(u,v,2,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+     val(1,2,idim) = b2val(u,v,1,1,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+     val(2,1,idim) = val(1,2,idim)
+     val(2,2,idim) = b2val(u,v,0,2,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
   end do
   
-end subroutine eval_surface
+end subroutine eval_surface_deriv2
 
-subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
+subroutine eval_surface_deriv2_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
 
   !***DESCRIPTION
   !
-  !     Written by Gaetan Kenway
-  !
-  !     Abstract eval_surface_V is a vector version of eval_surface
+  !     Written by Gaetan Kenway Abstract eval_surface_deriv2_V evaluates
+  !     the second directional derivatives on surface (Vector version)
   !
   !     Description of Arguments
   !     Input
@@ -64,9 +66,10 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
   !     nctlu   - Integer,Number of control points in u
   !     nctlv   - Integer,Number of control points in v
   !     ndim    - Integer, Spatial Dimension
+  !     n       - Integer, Number of points to evaluate
   !
   !     Ouput 
-  !     val     - Real, Evaluated point, size n,ndim
+  !     val     - Real, Evaluated points, size (n,2,2,ndim)
   
   
   ! Input
@@ -76,7 +79,7 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
   double precision, intent(in)          :: coef(nctlu,nctlv,ndim)
 
   ! Output
-  double precision, intent(out)         :: val(n,ndim)
+  double precision, intent(out)         :: val(n,2,2,ndim)
 
   ! Working
   integer                               :: idim,i
@@ -86,18 +89,22 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
 
   do i=1,n
      do idim=1,ndim
-        val(i,idim) = b2val(u(i),v(i),0,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+        val(i,1,1,idim) = b2val(u,v,2,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+        val(i,1,2,idim) = b2val(u,v,1,1,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+        val(i,2,1,idim) = val(i,1,2,idim)
+        val(i,2,2,idim) = b2val(u,v,0,2,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
      end do
   end do
-end subroutine eval_surface_V
+end subroutine eval_surface_deriv2_V
 
-subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
+subroutine eval_surface_deriv2_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
 
   !***DESCRIPTION
   !
   !     Written by Gaetan Kenway
   !
-  !     Abstract eval_surface_M is a matrix version of eval_surface
+  !     Written by Gaetan Kenway Abstract eval_surface_deriv2_M evaluates
+  !     the second directional derivatives on surface (Matrix version)
   !
   !     Description of Arguments
   !     Input
@@ -113,7 +120,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
   !     ndim    - Integer, Spatial Dimension
   !
   !     Ouput 
-  !     val     - Real, Evaluated point, size (n,m,ndim)
+  !     val     - Real, Evaluated point, size (n,m,2,2,ndim)
   
   
   ! Input
@@ -123,7 +130,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
   double precision, intent(in)          :: coef(nctlu,nctlv,ndim)
 
   ! Output
-  double precision, intent(out)         :: val(n,m,ndim)
+  double precision, intent(out)         :: val(n,m,2,2,ndim)
 
   ! Working
   integer                               :: idim,i,j
@@ -134,8 +141,11 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
   do i=1,n
      do j=1,m
         do idim=1,ndim
-           val(i,j,idim) = b2val(u(i,j),v(i,j),0,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+           val(i,j,1,1,idim) = b2val(u(i,j),v(i,j),2,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+           val(i,j,2,2,idim) = b2val(u(i,j),v(i,j),0,2,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+           val(i,j,1,2,idim) = b2val(u(i,j),v(i,j),1,1,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+           val(i,j,2,1,idim) = val(i,j,1,2,idim)
         end do
      end do
   end do
-end subroutine eval_surface_M
+end subroutine eval_surface_deriv2_M

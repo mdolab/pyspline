@@ -8,44 +8,41 @@ from scipy.linalg import lstsq,solve
 from mdo_import_helper import *
 exec(import_modules('geo_utils'))
 from scipy.io import savemat
-from matplotlib.pylab import plot,show,axis
+#from matplotlib.pylab import plot,show,axis
 import sys
-sys.path.append('../../../pyMIL/pyXLIGHT/python')
+#sys.path.append('../../../pyMIL/pyXLIGHT/python')
 import copy
-import pyXLIGHT
+#import pyXLIGHT
 
-
-
-airfoil = pyXLIGHT.xfoilAnalysis('naca0012.dat')
-airfoil.re = 100000
-airfoil.mach = 0.0
-airfoil.iter = 100
+# airfoil = pyXLIGHT.xfoilAnalysis('naca0012.dat')
+# airfoil.re = 100000
+# airfoil.mach = 0.0
+# airfoil.iter = 100
 
 nacax,nacay = loadtxt('naca0012.dat',unpack=True)
 #nacax,nacay = loadtxt('sc20714.dat',unpack=True)
 #nacax,nacay = loadtxt('sg6042.dat',unpack=True)
 
 
-curve = pySpline.linear_spline(task='lms',k=4,Nctl=10,x=nacax,y=nacay)
-x = linspace(-.25,1.25,250)
-y = linspace(-.2,.2,110)
-
+curve = pySpline.curve('lms',k=4,Nctl=10,x=nacax,y=nacay)
+x = linspace(-.25,1.25,25)
+y = linspace(-.2,.2,11)
 
 vals = curve(curve.s)
-plot(vals[:,0],vals[:,1])
-axis('equal')
+#plot(vals[:,0],vals[:,1])
+#axis('equal')
 timeA = time.time()
 for i in xrange(len(x)):
     for j in xrange(len(y)):
         s = curve.pyspline.project_point_curve([x[i],y[j]],curve.t,curve.k,curve.coef,4,1e-6,1e-6)
         val = curve(s)
-        plot([val[0],x[i]],[val[1],y[j]],'k-')
+        #plot([val[0],x[i]],[val[1],y[j]],'k-')
     # end for
 # end for
-show()
+#show()
 timeB = time.time()
 print 'time:',timeB-timeA        
-print 'avg time/call:',(timeB-timeA)/(250*110.0)
+#print 'avg time/call:',(timeB-timeA)/(250*110.0)
 
 
 sys.exit(0)

@@ -163,6 +163,95 @@
        double precision dimension(n,m,ndim),intent(out),depend(n,m,ndim) :: val
      end subroutine eval_surface_m
 
+     subroutine eval_surface_deriv(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val) ! in :test:eval_surface_deriv.f90
+       double precision intent(in) :: u
+       double precision intent(in) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nctlu,nctlv,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,2)==ndim),depend(coef) :: ndim=shape(coef,2)
+       double precision dimension(2,ndim),intent(out),depend(ndim) :: val
+     end subroutine eval_surface_deriv
+
+     subroutine eval_surface_deriv_v(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val) ! in :test:eval_surface_deriv.f90
+       double precision dimension(n),intent(in) :: u
+       double precision dimension(n),intent(in),depend(n) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nctlu,nctlv,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,2)==ndim),depend(coef) :: ndim=shape(coef,2)
+       integer optional,intent(in),check(len(u)>=n),depend(u) :: n=len(u)
+       double precision dimension(n,2,ndim),intent(out),depend(n,ndim) :: val
+     end subroutine eval_surface_deriv_v
+
+     subroutine eval_surface_deriv_m(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val) ! in :test:eval_surface_deriv.f90
+       double precision dimension(n,m),intent(in) :: u
+       double precision dimension(n,m),intent(in),depend(n,m) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nctlu,nctlv,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,2)==ndim),depend(coef) :: ndim=shape(coef,2)
+       integer optional,intent(in),check(shape(u,0)==n),depend(u) :: n=shape(u,0)
+       integer optional,intent(in),check(shape(u,1)==m),depend(u) :: m=shape(u,1)
+       double precision dimension(n,m,2,2,ndim),intent(out),depend(n,m,ndim) :: val
+     end subroutine eval_surface_deriv_m
+
+     subroutine eval_surface_deriv2(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val) ! in :test:eval_surface_deriv2.f90
+       double precision intent(in) :: u
+       double precision intent(in) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nctlu,nctlv,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,2)==ndim),depend(coef) :: ndim=shape(coef,2)
+       double precision dimension(2,2,ndim),intent(out),depend(ndim) :: val
+     end subroutine eval_surface_deriv2
+
+     subroutine eval_surface_deriv2_v(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val) ! in :test:eval_surface_deriv2.f90
+       double precision dimension(n),intent(in) :: u
+       double precision dimension(n),intent(in),depend(n) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nctlu,nctlv,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,2)==ndim),depend(coef) :: ndim=shape(coef,2)
+       integer optional,intent(in),check(len(u)>=n),depend(u) :: n=len(u)
+       double precision dimension(n,2,2,ndim),intent(out),depend(n,ndim) :: val
+     end subroutine eval_surface_deriv2_v
+
+     subroutine eval_surface_deriv2_m(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val) ! in :test:eval_surface_deriv2.f90
+       double precision dimension(n,m),intent(in) :: u
+       double precision dimension(n,m),intent(in),depend(n,m) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nctlu,nctlv,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,2)==ndim),depend(coef) :: ndim=shape(coef,2)
+       integer optional,intent(in),check(shape(u,0)==n),depend(u) :: n=shape(u,0)
+       integer optional,intent(in),check(shape(u,1)==m),depend(u) :: m=shape(u,1)
+       double precision dimension(n,m,2,2,ndim),intent(out),depend(n,m,ndim) :: val
+     end subroutine eval_surface_deriv2_m
 
      subroutine surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,rows,cols,vals) ! in :test:compute_surface.f90
        double precision dimension(nu,nv),intent(in) :: u
@@ -197,6 +286,24 @@
        double precision intent(out) :: rms
      end subroutine surface_para_corr
 
+     subroutine project_point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,niter,eps1,eps2,u,v,diff) ! in :test:project_point_surface.f90
+       double precision dimension(ndim),intent(in) :: x0
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nctlu,nctlv,ndim),intent(in),depend(ndim) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(len(x0)>=ndim),depend(x0) :: ndim=len(x0)
+       integer intent(in) :: niter
+       double precision intent(in) :: eps1
+       double precision intent(in) :: eps2
+       double precision intent(out) :: u
+       double precision intent(out) :: v
+       double precision dimension(ndim),intent(out),depend(ndim) :: diff
+     end subroutine project_point_surface
+
      ! ----------------- Misc Functions -----------------------------
 
      function poly_length(x,n,ndim) ! in :test:compute_curve.f90
@@ -223,7 +330,7 @@
        integer,intent(out) :: mflag
      end subroutine intrv
   end interface
-end programpyspline
+end program
 
 
 !   subroutine projectpoint(coef,kx,ky,nx,ny,tx,ty,x0,u0,v0,niter,tol,d,converged) ! in :test:projectpoint.f90
