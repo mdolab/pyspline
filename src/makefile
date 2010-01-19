@@ -15,6 +15,8 @@ OBJ =	misc/compute_curve.o\
 	misc/compute_surface.o\
 	misc/eval_surface.o\
 	misc/eval_surface_deriv.o\
+	misc/eval_surface_deriv2.o\
+	misc/project_point_surface.o\
 	bspline/bvalu.o\
 	bspline/intrv.o\
 	bspline/bspvn.o\
@@ -32,34 +34,6 @@ OBJ =	misc/compute_curve.o\
 	xerror/xersav.o\
 	xerror/xgetua.o\
 
-
-# 	bspline/bfqad.o\
-# 	bspline/bint4.o\
-# 	bspline/bintk.o\
-# 	bspline/bnfac.o\
-# 	bspline/bnslv.o\
-# 	bspline/bsgq8.o\
-# 	bspline/bspdr.o\
-# 	bspline/bspev.o\
-# 	bspline/bsppp.o\
-# 	bspline/bspvd.o\
-# 	bspline/bspvn.o\
-# 	bspline/bsqad.o\
-# 	bspline/pfqad.o\
-# 	bspline/ppgq8.o\
-# 	bspline/ppqad.o\
-# 	bspline/ppval.o\
-
-# 	tensbs/b2ink.o\
-# 	tensbs/b2val.o\
-# 	tensbs/b3ink.o\
-# 	tensbs/b3val.o\
-# 	tensbs/btpcf.o\
-
-# 	misc/bvaluV.o\
-# 	misc/b2valM.o\
-# 	misc/b2valV.o\
-# 	misc/projectpoint.o\
 # 	misc/getctlnormals.o\
 # 	misc/mincurvedistance.o\
 # 	misc/getbasis.o\
