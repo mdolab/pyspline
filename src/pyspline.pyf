@@ -5,16 +5,18 @@
   interface  ! in :pyspline
 
      ! --------------------- Curve Functions ------------------
-     subroutine compute_curve(s,x,t,k,n,nctl,ndim,coef) ! in :test:compute_curve.f90
-       double precision dimension(n),intent(in,out) :: s
-       double precision dimension(n,ndim),intent(in),depend(n) :: x
-       double precision dimension(nctl+k),intent(in,out),depend(k,nctl) :: t
-       integer intent(in) :: k
-       integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
-       integer intent(in) :: nctl
-       integer optional,intent(in),check(shape(x,1)==ndim),depend(x) :: ndim=shape(x,1)
-       double precision dimension(nctl,ndim),intent(out),depend(nctl,ndim) :: coef
-     end subroutine compute_curve
+ subroutine compute_curve(s,x,t,k,n,nctl,ndim,coef,niter,tol) ! in :test:compute_curve.f90
+            double precision dimension(n),intent(inout) :: s
+            double precision dimension(n,ndim),intent(in),depend(n) :: x
+            double precision dimension(nctl+k),intent(inout),depend(k,nctl) :: t
+            integer intent(in) :: k
+            integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+            integer intent(in) :: nctl
+            integer optional,intent(in),check(shape(x,1)==ndim),depend(x) :: ndim=shape(x,1)
+            double precision dimension(nctl,ndim),intent(out),depend(nctl,ndim) :: coef
+            integer intent(in) :: niter
+            double precision intent(in) :: tol
+        end subroutine compute_curve
 
      subroutine eval_curve(s,t,k,coef,nctl,ndim,val) ! in :test:eval_curve.f90
        double precision intent(in) :: s
@@ -79,16 +81,16 @@
        double precision dimension(n,ndim),intent(out),depend(n,ndim) :: val
      end subroutine eval_curve_deriv2_v
 
-     subroutine curve_jacobian_linear(t,k,s,n,nctl,rows,cols,vals) ! in :test:compute_curve.f90
-       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
-       integer intent(in) :: k
-       double precision dimension(n),intent(in) :: s
-       integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
-       integer intent(in) :: nctl
-       integer dimension(n*k),intent(out),depend(k,n) :: rows
-       integer dimension(n*k),intent(out),depend(k,n) :: cols
-       double precision dimension(n*k),intent(out),depend(k,n) :: vals
-     end subroutine curve_jacobian_linear
+    !  subroutine curve_jacobian_linear(t,k,s,n,nctl,rows,cols,vals) ! in :test:compute_curve.f90
+!        double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+!        integer intent(in) :: k
+!        double precision dimension(n),intent(in) :: s
+!        integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+!        integer intent(in) :: nctl
+!        integer dimension(n*k),intent(out),depend(k,n) :: rows
+!        integer dimension(n*k),intent(out),depend(k,n) :: cols
+!        double precision dimension(n*k),intent(out),depend(k,n) :: vals
+!      end subroutine curve_jacobian_linear
 
      subroutine project_point_curve(x0,t,k,coef,nctl,ndim,niter,eps1,eps2,s) ! in :test:project_point_curve.f90
        double precision dimension(ndim),intent(in) :: x0
@@ -104,18 +106,18 @@
        double precision dimension(ndim),intent(out), depend(ndim) :: diff
      end subroutine project_point_curve
 
-     subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,x,rms) ! in :test:compute_curve.f90
-       double precision dimension(k+nctl),intent(in),depend(k,nctl) :: t
-       integer intent(in) :: k
-       double precision dimension(n),intent(in,out) :: s
-       double precision dimension(nctl,ndim),intent(in) :: coef
-       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
-       integer optional,intent(in),check(shape(coef,1)==ndim),depend(coef) :: ndim=shape(coef,1)
-       double precision intent(in) :: length
-       integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
-       double precision dimension(n,ndim),intent(in),depend(n,ndim) :: x
-       double precision intent(out) :: rms
-     end subroutine curve_para_corr
+    !  subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,x,rms) ! in :test:compute_curve.f90
+!        double precision dimension(k+nctl),intent(in),depend(k,nctl) :: t
+!        integer intent(in) :: k
+!        double precision dimension(n),intent(in,out) :: s
+!        double precision dimension(nctl,ndim),intent(in) :: coef
+!        integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+!        integer optional,intent(in),check(shape(coef,1)==ndim),depend(coef) :: ndim=shape(coef,1)
+!        double precision intent(in) :: length
+!        integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+!        double precision dimension(n,ndim),intent(in),depend(n,ndim) :: x
+!        double precision intent(out) :: rms
+!      end subroutine curve_para_corr
 
      ! --------------------- Surface Function -----------------
      subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val) ! in :test:eval_surface.f90
