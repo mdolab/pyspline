@@ -33,13 +33,10 @@ OBJ =	misc/compute_curve.o\
 	xerror/xerrwv.o\
 	xerror/xersav.o\
 	xerror/xgetua.o\
-
-# 	misc/getctlnormals.o\
-# 	misc/mincurvedistance.o\
-# 	misc/getbasis.o\
-# 	misc/curve_stiffness.o\
-# 	misc/apply_constr.o
-
+	lsqr/lsqrDataModule.o\
+	lsqr/lsqrblasInterface.o\
+	lsqr/lsqrCheckModule.o\
+	lsqr/lsqrModule.o\
 
 ###================================================
 ###  Default compilers and flags
@@ -47,7 +44,7 @@ OBJ =	misc/compute_curve.o\
 ### Intel Fortran Compiler
 FC = ifort
 
-FFLAGS = -O2 -r8 -llapack
+FFLAGS = -O2 -r8 
 #FFLAGS = -O2 -fdefault-real-8
 AR       = ar
 AR_FLAGS = -rvs
@@ -69,6 +66,8 @@ clean:
 	$(RM) fitpack/*.o
 	@echo "Removing .o files in lmsfit"
 	$(RM) lmsfit/*.o
+	@echo "Removing .mod files"
+	$(RM) *.mod
 	@echo "Removing library"
 	$(RM) libspline.a
 	$(RM) libspline.so
@@ -77,10 +76,7 @@ libspline: $(OBJ)
 	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(OBJ)
 	$(FC)  -shared $(OBJ) -o $(SPLINE_LIB_SHARED) 
 
-
-
 .SUFFIXES: .o .f .f90
-
 
 .f.o:	
 	$(FC) $(FFLAGS) -c $< -o $*.o
@@ -93,37 +89,3 @@ libspline: $(OBJ)
 	@echo
 	@echo "        --- Compiled $*.f90 successfully ---"
 	@echo	
-
-
-
-# O-files for the fitpack function NO LONGER USED
-# 	fitpack/curfit.o\
-# 	fitpack/fpbspl.o\
-# 	fitpack/fpcurf.o\
-# 	fitpack/fpgivs.o\
-# 	fitpack/fprati.o\
-# 	fitpack/fpback.o\
-# 	fitpack/fpchec.o\
-# 	fitpack/fpdisc.o\
-# 	fitpack/fpknot.o\
-# 	fitpack/fprota.o\
-# 	fitpack/splev.o\
-# 	fitpack/fpbacp.o\
-# 	fitpack/fpchep.o\
-# 	fitpack/fpgrpa.o\
-# 	fitpack/fppasu.o\
-# 	fitpack/fptrnp.o\
-# 	fitpack/fptrpe.o\
-# 	fitpack/parsur.o\
-# 	fitpack/fpsuev.o\
-# 	fitpack/surev.o\
-# 	fitpack/fporde.o\
-# 	fitpack/fprank.o\
-# 	fitpack/fpsurf.o\
-# 	fitpack/surfit.o\
-# 	fitpack/bispev.o\
-# 	fitpack/fpbisp.o\
-
-# O-files for the fit_surf functions NO LONGER USED
-#	lmsfit/fit_foil.o\
-#	lmsfit/fit_surf.o\
