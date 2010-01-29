@@ -7,7 +7,11 @@ RM  	        = /bin/rm -rf
 
 SPLINE_LIB = libspline.a
 SPLINE_LIB_SHARED = libspline.so
-OBJ =	lms_jacobian.o\
+OBJ =	lsqrDataModule.o\
+	lsqrblasInterface.o\
+	lsqrCheckModule.o\
+	lsqrModule.o\
+	lms_jacobian.o\
 	compute_curve.o\
 	eval_curve.o\
 	eval_curve_deriv.o\
@@ -34,10 +38,6 @@ OBJ =	lms_jacobian.o\
 	xerror/xerrwv.o\
 	xerror/xersav.o\
 	xerror/xgetua.o\
-	lsqr/lsqrDataModule.o\
-	lsqr/lsqrblasInterface.o\
-	lsqr/lsqrCheckModule.o\
-	lsqr/lsqrModule.o\
 
 ###================================================
 ###  Default compilers and flags
@@ -53,20 +53,10 @@ AR_FLAGS = -rvs
 default: libspline
 
 clean:
-	@echo "Removing .o files in bspline"
-	$(RM) bspline/*.o
-	@echo "Removing .o files in machcon"
-	$(RM) machcon/*.o
-	@echo "Removing .o files in tensbs"
-	$(RM) tensbs/*.o
-	@echo "Removing .o files in xerror"
+	@echo "Removing .o files"
+	$(RM) *.o
 	$(RM) xerror/*.o
-	@echo "Removing .o files in misc"
-	$(RM) misc/*.o
-	@echo "Removing .o files in fitpack"
-	$(RM) fitpack/*.o
-	@echo "Removing .o files in lmsfit"
-	$(RM) lmsfit/*.o
+	$(RM) machcon/*.o
 	@echo "Removing .mod files"
 	$(RM) *.mod
 	@echo "Removing library"

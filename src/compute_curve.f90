@@ -23,6 +23,8 @@ subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol)
   !     Ouput coef - Real,Array of B-spline coefficients. Size (nctl,ndim)
 
   use lms_jacobian
+  use  lsqrModule,        only : LSQR
+  use  lsqrCheckModule,   only : Acheck, xcheck
 
   implicit none
   
@@ -38,15 +40,13 @@ subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol)
   double precision, intent(out)         :: coef(nctl,ndim)
 
   ! Working
-  integer                               :: i,idim,iter
+  integer                               :: i,idim,iter,nout
   double precision                      :: weight
   double precision                      :: length,res,norm,tot,val(ndim)
-!   double precision                      :: vals(n*k)
-!   integer                               :: col_ind(n*k),row_ptr(n)
   integer                               :: istop,itn
-  double precision                      :: Anorm,Acond,rnorm, xnorm
+  double precision                      :: Anorm,Acond,rnorm, Arnorm,xnorm
   ! Functions called
-  double precision                      :: poly_length
+  double precision                      :: poly_length,floor
 
   print *,'Welcome to Compute Curve'
      
@@ -55,18 +55,41 @@ subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol)
   length = poly_length(X,n,ndim)  
 
   ! Setup the jacobain module
-  call setup_jacobain(n,nctl,k)
+  call setup_jacobian(n,nctl,k)
   
   call curve_jacobian_linear(t,k,s,n,nctl)
-  
+
   do iter=1,niter
      ! Solve
      idim = 1
      !do idim=1,ndim
-     !call LSQR( n, Nctl, lms_jacobian%Aprod1, lms_jacobain%Aprod2,X(:,idim),0, .False., &
-     !     coef(:,idim), vals, 1e-12, 1e-12, 1e8, floor(n/2),0,&
-     !     istop, itn, Anorm, Acond, rnorm, Arnorm, xnorm )
-     !end do
+     print *,'calling lsqr'
+     print *,'n:',n
+     print *,'Nctl:',Nctl
+     !print *,'X(:,idim)',X(:,idim)
+     !print *,'col_ind:',col_ind
+     !print *,'A_ptr:',row_ptr
+     !print *,'vals:',vals
+     
+     nout   = 6
+     open(nout,file='LSQR.txt',status='unknown')
+     call Acheck(n,Nctl,Aprod1,Aprod2,nout,istop)
+     print *,'istop',istop
+
+
+      call LSQR( n, Nctl, Aprod1, Aprod2,X(:,idim),0.0, .False., &
+           coef(:,idim), vals, 1e-12, 1e-12, 1e8, 1000,nout,&
+           istop, itn, Anorm, Acond, rnorm, Arnorm, xnorm )
+   !end do
+      close(nout)
+     print *,'Results:'
+     print *,'istop:',istop
+     print *,'itn:',itn
+     print *,'Anorm:',Anorm
+     print *,'Acond:',Acond
+     print *,'rnorm:',rnorm
+     print *,'Arnorm:',Arnorm
+     print *,'xnorm:',xnorm
 
      !call curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X,rms)
      !call curve_jacobian_linear
@@ -83,7 +106,7 @@ end subroutine compute_curve
 
 subroutine curve_jacobian_linear(t,k,s,n,nctl)
   
-  use lms_jacobaian
+  use lms_jacobian
 
   implicit none
   ! Input
@@ -110,13 +133,15 @@ subroutine curve_jacobian_linear(t,k,s,n,nctl)
         vnikx(k) = 1.0
      end if
 
-     lms_jacobian%row_ptr(i) = i
+     row_ptr(i) = counter
      do j=1,k
-        lms_jacobian%col_ind(counter) = ileft-k+j-1
-        lms_jacobian%vals(counter) =vnikx(j)
+        col_ind(counter) = ileft-k+j
+        vals(counter) =vnikx(j)
+        counter = counter + 1
      end do
-  end do
 
+  end do
+  row_ptr(n+1) = counter
 end subroutine curve_jacobian_linear
 
 function poly_length(X,n,ndim)
