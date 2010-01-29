@@ -5,8 +5,7 @@ module lms_jacobian
   
   ! DYNAMIC WORKSPACE DEFINED HERE.
   ! They are allocated in lsqrtest and used by Aprod1, Aprod2.
-  
- 
+   
   integer         , allocatable ::  col_ind(:),row_ptr(:)
   double precision, allocatable ::  vals(:)
 
@@ -17,7 +16,6 @@ contains
 
     ! Setup the lms_jacobain object
     nnz = nrow*nnz_row
-    print *,'nnz:',nnz
     allocate(col_ind(nnz))
     allocate(row_ptr(nrow+1))
     allocate(vals(nnz))

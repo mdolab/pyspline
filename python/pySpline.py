@@ -743,7 +743,7 @@ class curve():
             if 'niter' in kwargs:
                 self.niter = kwargs['niter']
             else:
-                self.niter = 1000
+                self.niter = 10
             # end if
 
             if 'rel_tol' in kwargs:
@@ -780,12 +780,16 @@ class curve():
 
             # Generate the knot vector
             self.t = pyspline.knots(self.s,self.Nctl,self.k)
-            length =pyspline.poly_length(self.X)
-            self.niter = 1
+            self.coef = zeros((self.Nctl,self.nDim),'d')
+            self.coef,rms = pyspline.compute_curve(self.s,self.X,self.t,self.k,self.coef,
+                                         self.niter,self.rel_tol)
+            print 'Fitted with rms:',rms
 
-            self.coef = pyspline.compute_curve(self.s,self.X,self.t,self.k,
-                                               self.Nctl,self.niter,self.rel_tol)
-            
+    def runParameterCorrection(self,niter,rel_tol=1e-5):
+        # Run more parameter correction
+        self.coef,rms = pyspline.compute_curve(self.s,self.X,self.t,self.k,self.coef,
+                                               niter,self.rel_tol)
+        print 'ReFitted with rms:',rms
 
     def _getParameterization(self):
         # We need to parameterize the curve

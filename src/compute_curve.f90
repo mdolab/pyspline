@@ -1,4 +1,4 @@
-subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol)
+subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol,rms)
 
   !***DESCRIPTION
   !
@@ -6,8 +6,8 @@ subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol)
   !
   !     Abstract: compute_curve is the main function for the
   !               generation fo B-spline curves It does both
-  !               interpolating and LMS fits, variable B-spline weights
-  !               as well as Hoschek's Parameter Correction.
+  !               interpolating and LMS fits, as well as Hoschek's 
+  !               Parameter Correction.
   !
   !     Description of Arguments
   !     Input
@@ -37,75 +37,41 @@ subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol)
   double precision, intent(in)          :: tol
 
   ! Output
-  double precision, intent(out)         :: coef(nctl,ndim)
-
+  double precision, intent(inout)       :: coef(nctl,ndim)
+  double precision, intent(out)         :: rms
   ! Working
-  integer                               :: i,idim,iter,nout
+  integer                               :: i,idim,iter
   double precision                      :: weight
   double precision                      :: length,res,norm,tot,val(ndim)
   integer                               :: istop,itn
   double precision                      :: Anorm,Acond,rnorm, Arnorm,xnorm
   ! Functions called
-  double precision                      :: poly_length,floor
+  double precision                      :: poly_length,floor,compute_rms
 
-  print *,'Welcome to Compute Curve'
-     
   !Initialization
-  coef(:,:) =  0.0
   length = poly_length(X,n,ndim)  
-
-  ! Setup the jacobain module
   call setup_jacobian(n,nctl,k)
-  
   call curve_jacobian_linear(t,k,s,n,nctl)
 
   do iter=1,niter
      ! Solve
      idim = 1
-     !do idim=1,ndim
-     print *,'calling lsqr'
-     print *,'n:',n
-     print *,'Nctl:',Nctl
-     !print *,'X(:,idim)',X(:,idim)
-     !print *,'col_ind:',col_ind
-     !print *,'A_ptr:',row_ptr
-     !print *,'vals:',vals
-     
-     nout   = 6
-     open(nout,file='LSQR.txt',status='unknown')
-     call Acheck(n,Nctl,Aprod1,Aprod2,nout,istop)
-     print *,'istop',istop
-
-
-      call LSQR( n, Nctl, Aprod1, Aprod2,X(:,idim),0.0, .False., &
-           coef(:,idim), vals, 1e-12, 1e-12, 1e8, 1000,nout,&
-           istop, itn, Anorm, Acond, rnorm, Arnorm, xnorm )
-   !end do
-      close(nout)
-     print *,'Results:'
-     print *,'istop:',istop
-     print *,'itn:',itn
-     print *,'Anorm:',Anorm
-     print *,'Acond:',Acond
-     print *,'rnorm:',rnorm
-     print *,'Arnorm:',Arnorm
-     print *,'xnorm:',xnorm
-
-     !call curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X,rms)
-     !call curve_jacobian_linear
-     
-
-     print *,'Done LSQR'
+     do idim=1,ndim
+        call LSQR( n, Nctl, Aprod1, Aprod2,X(:,idim),0.0, .False., &
+             coef(:,idim), vals, 1e-12, 1e-12, 1e8, Nctl*4,0,&
+             istop, itn, Anorm, Acond, rnorm, Arnorm, xnorm )
+     end do
+     call curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X)
+     rms = compute_rms(t,k,s,coef,nctl,ndim,length,n,X)
+     call curve_jacobian_linear(t,k,s,n,nctl)
      ! Do convergence Check to break early
-     
   end do
+ 
   call kill_jacobian()
 
 end subroutine compute_curve
 
-
 subroutine curve_jacobian_linear(t,k,s,n,nctl)
-  
   use lms_jacobian
 
   implicit none
@@ -113,10 +79,8 @@ subroutine curve_jacobian_linear(t,k,s,n,nctl)
   double precision     ,intent(in)      :: t(nctl+k)
   double precision     ,intent(in)      :: s(n)
   integer              ,intent(in)      :: k,nctl,n
-  ! Output
-  !double precision     ,intent(out)     :: vals(n*k)
-  !integer              ,intent(out)     :: col_ind(n*k),row_ptr(n)
-  ! Working
+  ! Output -> in lms_jacobian module
+
   double precision                      :: vnikx(k),work(2*k)
   integer                               :: i,j,counter
   integer                               :: ilo,ileft,mflag,iwork
@@ -164,9 +128,7 @@ function poly_length(X,n,ndim)
   
 end function poly_length
 
-
-
-subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X,rms)
+subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X)
 
   ! Do Hoschek parameter correction
   implicit none
@@ -177,15 +139,13 @@ subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X,rms)
   integer           ,intent(in)      :: k,nctl,ndim,n
   double precision  ,intent(in)      :: X(n,ndim)
   double precision  ,intent(in)      :: length
-  double precision  ,intent(out)     :: rms
   ! Working
   integer                            :: i,j,max_inner_iter
-  double precision                   :: D(ndim),D2(ndim),Dnorm,D2norm
+  double precision                   :: D(ndim),D2(ndim)
   double precision                   :: val(ndim),deriv(ndim)
   double precision                   :: c,s_tilde,norm
 
   max_inner_iter = 10
-  rms = 0.0
   do i=2,n-1
      call eval_curve(s(i),t,k,coef,nctl,ndim,val)
      call eval_curve_deriv(s(i),t,k,coef,nctl,ndim,deriv)
@@ -200,26 +160,54 @@ subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X,rms)
         D2 = X(i,:)-val
         if (norm(D,ndim) .ge. norm(D2,ndim)) then
            s(i) = s_tilde
-           rms = rms + dot_product(D2,D2)
            exit inner_loop
         else
            c = c*0.5
-           if (j==max_inner_iter) then
-              rms = rms + dot_product(D2,D2)
-           end if
         end if
      end do inner_loop
   end do
 
-  ! Add the first and Last
-  call eval_curve(s(1),t,k,coef,nctl,ndim,val)
-  rms = rms + dot_product(X(1,:)-val,X(1,:)-val)
-  call eval_curve(s(n),t,k,coef,nctl,ndim,val)
-  rms = rms + dot_product(X(n,:)-val,X(n,:)-val)
-   rms = sqrt(rms/n)
 end subroutine curve_para_corr
 
+function norm(X,n)
+  ! Compute the L2 nomr of X
+  implicit none
+  double precision       :: X(n)
+  double precision       :: norm
+  integer                :: i,n
+  norm = 0.0
+  do i=1,n
+     norm = norm + X(i)**2
+  end do
+  norm = sqrt(norm)
+end function norm
 
+function compute_rms(t,k,s,coef,nctl,ndim,length,n,X)
+  ! Compute the rms
+  implicit none
+  ! Input/Output
+  double precision  ,intent(in)      :: t(k+nctl)
+  double precision  ,intent(in)      :: s(n)
+  double precision  ,intent(in)      :: coef(nctl,ndim)
+  integer           ,intent(in)      :: k,nctl,ndim,n
+  double precision  ,intent(in)      :: X(n,ndim)
+  double precision  ,intent(in)      :: length
+  double precision                   :: compute_rms  
+
+  ! Working
+  integer                            :: i,idim
+  double precision                   :: val(ndim),D(ndim)
+  
+  compute_rms = 0.0
+  do i=1,n
+     call eval_curve(s(i),t,k,coef,nctl,ndim,val)
+     D = val-X(i,:)
+     do idim=1,ndim
+        compute_rms = compute_rms + D(idim)**2
+     end do
+  end do
+  compute_rms = sqrt(compute_rms/n)
+end function compute_rms
 
 ! subroutine curve_jacobian(Jac,n,nctl,ndim,t,k,s,coef)
 
@@ -253,103 +241,91 @@ end subroutine curve_para_corr
 ! end subroutine curve_jacobian
 
 
-function compute_lms_norm(X,m,n,ndim)
-  ! Compute the norm from the dgels calc in general
-  ! m is rows
-  ! n is cols (m>n)
-  ! ndim is spatial dimension
-  implicit none
-  integer                         :: m,n,ndim,i,idim
-  double precision                :: X(m,ndim)
-  double precision                :: compute_lms_norm
+! function compute_lms_norm(X,m,n,ndim)
+!   ! Compute the norm from the dgels calc in general
+!   ! m is rows
+!   ! n is cols (m>n)
+!   ! ndim is spatial dimension
+!   implicit none
+!   integer                         :: m,n,ndim,i,idim
+!   double precision                :: X(m,ndim)
+!   double precision                :: compute_lms_norm
 
-  compute_lms_norm = 0.0
-  do i=n+1,m
-     do idim=1,ndim
-        compute_lms_norm = compute_lms_norm + X(i,idim)**2
-     end do
-  end do
-end function compute_lms_norm
+!   compute_lms_norm = 0.0
+!   do i=n+1,m
+!      do idim=1,ndim
+!         compute_lms_norm = compute_lms_norm + X(i,idim)**2
+!      end do
+!   end do
+! end function compute_lms_norm
 
 
 
-subroutine curve_jacobian_linear2(Jac,n,nctl,ndim,t,k,s)
+! subroutine curve_jacobian_linear2(Jac,n,nctl,ndim,t,k,s)
 
-  implicit none
-  integer                               :: k,nctl,ndim,n
-  double precision                      :: Jac(n,nctl)
-  double precision                      :: s(n)
-  double precision                      :: t(nctl+k)
-  double precision                      :: vnikx(k),work(2*k)
-  integer                               :: i,j
-  integer                               :: ilo,ileft,mflag,iwork
+!   implicit none
+!   integer                               :: k,nctl,ndim,n
+!   double precision                      :: Jac(n,nctl)
+!   double precision                      :: s(n)
+!   double precision                      :: t(nctl+k)
+!   double precision                      :: vnikx(k),work(2*k)
+!   integer                               :: i,j
+!   integer                               :: ilo,ileft,mflag,iwork
   
-  Jac(:,:) = 0.0
-  ilo = 1
-  do i=1,n
-     call intrv(t,nctl+k,s(i),ilo,ileft,mflag)
-     if (mflag == 0) then
-        call bspvn(t,k,k,1,s(i),ileft,vnikx,work,iwork)
-     else if (mflag == 1) then
-        ileft = nctl
-        vnikx(:) = 0.0
-        vnikx(k) = 1.0
-     end if
+!   Jac(:,:) = 0.0
+!   ilo = 1
+!   do i=1,n
+!      call intrv(t,nctl+k,s(i),ilo,ileft,mflag)
+!      if (mflag == 0) then
+!         call bspvn(t,k,k,1,s(i),ileft,vnikx,work,iwork)
+!      else if (mflag == 1) then
+!         ileft = nctl
+!         vnikx(:) = 0.0
+!         vnikx(k) = 1.0
+!      end if
 
-     do j=1,k
-        Jac(i,ileft-k+j) = vnikx(j)
-     end do
-  end do
+!      do j=1,k
+!         Jac(i,ileft-k+j) = vnikx(j)
+!      end do
+!   end do
 
-end subroutine curve_jacobian_linear2
+! end subroutine curve_jacobian_linear2
 
-function norm(X,n)
-  ! Compute the L2 nomr of X
-  implicit none
-  double precision       :: X(n)
-  double precision       :: norm
-  integer                :: i,n
-  norm = 0.0
-  do i=1,n
-     norm = norm + X(i)**2
-  end do
-  norm = sqrt(norm)
-end function norm
 
-subroutine curve_jacobian_non_linear(Jac,nrow,ncol,n,nctl,ndim,t,k,s,coef)
+! subroutine curve_jacobian_non_linear(Jac,nrow,ncol,n,nctl,ndim,t,k,s,coef)
 
-  implicit none
-  integer                               :: k,nrow,ncol,n,nctl,ndim
-  double precision                      :: Jac(nrow,ncol)
-  double precision                      :: t(nctl+k)
-  double precision                      :: s(n)
-  double precision                      :: coef(nctl,ndim+1)
-  double precision                      :: val(n,ndim),val0(n,ndim)
-  integer                               :: idim,jdim,i,j
-  Jac(:,:) = 0.0
-  ! FD the whole fucking thing
+!   implicit none
+!   integer                               :: k,nrow,ncol,n,nctl,ndim
+!   double precision                      :: Jac(nrow,ncol)
+!   double precision                      :: t(nctl+k)
+!   double precision                      :: s(n)
+!   double precision                      :: coef(nctl,ndim+1)
+!   double precision                      :: val(n,ndim),val0(n,ndim)
+!   integer                               :: idim,jdim,i,j
+!   Jac(:,:) = 0.0
+!   ! FD the whole fucking thing
 
-  call eval_curve_V(s,t,k,coef,nctl,ndim,n,val0)
-  do j=1,nctl               !-> Loop over the Cols
-     do idim=1,ndim+1       !- > Loop over the COls
+!   call eval_curve_V(s,t,k,coef,nctl,ndim,n,val0)
+!   do j=1,nctl               !-> Loop over the Cols
+!      do idim=1,ndim+1       !- > Loop over the COls
         
-        coef(j,idim) = coef(j,idim) + 1e-5
-        call eval_curve_V(s,t,k,coef,nctl,ndim,n,val)
+!         coef(j,idim) = coef(j,idim) + 1e-5
+!         call eval_curve_V(s,t,k,coef,nctl,ndim,n,val)
         
-        ! Set the stuff
-        do i = 1,n
-           do jdim=1,ndim
-              Jac(ndim*(i-1) + jdim  ,(j-1)*(ndim+1) + idim)  = &
-                   (val(i,jdim) -val0(i,jdim))/1e-6
-           end do
-        end do
+!         ! Set the stuff
+!         do i = 1,n
+!            do jdim=1,ndim
+!               Jac(ndim*(i-1) + jdim  ,(j-1)*(ndim+1) + idim)  = &
+!                    (val(i,jdim) -val0(i,jdim))/1e-6
+!            end do
+!         end do
         
-        coef(j,idim) = coef(j,idim) - 1e-5
+!         coef(j,idim) = coef(j,idim) - 1e-5
 
-     end do
-  end do
+!      end do
+!   end do
 
-end subroutine curve_jacobian_non_linear
+! end subroutine curve_jacobian_non_linear
 
 
 
