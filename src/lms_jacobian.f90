@@ -17,8 +17,9 @@ contains
 
     ! Setup the lms_jacobain object
     nnz = nrow*nnz_row
+    print *,'nnz:',nnz
     allocate(col_ind(nnz))
-    allocate(row_ptr(nrow))
+    allocate(row_ptr(nrow+1))
     allocate(vals(nnz))
     
   end subroutine setup_jacobian
@@ -28,43 +29,45 @@ contains
   end subroutine kill_jacobian
 
   subroutine Aprod1(m,n,x,y)
-
-    integer,          intent(in)    :: m,n
-    double precision, intent(in)    :: x(n)
-    double precision, intent(inout) :: y(m)
-
+    use lsqrDataModule, only : dp
+    integer,  intent(in)    :: m,n
+    real(dp), intent(in)    :: x(n)
+    real(dp), intent(inout) :: y(m)
+    integer                         :: i,k1,k2
     !-------------------------------------------------------------------
     ! Aprod1 computes y = y + A*x without altering x,
-    ! where A is a test matrix of the form  A = Y*D*Z,
-    ! and the matrices D, Y, Z are represented by
-    ! the allocatable vectors d, hy, hz in this module.
-    !
-    ! 23 Sep 2007: Fortran 90 version.
+    ! A is stored in compressed sparse row format
     !-------------------------------------------------------------------
 
     ! Do a sparse Matrix-Vector Produc
-    
-    
+    do i=1,m
+       k1 = row_ptr(i)
+       k2 = row_ptr(i+1)-1
+       Y(i) = Y(i) + dot_product(vals(k1:k2),x(col_ind(k1:k2)))
+    end do
   end subroutine Aprod1
 
   !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   subroutine Aprod2(m,n,x,y)
-
-    integer,          intent(in)    :: m,n
-    double precision, intent(in)    :: x(n)
-    double precision, intent(inout) :: y(m)
-
+    use lsqrDataModule, only : dp
+    integer,  intent(in)    :: m,n
+    real(dp), intent(inout) :: x(n)
+    real(dp), intent(in)    :: y(m)
+    
+    integer                         :: i,k
     !-------------------------------------------------------------------
     ! Aprod2 computes x = x + A'*y without altering y,
-    ! where A is a test matrix of the form  A = Y*D*Z,
-    ! and the matrices D, Y, Z are represented by
-    ! the allocatable vectors d, hy, hz in this module.
-    !
-    ! 23 Sep 2007: Fortran 90 version.
+    ! A is stored in compress sparse row foramt
     !-------------------------------------------------------------------
-    
     ! Do a sparse Matrix-Vector product
+    
+    do i=1,m
+       do k=row_ptr(i),row_ptr(i+1)-1
+          x(col_ind(k)) = x(col_ind(k)) + vals(k)*y(i)
+       end do
+    end do
+    
 
   end subroutine Aprod2
 
