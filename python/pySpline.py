@@ -137,13 +137,19 @@ MUST be defined for task lms or interpolate'
                 else:
                     self.nDim = self.X.shape[1]
             elif 'x' in kwargs and 'y' in kwargs and 'z'in kwargs:
-                self.X = vstack([kwargs['x'],kwargs['y'],kwargs['z']]).T          
+                self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],3))
+                self.X[:,:,0] = kwargs['x']
+                self.X[:,:,1] = kwargs['y']
+                self.X[:,:,2] = kwargs['z']
                 self.nDim = 3
             elif 'x' in kwargs and 'y' in kwargs:
-                self.X = vstack([kwargs['x'],kwargs['y']]).T
+                self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],2))
+                self.X[:,:,0] = kwargs['x']
+                self.X[:,:,1] = kwargs['y']
                 self.nDim = 2
             elif 'x' in kwargs:
-                self.X = array(kwargs['x'])
+                self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],1))
+                self.X[:,:,0] = kwargs['x']
                 self.nDim = 1
             # enf if
             if task == 'interpolate':
@@ -157,8 +163,7 @@ MUST be defined for task lms or interpolate'
             self.orig_data = True
             self.Nu = self.X.shape[0]
             self.Nv = self.X.shape[1]
-            self.nDim  = self.X.shape[2]
-           
+            print 'x shape:',self.X.shape           
             self.ku = int(kwargs['ku'])
             self.kv = int(kwargs['kv'])
 
@@ -222,19 +227,16 @@ MUST be defined for task lms or interpolate'
             self.tu = pyspline.knots(u,self.Nctlu,self.ku)
             self.tv = pyspline.knots(v,self.Nctlv,self.kv)
             [self.V,self.U] = meshgrid(v,u)
-           
-            self.recompute(100) # Just get solution without parameter correction
-            
+            self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim),'d')
+            self.niter = 1
+            self.U,self.V,self.coef, rms = pyspline.compute_surface(\
+                self.X,self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.coef,\
+                    self.niter,self.rel_tol)
         else:
             print 'Error: The first argument must be \'create\', \'lms\' or \'interpolate\''
             sys.exit(0)
         # end if (init type)
         return
-
-    def recompute(self,niter=1000):
-        '''Recompute the surface if the knot vector has changed with parameter correction:'''
-      
-        # ------  Do this with cgnr in fortran ------
 
 
     def _calcParameterization(self):
