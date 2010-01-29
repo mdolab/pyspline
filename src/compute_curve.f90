@@ -62,7 +62,7 @@ subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol,rms)
              istop, itn, Anorm, Acond, rnorm, Arnorm, xnorm )
      end do
      call curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X)
-     rms = compute_rms(t,k,s,coef,nctl,ndim,length,n,X)
+     rms = compute_rms_curve(t,k,s,coef,nctl,ndim,length,n,X)
      call curve_jacobian_linear(t,k,s,n,nctl)
      ! Do convergence Check to break early
   end do
@@ -182,7 +182,7 @@ function norm(X,n)
   norm = sqrt(norm)
 end function norm
 
-function compute_rms(t,k,s,coef,nctl,ndim,length,n,X)
+function compute_rms_curve(t,k,s,coef,nctl,ndim,length,n,X)
   ! Compute the rms
   implicit none
   ! Input/Output
@@ -192,22 +192,22 @@ function compute_rms(t,k,s,coef,nctl,ndim,length,n,X)
   integer           ,intent(in)      :: k,nctl,ndim,n
   double precision  ,intent(in)      :: X(n,ndim)
   double precision  ,intent(in)      :: length
-  double precision                   :: compute_rms  
+  double precision                   :: compute_rms_curve 
 
   ! Working
   integer                            :: i,idim
   double precision                   :: val(ndim),D(ndim)
   
-  compute_rms = 0.0
+  compute_rms_curve = 0.0
   do i=1,n
      call eval_curve(s(i),t,k,coef,nctl,ndim,val)
      D = val-X(i,:)
      do idim=1,ndim
-        compute_rms = compute_rms + D(idim)**2
+        compute_rms_curve = compute_rms_curve + D(idim)**2
      end do
   end do
-  compute_rms = sqrt(compute_rms/n)
-end function compute_rms
+  compute_rms_curve = sqrt(compute_rms_curve/n)
+end function compute_rms_curve
 
 ! subroutine curve_jacobian(Jac,n,nctl,ndim,t,k,s,coef)
 

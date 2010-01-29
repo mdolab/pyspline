@@ -1,12 +1,87 @@
-subroutine surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,rows,cols,vals)
+subroutine compute_surface(X,u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,ndim,coef,niter,tol,rms)
+  !***DESCRIPTION
+  !
+  !     Written by Gaetan Kenway
+  !
+  !     Abstract: compute_curve is the main function for the
+  !               generation fo B-spline curves It does both
+  !               interpolating and LMS fits, as well as Hoschek's 
+  !               Parameter Correction.
+  !
+  !     Description of Arguments
+  !     Input
+  !     X       - Real, Array of X values to fit, Size (nu,nv,ndim)  
+  !     u       - Real, Array of u coordinates, Size nu x nv
+  !     v       - Real, Array of v coordinates, Size nu x nv
+  !     tu      - Real,Knot vector in u. Length nctlu+ku
+  !     tv      - Real,Knot vector in v. Length nctlv+kv
+  !     ku      - Integer, order of B-spline in u
+  !     kv      - Integer, order of B-spline in v
+  !     nctlu   - Integer,Number of control points in u
+  !     nctlv   - Integer,Number of control points in v
+  !     nu      - Integer, Number of data points in u
+  !     nv      - Integer, Number of data points in v
+  !     ndim    - Integer, spatial dimensions
+  !     coef    - Array, B-spline coefficients. Size nctlu x nctlv x ndim
+  !     niter   - Integer, number of hoscek para-correction iterations
+  !     tol     - Integer, relative tolerance for convergence
+  !
+  !     Ouput 
+  !     rms     - Real, final RMS value
+
+  use lms_jacobian
+  use lsqrModule,        only : LSQR
+  use lsqrCheckModule,   only : Acheck, xcheck
+
+  implicit none
+  
+  ! Input/Output
+  double precision, intent(in)          :: X(nu,nv,ndim)
+  integer         , intent(in)          :: ku,kv,nctlu,nctlv,nu,nv,ndim
+  double precision, intent(inout)       :: u(nu,nv),v(nu,nv)
+  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+  double precision, intent(inout)       :: coef(nctlu,nctlv,ndim)
+  integer         , intent(in)          :: niter
+  double precision, intent(in)          :: tol
+  double precision, intent(out)         :: rms
+
+  ! Working
+  integer                               :: i,idim,iter
+  integer                               :: istop,itn
+  double precision                      :: Anorm,Acond,rnorm, Arnorm,xnorm
+  ! Functions called
+  double precision                      :: poly_length,floor,compute_rms
+
+  !Initialization
+  call setup_jacobian(nu*nv,nctlu*nctlv,ku*kv)
+  call surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv)
+  rms = 0.0
+  do iter=1,niter
+!      ! Solve
+      idim = 1
+      do idim=1,ndim
+         call LSQR( nu*nv, Nctlu*Nctlv, Aprod1, Aprod2,X(:,:,idim),0.0, .False., &
+              coef(:,:,idim), vals, 1e-12, 1e-12, 1e8, Nctlu*Nctlv*4,0,&
+              istop, itn, Anorm, Acond, rnorm, Arnorm, xnorm )
+      end do
+      !call surface_para_corr(t,k,s,coef,nctl,ndim,length,n,X)
+      call compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
+      call surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv)
+     ! Do convergence Check to break early
+     print *,'Done compute surface'
+  end do
+ 
+  call kill_jacobian()
+
+end subroutine compute_surface
+
+subroutine surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv)
 
   !***DESCRIPTION
   !
   !     Written by Gaetan Kenway
   !
-  !     Abstract surface_jacobian_linear computes the non-zero values in 
-  !     in the jacobain matrix which are returned to be set in a petsc4py 
-  !     sparse matrix
+  !     Abstract surface_jacobian_linear computes jacobian in rcs storage
   !
   !     Description of Arguments
   !     Input
@@ -16,26 +91,20 @@ subroutine surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,rows,cols,v
   !     tv      - Real,Knot vector in v. Length nctlv+kv
   !     ku      - Integer, order of B-spline in u
   !     kv      - Integer, order of B-spline in v
-  !     coef    - Real,Array of B-spline coefficients  Size (nctlu,nctlv,ndim)
   !     nctlu   - Integer,Number of control points in u
   !     nctlv   - Integer,Number of control points in v
   !     nu      - Integer, Number of data points in u
   !     nv      - Integer, Number of data points in v
-  !     ndim    - Integer, Spatial Dimension
   !
-  !     Ouput 
-  !     rows    - Integer, Row index, length n
-  !     cols    - Integer, Col index, length n
-  !     vals    - Real   , Values, length n
+  !     Ouput -> lms_jacobian module
+
+  use lms_jacobian
 
   implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,nu,nv
   double precision, intent(in)          :: u(nu,nv),v(nu,nv)
   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
-  ! Output
-  integer          ,intent(out)         :: rows(nu*nv*ku*kv),cols(nu*nv*ku*kv)
-  double precision, intent(out)         :: vals(nu*nv*ku*kv)
 
   ! Working
   double precision                      :: vniku(ku),worku(2*ku)
@@ -70,19 +139,21 @@ subroutine surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,rows,cols,v
            vnikv(:) = 0.0
            vnikv(kv) = 1.0
         end if
-
+        
+        row_ptr( (i-1)*nv + j ) = counter
         do ii=1,ku
            do jj = 1,kv
-              rows(counter) = (i-1)*nv + j -1
-              cols(counter) = (ileftu-ku+ii-1)*Nctlv + (ileftv-kv+jj-1)
+              !rows(counter) = (i-1)*nv + j -1
+              ! cols(counter) = (ileftu-ku+ii-1)*Nctlv + (ileftv-kv+jj-1)
+              col_ind(counter) = (ileftu-ku+ii-1)*Nctlv + (ileftv-kv+jj)
               vals(counter) = vniku(ii)*vnikv(jj)
               counter = counter + 1
            end do
         end do
      end do
   end do
+  row_ptr(nu*nv+1) = counter
 end subroutine surface_jacobian_linear
-
 
 subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
 
@@ -162,6 +233,35 @@ subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
   
 
 end subroutine surface_para_corr
+
+function compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
+ ! Do Hoschek parameter correction
+  implicit none
+  ! Input/Output
+  double precision  ,intent(in)      :: tu(ku+nctlu),tv(kv+nctlv)
+  double precision  ,intent(inout)   :: u(nu,nv),v(nu,nv)
+  double precision  ,intent(in)      :: coef(nctlu,nctlv,ndim)
+  integer           ,intent(in)      :: ku,kv,nctlu,nctlv,ndim,nu,nv
+  double precision  ,intent(in)      :: X(nu,nv,ndim)
+  double precision  ,intent(out)     :: rms
+ 
+  ! Working
+  integer                            :: i,j,idim
+  double precision                   :: val(ndim),D(ndim)
+  double precision                   :: compute_rms_surface
+  compute_rms_surface = 0.0
+  do i=1,nu
+     do j=1,nv
+        call eval_surface(u(i,j),v(i,j),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
+        D = val-X(i,j,:)
+        do idim=1,ndim
+           compute_rms_surface = compute_rms_surface + D(idim)**2
+        end do
+     end do
+  end do
+  compute_rms_surface = sqrt(compute_rms_surface/(nu*nv))
+end function compute_rms_surface
+
 
 
 ! subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
