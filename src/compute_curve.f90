@@ -46,7 +46,7 @@ subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol,rms)
   integer                               :: istop,itn
   double precision                      :: Anorm,Acond,rnorm, Arnorm,xnorm
   ! Functions called
-  double precision                      :: poly_length,floor,compute_rms
+  double precision                      :: poly_length,floor,compute_rms_curve
 
   !Initialization
   length = poly_length(X,n,ndim)  
