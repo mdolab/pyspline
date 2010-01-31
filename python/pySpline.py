@@ -407,7 +407,7 @@ original data for this surface or node is not in range 0->3'
             return pyspline.eval_surface_deriv2_m(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
         # end if
  
-    def projectPoint(self,x0,Niter=25,tol1=1e-6,tol2=1e-6,*args,**kwargs):
+    def projectPoint(self,x0,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
 
         '''Project a point x0 onto the surface. i.e. Find the point on the
         surface that minimizes the distance from x0 to
@@ -419,29 +419,27 @@ original data for this surface or node is not in range 0->3'
         v=-1
         if 'u' in kwargs: u = kwargs['u']
         if 'v' in kwargs: v = kwargs['v']
-        return pyspline.project_point_surface(x0,self.tu,self.tv,self.ku,self.kv,self.coef,
-                                              Niter,tol1,tol2,u,v)
-                                
-    def projectCurveEdge(self,curve,edge,s0=0.5,Niter=25,tol=1e-6):
-        '''Project a pySpline Curve, 'curve', onto edge 'edge' . We
-        will use the min_distance algorithim from the curve
-        class We will return the u,v Coordinates of the point (on the
-        edge) we found'''
+        return pyspline.point_surface(x0,self.tu,self.tv,self.ku,self.kv,self.coef,
+                                              Niter,eps1,eps2,u,v)
+      
 
-        s,t,d,conv = self.edge_curves[edge].minDistance(curve,s=s0,t=s0,Niter=Niter,tol=tol)
-        
-        if edge == 0:
-            return s,self.vmin
-        elif edge == 1:
-             return s,self.vmax
-        elif edge == 2:
-            return self.umin,s
-        elif edge == 3:
-            return self.umax,s
-        # end if
-        
-        return
-                                
+    def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
+
+        '''Project a point x0 onto the surface. i.e. Find the point on the
+        surface that minimizes the distance from x0 to
+        surface(u,v). See the fortran function project_point_surface.90'''
+
+        # We will use a starting point u0,v0 if given
+        u = -1.0
+        v = -1.0
+        s = -1.0
+        if 'u' in kwargs: u = kwargs['u']
+        if 'v' in kwargs: v = kwargs['v']
+        if 's' in kwargs: s = kwargs['s']
+        return pyspline.curve_surface(curve.t,curve.k,curve.coef,
+                                      self.tu,self.tv,self.ku,self.kv,self.coef,
+                                      Niter,eps1,eps2,u,v,s)
+   
     def _writeTecplot2D(self,handle,name,data):
          '''A Generic write tecplot zone to file'''
          nx = data.shape[0]
@@ -536,7 +534,7 @@ original data for this surface or node is not in range 0->3'
 
         return 
 
-    def writeTecplot(self,file_name,surfs=True,coef=True,orig=True):
+    def writeTecplot(self,file_name,surfs=True,coef=True,orig=True,dir=False):
         '''Write the surface to tecplot'''
         f = open(file_name,'w')
         if surfs:
@@ -545,6 +543,8 @@ original data for this surface or node is not in range 0->3'
             self._writeTecplotCoef(f)
         if orig:
             self._writeTecplotOrigData(f)
+        if dir:
+            self._writeDirections(f,0)
         f.close()
 
     def writeIGES_directory(self,handle,Dcount,Pcount):
