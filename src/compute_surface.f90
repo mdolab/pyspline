@@ -234,7 +234,7 @@ subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
 
 end subroutine surface_para_corr
 
-function compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
+function compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X)
  ! Do Hoschek parameter correction
   implicit none
   ! Input/Output
@@ -243,7 +243,6 @@ function compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
   double precision  ,intent(in)      :: coef(nctlu,nctlv,ndim)
   integer           ,intent(in)      :: ku,kv,nctlu,nctlv,ndim,nu,nv
   double precision  ,intent(in)      :: X(nu,nv,ndim)
-  double precision  ,intent(out)     :: rms
  
   ! Working
   integer                            :: i,j,idim
