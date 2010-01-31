@@ -1,7 +1,10 @@
-# This is a test script to test all the functionality of the 
+# This is a test script to test the functionality of the 
 # pySpline curve class
 
 from numpy import *
+import sys
+sys.path.append('../')
+
 import pySpline
 
 # Get some Helix-like data

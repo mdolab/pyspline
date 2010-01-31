@@ -68,9 +68,8 @@ subroutine compute_surface(X,u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,ndim,coef,niter,t
       call compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
       call surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv)
      ! Do convergence Check to break early
-     print *,'Done compute surface'
+
   end do
- 
   call kill_jacobian()
 
 end subroutine compute_surface
