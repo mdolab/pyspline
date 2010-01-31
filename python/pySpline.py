@@ -28,7 +28,7 @@ import os, sys, string, time, copy
 # External Python modules
 # =============================================================================
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
-vstack
+vstack,real
 
 import numpy.linalg
 import pyspline
@@ -163,7 +163,7 @@ MUST be defined for task lms or interpolate'
             self.orig_data = True
             self.Nu = self.X.shape[0]
             self.Nv = self.X.shape[1]
-            print 'x shape:',self.X.shape           
+
             self.ku = int(kwargs['ku'])
             self.kv = int(kwargs['kv'])
 
@@ -177,12 +177,10 @@ MUST be defined for task lms or interpolate'
             # Sanity check to make sure k is less than N
             if self.Nu < self.ku:
                 self.ku = self.Nu
-                print 'Warning: Nu<ku. ku is now %d'%(self.ku)
             # end if
 
             if self.Nv < self.kv:
                 self.kv = self.Nv
-                print 'Warning: Nv<kv. kv is now %d'%(self.kv)
             # end if
 
             if self.Nctlu < self.ku:
@@ -191,7 +189,6 @@ MUST be defined for task lms or interpolate'
 
             if self.Nctlv < self.kv:
                 self.kv = self.Nctlv
-                print 'Warning: Nv<kv. kv is now %d'%(self.kv)
             # end if
 
             if 'rel_tol' in kwargs:
@@ -213,9 +210,9 @@ MUST be defined for task lms or interpolate'
                 if self.nDim == 3:
                     u,v = self._calcParameterization()
                 else:
-                    print 'Automatic parameterization of ONLY available\
+                    mpiPrint('Automatic parameterization of ONLY available\
  for spatial data in 3 dimensions. Please supply u and v key word arguments\
- otherwise.'
+ otherwise.')
                     sys.exit(1)
                 # end if
             # end if
@@ -233,7 +230,7 @@ MUST be defined for task lms or interpolate'
                 self.X,self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.coef,\
                     self.niter,self.rel_tol)
         else:
-            print 'Error: The first argument must be \'create\', \'lms\' or \'interpolate\''
+            mpiPrint('Error: The first argument must be \'create\', \'lms\' or \'interpolate\'')
             sys.exit(0)
         # end if (init type)
         return
@@ -410,7 +407,7 @@ original data for this surface or node is not in range 0->3'
             return pyspline.eval_surface_deriv2_m(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
         # end if
  
-    def projectPoint(self,x0,Niter=25,tol1=1e-6,tol2=1e-6):
+    def projectPoint(self,x0,Niter=25,tol1=1e-6,tol2=1e-6,*args,**kwargs):
 
         '''Project a point x0 onto the surface. i.e. Find the point on the
         surface that minimizes the distance from x0 to
@@ -418,8 +415,12 @@ original data for this surface or node is not in range 0->3'
 
         # We will use a starting point u0,v0 if given
         assert len(x0) == self.nDim,'Error: x0 must have same spatial dimension as surface'
+        u=-1
+        v=-1
+        if 'u' in kwargs: u = kwargs['u']
+        if 'v' in kwargs: v = kwargs['v']
         return pyspline.project_point_surface(x0,self.tu,self.tv,self.ku,self.kv,self.coef,
-                                              Niter,tol1,tol2)
+                                              Niter,tol1,tol2,u,v)
                                 
     def projectCurveEdge(self,curve,edge,s0=0.5,Niter=25,tol=1e-6):
         '''Project a pySpline Curve, 'curve', onto edge 'edge' . We
@@ -449,7 +450,7 @@ original data for this surface or node is not in range 0->3'
          handle.write('DATAPACKING=POINT\n')
          for j in xrange(ny):
              for i in xrange(nx):
-                 handle.write('%f %f %f \n'%(data[i,j,0].astype('d'),data[i,j,1].astype('d'),data[i,j,2].astype('d')))
+                 handle.write('%f %f %f \n'%(data[i,j,0],data[i,j,1],data[i,j,2]))
              # end for
          # end for 
          
@@ -498,8 +499,8 @@ original data for this surface or node is not in range 0->3'
             if nv > MAX_SIZE: nv = MAX_SIZE
             if nv < MIN_SIZE: nv = MIN_SIZE
             
-            u_plot = linspace(self.range[0],self.range[1],nu).astype('d')
-            v_plot = linspace(self.range[2],self.range[3],nv).astype('d')
+            u_plot = linspace(self.range[0],self.range[1],nu)
+            v_plot = linspace(self.range[2],self.range[3],nv)
         # end if
 
         # Dump re-interpolated surface
@@ -530,14 +531,13 @@ original data for this surface or node is not in range 0->3'
             handle.write('%f,%f,%f \n'%(self.coef[2,1,0],self.coef[2,1,1],self.coef[2,1,2]))
             handle.write('%f,%f,%f \n'%(self.coef[3,1,0],self.coef[3,1,1],self.coef[3,1,2]))
         else:
-            print 'Not Enough control points to output direction indicator'
+            mpiPrint('Not Enough control points to output direction indicator')
         #end if
 
         return 
 
     def writeTecplot(self,file_name,surfs=True,coef=True,orig=True):
         '''Write the surface to tecplot'''
-        print 'file_name:',file_name
         f = open(file_name,'w')
         if surfs:
             self._writeTecplotSurface(f)
@@ -783,15 +783,16 @@ class curve():
             # Generate the knot vector
             self.t = pyspline.knots(self.s,self.Nctl,self.k)
             self.coef = zeros((self.Nctl,self.nDim),'d')
-            self.coef,rms = pyspline.compute_curve(self.s,self.X,self.t,self.k,self.coef,
-                                         self.niter,self.rel_tol)
-            print 'Fitted with rms:',rms
+            self.s,self.coef,rms = pyspline.compute_curve(self.s,self.X,self.t,self.k,self.coef,
+                                                   self.niter,self.rel_tol)
+            mpiPrint('Fitted with rms:%f'%rms)
+            self._calcGrevillePoints()
 
     def runParameterCorrection(self,niter,rel_tol=1e-5):
         # Run more parameter correction
-        self.coef,rms = pyspline.compute_curve(self.s,self.X,self.t,self.k,self.coef,
+        self.s,self.coef,rms = pyspline.compute_curve(self.s,self.X,self.t,self.k,self.coef,
                                                niter,self.rel_tol)
-        print 'ReFitted with rms:',rms
+        mpiPrint('ReFitted with rms: %f'%rms)
 
     def _getParameterization(self):
         # We need to parameterize the curve
@@ -808,29 +809,14 @@ class curve():
         self.s /= self.s[-1]
 
         return
-   
-    def projectPoint(self,x0,Niter=20,tol1=1e-6,tol2=1e-6):
-        '''Project a point x0 onto the curve and return parametric position
-        giving minimum distance. This should also work if point is
-        already on the curve as well'''
-
-        # tol1 is tolerance for point on curve and for delta change in parameter
-        # tol2 is tolerance for cosine convergence test (point off curve)
-
-        assert len(x0) == self.nDim,'Dimension of x0 and the dimension of\
- spline must be the same'
-        
-        s,D = pyspline.projectPoint(x0,self.t,self.k,self.coef,Niter,
-                                       tol1,tol2)
-        return s,D
-
+      
     def getLength(self):
         # Get the length of the actual Curve
         # Use the greville points for the positions
         
         # We should do this with exact gaussian integration 
 
-        points = self.getValueV(self.gpts)# These are physical points
+        points = self.getValue(self.gpts)# These are physical points
         length = 0
         for i in xrange(len(points)-1):
             length += e_dist(points[i],points[i+1])
@@ -870,13 +856,86 @@ class curve():
         elif len(s.shape) == 1:
             return pyspline.eval_curve_deriv_v(s,self.t,self.k,self.coef)
 
-    def minDistance(self,curve,s=0,t=0,Niter=25,tol=1e-6):
+    def projectPoint(self,x0,Niter=20,eps1=1e-6,eps2=1e-6,*args,**kwargs):
+        '''Project a point x0 onto the curve and return parametric position'''
+
+        # eps1 is tolerance for point on curve and for delta change in parameter
+        # eps2 is tolerance for cosine convergence test (point off curve)
+
+        assert len(x0) == self.nDim,'Dimension of x0 and the dimension of\
+ spline must be the same'
+        s = -1.0
+        if 's' in kwargs: s=kwargs['s']
+        return pyspline.point_curve(x0,self.t,self.k,self.coef,Niter,eps1,eps2,s)
+
+    def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
 
         '''Find the minimum distance between this curve (self) and a second
         curve passed in (curve)'''
-        return pyspline.mincurvedistance(
-            self.t,self.k,self.coef,curve.t,curve.k,curve.coef,s,t,Niter,tol)
-   
+
+        # eps1 is tolerance for intersection
+        # eps2 is tolerance for cosine convergence test (non-intersecting)
+
+        s = -1.0
+        t = -1.0
+        if 's' in kwargs:  s = kwargs['s']
+        if 't' in kwargs:  t = kwargs['t']
+        return pyspline.curve_curve(self.t,self.k,self.coef,
+                                    curve.t,curve.k, curve.coef,
+                                    Niter,eps1,eps2,s,t)
+
+    def writeTecplot(self,file_name,curve=True,coef=True,orig=True,*args,**kwargs):
+        '''Write the cuve to tecplot'''
+        f = open(file_name,'w')
+        if curve:
+            self._writeTecplotCurve(f,*args,**kwargs)
+        if coef:
+            self._writeTecplotCoef(f,*args,**kwargs)
+        if orig:
+            self._writeTecplotOrigData(f,*args,**kwargs)
+        f.close()
+
+    def _writeTecplot1D(self,handle,name,data):
+        '''A Generic write tecplot zone to file'''
+        n = data.shape[0]
+        handle.write('Zone T=%s I=%d \n'%(name,n))
+        handle.write('DATAPACKING=POINT\n')
+        for i in xrange(n):
+            for idim in xrange(self.nDim):
+                handle.write('%f '%data[i,idim])
+            # end for
+            handle.write('\n')
+        # end for
+        return
+
+    def _writeTecplotCoef(self,handle,*args,**kwargs):
+        '''Write the Spline coefficients to handle'''
+        self._writeTecplot1D(handle,'control_pts',self.coef)
+
+        return
+
+    def _writeTecplotOrigData(self,handle,*args,**kwargs):
+        if self.orig_data:
+            self._writeTecplot1D(handle,'orig_data',self.X)
+        # end if
+
+        return
+    def _writeTecplotCurve(self,handle,*args,**kwargs):
+        if 'size' in kwargs:
+            length = self.getLength()
+            n=int(floor(real(length/kwargs['size'])))
+            X = self.getValue(linspace(0,1,n))
+        else:
+            if not self.s == None:
+                X = self.getValue(self.s)
+            else:
+                s = 0.5*(1-cos(linspace(0,pi,25)))
+                X = self.getValue(s)
+            # end if
+        # end if
+        self._writeTecplot1D(handle,'interpolated',X)
+
+        return 
 
 #==============================================================================
 # Class Test
@@ -1195,7 +1254,7 @@ if __name__ == '__main__':
 #         if self.orig_data:
 #             s_plot = self.s
 #         else:
-#             s_plot = linspace(self.range[0],self.range[1],25).astype('d')
+#             s_plot = linspace(self.range[0],self.range[1],25)
 #         # end if 
         
 #         # Dump re-interpolated spline
@@ -1204,8 +1263,8 @@ if __name__ == '__main__':
 #         for i in xrange(len(s_plot)):
 #             for idim in xrange(self.nDim):
 #                 handle.write('%f '%(\
-#                         pyspline_real.bvalu(self.t.astype('d'),\
-#                                            self.coef[:,idim].astype('d'),\
+#                         pyspline_real.bvalu(self.t,\
+#                                            self.coef[:,idim],\
 #                                            self.k,0,s_plot[i])))
 #             # end for 
 #             handle.write('\n')
@@ -1227,78 +1286,3 @@ if __name__ == '__main__':
 
   # Generic algorithim -- Min distance between curve and surface
                                 
-
-#          # -------------- REWRITE IN FORTRAN -----------
-#         ''' Try to find the parametric u-v coordinate of the spline
-#         which coorsponds to the intersection of the directed vector 
-#         v = x0 + r*s where x0 is a basepoint, r  is a direction vector
-#         and s is the distance along the vector.
-        
-#         If possible, both intersections are attempted with the first 
-#         coorsponding to the first intersection in the direction of r
-        
-#         Input: 
-        
-#         x0: array, length 3: The base of the vector
-#         r : array, length 3: The direction of the vector
-
-#         u0: scalar: The guess for the u coordinate of the intersection
-#         v0: scalar: The guess for the v coordinate of the intersection
-
-#         '''
-#         maxIter = 25
-
-#         u = u0
-#         v = v0
-#         s = 0 #Start at the basepoint
-#         A = zeros((3,3),'d')
-#         for iter in xrange(maxIter):
-
-#             #just in case, force crop u,v to [-1,1]
-#             if u<0: u = 0
-#             if u>1: u =  1
-#             if v<0: v = 0
-#             if v>1: v =  1
-
-#             x = self.getValue(u,v) #x contains the x,y,z coordinates 
-
-#             f = zeros((3,1),'d')
-#             f[0] = x[0]-(x0[0]+r[0]*s)
-#             f[1] = x[1]-(x0[1]+r[1]*s)
-#             f[2] = x[2]-(x0[2]+r[2]*s)
-
-#             J = self.getJacobian(u,v)
-        
-#             A[:,0:2] = J
-#             A[0,2]   = -r[0]
-#             A[1,2]   = -r[1]
-#             A[2,2]   = -r[2]
-
-#             x_up = numpy.linalg.solve(A,-f)
-
-#             # Add a little error checking here:
-            
-#             if u + x_up[0] < 0 or u + x_up[0] > 1 or \
-#                v + x_up[1] < 0 or v + x_up[1] > 1:
-#                 #Cut the size of the step in 1/2
-#                 x_up /= 2
-
-#             u = u + x_up[0]
-#             v = v + x_up[1]
-#             s = s + x_up[2]
-
-#             if numpy.linalg.norm(x_up) < 1e-12:
-#                 if u<0 or v <0:
-#                     print 'u,v:',u,v
-#                     print x_up
-#                 return u,v,x
-
-#         # end for
-#         u = u - x_up[0]
-#         v = v - x_up[1]
-#         if not NO_PRINT:
-#             print 'Warning: Newton Iteration for u,v,s did not converge:'
-#             print 'u = %f, v = %f, s = %f\n'%(u,v,s)
-#             print 'Norm of update:',numpy.linalg.norm(x_up)
-
-#         return u,v,x
