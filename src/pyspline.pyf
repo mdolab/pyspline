@@ -105,7 +105,7 @@
        double precision intent(in) :: niter
        double precision intent(in) :: eps1
        double precision intent(in) :: eps2
-       double precision intent(out) :: s
+       double precision intent(in,out) :: s
        double precision dimension(ndim),intent(out), depend(ndim) :: diff
      end subroutine project_point_curve
 
@@ -326,8 +326,8 @@
        integer intent(in) :: niter
        double precision intent(in) :: eps1
        double precision intent(in) :: eps2
-       double precision intent(out) :: u
-       double precision intent(out) :: v
+       double precision intent(in,out) :: u
+       double precision intent(in,out) :: v
        double precision dimension(ndim),intent(out),depend(ndim) :: diff
      end subroutine project_point_surface
 
