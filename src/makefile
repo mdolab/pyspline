@@ -13,15 +13,10 @@ OBJ =	lsqrDataModule.o\
 	lsqrModule.o\
 	lms_jacobian.o\
 	compute_curve.o\
-	eval_curve.o\
-	eval_curve_deriv.o\
-	eval_curve_deriv2.o\
-	project_point_curve.o\
 	compute_surface.o\
+	eval_curve.o\
 	eval_surface.o\
-	eval_surface_deriv.o\
-	eval_surface_deriv2.o\
-	project_point_surface.o\
+	projections.o\
 	bvalu.o\
 	intrv.o\
 	bspvn.o\

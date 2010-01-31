@@ -215,10 +215,14 @@ subroutine eval_curve_deriv2(s,t,k,coef,nctl,ndim,val)
 
   inbv = 1
   
-  do idim=1,ndim
-     val(idim) = bvalu(t,coef(:,idim),nctl,k,2,s,inbv,work)
-  end do
-    
+  if (k == 2) then
+     val(:) = 0.0
+  else
+     do idim=1,ndim
+        val(idim) = bvalu(t,coef(:,idim),nctl,k,2,s,inbv,work)
+     end do
+  end if
+
 end subroutine eval_curve_deriv2
 
 subroutine eval_curve_deriv2_V(s,t,k,coef,nctl,ndim,n,val)
@@ -258,10 +262,13 @@ subroutine eval_curve_deriv2_V(s,t,k,coef,nctl,ndim,n,val)
 
   inbv = 1
 
-  do i=1,n
-     do idim=1,ndim
-        val(i,idim) = bvalu(t,coef(:,idim),nctl,k,2,s(i),inbv,work)
+  if (k == 2) then
+     val(:,:) = 0.0
+  else
+     do i=1,n
+        do idim=1,ndim
+           val(i,idim) = bvalu(t,coef(:,idim),nctl,k,2,s(i),inbv,work)
+        end do
      end do
-  end do
-
+  end if
 end subroutine eval_curve_deriv2_V
