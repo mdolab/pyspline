@@ -135,7 +135,7 @@ MUST be defined for task lms or interpolate'
                 if len(self.X.shape) == 1:
                     self.nDim =1
                 else:
-                    self.nDim = self.X.shape[1]
+                    self.nDim = self.X.shape[2]
             elif 'x' in kwargs and 'y' in kwargs and 'z'in kwargs:
                 self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],3))
                 self.X[:,:,0] = kwargs['x']
@@ -220,21 +220,47 @@ MUST be defined for task lms or interpolate'
             self.umax = u[-1]
             self.vmin = v[0]
             self.vmax = v[-1]
-          
             self.tu = pyspline.knots(u,self.Nctlu,self.ku)
             self.tv = pyspline.knots(v,self.Nctlv,self.kv)
+
+            #self._calcKnots()
             [self.V,self.U] = meshgrid(v,u)
             self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim),'d')
             self.niter = 1
+            print self.Nctlu,self.Nctlv
             self.U,self.V,self.coef, rms = pyspline.compute_surface(\
                 self.X,self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.coef,\
                     self.niter,self.rel_tol)
+            print 'RMS is:',rms
+
+            # Now do it dense
+            Jac = pyspline.surface_jacobian_linear2(self.U,self.V,self.tu,self.tv,
+                                                    self.ku,self.kv,self.Nctlu,
+                                                    self.Nctlv)
+            coef2 = zeros((self.Nctlu,self.Nctlv,self.nDim))
+            for idim in xrange(self.nDim):
+                coef2[:,:,idim] = numpy.linalg.lstsq(Jac,self.X[:,:,idim].flatten())[0].reshape((self.Nctlu,self.Nctlv))
+            # end for
+
+            print 'x - Comparison:'
+            print self.coef[:,:,0] - coef2[:,:,0]
+            print 'y - Comparison:'
+            print self.coef[:,:,1] - coef2[:,:,2]
+            print 'z - Comparison:'
+            print self.coef[:,:,1] - coef2[:,:,2]
+            self.coef = coef2
+
+
+
         else:
             mpiPrint('Error: The first argument must be \'create\', \'lms\' or \'interpolate\'')
             sys.exit(0)
         # end if (init type)
         return
 
+    def _calcKnots(self):
+        self.tu = pyspline.knots(u,self.Nctlu,self.ku)
+        self.tv = pyspline.knots(v,self.Nctlv,self.kv)
 
     def _calcParameterization(self):
 

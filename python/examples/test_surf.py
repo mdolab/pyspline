@@ -13,7 +13,7 @@ v = linspace(0,4,nv)
 [V,U] = meshgrid(v,u)
 Z = cos(U)*sin(V)
 
-surf = pySpline.surface('lms',Nctlu=8,Nctlv=8,x=U,y=V,z=Z,ku=4,kv=4)
+surf = pySpline.surface('lms',Nctlu=12,Nctlv=12,x=U,y=V,z=Z,ku=4,kv=4)
 surf.writeTecplot('surface.dat')
 
 # Test the project point Algorithim
