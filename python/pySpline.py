@@ -30,7 +30,7 @@ import os, sys, string, time, copy
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
 vstack,real
 
-import numpy.linalg
+from numpy.linalg import lstsq
 import pyspline
 
 from mdo_import_helper import *
@@ -135,7 +135,7 @@ MUST be defined for task lms or interpolate'
                 if len(self.X.shape) == 1:
                     self.nDim =1
                 else:
-                    self.nDim = self.X.shape[1]
+                    self.nDim = self.X.shape[2]
             elif 'x' in kwargs and 'y' in kwargs and 'z'in kwargs:
                 self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],3))
                 self.X[:,:,0] = kwargs['x']
@@ -220,21 +220,38 @@ MUST be defined for task lms or interpolate'
             self.umax = u[-1]
             self.vmin = v[0]
             self.vmax = v[-1]
-          
-            self.tu = pyspline.knots(u,self.Nctlu,self.ku)
-            self.tv = pyspline.knots(v,self.Nctlv,self.kv)
+            
+            self.u = u
+            self.v = v
+            self._calcKnots()
             [self.V,self.U] = meshgrid(v,u)
-            self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim),'d')
-            self.niter = 1
-            self.U,self.V,self.coef, rms = pyspline.compute_surface(\
-                self.X,self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.coef,\
-                    self.niter,self.rel_tol)
+#             self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim),'d')
+#             self.niter = 1      
+#             self.U,self.V,self.coef, rms = pyspline.compute_surface(\
+#                 self.X,self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.coef,\
+#                     self.niter,self.rel_tol)
+  
+            self.recompute()
+            #mpiPrint('Done Fitting Surface')
+
         else:
             mpiPrint('Error: The first argument must be \'create\', \'lms\' or \'interpolate\'')
             sys.exit(0)
         # end if (init type)
         return
 
+    def _calcKnots(self):
+        self.tu = pyspline.knots(self.u,self.Nctlu,self.ku)
+        self.tv = pyspline.knots(self.v,self.Nctlv,self.kv)
+
+
+    def recompute(self):
+        Jac = pyspline.surface_jacobian_wrap(self.U,self.V,self.tu,self.tv,
+                                             self.ku,self.kv,self.Nctlu,
+                                             self.Nctlv)
+        self.coef = lstsq(Jac,self.X.reshape([self.Nu*self.Nv,self.nDim]))[0].reshape([self.Nctlu,self.Nctlv,self.nDim])
+        self._setEdgeCurves()
+        return
 
     def _calcParameterization(self):
 
@@ -298,7 +315,7 @@ MUST be defined for task lms or interpolate'
         elif corner == 1:
             return self.getValue(self.umax,self.vmin)
         elif corner == 2:
-            return self.getValue(self.umin,self.vamx)
+            return self.getValue(self.umin,self.vmax)
         elif corner ==3:
             return self.getValue(self.umax,self.vmax)
         #end if
@@ -695,7 +712,7 @@ class curve():
         
         task = args[0]
         if task == 'create':
-            assert 'k' in kwargs and 't' in kwargs and 'coef' in kwargs and 'range' in kwargs, \
+            assert 'k' in kwargs and 't' in kwargs and 'coef' in kwargs, \
                 'Error: k,t,coef, and range MUST be defined for task=\'create\''
             
             self.s = None
@@ -706,10 +723,10 @@ class curve():
             self.coef = array(kwargs['coef'])
             self.Nctl = self.coef.shape[0]
             self.orig_data = False
-            self.smin = kwargs['range'][0]
-            self.smax = kwargs['range'][1]
+            self.smin = self.t[0]
+            self.smax = self.t[-1]
             self.nDim = self.coef.shape[1]-1
-            self._calcGrevillePts()
+            self._calcGrevillePoints()
             return
              
         elif task=='interpolate' or task == 'lms':
@@ -782,17 +799,18 @@ class curve():
 
             # Generate the knot vector
             self.t = pyspline.knots(self.s,self.Nctl,self.k)
+            self._calcGrevillePoints()
             self.coef = zeros((self.Nctl,self.nDim),'d')
             self.s,self.coef,rms = pyspline.compute_curve(self.s,self.X,self.t,self.k,self.coef,
-                                                   self.niter,self.rel_tol)
-            mpiPrint('Fitted with rms:%f'%rms)
-            self._calcGrevillePoints()
+                                                          self.niter,self.rel_tol)
+            mpiPrint('Fitted with rms:%f'%rms,self.NO_PRINT)
+
 
     def runParameterCorrection(self,niter,rel_tol=1e-5):
         # Run more parameter correction
         self.s,self.coef,rms = pyspline.compute_curve(self.s,self.X,self.t,self.k,self.coef,
                                                niter,self.rel_tol)
-        mpiPrint('ReFitted with rms: %f'%rms)
+        mpiPrint('ReFitted with rms: %f'%rms,self.NO_PRINT)
 
     def _getParameterization(self):
         # We need to parameterize the curve
