@@ -160,7 +160,7 @@ subroutine surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv)
 end subroutine surface_jacobian_linear
 
 
-subroutine surface_jacobian_linear2(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,Jac)
+subroutine surface_jacobian_wrap(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,Jac)
 
   implicit none
   ! Input
@@ -209,7 +209,7 @@ subroutine surface_jacobian_linear2(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,Jac)
         end do
      end do
   end do
-end subroutine surface_jacobian_linear2
+end subroutine surface_jacobian_wrap
 
 subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
 
