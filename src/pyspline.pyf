@@ -341,6 +341,22 @@
        integer,intent(out) :: ileft
        integer,intent(out) :: mflag
      end subroutine intrv
+
+     subroutine surface_jacobian_linear2(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,jac) ! in :test:compute_surface.f90
+       double precision dimension(nu,nv),intent(in) :: u
+       double precision dimension(nu,nv),intent(in),depend(nu,nv) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       integer intent(in) :: nctlu
+       integer intent(in) :: nctlv
+       integer optional,intent(in),check(shape(u,0)==nu),depend(u) :: nu=shape(u,0)
+       integer optional,intent(in),check(shape(u,1)==nv),depend(u) :: nv=shape(u,1)
+       double precision dimension(nu*nv,nctlu*nctlv),intent(out),depend(nu,nv,nctlu,nctlv) :: jac
+     end subroutine surface_jacobian_linear2
+
+
   end interface
 end program
 

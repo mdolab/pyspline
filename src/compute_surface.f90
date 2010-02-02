@@ -50,22 +50,27 @@ subroutine compute_surface(X,u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,ndim,coef,niter,t
   integer                               :: istop,itn
   double precision                      :: Anorm,Acond,rnorm, Arnorm,xnorm
   ! Functions called
-  double precision                      :: poly_length,floor,compute_rms
+  double precision                      :: poly_length,floor,compute_rms_surface
 
   !Initialization
   call setup_jacobian(nu*nv,nctlu*nctlv,ku*kv)
   call surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv)
   rms = 0.0
+
+
   do iter=1,niter
 !      ! Solve
       idim = 1
       do idim=1,ndim
-         call LSQR( nu*nv, Nctlu*Nctlv, Aprod1, Aprod2,X(:,:,idim),0.0, .False., &
-              coef(:,:,idim), vals, 1e-12, 1e-12, 1e8, Nctlu*Nctlv*4,0,&
+         call LSQR( nu*nv, Nctlu*Nctlv, Aprod1, Aprod2,X(:,:,idim),.0, .False., &
+              coef(:,:,idim), vals, 1e-12, 1e-12, 1e8, Nctlu*Nctlv*10,0,&
               istop, itn, Anorm, Acond, rnorm, Arnorm, xnorm )
+         print *,'istop,itn:',istop,itn
+         print *,'Anorm,Acond:',Anorm,Acond,Arnorm
+
       end do
       !call surface_para_corr(t,k,s,coef,nctl,ndim,length,n,X)
-      call compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
+      rms = compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X)
       call surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv)
      ! Do convergence Check to break early
 
@@ -153,6 +158,58 @@ subroutine surface_jacobian_linear(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv)
   end do
   row_ptr(nu*nv+1) = counter
 end subroutine surface_jacobian_linear
+
+
+subroutine surface_jacobian_linear2(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,Jac)
+
+  implicit none
+  ! Input
+  integer         , intent(in)          :: ku,kv,nctlu,nctlv,nu,nv
+  double precision, intent(in)          :: u(nu,nv),v(nu,nv)
+  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+  double precision, intent(out)         :: Jac(nu*nv,nctlu*nctlv)
+  ! Working
+  double precision                      :: vniku(ku),worku(2*ku)
+  integer                               :: ilou,ileftu,mflagu
+
+  double precision                      :: vnikv(kv),workv(2*kv)
+  integer                               :: ilov,ileftv,mflagv
+
+  integer                               :: i,j,ii,jj,iwork
+
+  ilou = 1
+  ilov = 1
+  do i=1,nu
+     do j = 1,nv
+        ! Get u interval
+        call intrv(tu,nctlu+ku,u(i,j),ilou,ileftu,mflagu)
+        if (mflagu == 0) then
+           call bspvn(tu,ku,ku,1,u(i,j),ileftu,vniku,worku,iwork)
+        else if (mflagu == 1) then
+           ileftu = nctlu
+           vniku(:) = 0.0
+           vniku(ku) = 1.0
+        end if
+
+        ! Get v interval
+        call intrv(tv,nctlv+kv,v(i,j),ilov,ileftv,mflagv)
+        if (mflagv == 0) then
+           call bspvn(tv,kv,kv,1,v(i,j),ileftv,vnikv,workv,iwork)
+        else if (mflagv == 1) then
+           ileftv = nctlv
+           vnikv(:) = 0.0
+           vnikv(kv) = 1.0
+        end if
+        
+        do ii=1,ku
+           do jj = 1,kv
+              Jac( (i-1)*nv + j, (ileftu-ku+ii-1)*Nctlv + (ileftv-kv+jj)) = &
+                   vniku(ii)*vnikv(jj)
+           end do
+        end do
+     end do
+  end do
+end subroutine surface_jacobian_linear2
 
 subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
 
@@ -258,6 +315,7 @@ function compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X)
      end do
   end do
   compute_rms_surface = sqrt(compute_rms_surface/(nu*nv))
+
 end function compute_rms_surface
 
 
