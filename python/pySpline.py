@@ -709,7 +709,11 @@ class curve():
                  x=<vals>,y=<vals>,z=<vals> where each is of length s
             Nctl, integer: The number of control points
     '''
-        
+        if 'no_print' in kwargs:
+            self.NO_PRINT = kwargs['no_print']
+        else:
+            self.NO_PRINT = False
+        # end if      
         task = args[0]
         if task == 'create':
             assert 'k' in kwargs and 't' in kwargs and 'coef' in kwargs, \
