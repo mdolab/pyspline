@@ -26,12 +26,21 @@ subroutine knots(X,N,Nctl,K,T)
      T(Nctl+J) = X(N) ! right
   end do
 
-  d = dble(N/(Nctl-k+1.0))
+  if (N .ne. Nctl) then
 
-  do j=1,Nctl-k+1
-     i = floor(j*d)
-     alpha = j*d-i
-     T(k+j) = (1-alpha)*X(i) + alpha*X(i+1)
-  end do
+     d = dble(N/(Nctl-k+1.0))
+
+     do j=1,Nctl-k+1
+        i = floor(j*d)
+        alpha = j*d-i
+        T(k+j) = (1-alpha)*X(i) + alpha*X(i+1)
+     end do
+   else  ! N == Nctl
+      do j = 1,N-k+1
+         T(k+j) = X(j+1)
+      end do
+   end if
+      
+
 
 end subroutine knots

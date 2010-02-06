@@ -32,7 +32,7 @@ subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol,rms)
   integer         , intent(in)          :: k,nctl,ndim,n
   double precision, intent(in)          :: X(n,ndim)
   double precision, intent(inout)       :: s(n)
-  double precision, intent(in)       :: t(nctl+k)
+  double precision, intent(in)          :: t(nctl+k)
   integer         , intent(in)          :: niter
   double precision, intent(in)          :: tol
 

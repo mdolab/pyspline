@@ -356,6 +356,40 @@
        double precision dimension(nu*nv,nctlu*nctlv),intent(out),depend(nu,nv,nctlu,nctlv) :: jac
      end subroutine surface_jacobian_wrap
 
+     subroutine updatecoefficients(type_bn,s_pos,links,coef,indicies,s,t,x,rotx,roty,rotz,scale,nref,ns,ncoef) ! in :test:updatecoefficients.f90
+       integer intent(in) :: type_bn
+       double precision dimension(ns),intent(in) :: s_pos
+       double precision dimension(ns,3),intent(in),depend(ns) :: links
+       double precision dimension(ncoef,3),intent(in,out) :: coef
+       integer dimension(ns),intent(in),depend(ns) :: indicies
+       double precision dimension(nref),intent(in) :: s
+       double precision dimension(nref + 2),intent(in),depend(nref) :: t
+       double precision dimension(nref,3),intent(in),depend(nref) :: x
+       double precision dimension(nref),intent(in),depend(nref) :: rotx
+       double precision dimension(nref),intent(in),depend(nref) :: roty
+       double precision dimension(nref),intent(in),depend(nref) :: rotz
+       double precision dimension(nref),intent(in),depend(nref) :: scale
+       integer optional,check(len(s)>=nref),depend(s) :: nref=len(s)
+       integer optional,check(len(s_pos)>=ns),depend(s_pos) :: ns=len(s_pos)
+       integer optional,check(shape(coef,0)==ncoef),depend(coef) :: ncoef=shape(coef,0)
+     end subroutine updatecoefficients
+
+     subroutine getbasispt(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,nctlv,nnz) ! in :test:getBasisPt.f90
+       double precision intent(in) :: u
+       double precision intent(in) :: v
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       double precision dimension(nnz),intent(in,out) :: vals
+       integer dimension(nnz),intent(in,out),depend(nnz) :: col_ind
+       integer intent(in) :: istart
+       integer dimension(nctlu,nctlv),intent(in) :: l_index
+       integer optional,intent(in),check(shape(l_index,0)==nctlu),depend(l_index) :: nctlu=shape(l_index,0)
+       integer optional,intent(in),check(shape(l_index,1)==nctlv),depend(l_index) :: nctlv=shape(l_index,1)
+       integer optional,intent(in),check(len(vals)>=nnz),depend(vals) :: nnz=len(vals)
+     end subroutine getbasispt
+
 
   end interface
 end program
