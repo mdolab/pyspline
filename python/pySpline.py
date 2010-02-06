@@ -368,6 +368,17 @@ original data for this surface or node is not in range 0->3'
             return self.X[0,-1]
         elif node == 3:
             return self.X[-1,-1]
+
+
+    def _getBasisPt(self,u,v,vals,istart,col_ind,l_index):
+        # This function should only be called from pyGeo
+        # The purpose is to compute the basis function for 
+        # a u,v point and add it to pyGeo's global dPt/dCoef
+        # matrix. vals,row_ptr,col_ind is the CSR data and 
+        # l_index in the local -> global mapping for this 
+        # surface
+        return pyspline.getbasispt(u,v,self.tu,self.tv,self.ku,self.kv,vals,
+                                   col_ind,istart,l_index)
                                 
     def __call__(self,u,v):
         return self.getValue(u,v)

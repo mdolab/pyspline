@@ -23,6 +23,8 @@ OBJ =	lsqrDataModule.o\
 	knots.o\
 	b2val.o\
 	b3val.o\
+	updatecoefficients.o\
+	getBasisPt.o\
 	machcon/i1mach.o\
 	machcon/r1mach.o\
 	xerror/fdump.o\
