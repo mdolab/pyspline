@@ -31,7 +31,7 @@ basalt:
 	@echo "Basalt"
 	cp ./config/config.BASALT.mk common.mk
 	( cd src && $(MAKE)) || exit 1; 
-	f2py  --fcompiler=intele --f90flags=-r8 -c -m pyspline src/pyspline.pyf src/libspline.a -lblas
+	f2py  --fcompiler=intele --f90flags=-r8 -c -m pyspline src/pyspline.pyf src/libspline.a -lblas -lg2c
 	mv pyspline.so ./python
 	rm common.mk
 
