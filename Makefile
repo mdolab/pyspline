@@ -3,7 +3,12 @@
 # G. Kenway Feb 7, 2010
 #*********************************************************
 
-default: intel
+default: 
+	@echo "Please select one of the following configurations"
+	@echo "make intel       -> for linux pcs with intel compiler"
+	@echo "make gfortran    -> for linux pcs with gfortran compiler"
+	@echo "make scinet      -> for uoft scinet gpc cluster"
+	@echo "make basalt      -> for sgi altix machine at utias"
 
 intel:
 	@echo "Linux - Intel"
@@ -23,7 +28,7 @@ scinet:
 	@echo "Scinet"
 	cp ./config/config.SCINET.mk common.mk
 	( cd src && $(MAKE)) || exit 1; 
-	f2py  --fcompiler=intelem --f90flags=-r8 -c -m pyspline src/pyspline.pyf src/libspline.a -lblas
+	f2py  --fcompiler=intelem --f90flags=-r8 -c -m pyspline src/pyspline.pyf src/libspline.a ${MKLPATH}/libmkl_intel_lp64.a ${MKLPATH}/libmkl_sequential.a ${MKLPATH}/libmkl_core.a 
 	mv pyspline.so ./python
 	rm common.mk
 
