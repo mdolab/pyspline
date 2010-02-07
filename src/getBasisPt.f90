@@ -10,10 +10,10 @@ subroutine getBasisPt(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,nctlv,nn
   integer         , intent(inout)       :: col_ind(nnz)
   ! Working
   double precision                      :: vniku(ku),worku(2*ku)
-  integer                               :: ilou,ileftu,mflagu
+  integer                               :: ilou,ileftu,mflagu,idim
 
   double precision                      :: vnikv(kv),workv(2*kv)
-  integer                               :: ilov,ileftv,mflagv,start,end,g_index
+  integer                               :: ilov,ileftv,mflagv,start,g_index
   integer                               :: i,j,ii,jj,iwork,counter
 
   ilou = 1
@@ -38,17 +38,16 @@ subroutine getBasisPt(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,nctlv,nn
      vnikv(kv) = 1.0
   end if
   counter = 0
-  do ii=1,ku
-     do jj = 1,kv
-       ! Get the local row/col for this surface
-        g_index = l_index(ileftu - ku + ii , ileftv - kv + jj )
-        start = istart + counter + 1
-        end   = start + 3
-        vals(start:end) = vniku(ii)*vnikv(jj)
-        col_ind(start    ) = g_index*3 
-        col_ind(start + 1) = g_index*3 + 1
-        col_ind(start + 2) = g_index*3 + 2
-        counter = counter + 3
+  do idim = 0,2
+     do ii=1,ku
+        do jj = 1,kv
+           ! Get the local row/col for this surface
+           g_index = l_index(ileftu - ku + ii , ileftv - kv + jj )
+           start = istart + counter + 1
+           vals(start) = vniku(ii)*vnikv(jj)
+           col_ind(start) = g_index*3 + idim
+           counter = counter + 1
+        end do
      end do
   end do
 end subroutine getBasisPt
