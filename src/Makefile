@@ -3,7 +3,8 @@
 # G. Kenway May 21, 2009
 #*********************************************************
 
-RM  	        = /bin/rm -rf
+INCLUDE_COMMON = ../common.mk
+include ${INCLUDE_COMMON}
 
 SPLINE_LIB = libspline.a
 SPLINE_LIB_SHARED = libspline.so
@@ -22,8 +23,8 @@ OBJ =	lsqrDataModule.o\
 	bspvn.o\
 	knots.o\
 	b2val.o\
-	b3val.o\
 	updatecoefficients.o\
+	updatecoefficients_c.o\
 	getBasisPt.o\
 	machcon/i1mach.o\
 	machcon/r1mach.o\
@@ -40,41 +41,12 @@ OBJ =	lsqrDataModule.o\
 ###================================================
 ###  Default compilers and flags
 
-### Intel Fortran Compiler
-FC = ifort
-
-FFLAGS = -O2 -r8 
-#FFLAGS = -O2 -fdefault-real-8
-AR       = ar
-AR_FLAGS = -rvs
-
 default: libspline
 
 clean:
-	@echo "Removing .o files"
-	$(RM) *.o
-	$(RM) xerror/*.o
-	$(RM) machcon/*.o
-	@echo "Removing .mod files"
-	$(RM) *.mod
-	@echo "Removing library"
-	$(RM) libspline.a
-	$(RM) libspline.so
+	$(RM) *.o xerror/*.o machcon/*.o *.mod libspline.a libspline.so
 
 libspline: $(OBJ) 
 	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(OBJ)
 	$(FC)  -shared $(OBJ) -o $(SPLINE_LIB_SHARED) 
 
-.SUFFIXES: .o .f .f90
-
-.f.o:	
-	$(FC) $(FFLAGS) -c $< -o $*.o
-	@echo
-	@echo "        --- Compiled $*.f successfully ---"
-	@echo	
-
-.f90.o:	
-	$(FC) $(FFLAGS) -c $< -o $*.o
-	@echo
-	@echo "        --- Compiled $*.f90 successfully ---"
-	@echo	

@@ -1,4 +1,5 @@
-subroutine updatecoefficients(type,s_pos,links,coef,indicies,s,t,x,rotx,roty,rotz,scale,nref,ns,ncoef)
+subroutine updatecoefficients(type,s_pos,links,coef,indicies,s,t,x,&
+     rotx,roty,rotz,scale,rot_type,nref,ns,ncoef)
 !*** DESCRIPTION
 !
 !     Written by Gaetan Kenway
@@ -33,7 +34,7 @@ subroutine updatecoefficients(type,s_pos,links,coef,indicies,s,t,x,rotx,roty,rot
   real, PARAMETER :: pi = 3.14159265358979
 
   integer ns,i,idim,nref,inbv,ncoef
-  integer         , intent(in)     :: type
+  integer         , intent(in)     :: type,rot_type
   integer         , intent(in)     :: indicies(ns)
   ! Ref axis:
   double precision, intent(in)     :: s(nref)
@@ -69,38 +70,32 @@ subroutine updatecoefficients(type,s_pos,links,coef,indicies,s,t,x,rotx,roty,rot
 
      ! Y Rot:
      call eval_curve(current_s,t,2,roty,nref,1,angle)
-     call yrot(angle*pi/180,maty)
+       call yrot(angle*pi/180,maty)
 
      ! Z Rot:
      call eval_curve(current_s,t,2,rotz,nref,1,angle)
      call zrot(angle*pi/180,matz)
-
-     rot_mat = matmul(maty,matmul(matx,matz))
-     
-     ! DO the inverse of the 3x3 explicitly
-     det = rot_mat(3,3)*( rot_mat(1,1)*rot_mat(2,2) - rot_mat(2,1)*rot_mat(1,2) ) &
-          - rot_mat(3,2)*( rot_mat(1,1)*rot_mat(2,3) - rot_mat(2,1)*rot_mat(1,3) ) &
-          + rot_mat(3,1)*( rot_mat(1,2)*rot_mat(2,3) - rot_mat(1,3)*rot_mat(2,2) )
-    
-     inv_rot_mat(1,1) =   (rot_mat(2,2)*rot_mat(3,3) - rot_mat(2,3)*rot_mat(3,2))/det
-     inv_rot_mat(1,2) = - (rot_mat(1,2)*rot_mat(3,3) - rot_mat(1,3)*rot_mat(3,2))/det
-     inv_rot_mat(1,3) =   (rot_mat(1,2)*rot_mat(2,3) - rot_mat(1,3)*rot_mat(2,2))/det
-    
-     inv_rot_mat(2,1) = - (rot_mat(2,1)*rot_mat(3,3) - rot_mat(2,3)*rot_mat(3,1))/det
-     inv_rot_mat(2,2) =   (rot_mat(1,1)*rot_mat(3,3) - rot_mat(1,3)*rot_mat(3,1))/det
-     inv_rot_mat(2,3) = - (rot_mat(1,1)*rot_mat(2,3) - rot_mat(1,3)*rot_mat(2,1))/det
-        
-     inv_rot_mat(3,1) =   (rot_mat(2,1)*rot_mat(3,2) - rot_mat(2,2)*rot_mat(3,1))/det
-     inv_rot_mat(3,2) = - (rot_mat(1,1)*rot_mat(3,2) - rot_mat(1,2)*rot_mat(3,1))/det
-     inv_rot_mat(3,3) =   (rot_mat(1,1)*rot_mat(2,2) - rot_mat(1,2)*rot_mat(2,1))/det
-     
+     !Select the rotation order
+     if (rot_type == 1) then
+        rot_mat = transpose(matmul(matz,matmul(maty,matx)))
+     else if (rot_type == 2) then
+        rot_mat = transpose(matmul(maty,matmul(matz,matx)))
+     else if (rot_type == 3) then
+        rot_mat = transpose(matmul(matx,matmul(matz,maty)))          
+     else if (rot_type == 4) then
+        rot_mat = transpose(matmul(matz,matmul(matx,maty)))          
+     else if (rot_type == 5) then
+        rot_mat = transpose(matmul(maty,matmul(matx,matz)))          
+     else if (rot_type == 6) then
+        rot_mat = transpose(matmul(matx,matmul(maty,matz)))          
+     end if
+   
      call eval_curve(current_s,t,2,x,nref,3,X_base)
-     
      if (type == 1) then ! We have a full connection and need to recompute links
         links(i,:) = coef(indicies(i)+1,:) - X_base
      end if
      
-     coef(indicies(i)+1,:) = X_base + matmul(inv_rot_mat,links(i,:))*current_scale
+     coef(indicies(i)+1,:) = X_base + matmul(rot_mat,links(i,:))*current_scale
   end do
 end subroutine updatecoefficients
 
