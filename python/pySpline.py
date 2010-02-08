@@ -116,8 +116,8 @@ class surface():
             self.umax = self.tu[-1]
             self.vmin = self.tv[0]
             self.vmax = self.tv[-1]
-
             self.nDim = self.coef.shape[2]
+            self._setEdgeCurves()
             return
      
         elif task == 'interpolate' or task == 'lms':
@@ -249,22 +249,22 @@ MUST be defined for task lms or interpolate'
 
     def recompute(self):
         # --- Direct Implementation
-#         Jac = pyspline.surface_jacobian_wrap2(self.U,self.V,self.tu,self.tv,
-#                                              self.ku,self.kv,self.Nctlu,
-#                                              self.Nctlv)
-#         self.coef = lstsq(Jac,self.X.reshape([self.Nu*self.Nv,self.nDim]))[0].reshape([self.Nctlu,self.Nctlv,self.nDim])
+        Jac = pyspline.surface_jacobian_wrap2(self.U,self.V,self.tu,self.tv,
+                                             self.ku,self.kv,self.Nctlu,
+                                             self.Nctlv)
+        self.coef = lstsq(Jac,self.X.reshape([self.Nu*self.Nv,self.nDim]))[0].reshape([self.Nctlu,self.Nctlv,self.nDim])
 
       #   # ---- Sparse Implemention
 
-        vals,row_ptr,col_ind = pyspline.surface_jacobian_wrap(\
-            self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
-        Jac2 = sparse.csr_matrix((vals,col_ind,row_ptr),
-                                 shape=[self.Nu*self.Nv,self.Nctlu*self.Nctlv])
-        self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
-        for idim in xrange(self.nDim):
-            J = Jac2.transpose()*Jac2
-            rhs  = Jac2.transpose()*self.X[:,:,idim].flatten()
-            self.coef[:,:,idim] =  linsolve.spsolve(J,rhs).reshape([self.Nctlu,self.Nctlv])
+#         vals,row_ptr,col_ind = pyspline.surface_jacobian_wrap(\
+#             self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
+#         Jac2 = sparse.csr_matrix((vals,col_ind,row_ptr),
+#                                  shape=[self.Nu*self.Nv,self.Nctlu*self.Nctlv])
+#         self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
+#         for idim in xrange(self.nDim):
+#             J = Jac2.transpose()*Jac2
+#             rhs  = Jac2.transpose()*self.X[:,:,idim].flatten()
+#             self.coef[:,:,idim] =  linsolve.spsolve(J,rhs).reshape([self.Nctlu,self.Nctlv])
 
         self._setEdgeCurves()
         return
