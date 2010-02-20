@@ -28,9 +28,12 @@ import os, sys, string, time, copy, pdb
 # External Python modules
 # =============================================================================
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
-vstack,real
+    ones,vstack,real,where,arange,append,hstack
 
-from scipy import sparse,linsolve
+import scipy
+from scipy import sparse
+from scipy.sparse.linalg.dsolve import factorized
+scipy.sparse.linalg.use_solver(useUmfpack=False)
 
 from numpy.linalg import lstsq
 import pyspline
@@ -39,8 +42,13 @@ from mdo_import_helper import *
 
 # =============================================================================
 def e_dist(x1,x2):
-    '''Get the eculidean distance between two points in e3'''
-    return sqrt((x1[0]-x2[0])**2 + (x1[1]-x2[1])**2 + (x1[2]-x2[2])**2)
+    '''Get the eculidean distance between two points in nDim space'''
+    total = 0.0
+    for idim in xrange(len(x1)):
+        total += (x1[idim]-x2[idim])**2
+    # end for
+    return sqrt(total)
+
 # =============================================================================
 # pySpline class
 # =============================================================================
@@ -72,6 +80,9 @@ class surface():
             u, real, array: list of u values (Optional for ndim=3,required otherwise)
             v, real, array: list of v values (Optional for ndim=3,required otherwise)
             X, real, array, size(len(u),len(v),nDim):Array of data points to fit
+            --> OR  x=array, size(len(u),len(v)) -> two dimensional interpolation
+            --> OR  x=array,y=array, each of size(len(u),len(v))
+            --> OR  x=array,y=array,z=array, each of size (len(u),len(v))
 
         args[0] \'lms\': Create an instance of the spline class using a
         Least-Mean-Squares fit to the spline. . **kwargs MUST contain
@@ -84,6 +95,9 @@ class surface():
             u, real, array: list of u values (Optional for ndim=3,required otherwise)
             v, real, array: list of v values (Optional for ndim=3,required otherwise)
             X, real, array, size(len(u),len(v),nDim):Array of data points to fit
+            --> OR  x=array, size(len(u),len(v)) -> two dimensional interpolation
+            --> OR  x=array,y=array, each of size(len(u),len(v))
+            --> OR  x=array,y=array,z=array, each of size (len(u),len(v))
 '''
         if 'no_print' in kwargs:
             self.NO_PRINT = kwargs['no_print']
@@ -123,10 +137,10 @@ class surface():
         elif task == 'interpolate' or task == 'lms':
             # Do some checking on the number of control points
             assert 'ku' in kwargs and 'kv' in kwargs and \
-                ('X' in kwargs or 'x' in kwargs or \
-                     ('x' in kwargs and 'y' in kwargs) or \
-                     ('x' in kwargs and 'y' in kwargs and 'z' in kwargs)), \
-                     'Error: ku,kv, and X (or x or x and y or x and y and z \
+                ( 'X' in kwargs or 'x' in kwargs or \
+                      ( 'x' in kwargs and 'y' in kwargs) or \
+                      ( 'x' in kwargs and 'y' in kwargs and 'z' in kwargs)), \
+                      'Error: ku,kv, and X (or x or x and y or x and y and z \
 MUST be defined for task lms or interpolate'
             if task=='lms':
                 assert 'Nctlu' in kwargs and 'Nctlv' in kwargs,'Nctlu and Nctlv\
@@ -170,28 +184,14 @@ MUST be defined for task lms or interpolate'
             self.kv = int(kwargs['kv'])
 
             # Sanity Check on Inputs
-            if self.Nctlu >= self.Nu-2:
-                self.Nctlu  = self.Nu-2
-            if self.Nctlv >= self.Nv-2:
-                self.Nctlv = self.Nv-2
-            # end if
+            if self.Nctlu >= self.Nu:  self.Nctlu  = self.Nu
+            if self.Nctlv >= self.Nv:  self.Nctlv = self.Nv
 
             # Sanity check to make sure k is less than N
-            if self.Nu < self.ku:
-                self.ku = self.Nu
-            # end if
-
-            if self.Nv < self.kv:
-                self.kv = self.Nv
-            # end if
-
-            if self.Nctlu < self.ku:
-                self.ku = self.Nctlu
-            # end if
-
-            if self.Nctlv < self.kv:
-                self.kv = self.Nctlv
-            # end if
+            if self.Nu < self.ku: self.ku = self.Nu
+            if self.Nv < self.kv: self.kv = self.Nv
+            if self.Nctlu < self.ku: self.ku = self.Nctlu
+            if self.Nctlv < self.kv: self.kv = self.Nctlv
 
             if 'rel_tol' in kwargs:
                 self.rel_tol = kwargs['rel_tol']
@@ -225,6 +225,7 @@ MUST be defined for task lms or interpolate'
             
             self.u = u
             self.v = v
+            
             self._calcKnots()
             [self.V,self.U] = meshgrid(v,u)
 #             self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim),'d')
@@ -248,6 +249,7 @@ MUST be defined for task lms or interpolate'
 
 
     def recompute(self):
+        '''Recompute the curve if the knot vector has been modified'''
         # --- Direct Implementation
         Jac = pyspline.surface_jacobian_wrap2(self.U,self.V,self.tu,self.tv,
                                              self.ku,self.kv,self.Nctlu,
@@ -270,7 +272,6 @@ MUST be defined for task lms or interpolate'
         return
 
     def _calcParameterization(self):
-
         u = zeros(self.Nu,'d')
         singular_counter = 0
         # loop over each v, and average the 'u' parameter 
@@ -315,16 +316,16 @@ MUST be defined for task lms or interpolate'
 
     def _setEdgeCurves(self):
         '''Create curve spline objects for each of the edges'''
-        self.edge_curves = []
-        self.edge_curves.append(curve('create',k=self.ku,t=self.tu,coef=self.coef[:,0]))
-        self.edge_curves.append(curve('create',k=self.ku,t=self.tu,coef=self.coef[:,-1]))
-        self.edge_curves.append(curve('create',k=self.kv,t=self.tv,coef=self.coef[0,:]))
-        self.edge_curves.append(curve('create',k=self.kv,t=self.tv,coef=self.coef[-1,:]))
+        self.edge_curves = [None,None,None,None]
+        self.edge_curves[0] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,0])
+        self.edge_curves[1] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,-1])
+        self.edge_curves[2] = curve('create',k=self.kv,t=self.tv,coef=self.coef[0,:])
+        self.edge_curves[3] = curve('create',k=self.kv,t=self.tv,coef=self.coef[-1,:])
 
         return
 
     def getValueCorner(self,corner):
-        '''Get the value of the spline on corner i '''
+        '''Get the value of the spline on corner i,i=0,1,2 or 3 '''
         assert corner in [0,1,2,3],'Error, getValueCorner: Corner must be in range 0->3'
         if corner == 0:
             return self.getValue(self.umin,self.vmin)
@@ -337,7 +338,7 @@ MUST be defined for task lms or interpolate'
         #end if
 
     def getOrigValuesEdge(self,edge):
-        ''' Get the values of the original data on edge. edge = 0,1,2,3'''
+        ''' Get the two end points and midpoint values of the original data on edge. edge = 0,1,2,3'''
         assert edge in [0,1,2,3] and self.orig_data == True,'Error, getOrigValuesEdge: No \
 original data for this surface or edge is not in range 0->3'
 
@@ -372,7 +373,7 @@ original data for this surface or edge is not in range 0->3'
         # end if
 
     def getOrigValueCorner(self,node):
-        ''' Get the values of the original data on edge. edge = 0,1,2,3'''
+        ''' Get the values of the original data on cornere. conrner = 0,1,2,3'''
         assert node in [0,1,2,3] and self.orig_data == True,'Error, getOrigValueCorner: No \
 original data for this surface or node is not in range 0->3'
 
@@ -385,7 +386,6 @@ original data for this surface or node is not in range 0->3'
         elif node == 3:
             return self.X[-1,-1]
 
-
     def _getBasisPt(self,u,v,vals,istart,col_ind,l_index):
         # This function should only be called from pyGeo
         # The purpose is to compute the basis function for 
@@ -397,10 +397,12 @@ original data for this surface or node is not in range 0->3'
                                    col_ind,istart,l_index)
                                 
     def __call__(self,u,v):
+        '''Equivalant to getValue'''
         return self.getValue(u,v)
 
     def getValue(self,u,v):
-        '''Get the value of the spline at point(s) u,v'''
+        '''Get the value of the spline at point(s) u,v
+        u and v can be scalars,vectors or arrays. They must be the same size'''
         #Assure u,v are numpy arrays
         u = array(u)
         v = array(v)
@@ -413,7 +415,8 @@ original data for this surface or node is not in range 0->3'
             return pyspline.eval_surface_m(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
                                 
     def getDerivative(self,u,v):
-        '''Get the value of the derivative of spline at point(s) u,v'''
+        '''Get the value of the derivative of spline at point(s) u,v
+        u and v can be scalars,vectors or arrays. They must be the same size'''
         u = array(u)
         v = array(v)
         assert u.shape == v.shape,'Error, getDerivative: u and v must have the same shape'
@@ -425,7 +428,8 @@ original data for this surface or node is not in range 0->3'
             return pyspline.eval_surface_deriv_m(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
         
     def getNormal(self,u,v):
-        '''Get the normalized normal at the surface point(s) u,v'''
+        '''Get the normalized normal at the surface point(s) u,v
+        u and v can be scalars,vectors or arrays. They must be the same size'''
         u = array(u)
         v = array(v)
         assert self.nDim == 3,'Error, getNormal is only defined for three spatial dimensions'
@@ -439,7 +443,8 @@ original data for this surface or node is not in range 0->3'
         # end if
 
     def getSecondDerivative(self,u,v):
-        '''Get the value of the second derivative (d2u2,d2v2,d2uv) of spline at point(s) u,v'''
+        '''Get the value of the second derivative (d2u2,d2v2,d2uv) of spline at point(s) u,v
+        u and v can be scalars,vectors or arrays. They must be the same size'''
         u = array(u)
         v = array(v)
         assert u.shape == v.shape,'Error, getSecondDerivative: u and v must have the same shape'
@@ -452,11 +457,13 @@ original data for this surface or node is not in range 0->3'
         # end if
  
     def projectPoint(self,x0,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
-
         '''Project a point x0 onto the surface. i.e. Find the point on the
         surface that minimizes the distance from x0 to
-        surface(u,v). See the fortran function project_point_surface.90'''
-
+        surface(u,v).
+        Starting points can be given by
+        u=<val>
+        v=<val>
+        '''
         # We will use a starting point u0,v0 if given
         assert len(x0) == self.nDim,'Error: x0 must have same spatial dimension as surface'
         u=-1
@@ -466,13 +473,15 @@ original data for this surface or node is not in range 0->3'
         return pyspline.point_surface(x0,self.tu,self.tv,self.ku,self.kv,self.coef,
                                               Niter,eps1,eps2,u,v)
       
-
     def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
-
-        '''Project a point x0 onto the surface. i.e. Find the point on the
-        surface that minimizes the distance from x0 to
-        surface(u,v). See the fortran function project_point_surface.90'''
-
+        '''Project a curve object curve onto this curve. This function
+        finds the parametric values of the shortest distances between
+        curves. If the curves intersection it will return ONE of the
+        intersections
+        Starting points can be given with 
+        u=<val>(surface)
+        v=<val>(surface)
+        s=<val> (curve)'''
         # We will use a starting point u0,v0 if given
         u = -1.0
         v = -1.0
@@ -480,9 +489,9 @@ original data for this surface or node is not in range 0->3'
         if 'u' in kwargs: u = kwargs['u']
         if 'v' in kwargs: v = kwargs['v']
         if 's' in kwargs: s = kwargs['s']
-        return pyspline.curve_surface(curve.t,curve.k,curve.coef,
-                                      self.tu,self.tv,self.ku,self.kv,self.coef,
-                                      Niter,eps1,eps2,u,v,s)
+        return pyspline.curve_surface(\
+            curve.t,curve.k,curve.coef,self.tu,self.tv,\
+                self.ku,self.kv,self.coef,Niter,eps1,eps2,u,v,s)
    
     def _writeTecplot2D(self,handle,name,data):
          '''A Generic write tecplot zone to file'''
@@ -509,8 +518,7 @@ original data for this surface or node is not in range 0->3'
         '''Output this surface\'s data to a open file handle \'handle\' '''
         
         # The size should be based on the knot vectors
-        
-       
+               
         MAX_SIZE = 100
         MIN_SIZE = 5
                 
@@ -525,7 +533,7 @@ original data for this surface or node is not in range 0->3'
 
             u = array([0,0.5,1,1,1,0.5,0,0])
             v = array([0,0,0,0.5,1,1,1,0.5])
-            val = self.getValueV(u,v)
+            val = self.getValue(u,v)
 
             u_len = (e_dist(val[0],val[1])+e_dist(val[1],val[2])+
                      e_dist(val[4],val[5])+e_dist(val[5],val[6]))/2
@@ -541,8 +549,8 @@ original data for this surface or node is not in range 0->3'
             if nv > MAX_SIZE: nv = MAX_SIZE
             if nv < MIN_SIZE: nv = MIN_SIZE
             
-            u_plot = linspace(self.range[0],self.range[1],nu)
-            v_plot = linspace(self.range[2],self.range[3],nv)
+            u_plot = linspace(self.umin,self.umax,nu)
+            v_plot = linspace(self.vmin,self.vmax,nv)
         # end if
 
         # Dump re-interpolated surface
@@ -591,8 +599,7 @@ original data for this surface or node is not in range 0->3'
             self._writeDirections(f,0)
         f.close()
 
-    def writeIGES_directory(self,handle,Dcount,Pcount):
-
+    def _writeIGES_directory(self,handle,Dcount,Pcount):
         '''Write the IGES file header information (Directory Entry Section)
         for this surface'''
         # A simplier Calc based on cmlib definations The 13 is for the
@@ -613,7 +620,7 @@ original data for this surface or node is not in range 0->3'
 
         return Pcount , Dcount
 
-    def writeIGES_parameters(self,handle,Pcount,counter):
+    def _writeIGES_parameters(self,handle,Pcount,counter):
         '''Write the IGES parameter information for this surface'''
 
         handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'\
@@ -701,11 +708,9 @@ original data for this surface or node is not in range 0->3'
 
         return Pcount,counter
 
-
 class curve():
 
     def __init__(self,*args,**kwargs):
-
         '''
         Create an instance of a b-spline curve. There are three
         ways to initialize the class as determined by the first argument
@@ -724,8 +729,10 @@ class curve():
         MUST contain the following information:
 
             k, integer: Order for spline
-            X, real, array, size(len(s),nDim): Array of data to fit OR
-                 x=<vals>,y=<vals>,z=<vals> where each is of length s
+            X, real, array, size(len(s),nDim): Array of data to fit 
+              --> OR  x=<vals>, len(s) ->1D interpolation
+              --> OR  x=<vals>,y=<vals>, each of len(s) -> 2D parametric curve
+              --> OR  x=<vals>,y=<vals>,z=<vals> each of len(s) ->3D parametric curve
             s, real, array: (OPTIONAL for nDim >=2 ) Array of s values 
 
         arg[0] = \'lms\': Create an instance of the spline class using a lms spline.
@@ -741,11 +748,8 @@ class curve():
         else:
             self.NO_PRINT = False
         # end if      
-        task = args[0]
-        if task == 'create':
-            assert 'k' in kwargs and 't' in kwargs and 'coef' in kwargs, \
-                'Error: k,t,coef, and range MUST be defined for task=\'create\''
-            
+        
+        if 'k' in kwargs and 't' in kwargs and 'coef' in kwargs: # We have a create class
             self.s = None
             self.X = None
             self.N = None
@@ -756,19 +760,12 @@ class curve():
             self.orig_data = False
             self.smin = self.t[0]
             self.smax = self.t[-1]
-            self.nDim = self.coef.shape[1]-1
+            self.nDim = self.coef.shape[1]
             self._calcGrevillePoints()
-            return
-             
-        elif task=='interpolate' or task == 'lms':
-            if task == 'interpolate':
-                assert 'k' in kwargs and ('X' in kwargs or 'x' in kwargs),\
-                'Error: k, and X (or x=,y=) MUST be defined for task \'interpolate\''
-            else:
-                assert 'k' in kwargs and ('X' in kwargs or 'x' in kwargs) \
-                and 'Nctl' in kwargs ,'Error: k, X and Nctl MUST be defined for task lms'
-            # end if
-
+        else: #lms or interpolate function
+            assert 'k' in kwargs and ('X' in kwargs or 'x' in kwargs),\
+                'Error: At least spline orderk, k and X (or x=,y=) MUST be defined for (interpolation) spline creation.\
+Nctl=<number of control points> must be specified for a LMS fit'
             if 'X' in kwargs:
                 self.X  = array(kwargs['X'])
                 if len(self.X.shape) == 1:
@@ -785,12 +782,9 @@ class curve():
                 self.X = array(kwargs['x'])
                 self.nDim = 1
             # enf if
-
-            self.N = self.X.shape[0]
-            self.k = kwargs['k']
-            assert self.k>=2 and self.k<9,'The value of k must be between 2 and 9'
-            
-            if 'niter' in kwargs:
+            self.k = int(kwargs['k'])
+            self.N = len(self.X)
+            if 'niter' in kwargs: 
                 self.niter = kwargs['niter']
             else:
                 self.niter = 10
@@ -808,39 +802,146 @@ class curve():
                 assert self.nDim > 1,'Error, pySpline: For 1D splines, the basis, s must be given'
                 self._getParameterization()
             # end if
-
             self.smin = self.s[0]
             self.smax = self.s[-1]
             self.orig_data = True
             
-            if task == 'interpolate':
-                self.Nctl = self.N      
-                self.niter = 1
+            if 'weights' in kwargs:
+                weights = array(kwargs['weights'])
             else:
-                self.Nctl = kwargs['Nctl']
-                if self.Nctl > self.N:
-                    self.Nctl  = self.N
+                weights = ones(self.N)
+            # end if
+
+            if 'deriv' in kwargs and 'deriv_ptr' in kwargs:
+                deriv = array(kwargs['deriv'])
+                deriv_ptr = array(kwargs['deriv_ptr'])
+            else:
+                deriv = None
+                deriv_ptr = array([])
+            # end if
+            if 'deriv_weights' in kwargs and deriv != None:
+                deriv_weights = array(kwargs['deriv_weights'])
+            else:
+                if deriv != None:
+                    deriv_weights = ones(len(deriv))
+                else:
+                    deriv_weights = None
                 # end if
             # end if
-
-            # Sanity check to make sure k is less than N
-            if self.N <= self.k:
-                self.k = self.N
+            if not 'Nctl' in kwargs: # We are doing an interpolation...set all weights to -1
+                weights[:] = 1
+                if deriv_weights != None:
+                    deriv_weights[:] = 1
+                # end if
+            # end if
+            # Now do the sparation between the constrained and unconstrained
+            S  = self.X[where(weights > 0.0)]
+            su = self.s[where(weights > 0.0)]
+            T  = self.X[where(weights <=  0.0)]
+            sc = self.s[where(weights <= 0.0)]
+            weights = weights[where(weights > 0.0)]
+            nu = len(S)
+            nc = len(T)
+     
+            # And the derivative info
+            if deriv != None:
+                S = vstack((S,deriv[where(deriv_weights > 0.0)]))
+                sdu = self.s[deriv_ptr][where(deriv_weights > 0.0)]
+                T = vstack((T,deriv[where(deriv_weights <= 0.0)]))
+                sdc = self.s[deriv_ptr][where(deriv_weights <= 0.0)] 
+                weights = append(weights,deriv_weights[where(deriv_weights > 0.0)])
+                ndu = len(sdu)
+                ndc = len(sdc)
+            else:
+                sdu = array([],'d')
+                sdc = array([],'d')
+                ndu = 0
+                ndc = 0
+            # end if
+            print 'weights:',weights
+            W = sparse.csr_matrix((weights,arange(len(weights)),arange(len(weights)+1))) # Diagonal
+            
+            if 'Nctl' in kwargs:
+                self.Nctl = int(kwargs['Nctl'])
+                if self.Nctl > nu+nc+ndu+ndc:
+                    self.Nctl = nu+nc+ndu+ndc
+                    interp = True
+            else:
+                self.Nctl = nu+nc+ndu+ndc
+                self.niter = 1
+                interp = True
+            # end if
+            # Sanity check to make sure k is ok
+            if nu+nc+ndu+ndc < self.k:
+                self.k = nu+nc+ndu+ndc
             # end if
 
-            # Generate the knot vector
-            self.t = pyspline.knots(self.s,self.Nctl,self.k)
+            # Generate the knot vector,greville points and empty coefficients
+            if interp:
+                print 'Here'
+                self.t = pyspline.knots_interp(self.s,deriv_ptr,self.k)
+            else:
+                self.t = pyspline.knots_lms(self.s,self.Nctl,self.k)
+            # end if
             self._calcGrevillePoints()
             self.coef = zeros((self.Nctl,self.nDim),'d')
-            self.s,self.coef,rms = pyspline.compute_curve(self.s,self.X,self.t,self.k,self.coef,
-                                                          self.niter,self.rel_tol)
-            mpiPrint('Fitted with rms:%f'%rms,self.NO_PRINT)
 
+            # Get the 'N' jacobain
+            N_vals = zeros((nu+ndu)*self.k)          # |
+            N_row_ptr = zeros(nu+ndu+1,'intc')       # | ->  Standard CSR formulation
+            N_col_ind = zeros((nu+ndu)*self.k,'intc')# |
+            print 'su,sdu',su,sdu
+            print 'nu,ndu:',nu,ndu
+            print 'knots:',self.t
+            pyspline.curve_jacobian_wrap(su,sdu,self.t,self.k,self.Nctl,N_vals,N_row_ptr,N_col_ind)
+            N = sparse.csr_matrix((N_vals,N_col_ind,N_row_ptr),shape=[nu+ndu,self.Nctl])
+
+            # If there is no constrained data...do a regular fit
+            if N.shape[0] == N.shape[1]: # Square N...will ONLY happen for pure interpolation 
+                print N.todense()
+                solve = factorized( N ) # Factorize once for efficiency
+                for idim in xrange(self.nDim):
+                    self.coef[:,idim] = solve(S[:,idim])
+                # end for
+                return
+
+            NTWN = N.transpose()*W*N # We need this either way
+            if nc + ndc == 0:
+                solve = factorized( NTWN ) # Factorize once for efficiency
+                for idim in xrange(self.nDim):
+                    self.coef[:,idim] = solve(N.transpose()*W*S[:,idim])
+                # end for
+            else:  # Now its more complicated since we have constraints
+                M_vals = zeros((nc+ndc)*self.k)          #|
+                M_row_ptr = zeros(nc+ndc+1,'intc')       #| -> Standard CSR formulation
+                M_col_ind = zeros((nc+ndc)*self.k,'intc')#|
+                pyspline.curve_jacobian_wrap(sc,sdc,self.t,self.k,self.Nctl,M_vals,M_row_ptr,M_col_ind)
+                M = sparse.csr_matrix((M_vals,M_col_ind,M_row_ptr),shape=[nc+ndc,self.Nctl])
+                # Now we must assemble the constrained jacobian
+                # [ N^T*W*T      M^T][P] = [ N^T*W*S]
+                # [ M            0  ][R]   [ T      ] 
+
+                NTWN = NTWN.tocsr() # Convert to CSR for the constr_jac function
+                MT   = M.transpose().tocsr() # Convert to CSR for the constr_jac function
+                j_val,j_col_ind,j_row_ptr = pyspline.constr_jac(
+                    NTWN.data,NTWN.indptr,NTWN.indices,MT.data,MT.indptr,MT.indices,
+                    M.data,M.indptr,M.indices,self.Nctl)
+                # Create sparse csr matrix and factorize
+                J = sparse.csr_matrix((j_val,j_col_ind,j_row_ptr),shape=[self.Nctl+nc+ndc,self.Nctl+nc+ndc])
+                solve = factorized( J )
+                for idim in xrange(self.nDim):
+                    rhs = hstack((N.transpose()*W*S[:,idim],T[:,idim]))
+                    self.coef[:,idim] = solve(rhs)[0:self.Nctl]
+                # end for
+            # end if (constr - not constrained
+        # end if
+        return
 
     def runParameterCorrection(self,niter,rel_tol=1e-5):
+        '''Run niter of the Hoschek's parameter correction algorithim'''
         # Run more parameter correction
-        self.s,self.coef,rms = pyspline.compute_curve(self.s,self.X,self.t,self.k,self.coef,
-                                               niter,self.rel_tol)
+        self.s,self.coef,rms = pyspline.compute_curve(\
+            self.s,self.X,self.t,self.k,self.coef,niter,self.rel_tol)
         mpiPrint('ReFitted with rms: %f'%rms,self.NO_PRINT)
 
     def _getParameterization(self):
@@ -858,13 +959,59 @@ class curve():
         self.s /= self.s[-1]
 
         return
-      
-    def getLength(self):
-        # Get the length of the actual Curve
-        # Use the greville points for the positions
+     
+    def insertKnot(self,u,r):
+        '''Insert at knot at u'''
+        t_new,coef_new,break_pt = pyspline.insertknot(u,r,self.t,self.k,self.coef)
+        self.t = t_new
+        self.coef = coef_new
+        self.Nctl = self.Nctl + r
         
-        # We should do this with exact gaussian integration 
+        return
 
+    def splitCurve(self,u):
+        ''' Split the curve at knot position u and return the two new
+        curves'''
+        # First determine if u is very close to an existing knot
+        ileft,mflag = pyspline.intrv(self.t,u,1)
+        if abs(u-self.t[ileft-1]) < 0.005:
+            u = self.t[ileft-1]
+        # end if
+        r,t_new,coef_new,break_pt = pyspline.insertknot(u,self.k-1,self.t,self.k,self.coef)
+        # r is the number of time the knot was actually added
+        s = self.k-1-r # Back out the multiplicity of the point
+        break_pt = break_pt - s
+        # -------- Process the Knot Vectors--------
+        t1 = zeros(break_pt + self.k)
+        t2 = zeros(self.Nctl+2*self.k-break_pt-s)
+        t1[0:break_pt] = t_new[0:break_pt]
+        t1[break_pt:] = self.k*[u]
+        if s== 0:
+            t2[1:] = t_new[break_pt:]
+        else:
+            t2[1:] = t_new[break_pt:-s]
+        t2[0]  = u
+
+        # Now Normalize
+        t1 = t1/t1[-1]
+        t2 = (t2-u)/(1-u)
+
+        # ------- Proces the Coefficient Arrays
+        coef1 = zeros((break_pt,self.nDim))
+        coef2 = zeros((len(t2)-self.k,self.nDim))
+        coef1[:,:] = coef_new[0:break_pt,:]
+        if s==0:
+            coef2[:,:] = coef_new[break_pt-1:,:]        
+        else:
+            coef2[:,:] = coef_new[break_pt-1:-s,:]        
+        # end if
+        curve1 = curve('create',k=self.k,t=t1,coef=coef1)
+        curve2 = curve('create',k=self.k,t=t2,coef=coef2)
+
+        return curve1,curve2
+
+    def getLength(self):
+        '''Compute the length of the curve using the Eculdian Norm'''
         points = self.getValue(self.gpts)# These are physical points
         length = 0
         for i in xrange(len(points)-1):
@@ -887,10 +1034,12 @@ class curve():
         return
 
     def __call__(self,s):
+        '''Equivilant to getValue'''
         return self.getValue(s)
     
     def getValue(self,s):
-        '''Get The value of the spline'''
+        '''Get The value of the spline
+        s can be a scalar or vector of values'''
         s = array(s)
         if len(s.shape) == 0:
             return pyspline.eval_curve(s,self.t,self.k,self.coef)
@@ -898,7 +1047,8 @@ class curve():
             return pyspline.eval_curve_v(s,self.t,self.k,self.coef)
 
     def getDerivative(self,s):
-        '''Get the value of the derivatve of the spline'''
+        '''Get the value of the derivatve of the spline
+        s can be a scalar or vector of values'''
         s = array(s)
         if len(s.shape) == 0:
             return pyspline.eval_curve_deriv(s,self.t,self.k,self.coef)
@@ -918,7 +1068,6 @@ class curve():
         return pyspline.point_curve(x0,self.t,self.k,self.coef,Niter,eps1,eps2,s)
 
     def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
-
         '''Find the minimum distance between this curve (self) and a second
         curve passed in (curve)'''
 
@@ -960,16 +1109,17 @@ class curve():
     def _writeTecplotCoef(self,handle,*args,**kwargs):
         '''Write the Spline coefficients to handle'''
         self._writeTecplot1D(handle,'control_pts',self.coef)
-
         return
 
     def _writeTecplotOrigData(self,handle,*args,**kwargs):
+        '''Write the original data to a handle'''
         if self.orig_data:
             self._writeTecplot1D(handle,'orig_data',self.X)
         # end if
 
         return
     def _writeTecplotCurve(self,handle,*args,**kwargs):
+        '''Write the interpolated curve to a handle'''
         if 'size' in kwargs:
             length = self.getLength()
             n=int(floor(real(length/kwargs['size'])))
@@ -990,348 +1140,5 @@ class curve():
 # Class Test
 #==============================================================================
 if __name__ == '__main__':
-	
-    # Run a Simple Test Case
-    print 'Testing pyspline...\n'
-    print 'There is an example in the ./example directory'
-
-
-
-# Functions to Eliminate Possibly
-#   def checkCoef(self):
-#         '''This function determines if there are crossed control points which
-#         could result in an invalid mesh'''
-#         # This function can easily migrate to fortran
-#         counter = 0
-#         # Loop over number of "elements or patches"
-#         ustart = 0
-#         uend = self.Nctlu - 1
-#         vstart = 0
-#         vend = self.Nctlv - 1
-
-
-#         for i in xrange(ustart,uend):
-#             for j in xrange(vstart,vend):
-#                 # First find normal of "patch" by taking cross product
-#                 # of the diagonals
-#                 d1 = self.coef[i+1,j+1]-self.coef[i,j]
-#                 d2 = self.coef[i,j+1]-self.coef[i+1,j]
-#                 normal = cross(d1,d2)
-#                 normal /= sqrt(dot(normal,normal))
-#                 if sqrt(dot(normal,normal)) == 0:
-#                     print 'ha ha '
-#                     sys.exit(0)
-#                 v1 = self.coef[i+1,j  ]-self.coef[i  ,j  ]
-#                 v2 = self.coef[i+1,j+1]-self.coef[i+1,j  ]
-#                 v3 = self.coef[i  ,j+1]-self.coef[i+1,j+1]
-#                 v4 = self.coef[i  ,j  ]-self.coef[i  ,j+1]
-#                 if sqrt(dot(v1,v1)) == 0:
-#                     v1 = zeros(3)
-#                 else:
-#                     v1 /=sqrt(dot(v1,v1))
-#                 if sqrt(dot(v2,v2)) == 0:
-#                     v2 = zeros(3)
-#                 else:
-#                     v2 /=sqrt(dot(v2,v2))
-#                 if sqrt(dot(v3,v3)) == 0:
-#                     v3 = zeros(3)
-#                 else:
-#                     v3 /=sqrt(dot(v3,v3))
-#                 if sqrt(dot(v4,v4)) == 0:
-#                     v4 = zeros(3)
-#                 else:
-#                     v4 /=sqrt(dot(v4,v4))
-          
-
-#                 # Now cross normal with all the vectors
-#                 values = zeros(4)
-#                 values[0] = dot(cross(v1,v2),normal)
-#                 values[1] = dot(cross(v2,v3),normal)
-#                 values[2] = dot(cross(v3,v4),normal)
-#                 values[3] = dot(cross(v4,v1),normal)
-# #                print values
-#                 for ii in xrange(4):
-#                     if abs(values[ii]) < 1e-3:
-#                         values[ii] = 0
-#                     # end if
-#                 # end for
-
-#                 if values[0] >=0 and values[1] >= 0 and values[2]>=0 and values[3]>=0:
-#                     pass
-#                 else:
-#                     if values[0]<=0 and values[1]<=0 and values[2]<=0 and values[3]<=0:
-#                         pass
-#                     else:
-#                         print 'values:',values,i,j
-# #                         print 'normal:',normal
-# #                         print 'v:',v1,v2,v3,v4
-#                         counter += 1
-#                     # end if
-#                 # end if
-#             # end for
-#         # end for
-#         return counter 
-
-
-#    if 'dx1' and 'dx2' in kwargs:
-#                 # We have defined a tangent vector at each end
-
-#                 #print 'dx1 and dx2 defined'
-                
-#                 self.Nctl = self.N + 2
-#                 dx1 = kwargs['dx1']
-#                 dx2 = kwargs['dx2']
-#                 ibcl = 1
-#                 ibcr = 1
-#                 kntopt = 1
-#                 assert len(dx1)==len(dx2)==self.nDim,'The length of the \
-# derivative vectors must match the spatial dimension of the curve'
-
-#                 if self.nDim > 1:
-#                     self.coef = zeros((self.Nctl,self.nDim),'d')
-
-#                     for idim in xrange(self.nDim):
-#                         fbcl = dx1[idim]
-#                         fbcr = dx2[idim]
-
-#                         self.t,self.coef[:,idim],k = \
-#                             pyspline.bint4(self.s,self.X[:,idim],\
-#                                                     ibcl,ibcr,fbcl,fbcr,kntopt)
-
-#                 else:
-#                     print 'do something'
-#                 # end if
-
-
-
-
-#             # Calculate the knot vector and Jacobian
-
-#             self._calcJacobian()
-
-#             # Lets do a lms 
-#             timeA = time.time()
-#             self.coef = zeros([self.Nctlu,self.Nctlv,self.nDim],'d')
-
-#             res = numpy.linalg.lstsq(self.J,self.X.reshape[self.Nu*self.Nv,self.nDim])
-#             for idim in xrange(self.nDim):
-#                 self.coef[:,:,idim] = reshape(res[0][idim],self.Nctlu,self.Nctlv)
-#             # end for
-                
-#             mpiPrint(' LMS Fit Time: %6.5f s\n'%(time.time()-timeA),self.NO_PRINT)
-            
-#             # Finally, set edges as linear splines
-#             self._setEdgeCurves()
-
-
-
-#         self.coef = zeros((self.Nctlu*self.Nctlv,self.nDim))
-        
-#         if USE_PETSC:
-
-#             J = PETSc.Mat()
-#             if PETSC_MAJOR_VERSION == 1:
-#                 J.createAIJ([self.Nu*self.Nv,self.Nctlu*self.Nctlv],nnz=self.ku*self.kv,comm=PETSc.COMM_SELF)
-#             elif PETSC_MAJOR_VERSION == 0:
-#                 J.createSeqAIJ([self.Nu*self.Nv,self.Nctlu*self.Nctlv],nz=self.ku*self.kv)
-
-#             rhs = PETSc.Vec().createSeq(self.Nu*self.Nv)
-#             sol = PETSc.Vec().createSeq(self.Nctlu*self.Nctlv)
-
-#             ksp = PETSc.KSP()
-#             ksp.create(PETSc.COMM_WORLD)
-#             ksp.getPC().setType('none')
-#             ksp.setType('lsqr')
-#             ksp.setConvergenceTest(self._converge_test)
-#             nrow = self.Nu*self.Nv
-#             ncol = self.Nctlu*self.Nctlv
-#             for iter in xrange(niter):
-#                 J.zeroEntries()
-#                 rows,cols,vals = pyspline.surface_jacobian_linear(
-#                     self.U,self.V,self.tu,self.tv,self.ku,self.kv,
-#                     self.Nctlu,self.Nctlv)
-
-#                 for i in xrange(len(rows)):
-#                     J.setValue(int(rows[i]),int(cols[i]),vals[i])#,PETSc.InsertMode.INSERT_VALUES)
-                    
-#                 # end for
-#                 J.assemble()
-#                 ksp.setOperators(J)
-
-#                 for idim in xrange(self.nDim): # Solve for each RHS
-#                     rhs[:] = self.X[:,:,idim].flatten()
-#                     ksp.solve(rhs, sol)
-#                     self.coef[:,idim] = sol[:]
-
-#                 # end for
-#                 self.U,self.V,rms = pyspline.surface_para_corr(
-#                     self.tu,self.tv,self.ku,self.kv,self.U,self.V,\
-#                     self.coef.reshape((self.Nctlu,self.Nctlv,self.nDim)),self.X)
-
-#                 # Convergence Checks
-#                 if iter == 0:
-#                     self.old_rms = rms
-#                     rms0 = rms
-#                     if rms < 1e-12:
-#                         break
-#                 else:
-#                     rel_change = abs((rms-self.old_rms)/self.old_rms)
-#                     if rel_change > 1:
-#                         print 'Fucked up'
-#                         break
-#                     self.old_rms = rms
-#                     if rel_change < self.rel_tol or rms <1e-12:
-#                         break
-#                     # end if
-                    
-#                 # end if
-#             # end for
-#         else: # Use Numpy
-#                pass
-
-#         self.coef = self.coef.reshape((self.Nctlu,self.Nctlv,self.nDim))
-#         print 'Succefully fit: rms0 = %g, rms_final = %g,iterations %d:'%(rms0,rms,iter+1)
-        
-#        return
-
-#     def _converge_test(self,ksp,iter,rnorm):
-#         # Do a relative norm and a happy breakdown absolute norm
-#         if iter== 0:
-#             self.old_rnorm = rnorm
-#             if rnorm < 1e-12:
-#                 return 1
-#             # end if 
-#         else:
-#             val = abs((rnorm-self.old_rnorm)/self.old_rnorm)
-#             self.old_rnorm = rnorm
-#             if val < 1e-12 or rnorm < 1e-12:
-#                 return 1
-#             # end if
-#         # end if
-
-    # If Using PETSc
-#             self.coef = zeros((self.Nctl,self.nDim))
-                 
-#             if USE_PETSC:
-#                 J = PETSc.Mat()
-#                 if PETSC_MAJOR_VERSION == 1:
-#                     J.createAIJ([self.N,self.Nctl],nnz=self.k,comm=PETSc.COMM_SELF)
-#                 elif PETSC_MAJOR_VERSION == 0:
-#                     J.createSeqAIJ([self.N,self.Nctl],nz=self.k)
-#                 # end if
-                
-#                 rhs = PETSc.Vec().createSeq(self.N)
-#                 temp = PETSc.Vec().createSeq(self.Nctl)
-                
-#                 ksp = PETSc.KSP()
-#                 ksp.create(PETSc.COMM_WORLD)
-#                 ksp.getPC().setType('none')
-#                 ksp.setType('lsqr')
-#                 ksp.setConvergenceTest(self._converge_test)
-#                 for j in xrange(self.niter):
-#                     J.zeroEntries()
-#                     rows,cols,vals = pyspline.curve_jacobian_linear(
-#                         self.t,self.k,self.s,self.Nctl)
-#                     for i in xrange(len(rows)):
-#                         J.setValue(int(rows[i]),int(cols[i]), vals[i],PETSc.InsertMode.INSERT_VALUES)
-#                     # end for
-#                     J.assemble()
-#                     ksp.setOperators(J)
-
-#                     for idim in xrange(self.nDim): # Solve for each RHS
-#                         rhs[:] = self.X[:,idim]
-#                         ksp.solve(rhs, temp)
-#                         self.coef[:,idim] = temp
-#                     # end for
-
-#                     # Run Hoschek Parameter Correction
-#                     self.s,rms = pyspline.curve_para_corr(
-#                         self.t,self.k,self.s,self.coef,length,self.X)
-
-#                     # Convergence Checks
-#                     if j == 0:
-#                         self.old_rms = rms
-#                         rms0 = rms
-#                     else:
-#                         val = abs((rms-self.old_rms)/self.old_rms)
-#                         self.old_rms = rms
-#                         if val < self.rel_tol or rms <1e-12:
-#                             break
-#                         # end if
-#                     # end if
-#                 # end for
-#             else: # Use Numpy
-#                 print 'Not implemented yet'
-#                 pass
-
-#             # end if
-#         # end if
-       
-#         print 'Succefully fit: rms0 = %g, rms_final = %g,iterations %d:'%(rms0,rms,j+1)
-                 
-#         return
-
-
-#     def _converge_test(self,ksp,iter,rnorm):
-#         # Do a relative norm and a happy breakdown absolute norm
-#         if iter== 0:
-#             self.old_rnorm = rnorm
-#             if rnorm < 1e-12:
-#                 return 1
-#             # end if 
-#         else:
-#             val = abs((rnorm-self.old_rnorm)/self.old_rnorm)
-#             self.old_rnorm = rnorm
-#             if val < 1e-12 or rnorm < 1e-12:
-#                 return 1
-#             # end if
-#         # end if
-    # --- From curve class ----
-   #  def writeTecplot(self,handle):
-#         '''Output this line\'s data to a open file handle \'handle\' '''
-
-#         if self.orig_data:
-#             handle.write('Zone T=%s I=%d \n'%('orig_data',self.N))
-#             handle.write('DATAPACKING=POINT\n')
-#             for i in xrange(self.N):
-#                 for idim in xrange(self.nDim):
-#                     handle.write('%f '%(real(self.X[i,idim])))
-#                 # end for
-#                 handle.write('\n')
-#         # end if
-
-#         if self.orig_data:
-#             s_plot = self.s
-#         else:
-#             s_plot = linspace(self.range[0],self.range[1],25)
-#         # end if 
-        
-#         # Dump re-interpolated spline
-#         handle.write('Zone T=%s I=%d \n'%('interpolated',len(s_plot)))
-#         handle.write('DATAPACKING=POINT\n')
-#         for i in xrange(len(s_plot)):
-#             for idim in xrange(self.nDim):
-#                 handle.write('%f '%(\
-#                         pyspline_real.bvalu(self.t,\
-#                                            self.coef[:,idim],\
-#                                            self.k,0,s_plot[i])))
-#             # end for 
-#             handle.write('\n')
-#         # end for 
-
-#         # Dump Control Points (Always have these :-) ) 
-#         handle.write('Zone T=%s I = %d\n'%('control_pts',self.Nctl))
-#         handle.write('DATAPACKING=POINT\n')
-
-#         for i in xrange(self.Nctl):
-#             for idim in xrange(self.nDim):
-#                 handle.write('%f '%(real(self.coef[i,idim])))
-#             # end for
-#             handle.write('\n')
-#         # end for
-
-#         return
-#     def findUV(self,x0,r,u0=0.5,v0=0.5,NO_PRINT=False):
-
-  # Generic algorithim -- Min distance between curve and surface
-                                
+    print 'There are two examples in the example directory.'
+    print 'Look at test_curve.py and test_surf.py for more informatin'
