@@ -21,8 +21,11 @@ OBJ =	lsqrDataModule.o\
 	bvalu.o\
 	intrv.o\
 	bspvn.o\
-	knots.o\
+	bspvd.o\
+	knots_lms.o\
+	knots_interp.o\
 	b2val.o\
+	insertKnot.o\
 	updatecoefficients.o\
 	updatecoefficients_c.o\
 	getBasisPt.o\

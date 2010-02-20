@@ -1,4 +1,4 @@
-subroutine knots(X,N,Nctl,K,T)
+subroutine knots_lms(X,N,Nctl,K,T)
   !  --------------------------------------------------------------------
   !  knots chooses a knot sequence,T, for data,X, of length N, with Nctl
   !  control points, and a spline of order k 
@@ -27,19 +27,24 @@ subroutine knots(X,N,Nctl,K,T)
   end do
 
   if (N .eq. Nctl .and. k == 2) then
-      do j = 1,N-k+1
-         T(k+j) = X(j+1)
-      end do
-   else
-     d = dble(N/(Nctl-k+1.0))
-
-     do j=1,Nctl-k+1
-        i = floor(j*d)
-        alpha = j*d-i
-        T(k+j) = (1-alpha)*X(i) + alpha*X(i+1)
+     do j = 1,N-k+1
+        T(k+j) = X(j+1)
      end do
-   end if
-      
-
-
-end subroutine knots
+  else
+     if (mod(N,2) == 1) then ! Odd
+        d = dble(N/(Nctl-k+1.0))
+        do j=1,Nctl-k
+           i = floor(j*d)
+           alpha = j*d-i
+           T(k+j) = (1-alpha)*X(i) + alpha*X(i+2)
+        end do
+     else ! even
+        d = dble(N/(Nctl-k+1.0))
+        do j=1,Nctl-k
+           i = floor(j*d)
+           alpha = j*d-i+0.5
+           T(k+j) = (1-alpha)*X(i) + alpha*X(i+1)
+        end do
+     end if
+  end if
+end subroutine knots_lms
