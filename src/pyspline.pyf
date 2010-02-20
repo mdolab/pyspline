@@ -325,14 +325,22 @@
        double precision :: poly_length
      end function poly_length
 
-     subroutine knots(x,n,nctl,k,t) ! in knots.f90
+     subroutine knots_lms(x,n,nctl,k,t) ! in :test:knots_lms.f90
        double precision dimension(n),intent(in) :: x
        integer optional,intent(in),check(len(x)>=n),depend(x) :: n=len(x)
        integer intent(in) :: nctl
        integer intent(in) :: k
        double precision dimension(nctl+k),intent(out),depend(nctl,k) :: t
-     end subroutine knots
-
+     end subroutine knots_lms
+     subroutine knots_interp(x,deriv_ptr,n,nd,k,t) ! in :test:knots_interp.f90
+       double precision dimension(n),intent(in) :: x
+       integer dimension(nd),intent(in) :: deriv_ptr
+       integer optional,intent(in),check(len(x)>=n),depend(x) :: n=len(x)
+       integer optional,intent(in),check(len(deriv_ptr)>=nd),depend(deriv_ptr) :: nd=len(deriv_ptr)
+       integer intent(in) :: k
+       double precision dimension(n+nd+k),intent(out),depend(n,nd,k) :: t
+     end subroutine knots_interp
+          
      subroutine intrv(xt,lxt,x,ilo,ileft,mflag) ! in :test:intrv.f
        double precision dimension(lxt),intent(in) :: xt
        integer optional,check(len(xt)>=lxt),depend(xt) :: lxt=len(xt)
@@ -428,9 +436,50 @@
        double precision dimension(nu*nv,nctlu*nctlv),intent(out),depend(nu,nv,nctlu,nctlv) :: jac
      end subroutine surface_jacobian_wrap2
 
-
-
-
+     subroutine insertknot(u,r,t,k,coef,nctl,ndim,t_new,coef_new,ileft) ! in :test:insertKnot.f90
+       double precision intent(in) :: u
+       integer intent(in,out) :: r
+       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       double precision dimension(nctl,ndim),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+       integer optional,intent(in),check(shape(coef,1)==ndim),depend(coef) :: ndim=shape(coef,1)
+       double precision dimension(nctl+k+r),intent(out),depend(r,k,nctl) :: t_new
+       double precision dimension(nctl+r,ndim),intent(out),depend(r,nctl,ndim) :: coef_new
+       integer intent(out) :: ileft
+     end subroutine insertknot
+        subroutine curve_jacobian_wrap(s,sd,t,k,nctl,n,nd,vals,row_ptr,col_ind) ! in :test:compute_curve.f90
+            double precision dimension(n),intent(in) :: s
+            double precision dimension(nd),intent(in) :: sd
+            double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+            integer intent(in) :: k
+            integer intent(in) :: nctl
+            integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+            integer optional,intent(in),check(len(sd)>=nd),depend(sd) :: nd=len(sd)
+            double precision dimension((n+nd)*k),intent(inout),depend(k,n,nd) :: vals
+            integer dimension(n+nd+1),intent(inout),depend(n,nd) :: row_ptr
+            integer dimension((n+nd)*k),intent(inout),depend(k,n,nd) :: col_ind
+        end subroutine curve_jacobian_wrap
+        subroutine constr_jac(a_val,a_row_ptr,a_col_ind,b_val,b_row_ptr,b_col_ind,c_val,c_row_ptr,c_col_ind,am,an,cm,annz,bnnz,cnnz,j_val,j_col_ind,j_row_ptr) ! in :test:compute_curve.f90
+          double precision dimension(annz),intent(in) :: a_val
+          integer dimension(am + 1),intent(in) :: a_row_ptr
+          integer dimension(annz),intent(in),depend(annz) :: a_col_ind
+          double precision dimension(bnnz),intent(in) :: b_val
+          integer dimension(am + 1),intent(in),depend(am) :: b_row_ptr
+          integer dimension(bnnz),intent(in),depend(bnnz) :: b_col_ind
+          double precision dimension(cnnz),intent(in) :: c_val
+          integer dimension(cm + 1),intent(in) :: c_row_ptr
+          integer dimension(cnnz),intent(in),depend(cnnz) :: c_col_ind
+          integer optional,intent(in),check((len(a_row_ptr)-1)>=am),depend(a_row_ptr) :: am=(len(a_row_ptr)-1)
+          integer intent(in) :: an
+          integer optional,intent(in),check((len(c_row_ptr)-1)>=cm),depend(c_row_ptr) :: cm=(len(c_row_ptr)-1)
+          integer optional,intent(in),check(len(a_val)>=annz),depend(a_val) :: annz=len(a_val)
+          integer optional,intent(in),check(len(b_val)>=bnnz),depend(b_val) :: bnnz=len(b_val)
+          integer optional,intent(in),check(len(c_val)>=cnnz),depend(c_val) :: cnnz=len(c_val)
+          double precision dimension(annz+bnnz+cnnz),intent(out),depend(annz,bnnz,cnnz) :: j_val
+          integer dimension(annz+bnnz+cnnz),intent(out),depend(annz,bnnz,cnnz) :: j_col_ind
+          integer dimension(am+cm+1),intent(out),depend(am,cm) :: j_row_ptr
+        end subroutine constr_jac
   end interface
 end program
 

@@ -103,10 +103,100 @@ subroutine curve_jacobian_linear(t,k,s,n,nctl)
         vals(counter) =vnikx(j)
         counter = counter + 1
      end do
-
   end do
   row_ptr(n+1) = counter
 end subroutine curve_jacobian_linear
+
+subroutine curve_jacobian_wrap(s,sd,t,k,nctl,n,nd,vals,row_ptr,col_ind)
+  implicit none
+  ! Input
+  double precision     ,intent(in)      :: t(nctl+k),s(n),sd(nd)
+  integer              ,intent(in)      :: k,nctl,n,nd
+  ! Output
+  double precision     ,intent(inout)   :: vals((n+nd)*k)
+  integer              ,intent(inout)   :: row_ptr(n+nd+1)
+  integer              ,intent(inout)   :: col_ind((n+nd)*k)
+  double precision                      :: vnikx(k),work((k+1)*(k+2)/2),vdikx(k,2)
+  integer                               :: i,j,counter
+  integer                               :: ilo,ileft,mflag,iwork
+  ilo = 1
+  counter = 1
+  do i=1,n ! Do the values first 
+     call intrv(t,nctl+k,s(i),ilo,ileft,mflag)
+     if (mflag == 1) then
+        ileft = ileft - k
+     end if
+     call bspvn(t,k,k,1,s(i),ileft,vnikx,work,iwork)
+     row_ptr(i) = counter-1
+     do j=1,k
+        col_ind(counter) = ileft-k+j-1
+        vals(counter) =vnikx(j)
+        counter = counter + 1
+     end do
+  end do
+  do i=1,nd ! Do the derivatives next
+     call intrv(t,nctl+k,sd(i),ilo,ileft,mflag)
+     if (mflag == 1) then
+        ileft = ileft - k
+     end if
+     call bspvd(t,k,2,sd(i),ileft,k,vdikx,work)
+     row_ptr(i+n) = counter-1
+     do j=1,k
+        col_ind(counter) = ileft-k+j-1
+        vals(counter) =vdikx(j,2)
+        counter = counter + 1
+     end do
+  end do
+  row_ptr(n+nd+1) = counter-1
+end subroutine curve_jacobian_wrap
+
+subroutine constr_jac(A_val,A_row_ptr,A_col_ind,B_val,B_row_ptr,B_col_ind,C_val,C_row_ptr,C_col_ind, &
+     Am,An,Cm,Annz,Bnnz,Cnnz,J_val,J_col_ind,J_row_ptr)
+  implicit none
+  ! Input
+  integer         , intent(in)   :: Am,An,Cm,Annz,Bnnz,Cnnz
+  double precision, intent(in)   :: A_val(Annz),B_val(Bnnz),C_val(Cnnz)
+  integer         , intent(in)   :: A_col_ind(Annz),B_col_ind(Bnnz),C_col_ind(Cnnz)
+  integer         , intent(in)   :: A_row_ptr(Am+1),B_row_ptr(Am+1),C_row_ptr(Cm+1)
+
+  ! Output
+  double precision, intent(out)  :: J_val(Annz+Bnnz+Cnnz)
+  integer         , intent(out)  :: J_col_ind(Annz+Bnnz+Cnnz)
+  integer         , intent(out)  :: J_row_ptr(Am+Cm+1)
+
+  ! Local 
+  integer                        :: i,j,counter
+  ! This functions assembes the following CSR matrix:
+  ! J = [A    B]
+  !     [C    0]
+
+  ! Now assmeble the full jacobain
+  counter = 1
+  J_row_ptr(1) = 0
+  do i =1,Am
+     do j=1,A_row_ptr(i+1)-A_row_ptr(i)
+        J_val(counter) =     A_val(A_row_ptr(i)+j)
+        J_col_ind(counter) = A_col_ind(A_row_ptr(i)+j)
+        counter = counter + 1
+     end do
+     do j=1,B_row_ptr(i+1)-B_row_ptr(i)
+        J_val(counter) = B_val(B_row_ptr(i)+j)
+        J_col_ind(counter) = B_col_ind(B_row_ptr(i)+j) + An
+        counter = counter + 1
+     end do
+     J_row_ptr(i+1) = counter - 1
+  end do
+  do i =1,Cm
+     do j=1,C_row_ptr(i+1)-C_row_ptr(i)
+        J_val(counter) = C_val(C_row_ptr(i)+j)
+        J_col_ind(counter) = C_col_ind(C_row_ptr(i)+j)
+        counter = counter + 1
+     end do
+     J_row_ptr(i+1+am) = counter - 1
+  end do
+end subroutine constr_jac
+
+
 
 function poly_length(X,n,ndim)
   ! Compute the length of the spatial polygon
