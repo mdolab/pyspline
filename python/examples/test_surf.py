@@ -6,14 +6,14 @@ import sys
 sys.path.append('../')
 import pySpline
 
-nu = 25
-nv = 25
+nu = 20
+nv = 20
 u = linspace(0,4,nu)
 v = linspace(0,4,nv)
 [V,U] = meshgrid(v,u)
 Z = cos(U)*sin(V)
 
-surf = pySpline.surface('lms',Nctlu=8,Nctlv=8,x=U,y=V,z=Z,ku=4,kv=4)
+surf = pySpline.surface(x=U,y=V,z=Z,ku=4,kv=4,Nctlu=5,Nctlv=5)
 surf.writeTecplot('surface.dat')
 
 # Test the project point Algorithim
@@ -34,7 +34,7 @@ x = [0,1,2]
 y = [4,3,2]
 z = [-3,1,3]
 
-curve = pySpline.curve('interpolate',k=3,x=x,y=y,z=z)
+curve = pySpline.curve(k=3,x=x,y=y,z=z)
 curve.writeTecplot('curve3.dat',size=.2)
 u,v,s,D = surf.projectCurve(curve)
 val1 = surf(u,v)
