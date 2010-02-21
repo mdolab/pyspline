@@ -20,7 +20,7 @@ curve.writeTecplot('helix.dat')
 
 # Load naca0012 data
 print 'Naca 0012 data'
-x,y = loadtxt('naca0012.dat',unpack=True)
+x,y = loadtxt('naca0012',unpack=True)
 curve = pySpline.curve(x=x,y=y,k=4,Nctl=11,niter=500)
 curve.writeTecplot('naca_data.dat')
 

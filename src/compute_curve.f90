@@ -223,10 +223,10 @@ subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X)
   ! Do Hoschek parameter correction
   implicit none
   ! Input/Output
-  double precision  ,intent(in)      :: t(k+nctl)
+  integer           ,intent(in)      :: k,nctl,ndim,n
+  double precision  ,intent(in)      :: t(nctl+k)
   double precision  ,intent(inout)   :: s(n)
   double precision  ,intent(in)      :: coef(nctl,ndim)
-  integer           ,intent(in)      :: k,nctl,ndim,n
   double precision  ,intent(in)      :: X(n,ndim)
   double precision  ,intent(in)      :: length
   ! Working
