@@ -294,7 +294,6 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   !     s       - Real: parameter on Curve 1
   !     t       - Real: parameter on Curve 2
   !     D       - Real: Distance between curve 
-  !     converged - Integer: 1 if converged -1 if not converged
   !
   implicit none
 

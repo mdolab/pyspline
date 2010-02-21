@@ -40,9 +40,23 @@ subroutine knots_interp(X,deriv_ptr,n,nd,k,t)
      end if
 
   else if (nd == 0) then
-     do j=1,N-k
-        T(K+j) = X(j+2)
-     end do
+     if (k ==2 ) then
+        do j=1,N-k
+           T(k+j) = X(j+1)
+        end do
+     else if (k == 3) then
+        do j=1,N-k
+           T(k+j) = 0.5*(X(j+1)+X(J+2))
+        end do
+     else if (k == 4) then
+        do j=1,N-k
+           T(K+j) = X(j+2)
+        end do
+     else
+        print *,'Error: Interpolation is only available for k=2,3 or 4'
+        stop
+     end if
+
   else
      print *,'Interp_knots with number of derivative != number of points is not yet supported'
      stop
