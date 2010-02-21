@@ -2,7 +2,7 @@
 # pySpline curve class
 
 from numpy import *
-import sys
+import sys,time
 sys.path.append('../')
 
 import pySpline
@@ -15,15 +15,13 @@ x = cos(theta)
 y = sin(theta)
 z = linspace(0,1,n)
 print 'Helix Data'
-curve = pySpline.curve('lms',x=x,y=y,z=z,k=4,Nctl=8)
-curve.runParameterCorrection(1000)
+curve = pySpline.curve(x=x,y=y,z=z,k=4,Nctl=8,niter=100)
 curve.writeTecplot('helix.dat')
 
 # Load naca0012 data
 print 'Naca 0012 data'
 x,y = loadtxt('naca0012.dat',unpack=True)
-curve = pySpline.curve('lms',x=x,y=y,k=4,Nctl=19)
-curve.runParameterCorrection(2000)
+curve = pySpline.curve(x=x,y=y,k=4,Nctl=11,niter=500)
 curve.writeTecplot('naca_data.dat')
 
 # Projection Tests
@@ -31,14 +29,14 @@ print 'Projection Tests'
 x = [0,2,3,5]
 y = [-2,5,3,0]
 z = [0,0,0,0]
-curve1 = pySpline.curve('interpolate',x=x,y=y,z=z,k=4)
+curve1 = pySpline.curve(x=x,y=y,z=z,k=4)
 curve1.writeTecplot('curve1.dat',size=.1)
 
 x = [-2,5,2,1]
 y = [5,1,4,2]
 z = [3,0,1,4]
 
-curve2 = pySpline.curve('interpolate',x=x,y=y,z=z,k=4)
+curve2 = pySpline.curve(x=x,y=y,z=z,k=4)
 curve2.writeTecplot('curve2.dat',size=.1)
 
 # Get the minimum distance distance between a point and each curve
