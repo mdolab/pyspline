@@ -23,43 +23,28 @@ subroutine knots_interp(X,deriv_ptr,n,nd,k,t)
      T(Nctl+J) = X(N) ! right
   end do
 
-  ! Do a "regular" interpolation knot vector in 'temp' and then add in
-  ! then additional ones we need for the derivative constraints
-  !do j = 1,N-2 ! Standard cubic spline interpolation (points at knots)
-  !   temp(j) = X(j+1)
-  !end do
-  !print *,'X:',X
-  !print *,'N:',N
-  !print *,'temp:',temp
-  ! if (nd > 0) then ! we have to add additional knots 
-  !    print *,'in here'
-  !    print *,'deriv_ptr:',deriv_ptr
-  !    d_count = -1
-  !    do j=2,N-1
-        
-  !       if (deriv_ptr(j) +1 == j) then !
-  !          print *,'j:',j
-  !          print *,'setting indices:',k+j+d_count,k+j+d_count + 1
-  !          T(k+j+d_count) = 0.5*X(j)
-  !          d_count = d_count + 1
-  !          T(k+j+d_count) = 0.5*(X(j) + X(j+1))
-  !          d_count = d_count + 1
-  !          T(k+j+d_count) = 0.5*(X(j) + 1)
-  !       else
-  !          print *,'should not be here'
-  !    !      T(k+j+d_count) = X(j+1)
-  !       end if
+  if (nd == n) then ! Full Length nd so we can use formulas in NURBS book
+     if (k == 3) then
+        do i=1,n-2
+           T(k+2*i-1) = 0.5*(X(i) + X(i+1))
+           T(k+2*i) = X(i+1)
+        end do
+        T(Nctl) = 0.5*(X(n-1) + 1)
+     else if (k ==4) then
+        T(5) = X(2)/2
+        T(Nctl) = 0.5*(X(n-1) + 1)
+         do i=1,n-3
+            T(k+2*i  ) = (1.0/3.0)*(2*X(i+1) + X(i+2))
+            T(k+2*i+1) = (1.0/3.0)*(X(i+1) + 2*X(i+2))
+         end do
+     end if
 
-  !    end do
-  !    print *, 'caled knots are:',T
-  ! else
-  !    T(k:Nctl) = temp(k:Nctl) ! Copy the temp vector verbatem
-  ! end if
-  T(4) = X(2)/2
-  T(5) = X(2)
-  T(6) = 0.5*(X(2)+1)
-  !T(5) = X(2)/2
-  !T(6) = (X(2)+1)/2
-  print *,'knots are :',T
-  print *,'X is :',X
+  else if (nd == 0) then
+     do j=1,N-k
+        T(K+j) = X(j+2)
+     end do
+  else
+     print *,'Interp_knots with number of derivative != number of points is not yet supported'
+     stop
+  end if
 end subroutine knots_interp

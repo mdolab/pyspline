@@ -29,9 +29,10 @@ import os, sys, string, time, copy, pdb
 # =============================================================================
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
     ones,vstack,real,where,arange,append,hstack
+from numpy.linalg import norm
 
 import scipy
-from scipy import sparse
+from scipy import sparse,io
 from scipy.sparse.linalg.dsolve import factorized
 scipy.sparse.linalg.use_solver(useUmfpack=False)
 
@@ -56,56 +57,47 @@ def e_dist(x1,x2):
 class surface():
 
     def __init__(self,*args,**kwargs):
+        
+        '''
+        Create an instance of a b-spline surface. There are two
+        ways to initialize the class
 
-        '''Create an instance of a b-spline surface. There are three ways to
-        initialize the class as determined by the first argument:
-
-        args[0] = \'create\': Create an instance of the spline class
+        Creation: Create an instance of the spline class
         directly by supplying the required information. **kwargs MUST
         contain the folloiwng information:
 
-            ku, integer: Order for u
-            kv, integer: Order for v
+            ku, integer: Order for spline in u
+            kv, integer: Order for spline in v
             tu, real array: Knot vector for u
             tv, real array: Knot vector for v
-            coef, real array size(Nctlu,Nctlv,nDim): Array of control point 
-                                                     values
+            coef, real array size(Nctlu,Nctlv,nDim): Array of control points
 
-        args[0] = \'interpolate\': Create an instance of the spline class
-        by using an interpolating spline to given data points. **kwarg
-        MUST contain the following information:
+        LMS/Interpolation
+        Create an instance of the spline class by using an interpolating spline to given data points. **kwarg
+        or a LMS spline. The following information is required:
 
-            ku, integer: Order for u
-            kv, integer: Order for v
-            u, real, array: list of u values (Optional for ndim=3,required otherwise)
-            v, real, array: list of v values (Optional for ndim=3,required otherwise)
-            X, real, array, size(len(u),len(v),nDim):Array of data points to fit
-            --> OR  x=array, size(len(u),len(v)) -> two dimensional interpolation
-            --> OR  x=array,y=array, each of size(len(u),len(v))
-            --> OR  x=array,y=array,z=array, each of size (len(u),len(v))
+            ku, integer: Order for spline in u
+            kv, integer: Order for spline in v
+            X, real, array, size(len(u),len(v),nDim): Array of data to fit 
+              --> OR  x=<vals>, (len(u),len(v) -2D interpolation
+              --> OR  x=<vals>,y=<vals>, each of size (len(u),len(v) 
+              --> OR  x=<vals>,y=<vals>,z=<vals> each of len(s) ->3D parametric surface
+            u,v, real, arrays: (OPTIONAL for nDim == 3 ) Arrays of u and v values
+            
+        For LMS spline:
+            Nctlu -> (integer) number of control points in u
+            Nctlv -> (integer) number of control points in v
 
-        args[0] \'lms\': Create an instance of the spline class using a
-        Least-Mean-Squares fit to the spline. . **kwargs MUST contain
-        the following information:
-
-            ku, integer: Order for u
-            kv, integer: Order for v
-            Nctlu, integer: Number of control points for u
-            Nctlv, integer: Number of control points for v
-            u, real, array: list of u values (Optional for ndim=3,required otherwise)
-            v, real, array: list of v values (Optional for ndim=3,required otherwise)
-            X, real, array, size(len(u),len(v),nDim):Array of data points to fit
-            --> OR  x=array, size(len(u),len(v)) -> two dimensional interpolation
-            --> OR  x=array,y=array, each of size(len(u),len(v))
-            --> OR  x=array,y=array,z=array, each of size (len(u),len(v))
-'''
+        Optional Data:
+           u    : array of u parameter locations (optional for ndim == 3)
+           v    : array of v parameter locations (optional for ndim == 3)
+           niter:  The number of Hoschek's parameter corrections to run
+           '''
         if 'no_print' in kwargs:
             self.NO_PRINT = kwargs['no_print']
         else:
             self.NO_PRINT = False
         # end if      
-        task = args[0]
-        mpiPrint('pySpline Type: %s. '%(task),self.NO_PRINT)
         
         # Defaults
         self.X    = None
@@ -115,10 +107,8 @@ class surface():
         self.Nv   = None
         self.orig_data = False
 
-        if task == 'create':
-            assert 'ku' in kwargs and 'kv' in kwargs  and 'tu' in kwargs \
-                and 'tv' in kwargs and 'coef' in kwargs,'Error: ku,kv,tu,tv,\
- and coef MUST be defined for task=create'
+        if 'ku' in kwargs and 'kv' in kwargs and 'tu' in kwargs and 'tv' in \
+kwargs and 'coef' in kwargs:
             self.ku = int(kwargs['ku'])
             self.kv = int(kwargs['kv'])
             self.tu = array(kwargs['tu'],'d')
@@ -133,8 +123,7 @@ class surface():
             self.nDim = self.coef.shape[2]
             self._setEdgeCurves()
             return
-     
-        elif task == 'interpolate' or task == 'lms':
+        else: # We have LMS/Interpolate
             # Do some checking on the number of control points
             assert 'ku' in kwargs and 'kv' in kwargs and \
                 ( 'X' in kwargs or 'x' in kwargs or \
@@ -142,10 +131,7 @@ class surface():
                       ( 'x' in kwargs and 'y' in kwargs and 'z' in kwargs)), \
                       'Error: ku,kv, and X (or x or x and y or x and y and z \
 MUST be defined for task lms or interpolate'
-            if task=='lms':
-                assert 'Nctlu' in kwargs and 'Nctlv' in kwargs,'Nctlu and Nctlv\
- MUST be defined for task lms'
-            
+
             if 'X' in kwargs:
                 self.X  = array(kwargs['X'])
                 if len(self.X.shape) == 1:
@@ -168,23 +154,27 @@ MUST be defined for task lms or interpolate'
                 self.X[:,:,0] = kwargs['x']
                 self.nDim = 1
             # enf if
-            if task == 'interpolate':
-                self.Nctlu = self.X.shape[0]
-                self.Nctlv = self.X.shape[1]
-            else:
-                self.Nctlu = kwargs['Nctlu']
-                self.Nctlv = kwargs['Nctlv']
-            # end if
-                
-            self.orig_data = True
+
             self.Nu = self.X.shape[0]
             self.Nv = self.X.shape[1]
 
             self.ku = int(kwargs['ku'])
             self.kv = int(kwargs['kv'])
 
+
+            if 'Nctlu' in kwargs and 'Nctlv' in kwargs:
+                self.Nctlu = kwargs['Nctlu']
+                self.Nctlv = kwargs['Nctlv']
+                self.interp = False
+            else:
+                self.Nctlu = self.Nu
+                self.Nctlv = self.Nv
+                self.interp = True
+                
+            self.orig_data = True
+
             # Sanity Check on Inputs
-            if self.Nctlu >= self.Nu:  self.Nctlu  = self.Nu
+            if self.Nctlu >= self.Nu:  self.Nctlu = self.Nu
             if self.Nctlv >= self.Nv:  self.Nctlv = self.Nv
 
             # Sanity check to make sure k is less than N
@@ -193,16 +183,10 @@ MUST be defined for task lms or interpolate'
             if self.Nctlu < self.ku: self.ku = self.Nctlu
             if self.Nctlv < self.kv: self.kv = self.Nctlv
 
-            if 'rel_tol' in kwargs:
-                self.rel_tol = kwargs['rel_tol']
-            else:
-                self.rel_tol = 5e-4
-            # end if
-
             if 'niter' in kwargs:
                 self.niter = kwargs['niter']
             else:
-                self.niter = 1000
+                self.niter = 1
             # end if
 
             if 'u' in kwargs and 'v' in kwargs:
@@ -210,7 +194,7 @@ MUST be defined for task lms or interpolate'
                 v = kwargs['v']
             else:
                 if self.nDim == 3:
-                    u,v = self._calcParameterization()
+                    self.u,self.v,self.U,self.V = self._calcParameterization()
                 else:
                     mpiPrint('Automatic parameterization of ONLY available\
  for spatial data in 3 dimensions. Please supply u and v key word arguments\
@@ -218,61 +202,51 @@ MUST be defined for task lms or interpolate'
                     sys.exit(1)
                 # end if
             # end if
-            self.umin = u[0]
-            self.umax = u[-1]
-            self.vmin = v[0]
-            self.vmax = v[-1]
-            
-            self.u = u
-            self.v = v
-            
+            self.umin = 0
+            self.umax = 1
+            self.vmin = 0
+            self.vmax = 1
             self._calcKnots()
-            [self.V,self.U] = meshgrid(v,u)
-#             self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim),'d')
-#             self.niter = 1      
-#             self.U,self.V,self.coef, rms = pyspline.compute_surface(\
-#                 self.X,self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.coef,\
-#                     self.niter,self.rel_tol)
-  
             self.recompute()
-            #mpiPrint('Done Fitting Surface')
-
-        else:
-            mpiPrint('Error: The first argument must be \'create\', \'lms\' or \'interpolate\'')
-            sys.exit(0)
-        # end if (init type)
         return
 
     def _calcKnots(self):
-        self.tu = pyspline.knots(self.u,self.Nctlu,self.ku)
-        self.tv = pyspline.knots(self.v,self.Nctlv,self.kv)
-
+        if self.interp:
+            self.tu = pyspline.knots_interp(self.u,array([],'d'),self.ku)
+            self.tv = pyspline.knots_interp(self.v,array([],'d'),self.kv)
+        else:
+            self.tu = pyspline.knots_lms(self.u,self.Nctlu,self.ku)
+            self.tv = pyspline.knots_lms(self.v,self.Nctlv,self.kv)
+        # end if
 
     def recompute(self):
         '''Recompute the curve if the knot vector has been modified'''
-        # --- Direct Implementation
-        Jac = pyspline.surface_jacobian_wrap2(self.U,self.V,self.tu,self.tv,
-                                             self.ku,self.kv,self.Nctlu,
-                                             self.Nctlv)
-        self.coef = lstsq(Jac,self.X.reshape([self.Nu*self.Nv,self.nDim]))[0].reshape([self.Nctlu,self.Nctlv,self.nDim])
+        vals,row_ptr,col_ind = pyspline.surface_jacobian_wrap(\
+            self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
+        N = sparse.csr_matrix((vals,col_ind,row_ptr),
+                                 shape=[self.Nu*self.Nv,self.Nctlu*self.Nctlv])
+        self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
+        mdict = {'jac':N.todense()}
+        io.savemat('N.mat', mdict)
 
-      #   # ---- Sparse Implemention
-
-#         vals,row_ptr,col_ind = pyspline.surface_jacobian_wrap(\
-#             self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
-#         Jac2 = sparse.csr_matrix((vals,col_ind,row_ptr),
-#                                  shape=[self.Nu*self.Nv,self.Nctlu*self.Nctlv])
-#         self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
-#         for idim in xrange(self.nDim):
-#             J = Jac2.transpose()*Jac2
-#             rhs  = Jac2.transpose()*self.X[:,:,idim].flatten()
-#             self.coef[:,:,idim] =  linsolve.spsolve(J,rhs).reshape([self.Nctlu,self.Nctlv])
-
+        if self.interp:
+            solve = factorized( N )
+            for idim in xrange(self.nDim):
+                self.coef[:,:,idim] =  solve(self.X[:,:,idim].flatten()).reshape([self.Nctlu,self.Nctlv])
+            # end for
+        else:
+            solve = factorized (N.transpose()*N)
+            for idim in xrange(self.nDim):
+                rhs  = N.transpose()*self.X[:,:,idim].flatten()
+                self.coef[:,:,idim] = solve(rhs).reshape([self.Nctlu,self.Nctlv])
+            # end for
+        # end if
         self._setEdgeCurves()
         return
 
     def _calcParameterization(self):
         u = zeros(self.Nu,'d')
+        U = zeros((self.Nu,self.Nv),'d')
         singular_counter = 0
         # loop over each v, and average the 'u' parameter 
         for j in xrange(self.Nv): 
@@ -285,8 +259,10 @@ MUST be defined for task lms or interpolate'
             if temp[-1] == 0: # We have a singular point
                 singular_counter += 1
                 temp[:] = 0.0
+                U[:,j] = linspace(0,1,self.Nu)
             else:
                 temp /= temp[-1]
+                U[:,j] = temp.copy()
             # end if
 
             u += temp #accumulate the u-parameter calcs for each j
@@ -294,6 +270,7 @@ MUST be defined for task lms or interpolate'
         u =u/(self.Nv-singular_counter) #divide by the number of 'j's we had
         
         v = zeros(self.Nv,'d')
+        V = zeros((self.Nu,self.Nv),'d')
         singular_counter = 0
         # loop over each v, and average the 'u' parameter 
         for i in xrange(self.Nu): 
@@ -304,15 +281,17 @@ MUST be defined for task lms or interpolate'
             if temp[-1] == 0: #We have a singular point
                 singular_counter += 1
                 temp[:] = 0.0
+                V[i,:] = linspace(0,1,self.Nv)
             else:
                 temp /= temp[-1]
+                V[i,:] = temp.copy()
             #end if 
 
             v += temp #accumulate the v-parameter calcs for each i
         # end for 
         v = v/(self.Nu-singular_counter) #divide by the number of 'i's we had
 
-        return u,v
+        return u,v,U,V
 
     def _setEdgeCurves(self):
         '''Create curve spline objects for each of the edges'''
@@ -712,21 +691,20 @@ class curve():
 
     def __init__(self,*args,**kwargs):
         '''
-        Create an instance of a b-spline curve. There are three
-        ways to initialize the class as determined by the first argument
+        Create an instance of a b-spline curve. There are two
+        ways to initialize the class
 
-        args[0] = \'create\': Create an instance of the spline class
+        Creation: Create an instance of the spline class
         directly by supplying the required information. **kwargs MUST
         contain the folloiwng information:
 
             k, integer: Order for spline
-            Nctu, integer: Number of u control points
             t, real array: Knot vector 
-            coef, real array size(Nctl,nDim+1): Array of control points and weights
+            coef, real array size(Nctl,nDim): Array of control points
 
-        arg[0] = \'interpolate\': Create an instance of the spline class
-        by using an interpolating spline to given data points. **kwarg
-        MUST contain the following information:
+        LMS/Interpolation
+        Create an instance of the spline class by using an interpolating spline to given data points. **kwarg
+        or a LMS spline. The following information is required:
 
             k, integer: Order for spline
             X, real, array, size(len(s),nDim): Array of data to fit 
@@ -734,14 +712,19 @@ class curve():
               --> OR  x=<vals>,y=<vals>, each of len(s) -> 2D parametric curve
               --> OR  x=<vals>,y=<vals>,z=<vals> each of len(s) ->3D parametric curve
             s, real, array: (OPTIONAL for nDim >=2 ) Array of s values 
+            
+        For LMS spline:
+             Nctl -> (integer) number of control points
 
-        arg[0] = \'lms\': Create an instance of the spline class using a lms spline.
-       **kwargs MUST contain the following information:
-            k, integer: Order for spline
-            s, real, array: (OPTIONAL for nDIM >=2) Array of s values 
-            X, real, array, size(len(s),nDim): Array of data to fit OR
-                 x=<vals>,y=<vals>,z=<vals> where each is of length s
-            Nctl, integer: The number of control points
+        Optional Data:
+        
+        weights:   A array of weighting factors for each fitting point
+                   A value of -1 can be used to exactly constrain a point
+        deriv and deriv_ptr: deriv is a array which contains derivative
+                             information at point indicies defined by deriv_ptr
+        deriv_weights: A array of len deriv_ptr which contains derivative weighting
+                       A value of -1 can be used to exactly constrain a derivative
+        niter:  The number of Hoschek's parameter corrections to run
     '''
         if 'no_print' in kwargs:
             self.NO_PRINT = kwargs['no_print']
@@ -787,13 +770,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             if 'niter' in kwargs: 
                 self.niter = kwargs['niter']
             else:
-                self.niter = 10
-            # end if
-
-            if 'rel_tol' in kwargs:
-                self.rel_tol = kwargs['rel_tol']
-            else:
-                self.rel_tol = 5e-4
+                self.niter = 1
             # end if
 
             if 's' in kwargs:
@@ -807,106 +784,119 @@ Nctl=<number of control points> must be specified for a LMS fit'
             self.orig_data = True
             
             if 'weights' in kwargs:
-                weights = array(kwargs['weights'])
+                self.weights = array(kwargs['weights'])
             else:
-                weights = ones(self.N)
+                self.weights = ones(self.N)
             # end if
 
             if 'deriv' in kwargs and 'deriv_ptr' in kwargs:
-                deriv = array(kwargs['deriv'])
-                deriv_ptr = array(kwargs['deriv_ptr'])
+                self.deriv = array(kwargs['deriv'])
+                self.deriv_ptr = array(kwargs['deriv_ptr'])
             else:
-                deriv = None
-                deriv_ptr = array([])
+                self.deriv = None
+                self.deriv_ptr = array([])
             # end if
             if 'deriv_weights' in kwargs and deriv != None:
-                deriv_weights = array(kwargs['deriv_weights'])
+                self.deriv_weights = array(kwargs['deriv_weights'])
             else:
-                if deriv != None:
-                    deriv_weights = ones(len(deriv))
+                if self.deriv != None:
+                    self.deriv_weights = ones(len(self.deriv))
                 else:
-                    deriv_weights = None
+                    self.deriv_weights = None
                 # end if
             # end if
-            if not 'Nctl' in kwargs: # We are doing an interpolation...set all weights to -1
-                weights[:] = 1
-                if deriv_weights != None:
-                    deriv_weights[:] = 1
+            if not 'Nctl' in kwargs: # We are doing an interpolation...set all weights to 1
+                self.interp = True
+                self.weights[:] = 1
+                if self.deriv_weights != None:
+                    self.deriv_weights[:] = 1
                 # end if
-            # end if
-            # Now do the sparation between the constrained and unconstrained
-            S  = self.X[where(weights > 0.0)]
-            su = self.s[where(weights > 0.0)]
-            T  = self.X[where(weights <=  0.0)]
-            sc = self.s[where(weights <= 0.0)]
-            weights = weights[where(weights > 0.0)]
-            nu = len(S)
-            nc = len(T)
-     
-            # And the derivative info
-            if deriv != None:
-                S = vstack((S,deriv[where(deriv_weights > 0.0)]))
-                sdu = self.s[deriv_ptr][where(deriv_weights > 0.0)]
-                T = vstack((T,deriv[where(deriv_weights <= 0.0)]))
-                sdc = self.s[deriv_ptr][where(deriv_weights <= 0.0)] 
-                weights = append(weights,deriv_weights[where(deriv_weights > 0.0)])
-                ndu = len(sdu)
-                ndc = len(sdc)
             else:
-                sdu = array([],'d')
-                sdc = array([],'d')
-                ndu = 0
-                ndc = 0
-            # end if
-            print 'weights:',weights
-            W = sparse.csr_matrix((weights,arange(len(weights)),arange(len(weights)+1))) # Diagonal
-            
-            if 'Nctl' in kwargs:
+                self.interp = False
                 self.Nctl = int(kwargs['Nctl'])
-                if self.Nctl > nu+nc+ndu+ndc:
-                    self.Nctl = nu+nc+ndu+ndc
-                    interp = True
-            else:
-                self.Nctl = nu+nc+ndu+ndc
-                self.niter = 1
-                interp = True
             # end if
-            # Sanity check to make sure k is ok
-            if nu+nc+ndu+ndc < self.k:
-                self.k = nu+nc+ndu+ndc
+            self.recompute(self.niter)
+        return
+
+    def recompute(self,niter):
+
+        # Now do the sparation between the constrained and unconstrained
+        su_select = where(self.weights > 0.0)
+        sc_select = where(self.weights <= 0.0)
+                          
+        S  = self.X[su_select]
+        su = self.s[su_select]
+        T  = self.X[sc_select]
+        sc = self.s[sc_select]
+        self.weights = self.weights[where(self.weights > 0.0)]
+        nu = len(S)
+        nc = len(T)
+     
+        # And the derivative info
+        if self.deriv != None:
+            sdu_select = where(self.deriv_weights > 0.0)
+            sdc_select = where(self.deriv_weights <= 0.0)
+            S = vstack((S,self.deriv[sdu_select]))
+            sdu = self.s[self.deriv_ptr][sdu_select]
+            T = vstack((T,self.deriv[sdc_select]))
+            sdc = self.s[self.deriv_ptr][sdc_select]
+            self.weights = append(self.weights,self.deriv_weights[where(self.deriv_weights > 0.0)])
+            ndu = len(sdu)
+            ndc = len(sdc)
+        else:
+            sdu = array([],'d')
+            sdc = array([],'d')
+            ndu = 0
+            ndc = 0
+        # end if
+        W = sparse.csr_matrix((self.weights,arange(len(self.weights)),arange(len(self.weights)+1))) # Diagonal
+            
+        if self.interp:
+            self.Nctl = nu+nc+ndu+ndc
+            self.niter = 1
+        # end if
+
+        # Sanity check to make sure k is ok
+        if nu+nc+ndu+ndc < self.k:
+            self.k = nu+nc+ndu+ndc
+        # end if
+
+        # Generate the knot vector,greville points and empty coefficients
+        if self.interp:
+            self.t = pyspline.knots_interp(self.s,self.deriv_ptr,self.k)
+        else:
+            self.t = pyspline.knots_lms(self.s,self.Nctl,self.k)
+        # end if
+        self._calcGrevillePoints()
+        self.coef = zeros((self.Nctl,self.nDim),'d')
+
+        # Get the 'N' jacobain
+        N_vals = zeros((nu+ndu)*self.k)          # |
+        N_row_ptr = zeros(nu+ndu+1,'intc')       # | ->  Standard CSR formulation
+        N_col_ind = zeros((nu+ndu)*self.k,'intc')# |
+        pyspline.curve_jacobian_wrap(su,sdu,self.t,self.k,self.Nctl,N_vals,N_row_ptr,N_col_ind)
+        N = sparse.csr_matrix((N_vals,N_col_ind,N_row_ptr),shape=[nu+ndu,self.Nctl])
+        if self.interp:
+            solve = factorized( N ) # Factorize once for efficiency
+            for idim in xrange(self.nDim):
+                self.coef[:,idim] = solve(S[:,idim])
+            # end for
+            return
+        # end if
+                
+        length = pyspline.poly_length(self.X)
+        for iter in xrange(niter):
+            su = self.s[su_select]
+            sc = self.s[sc_select]
+            if self.deriv != None:
+                sdu = self.s[self.deriv_ptr][sdu_select]
+                sdc = self.s[self.deriv_ptr][sdc_select]
             # end if
 
-            # Generate the knot vector,greville points and empty coefficients
-            if interp:
-                print 'Here'
-                self.t = pyspline.knots_interp(self.s,deriv_ptr,self.k)
-            else:
-                self.t = pyspline.knots_lms(self.s,self.Nctl,self.k)
-            # end if
-            self._calcGrevillePoints()
-            self.coef = zeros((self.Nctl,self.nDim),'d')
-
-            # Get the 'N' jacobain
-            N_vals = zeros((nu+ndu)*self.k)          # |
-            N_row_ptr = zeros(nu+ndu+1,'intc')       # | ->  Standard CSR formulation
-            N_col_ind = zeros((nu+ndu)*self.k,'intc')# |
-            print 'su,sdu',su,sdu
-            print 'nu,ndu:',nu,ndu
-            print 'knots:',self.t
             pyspline.curve_jacobian_wrap(su,sdu,self.t,self.k,self.Nctl,N_vals,N_row_ptr,N_col_ind)
-            N = sparse.csr_matrix((N_vals,N_col_ind,N_row_ptr),shape=[nu+ndu,self.Nctl])
-
-            # If there is no constrained data...do a regular fit
-            if N.shape[0] == N.shape[1]: # Square N...will ONLY happen for pure interpolation 
-                print N.todense()
-                solve = factorized( N ) # Factorize once for efficiency
-                for idim in xrange(self.nDim):
-                    self.coef[:,idim] = solve(S[:,idim])
-                # end for
-                return
-
             NTWN = N.transpose()*W*N # We need this either way
-            if nc + ndc == 0:
+
+            if nc + ndc == 0: # We are doing LMS but no constraints...just a straight weighted LMS
                 solve = factorized( NTWN ) # Factorize once for efficiency
                 for idim in xrange(self.nDim):
                     self.coef[:,idim] = solve(N.transpose()*W*S[:,idim])
@@ -934,15 +924,19 @@ Nctl=<number of control points> must be specified for a LMS fit'
                     self.coef[:,idim] = solve(rhs)[0:self.Nctl]
                 # end for
             # end if (constr - not constrained
-        # end if
-        return
 
-    def runParameterCorrection(self,niter,rel_tol=1e-5):
-        '''Run niter of the Hoschek's parameter correction algorithim'''
-        # Run more parameter correction
-        self.s,self.coef,rms = pyspline.compute_curve(\
-            self.s,self.X,self.t,self.k,self.coef,niter,self.rel_tol)
-        mpiPrint('ReFitted with rms: %f'%rms,self.NO_PRINT)
+            # Run para correction
+            self.s = pyspline.curve_para_corr(self.t,self.k,self.s.copy(),self.coef,length,self.X)
+        # end for (iter loop)
+        # Check the RMS
+        rms = 0.0
+        for idim in xrange(self.nDim):
+            rms += norm(N*self.coef[:,idim]-S[:,idim])**2
+        # end for
+        rms = sqrt(rms/self.N)
+        mpiPrint('Rms is: %f'%(rms),self.NO_PRINT)
+      
+        return
 
     def _getParameterization(self):
         # We need to parameterize the curve
