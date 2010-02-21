@@ -1,7 +1,7 @@
 '''
 pySpline
 
-Contains an relatively thin interface to the cmlib spline functions
+Contains an class functions for working with B-spline curves and surfaces
 
 Copyright (c) 2009 by G. Kenway
 All rights reserved. Not to be used for commercial purposes.
@@ -17,7 +17,6 @@ History
 	v. 1.0 - Initial Class Creation (GKK, 2009)
 '''
 
-__version__ = '$Revision: $'
 
 # =============================================================================
 # Standard Python modules
@@ -53,11 +52,11 @@ def e_dist(x1,x2):
 # =============================================================================
 # pySpline class
 # =============================================================================
+  
 
-class surface():
+class surface(object):
 
     def __init__(self,*args,**kwargs):
-        
         '''
         Create an instance of a b-spline surface. There are two
         ways to initialize the class
@@ -99,16 +98,13 @@ class surface():
             self.NO_PRINT = False
         # end if      
         
-        # Defaults
-        self.X    = None
-        self.u    = None
-        self.v    = None
-        self.Nu   = None
-        self.Nv   = None
-        self.orig_data = False
-
         if 'ku' in kwargs and 'kv' in kwargs and 'tu' in kwargs and 'tv' in \
-kwargs and 'coef' in kwargs:
+                kwargs and 'coef' in kwargs:
+            self.X = None
+            self.u = None
+            self.v = None
+            self.U = None
+            self.V = None
             self.ku = int(kwargs['ku'])
             self.kv = int(kwargs['kv'])
             self.tu = array(kwargs['tu'],'d')
@@ -121,6 +117,7 @@ kwargs and 'coef' in kwargs:
             self.vmin = self.tv[0]
             self.vmax = self.tv[-1]
             self.nDim = self.coef.shape[2]
+            self.orig_data = False
             self._setEdgeCurves()
             return
         else: # We have LMS/Interpolate
@@ -190,8 +187,8 @@ MUST be defined for task lms or interpolate'
             # end if
 
             if 'u' in kwargs and 'v' in kwargs:
-                u = kwargs['u']
-                v = kwargs['v']
+                self.u = kwargs['u']
+                self.v = kwargs['v']
             else:
                 if self.nDim == 3:
                     self.u,self.v,self.U,self.V = self._calcParameterization()
@@ -218,9 +215,16 @@ MUST be defined for task lms or interpolate'
             self.tu = pyspline.knots_lms(self.u,self.Nctlu,self.ku)
             self.tv = pyspline.knots_lms(self.v,self.Nctlv,self.kv)
         # end if
+            
+        return
 
     def recompute(self):
-        '''Recompute the curve if the knot vector has been modified'''
+        '''Recompute the surface if any data has been modified
+         Required:
+             None
+         Returns:
+             None
+             '''
         vals,row_ptr,col_ind = pyspline.surface_jacobian_wrap(\
             self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
@@ -304,7 +308,12 @@ MUST be defined for task lms or interpolate'
         return
 
     def getValueCorner(self,corner):
-        '''Get the value of the spline on corner i,i=0,1,2 or 3 '''
+        '''Get the value of the spline on corner 
+        Requred:
+            corner: corner index=0,1,2 or 3 
+        Returns:
+            value: Surface value on corner
+            '''
         assert corner in [0,1,2,3],'Error, getValueCorner: Corner must be in range 0->3'
         if corner == 0:
             return self.getValue(self.umin,self.vmin)
@@ -317,7 +326,13 @@ MUST be defined for task lms or interpolate'
         #end if
 
     def getOrigValuesEdge(self,edge):
-        ''' Get the two end points and midpoint values of the original data on edge. edge = 0,1,2,3'''
+        '''Get the two end points and midpoint values of the original data
+        on edge.
+        Required:
+           edge: edge index = 0,1,2,3
+        Returns:
+            start value, mid point value, end_point value
+            '''
         assert edge in [0,1,2,3] and self.orig_data == True,'Error, getOrigValuesEdge: No \
 original data for this surface or edge is not in range 0->3'
 
@@ -352,7 +367,13 @@ original data for this surface or edge is not in range 0->3'
         # end if
 
     def getOrigValueCorner(self,node):
-        ''' Get the values of the original data on cornere. conrner = 0,1,2,3'''
+        ''' 
+        Get the values of the original data on corner.
+        Required Arguments:
+           node: index of conrner = 0,1,2,3
+        Returns:
+           value: Value at corner
+           '''
         assert node in [0,1,2,3] and self.orig_data == True,'Error, getOrigValueCorner: No \
 original data for this surface or node is not in range 0->3'
 
@@ -376,13 +397,18 @@ original data for this surface or node is not in range 0->3'
                                    col_ind,istart,l_index)
                                 
     def __call__(self,u,v):
-        '''Equivalant to getValue'''
+        '''
+        Equivalant to getValue
+        '''
         return self.getValue(u,v)
 
     def getValue(self,u,v):
-        '''Get the value of the spline at point(s) u,v
-        u and v can be scalars,vectors or arrays. They must be the same size'''
-        #Assure u,v are numpy arrays
+        '''Get the value at the surface point(s) u,v
+        Required Arguments:
+           u,v: u and v can be a scalar,vector or matrix of values
+        Returns:
+           values: An array of size (shape(u), nDim)
+           '''
         u = array(u)
         v = array(v)
         assert u.shape == v.shape,'Error, getValue: u and v must have the same shape'
@@ -394,8 +420,12 @@ original data for this surface or node is not in range 0->3'
             return pyspline.eval_surface_m(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
                                 
     def getDerivative(self,u,v):
-        '''Get the value of the derivative of spline at point(s) u,v
-        u and v can be scalars,vectors or arrays. They must be the same size'''
+        '''Get the derivative at the surface point(s) u,v
+        Required Arguments:
+           u,v: u,v can be a scalar,vector or matrix of values
+        Returns:
+           values: An array of size (shape(u), 2, ndim)
+           '''
         u = array(u)
         v = array(v)
         assert u.shape == v.shape,'Error, getDerivative: u and v must have the same shape'
@@ -408,7 +438,12 @@ original data for this surface or node is not in range 0->3'
         
     def getNormal(self,u,v):
         '''Get the normalized normal at the surface point(s) u,v
-        u and v can be scalars,vectors or arrays. They must be the same size'''
+        Required Arguments:
+           u: u can be a scalar,vector or matrix of values
+           v: v can be a scalar,vector or matrix of values
+        Returns:
+           values: An array of size (shape(u), 3)
+           '''
         u = array(u)
         v = array(v)
         assert self.nDim == 3,'Error, getNormal is only defined for three spatial dimensions'
@@ -422,8 +457,14 @@ original data for this surface or node is not in range 0->3'
         # end if
 
     def getSecondDerivative(self,u,v):
-        '''Get the value of the second derivative (d2u2,d2v2,d2uv) of spline at point(s) u,v
-        u and v can be scalars,vectors or arrays. They must be the same size'''
+        '''Get the second derivative matrix at point(s) u,v
+        [ (d^2)/(du^2)    (d^2)/(dudv) ]
+        [ (d^2)/(dudv)    (d^2)/(dv^2) ]
+        Required Arguments:
+            u,v: u,v can be a scalar,vector or matrix of values
+        Returns:
+           values: An array of size (shape(u), 2,2,ndim)
+           '''
         u = array(u)
         v = array(v)
         assert u.shape == v.shape,'Error, getSecondDerivative: u and v must have the same shape'
@@ -436,12 +477,21 @@ original data for this surface or node is not in range 0->3'
         # end if
  
     def projectPoint(self,x0,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
-        '''Project a point x0 onto the surface. i.e. Find the point on the
-        surface that minimizes the distance from x0 to
-        surface(u,v).
-        Starting points can be given by
-        u=<val>
-        v=<val>
+        '''
+        Project a point x0 onto the surface and return parametric position
+        curve: 
+        Required Arguments:
+            x0   : A point in nDim space for projection
+        Optional Arguments:
+            Niter: Maximum number of newton iterations
+            eps1 : Intersection/Relative change tolerance
+            eps2 : Cosine convergence measure tolerance
+            u    : Initial guess for u position
+            v    : Initial guess for v position
+        Returns:
+            u    : Parametric position u on surface
+            v    : Parametric position v on surface
+            D    : Distance between curve(s) and surface(u,v)
         '''
         # We will use a starting point u0,v0 if given
         assert len(x0) == self.nDim,'Error: x0 must have same spatial dimension as surface'
@@ -453,15 +503,23 @@ original data for this surface or node is not in range 0->3'
                                               Niter,eps1,eps2,u,v)
       
     def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
-        '''Project a curve object curve onto this curve. This function
-        finds the parametric values of the shortest distances between
-        curves. If the curves intersection it will return ONE of the
-        intersections
-        Starting points can be given with 
-        u=<val>(surface)
-        v=<val>(surface)
-        s=<val> (curve)'''
-        # We will use a starting point u0,v0 if given
+        '''
+        Find the minimum distance between this surface and a curve
+        Required Arguments:
+            curve: A pyspline curve class to do the projection with
+        Optional Arguments:
+            Niter: Maximum number of newton iterations
+            eps1 : Intersection/Relative change tolerance
+            eps2 : Cosine convergence measure tolerance
+            u    : Initial guess for u parameter on surface
+            v    : Initial guess for v parameter on surface
+            s    : Initial guess for s parameter on curve
+        Returns:
+            u    : Parametric position u on surface
+            v    : Parametric position v on surface
+            s    : Parametric position s on curve
+            D    : Distance between curve(s) and surface(u,v)
+            '''      
         u = -1.0
         v = -1.0
         s = -1.0
@@ -566,7 +624,15 @@ original data for this surface or node is not in range 0->3'
         return 
 
     def writeTecplot(self,file_name,surfs=True,coef=True,orig=True,dir=False):
-        '''Write the surface to tecplot'''
+        '''Write the surface to a tecplot dat file
+        Required Arguments:
+            file_name: The output file name
+        Optional Arguments:
+            surfs: Boolean to write interpolated surfaces (default=True)
+            coef : Boolean to write coefficients (default=True)
+            orig : Boolean to write original data (default=True)
+            dir  : Boolean to write out surface direction indicators (default=False)
+            '''
         f = open(file_name,'w')
         if surfs:
             self._writeTecplotSurface(f)
@@ -579,8 +645,10 @@ original data for this surface or node is not in range 0->3'
         f.close()
 
     def _writeIGES_directory(self,handle,Dcount,Pcount):
-        '''Write the IGES file header information (Directory Entry Section)
-        for this surface'''
+        '''
+        Write the IGES file header information (Directory Entry Section)
+        for this surface
+        '''
         # A simplier Calc based on cmlib definations The 13 is for the
         # 9 parameters at the start, and 4 at the end. See the IGES
         # 5.3 Manual paraEntries = 13 + Knotsu + Knotsv + Weights +
@@ -600,7 +668,9 @@ original data for this surface or node is not in range 0->3'
         return Pcount , Dcount
 
     def _writeIGES_parameters(self,handle,Pcount,counter):
-        '''Write the IGES parameter information for this surface'''
+        '''
+        Write the IGES parameter information for this surface
+        '''
 
         handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'\
                          %(128,self.Nctlu-1,self.Nctlv-1,\
@@ -687,7 +757,7 @@ original data for this surface or node is not in range 0->3'
 
         return Pcount,counter
 
-class curve():
+class curve(object):
 
     def __init__(self,*args,**kwargs):
         '''
@@ -725,7 +795,7 @@ class curve():
         deriv_weights: A array of len deriv_ptr which contains derivative weighting
                        A value of -1 can be used to exactly constrain a derivative
         niter:  The number of Hoschek's parameter corrections to run
-    '''
+        '''
         if 'no_print' in kwargs:
             self.NO_PRINT = kwargs['no_print']
         else:
@@ -762,11 +832,13 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 self.X = vstack([kwargs['x'],kwargs['y']]).T
                 self.nDim = 2
             elif 'x' in kwargs:
-                self.X = array(kwargs['x'])
+                self.X = array(kwargs['x']).reshape((len(kwargs['x']),1))
                 self.nDim = 1
             # enf if
+            self.X = self.X.astype('d') # Make sure its real
             self.k = int(kwargs['k'])
             self.N = len(self.X)
+            self.t = None
             if 'niter' in kwargs: 
                 self.niter = kwargs['niter']
             else:
@@ -819,7 +891,13 @@ Nctl=<number of control points> must be specified for a LMS fit'
         return
 
     def recompute(self,niter):
-
+        '''
+        Run iterations of Hoschek's Parameter Correction
+        Required:
+            niter: The number of parameter correction iterations to run
+        Returns:
+            None
+            '''
         # Now do the sparation between the constrained and unconstrained
         su_select = where(self.weights > 0.0)
         sc_select = where(self.weights <= 0.0)
@@ -863,9 +941,13 @@ Nctl=<number of control points> must be specified for a LMS fit'
 
         # Generate the knot vector,greville points and empty coefficients
         if self.interp:
-            self.t = pyspline.knots_interp(self.s,self.deriv_ptr,self.k)
+            if self.t == None:
+                self.t = pyspline.knots_interp(self.s,self.deriv_ptr,self.k)
+            # end if
         else:
-            self.t = pyspline.knots_lms(self.s,self.Nctl,self.k)
+            if self.t == None:
+                self.t = pyspline.knots_lms(self.s,self.Nctl,self.k)
+            # end if
         # end if
         self._calcGrevillePoints()
         self.coef = zeros((self.Nctl,self.nDim),'d')
@@ -955,7 +1037,12 @@ Nctl=<number of control points> must be specified for a LMS fit'
         return
      
     def insertKnot(self,u,r):
-        '''Insert at knot at u'''
+        '''
+        Insert at knot at u
+        Required:
+            u : Parametric position to split at
+            r : The number of times to insert the knot
+            '''
         t_new,coef_new,break_pt = pyspline.insertknot(u,r,self.t,self.k,self.coef)
         self.t = t_new
         self.coef = coef_new
@@ -964,13 +1051,21 @@ Nctl=<number of control points> must be specified for a LMS fit'
         return
 
     def splitCurve(self,u):
-        ''' Split the curve at knot position u and return the two new
-        curves'''
+        ''' 
+        Split the curve at parametric position
+        Required:
+            u : Parametric position for split
+        Optional: 
+            None
+        Returns:
+            curve1,curve2: The two split spline curve
+        '''
         # First determine if u is very close to an existing knot
         ileft,mflag = pyspline.intrv(self.t,u,1)
         if abs(u-self.t[ileft-1]) < 0.005:
             u = self.t[ileft-1]
         # end if
+
         r,t_new,coef_new,break_pt = pyspline.insertknot(u,self.k-1,self.t,self.k,self.coef)
         # r is the number of time the knot was actually added
         s = self.k-1-r # Back out the multiplicity of the point
@@ -1005,7 +1100,13 @@ Nctl=<number of control points> must be specified for a LMS fit'
         return curve1,curve2
 
     def getLength(self):
-        '''Compute the length of the curve using the Eculdian Norm'''
+        '''
+        Compute the length of the curve using the Eculdian Norm
+        Required Argument: 
+            None
+        Returns:
+            Length: Lenght of curve
+            '''
         points = self.getValue(self.gpts)# These are physical points
         length = 0
         for i in xrange(len(points)-1):
@@ -1028,12 +1129,20 @@ Nctl=<number of control points> must be specified for a LMS fit'
         return
 
     def __call__(self,s):
-        '''Equivilant to getValue'''
+        '''
+        Equivilant to getValue
+        '''
         return self.getValue(s)
     
     def getValue(self,s):
-        '''Get The value of the spline
-        s can be a scalar or vector of values'''
+        '''
+        Get the value of the spline
+        Required Arguments:
+           s: s can be a scalar or vector of values
+        Returns:
+           values: An array of shape(len(s),nDim)) if s is an array
+                   or array of len(nDim) if nDim == 1
+                   '''
         s = array(s)
         if len(s.shape) == 0:
             return pyspline.eval_curve(s,self.t,self.k,self.coef)
@@ -1041,8 +1150,14 @@ Nctl=<number of control points> must be specified for a LMS fit'
             return pyspline.eval_curve_v(s,self.t,self.k,self.coef)
 
     def getDerivative(self,s):
-        '''Get the value of the derivatve of the spline
-        s can be a scalar or vector of values'''
+        '''
+        Get the value of the derivatve of the spline
+        Required Arguments:
+           s: s can be a scalar or vector of values
+        Returns:
+           values: An array of shape(len(s),nDim)) if s is an array
+                   or array of len(nDim) if nDim == 1
+                   '''
         s = array(s)
         if len(s.shape) == 0:
             return pyspline.eval_curve_deriv(s,self.t,self.k,self.coef)
@@ -1050,11 +1165,19 @@ Nctl=<number of control points> must be specified for a LMS fit'
             return pyspline.eval_curve_deriv_v(s,self.t,self.k,self.coef)
 
     def projectPoint(self,x0,Niter=20,eps1=1e-6,eps2=1e-6,*args,**kwargs):
-        '''Project a point x0 onto the curve and return parametric position'''
-
-        # eps1 is tolerance for point on curve and for delta change in parameter
-        # eps2 is tolerance for cosine convergence test (point off curve)
-
+        '''Project a point x0 onto the curve and return parametric position
+        curve: 
+        Required Arguments:
+            x0   : A point in nDim space for projection
+        Optional Arguments:
+            Niter: Maximum number of newton iterations
+            eps1 : Intersection/Relative change tolerance
+            eps2 : Cosine convergence measure tolerance
+            s    : Initial guess for position
+        Returns:
+            s: Parametric position of closest point on curve
+            D: Distance from point to curve(s)
+        '''
         assert len(x0) == self.nDim,'Dimension of x0 and the dimension of\
  spline must be the same'
         s = -1.0
@@ -1062,12 +1185,22 @@ Nctl=<number of control points> must be specified for a LMS fit'
         return pyspline.point_curve(x0,self.t,self.k,self.coef,Niter,eps1,eps2,s)
 
     def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
-        '''Find the minimum distance between this curve (self) and a second
-        curve passed in (curve)'''
-
-        # eps1 is tolerance for intersection
-        # eps2 is tolerance for cosine convergence test (non-intersecting)
-
+        '''
+        Find the minimum distance between this curve (self) and a second
+        curve passed in (curve)
+        Required Arguments:
+            curve: A pyspline curve class to do the projection with
+        Optional Arguments:
+            Niter: Maximum number of newton iterations
+            eps1 : Intersection/Relative change tolerance
+            eps2 : Cosine convergence measure tolerance
+            s    : Initial guess for curve1 (this curve class)
+            t    : Initial guess for curve2 (cuve passed in)
+        Returns:
+            s    : Parametric position on curve1 (this class)
+            t    : Parametric position on curve2 (curve passed in)
+            D    : Distance between curve1(s) and curve2(t)
+            '''
         s = -1.0
         t = -1.0
         if 's' in kwargs:  s = kwargs['s']
@@ -1077,7 +1210,18 @@ Nctl=<number of control points> must be specified for a LMS fit'
                                     Niter,eps1,eps2,s,t)
 
     def writeTecplot(self,file_name,curve=True,coef=True,orig=True,*args,**kwargs):
-        '''Write the cuve to tecplot'''
+        '''
+        Write the cuve to a tecplot dat file
+        Required Arguments:
+            file_name: The output file name
+        Optional Arguments:
+            curve: boolean flag to write the interpolated curve (default=True)
+            coef : boolean flag to write the control points (defaut=True)
+            orig : boolean flag to write the original data (default=True)
+            size : A distance to determine the output resolution of interpolated curve
+        Returns:
+            None
+            '''
         f = open(file_name,'w')
         if curve:
             self._writeTecplotCurve(f,*args,**kwargs)
@@ -1101,19 +1245,26 @@ Nctl=<number of control points> must be specified for a LMS fit'
         return
 
     def _writeTecplotCoef(self,handle,*args,**kwargs):
-        '''Write the Spline coefficients to handle'''
+        '''
+        Write the Spline coefficients to handle
+        '''
         self._writeTecplot1D(handle,'control_pts',self.coef)
         return
 
     def _writeTecplotOrigData(self,handle,*args,**kwargs):
-        '''Write the original data to a handle'''
+        '''
+        Write the original data to a handle
+        '''
         if self.orig_data:
             self._writeTecplot1D(handle,'orig_data',self.X)
         # end if
 
         return
+
     def _writeTecplotCurve(self,handle,*args,**kwargs):
-        '''Write the interpolated curve to a handle'''
+        '''
+        Write the interpolated curve to a handle
+        '''
         if 'size' in kwargs:
             length = self.getLength()
             n=int(floor(real(length/kwargs['size'])))
@@ -1129,7 +1280,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
         self._writeTecplot1D(handle,'interpolated',X)
 
         return 
-
+  
 #==============================================================================
 # Class Test
 #==============================================================================
