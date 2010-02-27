@@ -634,6 +634,7 @@ original data for this surface or node is not in range 0->3'
             dir  : Boolean to write out surface direction indicators (default=False)
             '''
         f = open(file_name,'w')
+        f.write ('VARIABLES = "X", "Y","Z"\n')
         if surfs:
             self._writeTecplotSurface(f)
         if coef:
@@ -1223,6 +1224,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             None
             '''
         f = open(file_name,'w')
+        f.write ('VARIABLES = "X", "Y","Z"\n')
         if curve:
             self._writeTecplotCurve(f,*args,**kwargs)
         if coef:
@@ -1274,6 +1276,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 X = self.getValue(self.s)
             else:
                 s = 0.5*(1-cos(linspace(0,pi,25)))
+
                 X = self.getValue(s)
             # end if
         # end if
