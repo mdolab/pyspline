@@ -78,7 +78,6 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,Niter,eps1,eps2,s,Diff)
   Diff = val-x0
   s = s0 - dot_product(deriv,Diff)/(dot_product(deriv2,Diff) + norm(deriv,ndim)**2)
   iteration_loop: do i =1,Niter
-     !print *,'iter',i,s0,s
      ! Check the Convergence Criteria
      if (norm(Diff,ndim) <= eps1) then
         exit iteration_loop
@@ -250,7 +249,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,niter,eps1,eps2,u,
         v = tv(1)
      end if
 
-     if (v > tu(nctlv+kv)) then
+     if (v > tv(nctlv+kv)) then
         v = tv(nctlv+kv)
      end if
 
@@ -484,29 +483,28 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
   integer                               :: i,j,ii,jj,l,ll
   double precision                      :: D,D0,u0,v0,s0,delta(3)
   double precision                      :: A(3,3),ki(3)
-  integer                               :: n ! Huristic Value
+  integer                               :: n,nc ! Huristic Value
 
   ! Functions     
   double precision                      :: norm
 
   n = 3
-
+  nc = 15
   ! First we will evaluate the surface at n points inside each knot span in each direction
   !if we are given a bad guess do the brute force
   if (u < 0 .or. u > 1 .or. v < 0 .or. v > 1 .or. s < 0 .or. s > 1) then
      call eval_surface(tu(1),tv(1),tu,tv,ku,kv,coefs,nctlu,nctlv,ndim,val0_s)
      call eval_curve(tc(1),tc,kc,coefc,nctlc,ndim,val0_c)
      D0 = norm(val0_s-val0_c,ndim)
-
      do l = 1,nctlc-kc+1
-        do ll = 1,n
+        do ll = 1,nc
            do i = 1,nctlu-ku+1
               do ii = 1,n
                  do j = 1,nctlv-kv+1
                     do jj =1,n
-                       u = tu(i+ku-1) + (real(ii)/n)*(tu(i+ku)-tu(i+ku-1))
-                       v = tv(j+kv-1) + (real(jj)/n)*(tv(i+kv)-tv(i+kv-1))
-                       s = tc(l+kc-1) + (real(ll)/n)*(tc(l+kc)-tc(i+kc-1))
+                       u = tu(i+ku-1) + (real(ii-1)/(n-1))*(tu(i+ku)-tu(i+ku-1))
+                       v = tv(j+kv-1) + (real(jj-1)/(n-1))*(tv(j+kv)-tv(j+kv-1))
+                       s = tc(l+kc-1) + (real(ll-1)/(nc-1))*(tc(l+kc)-tc(l+kc-1))
                        call eval_surface(u,v,tu,tv,ku,kv,coefs,nctlu,nctlv,ndim,val_s)
                        call eval_curve(s,tc,kc,coefc,nctlc,ndim,val_c)
                        D = norm(val_s-val_c,ndim)
@@ -530,6 +528,7 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
      call eval_curve(s,tc,kc,coefc,nctlc,ndim,val_c)
      D0 = norm(val_s-val_c,ndim)
   end if
+  
   ! Now we have u0,v0,s0 so we can do the newton iteration
 
   call eval_surface(u0,v0,tu,tv,ku,kv,coefs,nctlu,nctlv,ndim,val_s)
@@ -545,8 +544,8 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
   u = u0
   v = v0
   s = s0
-  iteration_loop: do i=1,niter
 
+  iteration_loop: do i=1,niter
      ! Check the convergence criteria
      if (norm(Diff,ndim) <= eps1) then
         exit iteration_loop
@@ -557,11 +556,10 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
           norm(dot_product(deriv_c     ,Diff),ndim)/(norm(deriv_c     ,ndim)*norm(Diff,ndim)) <= eps2) then
         exit iteration_loop
      end if
-
      u0 = u
      v0 = v
      s0 = s
-     !print *,'u,v,s:',u,v,s,Diff
+     
      call eval_surface(u0,v0,tu,tv,ku,kv,coefs,nctlu,nctlv,ndim,val_s)
      call eval_surface_deriv(u0,v0,tu,tv,ku,kv,coefs,nctlu,nctlv,ndim,deriv_s)
      call eval_surface_deriv2(u0,v0,tu,tv,ku,kv,coefs,nctlu,nctlv,ndim,deriv2_s)
@@ -592,7 +590,6 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
      u = u0 + delta(1)
      v = v0 + delta(2)
      s = s0 + delta(3)
-
      ! Bounds Checking
      if (u < tu(1)) then
         u = tu(1)
@@ -606,7 +603,7 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
         v = tv(1)
      end if
 
-     if (v > tu(nctlv+kv)) then
+     if (v > tv(nctlv+kv)) then
         v = tv(nctlv+kv)
      end if
 
@@ -634,7 +631,6 @@ subroutine solve_2by2(A,b,x)
   double precision         :: idet
 
   idet = 1/(A(1,1)*A(2,2)-A(1,2)*A(2,1))
-
   x(1) = idet*(A(2,2)*b(1) - A(1,2)*b(2))
   x(2) = idet*(-A(2,1)*b(1) + A(1,1)*b(2))
 
@@ -646,7 +642,6 @@ subroutine solve_3by3(A,b,x)
   double precision         :: idet
 
   idet = 1/(A(1,1)*(A(3,3)*A(2,2)-A(3,2)*A(2,3))-A(2,1)*(A(3,3)*A(1,2)-A(3,2)*A(1,3))+A(3,1)*(A(2,3)*A(1,2)-A(2,2)*A(1,3)))
-
   x(1) = idet*( b(1)*(A(3,3)*A(2,2)-A(3,2)*A(2,3)) - b(2)*(A(3,3)*A(1,2)-A(3,2)*A(1,3)) + b(3)*(A(2,3)*A(1,2)-A(2,2)*A(1,3)))
   x(2) = idet*(-b(1)*(A(3,3)*A(2,1)-A(3,1)*A(2,3)) + b(2)*(A(3,3)*A(1,1)-A(3,1)*A(1,3)) - b(3)*(A(2,3)*A(1,1)-A(2,1)*A(1,3)))
   x(3) = idet*( b(1)*(A(3,2)*A(2,1)-A(3,1)*A(2,2)) - b(2)*(A(3,2)*A(1,1)-A(3,1)*A(1,2)) + b(3)*(A(2,2)*A(1,1)-A(2,1)*A(1,2)))
