@@ -245,21 +245,22 @@
      end subroutine eval_surface_deriv2_m
 
      ! ----------------  Projection Functions -----------------------
-     subroutine point_curve(x0,t,k,coef,nctl,ndim,niter,eps1,eps2,s,diff) ! in :test:projections.f90
-       double precision dimension(ndim),intent(in) :: x0
+     subroutine point_curve(x0,t,k,coef,nctl,ndim,n,niter,eps1,eps2,s,diff) ! in :test:projections.f90
+       double precision dimension(n,ndim),intent(in) :: x0
        double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
        integer intent(in) :: k
        double precision dimension(nctl,ndim),intent(in),depend(ndim) :: coef
        integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
-       integer optional,intent(in),check(len(x0)>=ndim),depend(x0) :: ndim=len(x0)
+       integer optional,intent(in),check(shape(x0,1)==ndim),depend(x0) :: ndim=shape(x0,1)
+       integer optional,intent(in),check(shape(x0,0)==n),depend(x0) :: n=shape(x0,0)
        double precision intent(in) :: niter
        double precision intent(in) :: eps1
        double precision intent(in) :: eps2
-       double precision intent(in,out) :: s
-       double precision dimension(ndim),intent(out),depend(ndim) :: diff
+       double precision dimension(n),intent(in,out),depend(n) :: s
+       double precision dimension(n,ndim),intent(out),depend(n,ndim) :: diff
      end subroutine point_curve
-     subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,niter,eps1,eps2,u,v,diff) ! in :test:projections.f90
-       double precision dimension(ndim),intent(in) :: x0
+     subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,niter,eps1,eps2,u,v,diff) ! in :test:projections.f90
+       double precision dimension(n,ndim),intent(in) :: x0
        double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
        double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
        integer intent(in) :: ku
@@ -267,13 +268,14 @@
        double precision dimension(nctlu,nctlv,ndim),intent(in),depend(ndim) :: coef
        integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
        integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
-       integer optional,intent(in),check(len(x0)>=ndim),depend(x0) :: ndim=len(x0)
+       integer optional,intent(in),check(shape(x0,1)==ndim),depend(x0) :: ndim=shape(x0,1)
+       integer optional,intent(in),check(shape(x0,0)==n),depend(x0) :: n=shape(x0,0)
        integer intent(in) :: niter
        double precision intent(in) :: eps1
        double precision intent(in) :: eps2
-       double precision intent(in,out) :: u
-       double precision intent(in,out) :: v
-       double precision dimension(ndim),intent(out),depend(ndim) :: diff
+       double precision dimension(n),intent(in,out),depend(n) :: u
+       double precision dimension(n),intent(in,out),depend(n) :: v
+       double precision dimension(n,ndim),intent(out),depend(n,ndim) :: diff
      end subroutine point_surface
      
      subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,niter,eps1,eps2,s,t,diff) ! in :test:projections.f90
