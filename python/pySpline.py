@@ -476,12 +476,37 @@ original data for this surface or node is not in range 0->3'
             return pyspline.eval_surface_deriv2_m(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
         # end if
  
+    def getBounds(self):
+        '''Determine the extents of the surface
+        Required: 
+            None:
+        Returns:
+            xmin,xmax: xmin is the lowest x,y,z point and xmax the highest
+            '''
+        assert self.nDim == 3,'getBounds is only defined for nDim = 3'
+        cx = self.coef[:,:,0].flatten()
+        cy = self.coef[:,:,1].flatten()
+        cz = self.coef[:,:,2].flatten()
+
+        Xmin = zeros(self.nDim)
+        Xmin[0] = min(cx)
+        Xmin[1] = min(cy)
+        Xmin[2] = min(cz)
+
+        Xmax = zeros(self.nDim)
+        Xmax[0] = max(cx)
+        Xmax[1] = max(cy)
+        Xmax[2] = max(cz)
+
+        return Xmin,Xmax
+    
+
     def projectPoint(self,x0,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
         Project a point x0 onto the surface and return parametric position
         curve: 
         Required Arguments:
-            x0   : A point in nDim space for projection
+            x0   : A point or points in nDim space for projection
         Optional Arguments:
             Niter: Maximum number of newton iterations
             eps1 : Intersection/Relative change tolerance
@@ -489,19 +514,43 @@ original data for this surface or node is not in range 0->3'
             u    : Initial guess for u position
             v    : Initial guess for v position
         Returns:
-            u    : Parametric position u on surface
-            v    : Parametric position v on surface
-            D    : Distance between curve(s) and surface(u,v)
+            u    : Parametric position(s) u on surface
+            v    : Parametric position(s) v on surface
+            D    : Distance(s) between curve(s) and surface(u,v)
         '''
         # We will use a starting point u0,v0 if given
-        assert len(x0) == self.nDim,'Error: x0 must have same spatial dimension as surface'
-        u=-1
-        v=-1
-        if 'u' in kwargs: u = kwargs['u']
-        if 'v' in kwargs: v = kwargs['v']
-        return pyspline.point_surface(x0,self.tu,self.tv,self.ku,self.kv,self.coef,
-                                              Niter,eps1,eps2,u,v)
-      
+        x0 = array(x0)
+
+        if len(x0.shape) == 1: # Just 1 value passed in 
+            if 'u' in kwargs:
+                u = array([kwargs['u']])
+            else:
+                u = array([-1.0])
+            # end if
+            if 'v' in kwargs:
+                v = array([kwargs['v']])
+            else:
+                v = array([-1.0])
+            # end if
+            result = pyspline.point_surface(\
+                array([x0]),self.tu,self.tv,self.ku,self.kv,self.coef,Niter,eps1,eps2,u,v)
+            return result[0][0],result[1][0],result[2][0] #u,v,D
+        else:
+            if 'u' in kwargs:
+                u = kwargs['u']
+            else:
+                u = -1.0*ones(len(x0))
+            # end if
+            if 'v' in kwargs:
+                v = kwargs['v']
+            else:
+                v = -1.0*ones(len(x0))
+            # end if
+            result = pyspline.point_surface(\
+                array([x0]),self.tu,self.tv,self.ku,self.kv,self.coef,Niter,eps1,eps2,u,v)
+            return result[0],result[1],result[2] #u,v,D
+        # end if
+
     def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
         Find the minimum distance between this surface and a curve
@@ -1166,24 +1215,41 @@ Nctl=<number of control points> must be specified for a LMS fit'
             return pyspline.eval_curve_deriv_v(s,self.t,self.k,self.coef)
 
     def projectPoint(self,x0,Niter=20,eps1=1e-6,eps2=1e-6,*args,**kwargs):
-        '''Project a point x0 onto the curve and return parametric position
+        '''Project a point x0 or (points x0) onto the curve and return parametric
+        position(s)
         curve: 
         Required Arguments:
-            x0   : A point in nDim space for projection
+            x0   : A point(s) in nDim space for projection
         Optional Arguments:
             Niter: Maximum number of newton iterations
             eps1 : Intersection/Relative change tolerance
             eps2 : Cosine convergence measure tolerance
             s    : Initial guess for position
         Returns:
-            s: Parametric position of closest point on curve
-            D: Distance from point to curve(s)
+            s: Parametric position(s) of closest point on curve
+            D: Distance(s) from point to curve
         '''
-        assert len(x0) == self.nDim,'Dimension of x0 and the dimension of\
- spline must be the same'
-        s = -1.0
-        if 's' in kwargs: s=kwargs['s']
-        return pyspline.point_curve(x0,self.t,self.k,self.coef,Niter,eps1,eps2,s)
+        x0 = array(x0) # Ensure x0 is array
+
+        if len(x0.shape) == 1: # Just 1 value pased in
+            if 's' in kwargs: 
+                s=kwargs['s']
+            else:
+                s=[-1.0]
+            # end if
+            result = pyspline.point_curve(array([x0]),self.t,self.k,self.coef,
+                                          Niter,eps1,eps2,s)
+            return result[0][0],result[1][0] # s,D
+        else:
+            if 's' in kwargs: 
+                s=kwargs['s']
+            else:
+                s=-1.0*ones(len(x0))
+            # end if
+            result = pyspline.point_curve(x0,self.t,self.k,self.coef,
+                                          Niter,eps1,eps2,s)
+            return result[0],result[1] # s,D
+        # end if
 
     def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
