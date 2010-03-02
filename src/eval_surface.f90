@@ -328,16 +328,22 @@ subroutine eval_surface_deriv2(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
 
   double precision b2val
 
-  if (k>=3) then
-     do idim=1,ndim
+  do idim=1,ndim
+     if (ku>=3) then
         val(1,1,idim) = b2val(u,v,2,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
-        val(1,2,idim) = b2val(u,v,1,1,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
-        val(2,1,idim) = val(1,2,idim)
+     else
+        val(1,1,idim) = 0.0
+     end if
+     
+     val(1,2,idim) = b2val(u,v,1,1,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+     val(2,1,idim) = val(1,2,idim)
+     
+     if (kv>=3) then
         val(2,2,idim) = b2val(u,v,0,2,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
-     end do
-  else
-     val(:,:,:) = 0.0
-  end if
+     else
+        val(2,2,idim) = 0.0
+     end if
+  end do
   
 end subroutine eval_surface_deriv2
 
