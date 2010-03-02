@@ -326,6 +326,180 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
 end subroutine point_surface
 
 
+subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter,eps1,eps2,u,v,w,Diff)
+
+  !***DESCRIPTION
+  !
+  !     Written by Gaetan Kenway
+  !
+  !     Abstract: pint_surface attempts to solve the point inversion problem for a surface
+  !
+  !     Description of Arguments
+  !     Input
+  !     x0      - Real, array size(N,ndim) points we are trying to invert
+  !     tu      - Real,Knot vector in u. Length nctlu+ku
+  !     tv      - Real,Knot vector in v. Length nctlv+kv
+  !     tw      - Real,Knot vector in w. Length nctlw+kw
+  !     ku      - Integer, order of B-spline in u
+  !     kv      - Integer, order of B-spline in v
+  !     kw      - Integer, order of B-spline in w
+  !     coef    - Real,Array of B-spline coefficients  Size (nctlu,nctlv,nctlw,ndim)
+  !     nctlu   - Integer,Number of control points in u
+  !     nctlv   - Integer,Number of control points in v
+  !     nctlw   - Integer,Number of control points in w
+  !     ndim    - Integer, Spatial Dimension
+  !     Niter   - Integer, Maximum number of Netwton iterations
+  !     eps1    - Real - Eculdian Distance Convergence Measure
+  !     eps2    - Real - Cosine Convergence Measure
+  !
+  !     Ouput 
+  !     u       - Real,vector size(N), u parameters where V(u,v,w) is closest to x0
+  !     v       - Real,vector size(N), v parameters where V(u,v,w) is closest to x0
+  !     w       - Real,vector size(N), w parameters where V(u,v,w) is closest to x0
+  !     diff    - Real Array size(N,ndim) - Distance between x0 and V(u,v,w)
+
+  implicit none
+  ! Input
+  double precision, intent(in)          :: x0(N,ndim)
+  integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim,niter,N
+  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
+  double precision, intent(in)          :: coef(nctlu,nctlv,nctlw,ndim)
+  double precision, intent(in)          :: eps1,eps2
+  ! Output
+  double precision, intent(inout)       :: u(N),v(N),w(N)
+  double precision, intent(out)         :: diff(N,ndim)
+
+
+  ! Working
+  double precision                      :: val(ndim)
+  double precision                      :: deriv(3,ndim)
+  double precision                      :: deriv2(3,3,ndim)
+  double precision                      :: val0(ndim),uu,vv
+  logical                               :: brute_force
+  integer                               :: i,j,ii,jj,counter,ipt
+  double precision                      :: D,D0,u0(N),v0(N),w0(N),delta(3)
+  double precision                      :: A(3,3),ki(3)
+  integer                               :: n_sub ! Huristic Value
+  
+  ! Alloctable
+  double precision,allocatable          :: volume_vals(:,:)
+  
+  ! Functions     
+  double precision                      :: norm
+
+  n_sub = 3
+  brute_force = .false.
+  ! First we will evaluate the surface at n points inside each knot span in each direction
+
+  !if we are given a bad guess do the brute force
+  point_loop: do ipt=1,N
+     if (u(ipt) < 0 .or. u(ipt) > 1 .or. v(ipt) < 0 .or. v(ipt) > 1) then
+        brute_force = .True.
+        exit point_loop
+     end if
+  end do point_loop
+
+  if (brute_force == .True.) then
+     print *,'Brute Force Not Implemented Yet'
+     stop
+  else
+     u0(:) = u(:)   
+     v0(:) = v(:)
+     w0(:) = w(:)
+  end if
+ 
+  ! Now we have u0,v0,w0 so we can do the newton search
+  do ipt=1,N
+     call eval_volume(u0(ipt),v0(ipt),w0(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,val)
+     call eval_volume_deriv(u0(ipt),v0(ipt),w0(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,deriv)
+     call eval_volume_deriv2(u0(ipt),v0(ipt),w0(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,deriv2)
+     Diff(ipt,:) = val-x0(ipt,:)
+     u(ipt) = u0(ipt)
+     v(ipt) = v0(ipt)
+     w(ipt) = w0(ipt)
+     iteration_loop: do i=1,niter
+        ! Check the convergence criteria
+        if (norm(Diff(ipt,:),ndim) <= eps1) then
+           exit iteration_loop
+        end if
+        
+        if (norm(dot_product(deriv(1,:),Diff(ipt,:)),ndim)/(norm(deriv(1,:),ndim)*norm(Diff(ipt,:),ndim)) <= eps2 .and. &
+             norm(dot_product(deriv(2,:),Diff(ipt,:)),ndim)/(norm(deriv(2,:),ndim)*norm(Diff(ipt,:),ndim))<= eps2 .and. & 
+             norm(dot_product(deriv(3,:),Diff(ipt,:)),ndim)/(norm(deriv(3,:),ndim)*norm(Diff(ipt,:),ndim))<= eps2) then
+           exit iteration_loop
+        end if
+        u0(ipt) = u(ipt)
+        v0(ipt) = v(ipt)
+        w0(ipt) = w(ipt)
+        call eval_volume(u(ipt),v(ipt),w(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,val)
+        call eval_volume_deriv(u(ipt),v(ipt),w(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,deriv)
+        call eval_volume_deriv2(u(ipt),v(ipt),w(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,deriv2)
+        
+        Diff(ipt,:) = val-x0(ipt,:)
+
+        A(1,1) = norm(deriv(1,:),ndim)**2 + dot_product(Diff(ipt,:),deriv2(1,1,:))
+        A(1,2) = dot_product(deriv(1,:),deriv(2,:)) + dot_product(Diff(ipt,:),deriv2(1,2,:))
+        A(1,3) = dot_product(deriv(1,:),deriv(3,:)) + dot_product(Diff(ipt,:),deriv2(1,3,:))
+        A(2,2) = norm(deriv(2,:),ndim)**2 + dot_product(Diff(ipt,:),deriv2(2,2,:))
+        A(2,3) = dot_product(deriv(2,:),deriv(3,:)) + dot_product(Diff(ipt,:),deriv2(2,3,:))
+        A(3,3) = norm(deriv(3,:),ndim)**2 + dot_product(Diff(ipt,:),deriv2(3,3,:))
+        A(2,1) = A(1,2)
+        A(3,1) = A(1,3)
+        A(3,2) = A(2,3)
+
+        ki(1) = -dot_product(Diff(ipt,:),deriv(1,:))
+        ki(2) = -dot_product(Diff(ipt,:),deriv(2,:))
+        ki(3) = -dot_product(Diff(ipt,:),deriv(3,:))
+
+        call solve_3by3(A,ki,delta)
+     
+        u(ipt) = u0(ipt) + delta(1)
+        v(ipt) = v0(ipt) + delta(2)
+        w(ipt) = w0(ipt) + delta(3)
+
+        ! -- U Bounds Checking --
+        if (u(ipt) < tu(1)) then
+           u(ipt) = tu(1)
+        end if
+
+        if (u(ipt) > tu(nctlu+ku)) then
+           u(ipt) = tu(nctlu+ku)
+        end if
+
+        ! -- V Bounds Checking --
+        if (v(ipt) < tv(1)) then
+           v(ipt) = tv(1)
+        end if
+
+        if (v(ipt) > tv(nctlv+kv)) then
+           v(ipt) = tv(nctlv+kv)
+        end if
+
+        ! -- W Bounds Checking --
+        if (w(ipt) < tw(1)) then
+           w(ipt) = tw(1)
+        end if
+
+        if (w(ipt) > tw(nctlw+kw)) then
+           w(ipt) = tw(nctlw+kw)
+        end if
+
+        
+        ! No Change convergence Test
+        
+        if (norm( (u(ipt)-u0(ipt))*deriv(1,:) + &
+                  (v(ipt)-v0(ipt))*deriv(2,:) + &
+                  (w(ipt)-w0(ipt))*deriv(3,:),ndim) <= eps1) then
+           exit iteration_loop
+        end if
+     end do iteration_loop
+  end do
+  if (brute_force == .true.) then
+     deallocate(volume_vals)
+  end if
+end subroutine point_volume
+
+
 subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Diff)
 
   !*** DESCRIPTION

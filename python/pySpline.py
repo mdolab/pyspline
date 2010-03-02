@@ -27,7 +27,7 @@ import os, sys, string, time, copy, pdb
 # External Python modules
 # =============================================================================
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
-    ones,vstack,real,where,arange,append,hstack
+    ones,vstack,real,where,arange,append,hstack,mgrid
 from numpy.linalg import norm
 
 import scipy
@@ -50,7 +50,7 @@ def e_dist(x1,x2):
     return sqrt(total)
 
 # =============================================================================
-# pySpline class
+# pySpline classes
 # =============================================================================
   
 
@@ -1350,6 +1350,324 @@ Nctl=<number of control points> must be specified for a LMS fit'
 
         return 
   
+class volume(object):
+
+    def __init__(self,*args,**kwargs):
+        '''
+        Create an instance of a b-spline surface. There are two
+        ways to initialize the class
+
+        Creation: Create an instance of the volume spline class
+        directly by supplying the required information. **kwargs MUST
+        contain the folloiwng information:
+
+            ku, integer: Order for spline in u
+            kv, integer: Order for spline in v
+            kw, integer: Order for spline in w
+            tu, real array: Knot vector for u
+            tv, real array: Knot vector for v
+            tw, real array: Knot vector for w
+            coef, real array size(Nctlu,Nctlv,Nctlw,nDim): Array of control points
+
+        LMS/Interpolation
+        Create an instance of the Volume spline class by using an interpolating (or lms)
+        spline to given data points. The following information is required:
+
+            ku, integer: Order for spline in u
+            kv, integer: Order for spline in v
+            kw, integer: Order for spline in w
+            X, real, array, size(len(u),len(v),len(w),nDim): Array of data to fit 
+            u,v,w real, arrays: (OPTIONAL for nDim == 3 ) Arrays of u,v,w values
+            
+        For LMS spline:
+            NOT IMPLEMENTED
+            '''
+        if 'no_print' in kwargs:
+            self.NO_PRINT = kwargs['no_print']
+        else:
+            self.NO_PRINT = False
+        # end if      
+        
+        if 'ku' in kwargs and 'kv' in kwargs and 'kw' in kwargs and \
+                'tu' in kwargs and 'tv' in kwargs and 'tw' in kwargs and \
+                'coef' in kwargs:
+            self.X = None
+            self.u = None
+            self.v = None
+            self.w = None
+            self.U = None
+            self.V = None
+            self.W = None
+            self.ku = int(kwargs['ku'])
+            self.kv = int(kwargs['kv'])
+            self.kw = int(kwargs['kw'])
+            self.tu = array(kwargs['tu'],'d')
+            self.tv = array(kwargs['tv'],'d')
+            self.tw = array(kwargs['tv'],'d')
+            self.coef = array(kwargs['coef'],'d')
+            self.Nctlu = self.coef.shape[0]
+            self.Nctlv = self.coef.shape[1]
+            self.Nctlv = self.coef.shape[2]
+            self.nDim  = self.coef.shape[3]
+            self.umin = self.tu[0]
+            self.umax = self.tu[-1]
+            self.vmin = self.tv[0]
+            self.vmax = self.tv[-1]
+            self.wmin = self.tw[0]
+            self.wmax = self.tw[-1]
+            self.orig_data = False
+            self._setFaceSurfaces()
+        else:
+            # We can do linear splines easily 
+            if 'X' in kwargs:
+                self.X  = array(kwargs['X'])
+                if len(self.X.shape) == 1:
+                    self.nDim =1
+                else:
+                    self.nDim = self.X.shape[3]
+            else:
+                mpiPrint('Only X=<Nu,Nv,Nw,3> is currently supported')
+            # end if
+
+            self.Nctlu = self.X.shape[0]
+            self.Nctlv = self.X.shape[1]
+            self.Nctlw = self.X.shape[2]
+            self.ku    = 2
+            self.kv    = 2
+            self.kw    = 2
+            self.coef = self.X
+            # Cheat on the knot vectors
+            u = linspace(0,1,self.Nctlu)
+            v = linspace(0,1,self.Nctlv)
+            w = linspace(0,1,self.Nctlw)
+            self.tu = pyspline.knots_interp(u,array([],'d'),self.ku)
+            self.tv = pyspline.knots_interp(v,array([],'d'),self.kv)
+            self.tw = pyspline.knots_interp(w,array([],'d'),self.kw)
+            self.umin = self.tu[0]
+            self.umax = self.tu[-1]
+            self.vmin = self.tv[0]
+            self.vmax = self.tv[-1]
+            self.wmin = self.tw[0]
+            self.wmax = self.tw[-1]
+            self.orig_data = False
+            self._setFaceSurfaces()
+        # end if
+            
+
+    def _setFaceSurfaces(self):
+        '''Create face spline objects for each of the faces'''
+        self.face_surfaces = [None,None,None,None,None,None]
+        self.face_surfaces[0] = surface('create',ku=self.ku,kv=self.kv,tu=self.tu,
+                                      tv=self.tv,coef=self.coef[:,:,0,:])
+        self.face_surfaces[1] = surface('create',ku=self.ku,kv=self.kv,tu=self.tu,
+                                      tv=self.tv,coef=self.coef[:,:,-1,:])
+        self.face_surfaces[2] = surface('create',ku=self.ku,kv=self.kw,tu=self.tu,
+                                      tv=self.tw,coef=self.coef[:,0,:,:])
+        self.face_surfaces[3] = surface('create',ku=self.ku,kv=self.kw,tu=self.tu,
+                                      tv=self.tw,coef=self.coef[:,-1,:,:])
+        self.face_surfaces[4] = surface('create',ku=self.kv,kv=self.kw,tu=self.tv,
+                                      tv=self.tw,coef=self.coef[0,:,:,:])
+        self.face_surfaces[5] = surface('create',ku=self.kv,kv=self.kw,tu=self.tv,
+                                      tv=self.tw,coef=self.coef[-1,:,:,:])
+        
+        return
+                               
+    def __call__(self,u,v,w):
+        '''
+        Equivalant to getValue
+        '''
+        return self.getValue(u,v,w)
+
+    def getValue(self,u,v,w):
+        '''Get the value at the volume points(s) u,v,w
+        Required Arguments:
+            u,v,w: u,w and w can be a scalar,vector or matrix of values
+        Returns:
+           values: An array of size (shape(u), nDim)
+           '''
+        u = array(u)
+        v = array(v)
+        w = array(w)
+        assert u.shape == v.shape == w.shape,'Error, getValue: u and v must have the same shape'
+        if len(u.shape) == 0:
+            return pyspline.eval_volume(u,v,w,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,self.coef)
+        elif len(u.shape) == 1:
+            return pyspline.eval_volume_v(u,v,w,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,self.coef)
+        elif len(u.shape) == 2:
+            return pyspline.eval_volume_m(u,v,w,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,self.coef)
+        elif len(u.shape) == 3:
+            return pyspline.eval_volume_t(u,v,w,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,self.coef)
+        # end if
+
+    def getBounds(self):
+        '''Determine the extents of the volume
+        Required: 
+            None:
+        Returns:
+            xmin,xmax: xmin is the lowest x,y,z point and xmax the highest
+            '''
+        assert self.nDim == 3,'getBounds is only defined for nDim = 3'
+        cx = self.coef[:,:,:,0].flatten()
+        cy = self.coef[:,:,:,1].flatten()
+        cz = self.coef[:,:,:,2].flatten()
+
+        Xmin = zeros(self.nDim)
+        Xmin[0] = min(cx)
+        Xmin[1] = min(cy)
+        Xmin[2] = min(cz)
+
+        Xmax = zeros(self.nDim)
+        Xmax[0] = max(cx)
+        Xmax[1] = max(cy)
+        Xmax[2] = max(cz)
+
+        return Xmin,Xmax
+
+    def projectPoint(self,x0,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
+        '''
+        Project a point x0 onto the volume and return parametric position
+
+        Required Arguments:
+            x0   : A point or points in nDim space for projection
+        Optional Arguments:
+            Niter: Maximum number of newton iterations
+            eps1 : Intersection/Relative change tolerance
+            eps2 : Cosine convergence measure tolerance
+            u    : Initial guess for u position
+            v    : Initial guess for v position
+            w    : Initial guess for w position 
+        Returns:
+            u    : Parametric position(s) u on surface
+            v    : Parametric position(s) v on surface
+            w    : Parametric position(s) w on surface
+            D    : Distance(s) between point(s) and surface(u,v,w)
+        '''
+        # We will use a starting point u0,v0 if given
+        x0 = array(x0)
+
+        if len(x0.shape) == 1: # Just 1 value passed in 
+            if 'u' in kwargs:
+                u = array([kwargs['u']])
+            else:
+                u = array([.5])
+            # end if
+            if 'v' in kwargs:
+                v = array([kwargs['v']])
+            else:
+                v = array([.5])
+            # end if
+            if 'w' in kwargs:
+                w = array([kwargs['w']])
+            else:
+                w = array([.5])
+            # end if
+
+            result = pyspline.point_volume(array([x0]),self.tu,self.tv,self.tw,
+                                           self.ku,self.kv,self.kw,
+                                           self.coef,Niter,eps1,eps2,u,v,w)
+            return result[0][0],result[1][0],result[2][0],result[3][0] #u,v,D
+        else:
+            mpiPrint('Vector version of project point not implemented')
+        # end if
+            return 
+
+    def _writeTecplot3D(self,handle,name,data):
+         '''A Generic write tecplot zone to file'''
+         nx = data.shape[0]
+         ny = data.shape[1]
+         nz = data.shape[2]
+         handle.write('Zone T=%s I=%d J=%d K=%d\n'%(name,nx,ny,nz))
+         handle.write('DATAPACKING=POINT\n')
+         for k in xrange(nz):
+             for j in xrange(ny):
+                 for i in xrange(nx):
+                     handle.write('%f %f %f \n'%(data[i,j,k,0],data[i,j,k,1],data[i,j,k,2]))
+                 # end for
+             # end for
+         # end for 
+         
+         return
+
+    def _writeTecplotVolume(self,handle):
+        '''Output this volume\'s data to a open file handle \'handle\' '''
+        
+        # This works really well actually
+        u_plot = 0.5*(1-cos(linspace(0,pi,25)))
+        v_plot = 0.5*(1-cos(linspace(0,pi,25)))
+        w_plot = 0.5*(1-cos(linspace(0,pi,25)))
+
+        # Dump re-interpolated surface
+        W_plot = zeros((25,25,25))
+        V_plot = zeros((25,25,25))
+        U_plot = zeros((25,25,25))
+        for i in xrange(25):
+            [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
+            W_plot[i,:,:] = w_plot[i]
+        # end for
+        X = self.getValue(U_plot,V_plot,W_plot)
+        self._writeTecplot3D(handle,'interpolated',X)
+
+    def _writeTecplotCoef(self,handle):
+        '''Write the Spline coefficients to handle'''
+        self._writeTecplot3D(handle,'control_pts',self.coef)
+        return
+
+
+    def _writeTecplotOrigData(self,handle):
+        if self.orig_data:
+            self._writeTecplot3D(handle,'orig_data',self.X)
+        # end if
+
+        return
+
+    def writeTecplot(self,file_name,vols=True,coef=True,orig=False):
+        '''Write the surface to a tecplot dat file
+        Required Arguments:
+            file_name: The output file name
+        Optional Arguments:
+            surfs: Boolean to write interpolated surfaces (default=True)
+            coef : Boolean to write coefficients (default=True)
+            orig : Boolean to write original data (default=True)
+            dir  : Boolean to write out surface direction indicators (default=False)
+            '''
+        f = open(file_name,'w')
+        f.write ('VARIABLES = "X", "Y","Z"\n')
+        if vols:
+            self._writeTecplotVolume(f)
+        if coef:
+            self._writeTecplotCoef(f)
+        if orig:
+            self._writeTecplotOrigData(f)
+        f.close()
+
+def trilinear_volume(xmin,xmax):
+    '''This is a short-cut function to create a trilinear b-spline
+    volume from the xmin,xmax bounding box function from the surface class'''
+    tu = [0,0,1,1]
+    tv = [0,0,1,1]
+    tw = [0,0,1,1]
+    ku = 2
+    kv = 2
+    kw = 2
+    x_low  = xmin[0]
+    x_high = xmax[0]
+    y_low  = xmin[1]
+    y_high = xmax[1]
+    z_low  = xmin[2]
+    z_high = xmax[2]
+
+    coef = zeros((2,2,2,3))
+    coef[0,0,0,:] = [x_low,y_low,z_low]
+    coef[1,0,0,:] = [x_high,y_low,z_low]
+    coef[0,1,0,:] = [x_low,y_high,z_low]
+    coef[1,1,0,:] = [x_high,y_high,z_low]
+    coef[0,0,1,:] = [x_low,y_low,z_high]
+    coef[1,0,1,:] = [x_high,y_low,z_high]
+    coef[0,1,1,:] = [x_low,y_high,z_high]
+    coef[1,1,1,:] = [x_high,y_high,z_high]
+    return volume(coef=coef,tu=tu,tv=tv,tw=tw,ku=ku,kv=kv,kw=kw)
+
+
 #==============================================================================
 # Class Test
 #==============================================================================

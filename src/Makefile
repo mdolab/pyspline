@@ -17,6 +17,7 @@ OBJ =	lsqrDataModule.o\
 	compute_surface.o\
 	eval_curve.o\
 	eval_surface.o\
+	eval_volume.o\
 	projections.o\
 	bvalu.o\
 	intrv.o\
@@ -25,6 +26,7 @@ OBJ =	lsqrDataModule.o\
 	knots_lms.o\
 	knots_interp.o\
 	b2val.o\
+	b3val.o\
 	insertKnot.o\
 	updatecoefficients.o\
 	updatecoefficients_c.o\
