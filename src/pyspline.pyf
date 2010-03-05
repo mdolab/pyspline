@@ -591,6 +591,10 @@
        integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
        double precision dimension(n,ndim),intent(in),depend(n,ndim) :: x
      end subroutine curve_para_corr
+     
+     subroutine cgns_test()
+     end subroutine cgns_test
+
   end interface
 end program
 

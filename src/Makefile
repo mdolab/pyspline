@@ -31,6 +31,7 @@ OBJ =	lsqrDataModule.o\
 	updatecoefficients.o\
 	updatecoefficients_c.o\
 	getBasisPt.o\
+	cgns_test.o\
 	machcon/i1mach.o\
 	machcon/r1mach.o\
 	xerror/fdump.o\

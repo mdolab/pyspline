@@ -22,7 +22,7 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   !     Ouput 
   !     val     - Real, Evaluated point, size ndim
   
-  
+  implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim
   double precision, intent(in)          :: u,v
@@ -33,13 +33,37 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   double precision, intent(out)         :: val(ndim)
 
   ! Working
-  integer                               :: idim
-  double precision                      :: work(3*max(ku,kv) + kv)
+  integer                               :: idim,istartu,istartv,i,j
+  integer                               :: ileftu,iworku,ilou,mflagu
+  integer                               :: ileftv,iworkv,ilov,mflagv
+  double precision                      :: basisu(ku),basisv(kv)
+  double precision                      :: worku(2*ku),workv(2*kv)
 
-  double precision b2val
+  val(:) = 0.0
+  ilou = 1
+  ilov = 1
+  ! U
+  call INTRV(tu,nctlu+ku,u,ilou,ileftu,mflagu)
+  if (mflagu == 1) then
+     ileftu = ileftu-ku
+  end if
+  call BSPVN(tu,ku,ku,1,u,ileftu,basisu,worku,iworku)
+  istartu = ileftu-ku
+  
+  ! V
+  call INTRV(tv,nctlv+kv,v,ilov,ileftv,mflagv)
+  if (mflagv == 1) then
+     ileftv = ileftv-kv
+  end if
+  call BSPVN(tv,kv,kv,1,v,ileftv,basisv,workv,iworkv)
+  istartv = ileftv-kv
 
-  do idim=1,ndim
-     val(idim) = b2val(u,v,0,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+  do i=1,ku
+     do j=1,kv
+        do idim=1,ndim
+           val(idim) = val(idim) + basisu(i)*basisv(j)*coef(istartu+i,istartv+j,idim)
+        end do
+     end do
   end do
   
 end subroutine eval_surface
@@ -68,7 +92,7 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
   !     Ouput 
   !     val     - Real, Evaluated point, size n,ndim
   
-  
+  implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,n
   double precision, intent(in)          :: u(n),v(n)
@@ -78,15 +102,40 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
   ! Output
   double precision, intent(out)         :: val(n,ndim)
 
-  ! Working
-  integer                               :: idim,i
-  double precision                      :: work(3*max(ku,kv) + kv)
+ ! Working
+  integer                               :: idim,istartu,istartv,i,j,ii
+  integer                               :: ileftu,iworku,ilou,mflagu
+  integer                               :: ileftv,iworkv,ilov,mflagv
+  double precision                      :: basisu(ku),basisv(kv)
+  double precision                      :: worku(2*ku),workv(2*kv)
 
-  double precision b2val
+  ilou = 1
+  ilov = 1
+  val(:,:) = 0.0
 
-  do i=1,n
-     do idim=1,ndim
-        val(i,idim) = b2val(u(i),v(i),0,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+  do ii=1,n
+     ! U
+     call INTRV(tu,nctlu+ku,u(ii),ilou,ileftu,mflagu)
+     if (mflagu == 1) then
+        ileftu = ileftu-ku
+     end if
+     call BSPVN(tu,ku,ku,1,u(ii),ileftu,basisu,worku,iworku)
+     istartu = ileftu-ku
+     
+     ! V
+     call INTRV(tv,nctlv+kv,v(ii),ilov,ileftv,mflagv)
+     if (mflagv == 1) then
+        ileftv = ileftv-kv
+     end if
+     call BSPVN(tv,kv,kv,1,v(ii),ileftv,basisv,workv,iworkv)
+     istartv = ileftv-kv
+     
+     do i=1,ku
+        do j=1,kv
+           do idim=1,ndim
+              val(ii,idim) = val(ii,idim) + basisu(i)*basisv(j)*coef(istartu+i,istartv+j,idim)
+           end do
+        end do
      end do
   end do
 end subroutine eval_surface_V
@@ -115,7 +164,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
   !     Ouput 
   !     val     - Real, Evaluated point, size (n,m,ndim)
   
-  
+  implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,n,m
   double precision, intent(in)          :: u(n,m),v(n,m)
@@ -125,19 +174,44 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
   ! Output
   double precision, intent(out)         :: val(n,m,ndim)
 
-  ! Working
-  integer                               :: idim,i,j
-  double precision                      :: work(3*max(ku,kv) + kv)
+! Working
+  integer                               :: idim,istartu,istartv,i,j,ii,jj
+  integer                               :: ileftu,iworku,ilou,mflagu
+  integer                               :: ileftv,iworkv,ilov,mflagv
+  double precision                      :: basisu(ku),basisv(kv)
+  double precision                      :: worku(2*ku),workv(2*kv)
 
-  double precision b2val
-
-  do i=1,n
-     do j=1,m
-        do idim=1,ndim
-           val(i,j,idim) = b2val(u(i,j),v(i,j),0,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
+  ilou = 1
+  ilov = 1
+  val(:,:,:) = 0.0
+  do ii=1,n
+     do jj = 1,m
+        ! U
+        call INTRV(tu,nctlu+ku,u(ii,jj),ilou,ileftu,mflagu)
+        if (mflagu == 1) then
+           ileftu = ileftu-ku
+        end if
+        call BSPVN(tu,ku,ku,1,u(ii,jj),ileftu,basisu,worku,iworku)
+        istartu = ileftu-ku
+        
+        ! V
+        call INTRV(tv,nctlv+kv,v(ii,jj),ilov,ileftv,mflagv)
+        if (mflagv == 1) then
+           ileftv = ileftv-kv
+        end if
+        call BSPVN(tv,kv,kv,1,v(ii,jj),ileftv,basisv,workv,iworkv)
+        istartv = ileftv-kv
+     
+        do i=1,ku
+           do j=1,kv
+              do idim=1,ndim
+                 val(ii,jj,idim) = val(ii,jj,idim) + basisu(i)*basisv(j)*coef(istartu+i,istartv+j,idim)
+              end do
+           end do
         end do
      end do
   end do
+
 end subroutine eval_surface_M
 
 subroutine eval_surface_deriv(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
@@ -176,8 +250,6 @@ subroutine eval_surface_deriv(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
 
   ! Working
   integer                               :: idim
-  double precision                      :: work(3*max(ku,kv) + kv)
-
   double precision b2val
 
   do idim=1,ndim
