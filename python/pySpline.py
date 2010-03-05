@@ -28,16 +28,18 @@ import os, sys, string, time, copy, pdb
 # =============================================================================
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
     ones,vstack,real,where,arange,append,hstack,mgrid
-from numpy.linalg import norm
+from numpy.linalg import norm,norm
 
 import scipy
 from scipy import sparse,io
 from scipy.sparse.linalg.dsolve import factorized
 scipy.sparse.linalg.use_solver(useUmfpack=False)
 
-from numpy.linalg import lstsq
-import pyspline
+# =============================================================================
+# Custom Python modules
+# =============================================================================
 
+import pyspline
 from mdo_import_helper import *
 
 # =============================================================================
@@ -230,8 +232,6 @@ MUST be defined for task lms or interpolate'
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
                                  shape=[self.Nu*self.Nv,self.Nctlu*self.Nctlv])
         self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
-        mdict = {'jac':N.todense()}
-        io.savemat('N.mat', mdict)
 
         if self.interp:
             solve = factorized( N )
@@ -1571,9 +1571,27 @@ class volume(object):
                                            self.coef,Niter,eps1,eps2,u,v,w)
             return result[0][0],result[1][0],result[2][0],result[3][0] #u,v,D
         else:
-            mpiPrint('Vector version of project point not implemented')
+            if 'u' in kwargs:
+                u = array(kwargs['u'])
+            else:
+                u = 0.5*ones(len(x0))
+            # end if
+            if 'v' in kwargs:
+                v = array(kwargs['v'])
+            else:
+                v = 0.5*ones(len(x0))
+            # end if
+            if 'w' in kwargs:
+                w = array(kwargs['w'])
+            else:
+                w = 0.5*ones(len(x0))
+            # end if
+            result = pyspline.point_volume(\
+                x0,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,\
+                    self.coef,Niter,eps1,eps2,u,v,w)
+            return result[0],result[1],result[2],result[3]
         # end if
-            return 
+
 
     def _writeTecplot3D(self,handle,name,data):
          '''A Generic write tecplot zone to file'''
@@ -1611,8 +1629,7 @@ class volume(object):
             [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
             W_plot[i,:,:] = w_plot[i]
         # end for
-        X = self.getValue(U_plot,V_plot,W_plot)
-        self._writeTecplot3D(handle,'interpolated',X)
+        self._writeTecplot3D(handle,'interpolated',self.getValue(U_plot,V_plot,W_plot))
 
     def _writeTecplotCoef(self,handle):
         '''Write the Spline coefficients to handle'''
@@ -1647,32 +1664,134 @@ class volume(object):
             self._writeTecplotOrigData(f)
         f.close()
 
-def trilinear_volume(xmin,xmax):
-    '''This is a short-cut function to create a trilinear b-spline
-    volume from the xmin,xmax bounding box function from the surface class'''
+
+
+# ----------------------------------------------------------------------
+#                     Misc Helper Functions
+# ----------------------------------------------------------------------
+
+
+def trilinear_volume(*args,**kwargs):
+    '''This is a short-cut function to create a trilinear b-spline volume
+    Args can contain:
+        X: array of size(8,3) which contains the corners of the box is
+        coordinate order (i,j,k)
+      
+        xmin,xmax: The lower extreme and upper extreme corners of the box
+        
+        '''
     tu = [0,0,1,1]
     tv = [0,0,1,1]
     tw = [0,0,1,1]
     ku = 2
     kv = 2
     kw = 2
-    x_low  = xmin[0]
-    x_high = xmax[0]
-    y_low  = xmin[1]
-    y_high = xmax[1]
-    z_low  = xmin[2]
-    z_high = xmax[2]
+    if len(args) == 0:
+        return volume(coef=args[0],tu=tu,tv=tv,tw=tw,ku=ku,kv=kv,kw=kw)
+    elif len(args) == 2:
+        xmin = args[0]
+        xmax = args[1]
 
-    coef = zeros((2,2,2,3))
-    coef[0,0,0,:] = [x_low,y_low,z_low]
-    coef[1,0,0,:] = [x_high,y_low,z_low]
-    coef[0,1,0,:] = [x_low,y_high,z_low]
-    coef[1,1,0,:] = [x_high,y_high,z_low]
-    coef[0,0,1,:] = [x_low,y_low,z_high]
-    coef[1,0,1,:] = [x_high,y_low,z_high]
-    coef[0,1,1,:] = [x_low,y_high,z_high]
-    coef[1,1,1,:] = [x_high,y_high,z_high]
-    return volume(coef=coef,tu=tu,tv=tv,tw=tw,ku=ku,kv=kv,kw=kw)
+        x_low  = xmin[0]
+        x_high = xmax[0]
+        y_low  = xmin[1]
+        y_high = xmax[1]
+        z_low  = xmin[2]
+        z_high = xmax[2]
+
+        coef = zeros((2,2,2,3))
+        coef[0,0,0,:] = [x_low,y_low,z_low]
+        coef[1,0,0,:] = [x_high,y_low,z_low]
+        coef[0,1,0,:] = [x_low,y_high,z_low]
+        coef[1,1,0,:] = [x_high,y_high,z_low]
+        coef[0,0,1,:] = [x_low,y_low,z_high]
+        coef[1,0,1,:] = [x_high,y_low,z_high]
+        coef[0,1,1,:] = [x_low,y_high,z_high]
+        coef[1,1,1,:] = [x_high,y_high,z_high]
+        return volume(coef=coef,tu=tu,tv=tv,tw=tw,ku=ku,kv=kv,kw=kw)
+    else:
+        mpiPrint('Error: An unknown number of arguments was passed to trilinear\
+ volume')
+        sys.exit(1)
+    # end if
+
+
+def bilinear_surface(*args,**kwargs):
+    '''This is short-cut function to create a bilinear surface
+    Args can contain:
+        x: array of size(4,3) The four corners of the array arranged in
+        the coordinate direction orientation:
+
+        2          3
+        /----------\
+        |          |
+        |          |
+        |          |
+        \----------/
+        0          1
+    
+   OR
+
+   Args can contain pt1,pt2,pt3,pt4 is CCW Ordering
+
+        3          2
+        /----------\
+        |          |
+        |          |
+        |          |
+        \----------/
+        0          1
+        '''
+    if len(args) == 1:
+        # One argument passed in ... assume its X
+        assert len(args[0]) == 4,'Error: a single argument passed to bilinear\
+ surface must contain 4 points and be of size (4,3)'
+        return surface(coef=X.reshape[2,2,:],tu=[0,0,1,1],tv=[0,0,1,1],ku=2,kv=2)
+    else:
+        # Assume 4 arguments
+        coef = zeros([2,2,3])
+        coef[0,0] = args[0]
+        coef[0,1] = args[1]
+        coef[1,0] = args[3]
+        coef[1,1] = args[2]
+        return surface(coef=coef,tu=[0,0,1,1],tv=[0,0,1,1],ku=2,kv=2)
+    # end if
+
+def line(*args,**kwargs):
+    '''This is a short cut function to create a line curve
+
+    Args can contain:
+       X: array of size(2,ndim) The two end points
+       
+       OR:
+       x1,x2: The two end points (each of size ndim)
+
+       OR:
+       x1,dir=direction
+       x1 and the keyword argument direction
+
+       OR: 
+       x1,dir=direction,length=length
+       x1, direction and specific length
+       '''
+    if len(args) == 2:
+        # Its a two-point type
+        return curve(coef=[args[0],args[1]],k=2,t=[0,0,1,1])
+    elif len(args) == 1:
+        if len(args[0]) == 2: # its X
+            return curve(coef=args[0],k=2,t=[0,0,1,1])
+        elif 'dir' in kwargs:
+            # We have point and direction
+            if 'length' in kwargs:
+                x2 = args[0] + kwargs['direction']/norm(kwargs['direction'])*kwargs['length']
+            else:
+                x2 = args[0] + kwargs['direction']
+            # end if
+            return curve(coef=[args[0],x2],k=2,t=[0,0,1,1])
+        else:
+            mpiPrint('Error: dir must be specified if only 1 argument is given')
+        # end if
+    # end if
 
 
 #==============================================================================
