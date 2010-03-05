@@ -610,8 +610,11 @@ original data for this surface or node is not in range 0->3'
                 
         if size == None:
             # This works really well actually
-            u_plot = 0.5*(1-cos(linspace(0,pi,25)))
-            v_plot = 0.5*(1-cos(linspace(0,pi,25)))
+            Nx = self.Nctlu*self.ku+1
+            Ny = self.Nctlv*self.kv+1
+
+            u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
+            v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
         else:
             # Cheaply calculate the length of each size of the surface
             # to determine its lenght and then use the size parameter 
@@ -1197,7 +1200,8 @@ Nctl=<number of control points> must be specified for a LMS fit'
         if len(s.shape) == 0:
             return pyspline.eval_curve(s,self.t,self.k,self.coef)
         elif len(s.shape) == 1:
-            return pyspline.eval_curve_v(s,self.t,self.k,self.coef)
+            return  pyspline.eval_curve_v(s,self.t,self.k,self.coef)
+        # end if
 
     def getDerivative(self,s):
         '''
@@ -1407,7 +1411,7 @@ class volume(object):
             self.coef = array(kwargs['coef'],'d')
             self.Nctlu = self.coef.shape[0]
             self.Nctlv = self.coef.shape[1]
-            self.Nctlv = self.coef.shape[2]
+            self.Nctlw = self.coef.shape[2]
             self.nDim  = self.coef.shape[3]
             self.umin = self.tu[0]
             self.umax = self.tu[-1]
@@ -1592,15 +1596,18 @@ class volume(object):
         '''Output this volume\'s data to a open file handle \'handle\' '''
         
         # This works really well actually
-        u_plot = 0.5*(1-cos(linspace(0,pi,25)))
-        v_plot = 0.5*(1-cos(linspace(0,pi,25)))
-        w_plot = 0.5*(1-cos(linspace(0,pi,25)))
+        Nx = self.Nctlu*self.ku+1
+        Ny = self.Nctlv*self.kv+1
+        Nz = self.Nctlw*self.kw+1
+        u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
+        v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
+        w_plot = 0.5*(1-cos(linspace(0,pi,Nz)))
 
         # Dump re-interpolated surface
-        W_plot = zeros((25,25,25))
-        V_plot = zeros((25,25,25))
-        U_plot = zeros((25,25,25))
-        for i in xrange(25):
+        W_plot = zeros((Nx,Ny,Nz))
+        V_plot = zeros((Nx,Ny,Nz))
+        U_plot = zeros((Nx,Ny,Nz))
+        for i in xrange(Nx):
             [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
             W_plot[i,:,:] = w_plot[i]
         # end for

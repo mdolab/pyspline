@@ -63,7 +63,7 @@ C***FIRST EXECUTABLE STATEMENT  INTRV
       IHI = ILO + 1
 
       IF (IHI.LT.LXT) GO TO 10
-      IF (X.GE.XT(LXT)) Go TO 110
+      IF (X.GT.XT(LXT)) go to 110
       IF (LXT.LE.1) GO TO 90
       ILO = LXT - 1
       IHI = LXT

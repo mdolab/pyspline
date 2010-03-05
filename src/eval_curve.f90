@@ -70,20 +70,25 @@ subroutine eval_curve_V(s,t,k,coef,nctl,ndim,n,val)
   double precision, intent(out)         :: val(n,ndim)
 
   ! Working
-  integer                               :: i,idim,inbv
-  double precision                      :: work(3*k)
+  integer                               :: i,l,idim,istart
+  integer                               :: ILEFT,IWORK,ILO,mflag
+  double precision                      :: VNIKX(k),WORK(2*K)
 
-  ! Functions
-  double precision                      :: bvalu
-
-  inbv = 1
-
+ val(:,:) = 0.0
+ ILO = 1
   do i=1,n
-     do idim=1,ndim
-        val(i,idim) = bvalu(t,coef(:,idim),nctl,k,0,s(i),inbv,work)
+     call INTRV(T,NCTL+K,s(i),ILO,ILEFT,MFLAG)
+     if (mflag == 1) then
+        ileft = ileft-k
+     end if
+     call BSPVN(T,K,K,1,s(i),ILEFT,VNIKX,WORK,IWORK)
+     istart = ileft-k
+     do l=1,k
+        do idim=1,ndim
+           val(i,idim) = val(i,idim) + vnikx(l)*coef(istart+l,idim)
+        end do
      end do
   end do
-
 end subroutine eval_curve_V
 
 subroutine eval_curve_deriv(s,t,k,coef,nctl,ndim,val)
