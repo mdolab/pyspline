@@ -109,6 +109,10 @@ C
       CALL XERROR( ' BSPVN,  INDEX IS NOT 1 OR 2',28,2,1)
       RETURN
   110 CONTINUE
+      print *,'X:',X
+      print *,'ILEFT:',ILEFT
+      print *,'T(ILEFT):',T(ILEFT)
+      print *,'T(ILEFT+1)',T(ILEFT+1)
       CALL XERROR( ' BSPVN,  X DOES NOT SATISFY T(ILEFT).LE.X.LE.T(ILEFT
      1+1)', 55, 2, 1)
       RETURN

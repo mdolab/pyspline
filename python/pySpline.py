@@ -41,6 +41,7 @@ scipy.sparse.linalg.use_solver(useUmfpack=False)
 
 import pyspline
 from mdo_import_helper import *
+USE_TECIO = pyspline.tecplot_test()
 
 # =============================================================================
 def e_dist(x1,x2):
@@ -50,6 +51,99 @@ def e_dist(x1,x2):
         total += (x1[idim]-x2[idim])**2
     # end for
     return sqrt(total)
+
+
+def _writeTecplot1D(handle,name,data):
+    '''A Generic write tecplot zone to file'''
+    if handle != None:
+        nx = data.shape[0]
+        ndim = data.shape[1]
+        handle.write('Zone T=\"%s\" I=%d\n'%(name,nx))
+        handle.write('DATAPACKING=POINT\n')
+        for i in xrange(nx):
+            for idim in xrange(ndim):
+                handle.write('%f '%(data[i,idim]))
+            # end for
+            handle.write('\n')
+        # end for
+    else:
+        pyspline.i_ordered(name,data)
+    # end if
+    return
+
+def _writeTecplot2D(handle,name,data):
+    '''A Generic write tecplot zone to file'''
+    if handle != None:
+        nx = data.shape[0]
+        ny = data.shape[1]
+        ndim = data.shape[2]
+        handle.write('Zone T=\"%s\" I=%d J=%d\n'%(name,nx,ny))
+        handle.write('DATAPACKING=POINT\n')
+        for j in xrange(ny):
+            for i in xrange(nx):
+                for idim in xrange(ndim):
+                    handle.write('%f '%(data[i,j,idim]))
+                # end for
+                handle.write('\n')
+            # end for
+        # end for
+    else:
+        pyspline.ij_ordered(name,data)
+    # end if
+    return
+
+def _writeTecplot3D(handle,name,data):
+    '''A Generic write tecplot zone to file'''
+    if handle != None:
+        nx = data.shape[0]
+        ny = data.shape[1]
+        nz = data.shape[2]
+        handle.write('Zone T=\"%s\" I=%d J=%d K=%d\n'%(name,nx,ny,nz))
+        handle.write('DATAPACKING=POINT\n')
+        for k in xrange(nz):
+            for j in xrange(ny):
+                for i in xrange(nx):
+                    for idim in xrange(ndim):
+                        handle.write('%f '%(data[i,j,k,idim]))
+                    # end for
+                    handle.write('\n')
+                # end for 
+            # end for
+        # end for
+    else:
+        pyspline.ijk_ordered(name,data)
+    # end if
+    return
+
+def _writeHeader(f,ndim):
+    if ndim == 1:
+        f.write ('VARIABLES = "X"\n')
+    elif ndim == 2:
+        f.write ('VARIABLES = "X","Y"\n')
+    else:
+        f.write ('VARIABLES = "X", "Y","Z"\n')
+    # end if
+
+def openTecplot(file_name,ndim,tecio=USE_TECIO):
+    if tecio:
+        mpiPrint('Opening binary Tecplot File: %s'%(file_name))
+        pyspline.open_tecplot(file_name,ndim)
+        f = None
+    else:
+        mpiPrint('Opening ascii Tecplot File: %s'%(file_name))
+        f = open(file_name,'w')
+        _writeHeader(f,ndim)
+    # end if
+    return f
+
+def closeTecplot(f,tecio=USE_TECIO):
+    if tecio:
+        pyspline.close_tecplot()
+    else:
+        f.close()
+    #end if
+    
+    return 
 
 # =============================================================================
 # pySpline classes
@@ -579,79 +673,31 @@ original data for this surface or node is not in range 0->3'
             curve.t,curve.k,curve.coef,self.tu,self.tv,\
                 self.ku,self.kv,self.coef,Niter,eps1,eps2,u,v,s)
    
-    def _writeTecplot2D(self,handle,name,data):
-         '''A Generic write tecplot zone to file'''
-         nx = data.shape[0]
-         ny = data.shape[1]
-         handle.write('Zone T=%s I=%d J=%d\n'%(name,nx,ny))
-         handle.write('DATAPACKING=POINT\n')
-         for j in xrange(ny):
-             for i in xrange(nx):
-                 handle.write('%f %f %f \n'%(data[i,j,0],data[i,j,1],data[i,j,2]))
-             # end for
-         # end for 
-         
-         return
+  
 
     def _writeTecplotOrigData(self,handle):
         if self.orig_data:
-            self._writeTecplot2D(handle,'orig_data',self.X)
+            _writeTecplot2D(handle,'orig_data',self.X)
         # end if
 
         return
 
-    def _writeTecplotSurface(self,handle,size=None):
+    def _writeTecplotSurface(self,handle):
         '''Output this surface\'s data to a open file handle \'handle\' '''
         
-        # The size should be based on the knot vectors
-               
-        MAX_SIZE = 100
-        MIN_SIZE = 5
-                
-        if size == None:
-            # This works really well actually
-            Nx = self.Nctlu*self.ku+1
-            Ny = self.Nctlv*self.kv+1
-
-            u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
-            v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
-        else:
-            # Cheaply calculate the length of each size of the surface
-            # to determine its lenght and then use the size parameter 
-            # to determine the number of points to use
-
-            u = array([0,0.5,1,1,1,0.5,0,0])
-            v = array([0,0,0,0.5,1,1,1,0.5])
-            val = self.getValue(u,v)
-
-            u_len = (e_dist(val[0],val[1])+e_dist(val[1],val[2])+
-                     e_dist(val[4],val[5])+e_dist(val[5],val[6]))/2
-            
-            v_len = (e_dist(val[2],val[3])+e_dist(val[3],val[4])+
-                     e_dist(val[6],val[7])+e_dist(val[7],val[0]))/2
-            
-            nu=int(floor(real(u_len/size)))
-            nv=int(floor(real(v_len/size)))
-            
-            if nu > MAX_SIZE: nu = MAX_SIZE
-            if nu < MIN_SIZE: nu = MIN_SIZE
-            if nv > MAX_SIZE: nv = MAX_SIZE
-            if nv < MIN_SIZE: nv = MIN_SIZE
-            
-            u_plot = linspace(self.umin,self.umax,nu)
-            v_plot = linspace(self.vmin,self.vmax,nv)
-        # end if
-
-        # Dump re-interpolated surface
+        Nx = self.Nctlu*self.ku+1
+        Ny = self.Nctlv*self.kv+1
+        u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
+        v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
         [V_plot,U_plot] = meshgrid(v_plot,u_plot)
         X = self.getValue(U_plot,V_plot)
-        self._writeTecplot2D(handle,'interpolated',X)
-    
+        _writeTecplot2D(handle,'interpolated',X)
+        
         return
                     
     def _writeTecplotCoef(self,handle):
         '''Write the Spline coefficients to handle'''
-        self._writeTecplot2D(handle,'control_pts',self.coef)
+        _writeTecplot2D(handle,'control_pts',self.coef)
 
         return
 
@@ -663,19 +709,20 @@ original data for this surface or node is not in range 0->3'
 
     def _writeDirections(self,handle,isurf):
         '''Write out and indication of the surface direction'''
-        handle.write('Zone T=\"surface%d direction\" I=4\n'%(isurf))
         if self.Nctlu >= 3 and self.Nctlv >=3:
-            handle.write('%f,%f,%f \n'%(self.coef[1,2,0],self.coef[1,2,1],self.coef[1,2,2]))
-            handle.write('%f,%f,%f \n'%(self.coef[1,1,0],self.coef[1,1,1],self.coef[1,1,2]))
-            handle.write('%f,%f,%f \n'%(self.coef[2,1,0],self.coef[2,1,1],self.coef[2,1,2]))
-            handle.write('%f,%f,%f \n'%(self.coef[3,1,0],self.coef[3,1,1],self.coef[3,1,2]))
+            data = zeros((4,self.nDim))
+            data[0] = self.coef[1,2]
+            data[1] = self.coef[1,1]
+            data[2] = self.coef[2,1]
+            data[3] = self.coef[3,1]
+            _writeTecplot1D(handle,'surface%d direction'%(isurf),data)
         else:
             mpiPrint('Not Enough control points to output direction indicator')
         #end if
 
         return 
 
-    def writeTecplot(self,file_name,surfs=True,coef=True,orig=True,dir=False):
+    def writeTecplot(self,file_name,surfs=True,coef=True,orig=True,dir=False,tecio=USE_TECIO):
         '''Write the surface to a tecplot dat file
         Required Arguments:
             file_name: The output file name
@@ -685,8 +732,8 @@ original data for this surface or node is not in range 0->3'
             orig : Boolean to write original data (default=True)
             dir  : Boolean to write out surface direction indicators (default=False)
             '''
-        f = open(file_name,'w')
-        f.write ('VARIABLES = "X", "Y","Z"\n')
+        f = openTecplot(file_name,self.nDim,tecio)
+
         if surfs:
             self._writeTecplotSurface(f)
         if coef:
@@ -694,8 +741,8 @@ original data for this surface or node is not in range 0->3'
         if orig:
             self._writeTecplotOrigData(f)
         if dir:
-            self._writeDirections(f,0)
-        f.close()
+            self._writeDirections(f)
+        closeTecplot()
 
     def _writeIGES_directory(self,handle,Dcount,Pcount):
         '''
@@ -1280,7 +1327,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                                     curve.t,curve.k, curve.coef,
                                     Niter,eps1,eps2,s,t)
 
-    def writeTecplot(self,file_name,curve=True,coef=True,orig=True,*args,**kwargs):
+    def writeTecplot(self,file_name,curve=True,coef=True,orig=True,tecio=USE_TECIO,*args,**kwargs):
         '''
         Write the cuve to a tecplot dat file
         Required Arguments:
@@ -1293,34 +1340,24 @@ Nctl=<number of control points> must be specified for a LMS fit'
         Returns:
             None
             '''
-        f = open(file_name,'w')
-        f.write ('VARIABLES = "X", "Y","Z"\n')
-        if curve:
-            self._writeTecplotCurve(f,*args,**kwargs)
-        if coef:
-            self._writeTecplotCoef(f,*args,**kwargs)
-        if orig:
-            self._writeTecplotOrigData(f,*args,**kwargs)
-        f.close()
+        openTecplot(file_name,self.nDim,tecio)
 
-    def _writeTecplot1D(self,handle,name,data):
-        '''A Generic write tecplot zone to file'''
-        n = data.shape[0]
-        handle.write('Zone T=%s I=%d \n'%(name,n))
-        handle.write('DATAPACKING=POINT\n')
-        for i in xrange(n):
-            for idim in xrange(self.nDim):
-                handle.write('%f '%data[i,idim])
-            # end for
-            handle.write('\n')
-        # end for
-        return
+        if curve:
+            self._writeTecplotCurve(f)
+        if coef:
+            self._writeTecplotCoef(f)
+        if orig:
+            self._writeTecplotOrigData(f)
+        closeTecplot(f)
+
+        return 
 
     def _writeTecplotCoef(self,handle,*args,**kwargs):
         '''
         Write the Spline coefficients to handle
         '''
-        self._writeTecplot1D(handle,'control_pts',self.coef)
+        _writeTecplot1D(handle,'control_pts',self.coef)
+
         return
 
     def _writeTecplotOrigData(self,handle,*args,**kwargs):
@@ -1328,7 +1365,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
         Write the original data to a handle
         '''
         if self.orig_data:
-            self._writeTecplot1D(handle,'orig_data',self.X)
+            _writeTecplot1D(handle,'orig_data',self.X)
         # end if
 
         return
@@ -1350,7 +1387,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 X = self.getValue(s)
             # end if
         # end if
-        self._writeTecplot1D(handle,'interpolated',X)
+        _writeTecplot1D(handle,'interpolated',X)
 
         return 
   
@@ -1593,22 +1630,6 @@ class volume(object):
         # end if
 
 
-    def _writeTecplot3D(self,handle,name,data):
-         '''A Generic write tecplot zone to file'''
-         nx = data.shape[0]
-         ny = data.shape[1]
-         nz = data.shape[2]
-         handle.write('Zone T=%s I=%d J=%d K=%d\n'%(name,nx,ny,nz))
-         handle.write('DATAPACKING=POINT\n')
-         for k in xrange(nz):
-             for j in xrange(ny):
-                 for i in xrange(nx):
-                     handle.write('%f %f %f \n'%(data[i,j,k,0],data[i,j,k,1],data[i,j,k,2]))
-                 # end for
-             # end for
-         # end for 
-         
-         return
 
     def _writeTecplotVolume(self,handle):
         '''Output this volume\'s data to a open file handle \'handle\' '''
@@ -1629,22 +1650,25 @@ class volume(object):
             [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
             W_plot[i,:,:] = w_plot[i]
         # end for
-        self._writeTecplot3D(handle,'interpolated',self.getValue(U_plot,V_plot,W_plot))
+        _writeTecplot3D(handle,'interpolated',self.getValue(U_plot,V_plot,W_plot))
+
+        return
 
     def _writeTecplotCoef(self,handle):
         '''Write the Spline coefficients to handle'''
-        self._writeTecplot3D(handle,'control_pts',self.coef)
+        _writeTecplot3D(handle,'control_pts',self.coef)
+
         return
 
 
     def _writeTecplotOrigData(self,handle):
         if self.orig_data:
-            self._writeTecplot3D(handle,'orig_data',self.X)
+            _writeTecplot3D(handle,'orig_data',self.X)
         # end if
 
         return
 
-    def writeTecplot(self,file_name,vols=True,coef=True,orig=False):
+    def writeTecplot(self,file_name,vols=True,coef=True,orig=False,tecio=USE_TECIO):
         '''Write the surface to a tecplot dat file
         Required Arguments:
             file_name: The output file name
@@ -1653,18 +1677,17 @@ class volume(object):
             coef : Boolean to write coefficients (default=True)
             orig : Boolean to write original data (default=True)
             dir  : Boolean to write out surface direction indicators (default=False)
+
             '''
-        f = open(file_name,'w')
-        f.write ('VARIABLES = "X", "Y","Z"\n')
+        openTecplot(file_name,self.nDim,tecio)
+        
         if vols:
             self._writeTecplotVolume(f)
         if coef:
             self._writeTecplotCoef(f)
         if orig:
             self._writeTecplotOrigData(f)
-        f.close()
-
-
+        closeTecplot()
 
 # ----------------------------------------------------------------------
 #                     Misc Helper Functions

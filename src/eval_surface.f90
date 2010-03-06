@@ -250,13 +250,13 @@ subroutine eval_surface_deriv(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
 
   ! Working
   integer                               :: idim
+  double precision                      :: work(3*max(ku,kv) + kv)
   double precision b2val
-
+  
   do idim=1,ndim
      val(1,idim) = b2val(u,v,1,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
      val(2,idim) = b2val(u,v,0,1,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
   end do
-  
 end subroutine eval_surface_deriv
 
 subroutine eval_surface_deriv_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)

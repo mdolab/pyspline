@@ -5,6 +5,8 @@
 
 INCLUDE_COMMON = ../common.mk
 include ${INCLUDE_COMMON}
+RULES = ../config/rules.mk
+include ${RULES}
 
 SPLINE_LIB = libspline.a
 SPLINE_LIB_SHARED = libspline.so
@@ -32,6 +34,7 @@ OBJ =	lsqrDataModule.o\
 	updatecoefficients_c.o\
 	getBasisPt.o\
 	cgns_test.o\
+	tecplot_functions.o\
 	machcon/i1mach.o\
 	machcon/r1mach.o\
 	xerror/fdump.o\
@@ -55,4 +58,5 @@ clean:
 libspline: $(OBJ) 
 	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(OBJ)
 	$(FC)  -shared $(OBJ) -o $(SPLINE_LIB_SHARED) 
-
+	f2py  --fcompiler=${COMPILER_NAME} --f90flags='${FFLAGS}' -c -m pyspline pyspline.pyf libspline.a ${TEC_LIB} ${LIBSTDCpp} -lblas
+	mv pyspline.so ../python	

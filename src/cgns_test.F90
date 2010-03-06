@@ -2,7 +2,7 @@ subroutine cgns_test()
 
 #IFDEF USE_CGNS 
 
-
+print *,'CGNS enabled in this build'
   
 #ELSE
 

@@ -27,10 +27,9 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
   implicit none
   ! Input
   double precision, intent(in)          :: x0(N,ndim)
-  integer         , intent(in)          :: k,nctl,ndim,N
+  integer         , intent(in)          :: k,nctl,ndim,N,niter
   double precision, intent(in)          :: t(nctl+k)
   double precision, intent(in)          :: coef(nctl,ndim)
-  double precision, intent(in)          :: Niter
   double precision, intent(in)          :: eps1,eps2
 
   ! Output
@@ -62,14 +61,17 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
      end if
   end do point_loop
   
-  if (brute_force == .True.) then
+  if (brute_force .eqv. .True.) then
      ! Dynamically allot the required space for the brute-force search search
-     allocate(curve_vals((nctl-k+1) * n_sub,ndim))
+     allocate(curve_vals((nctl-k+2) + (nctl-k+1)*n_sub,ndim))
      counter = 1
-     do i=1,nctl-k+1 ! Number of knot spans for k-repeated knots at end
-        do j=0,n_sub-1
-           ss = t(i+k-1) + (real(j)/(n_sub-1)*(t(i+k)-t(i+k-1)))
-           call eval_curve(ss,t,k,coef,nctl,ndim,curve_vals(counter,:))
+     do i=1,nctl-k+2 ! Number of knot spans for k-repeated knots at end
+        call eval_curve(t(i+k-1),t,k,coef,nctl,ndim,curve_vals(counter,:))
+        counter = counter + 1
+     end do
+     do i=1,nctl-k+1
+        do j =1,n_sub
+           ss = t(i+k-1) + (real(j)/(n_sub+1)*(t(i+k)-t(i+k-1)))
            counter = counter + 1
         end do
      end do
@@ -80,12 +82,21 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
            call eval_curve(t(1),t,k,coef,nctl,ndim,val0)
            D0 = norm(val0-x0(i,:),ndim)
            counter = 1
-           do i=1,nctl-k+1 
-              do j=0,n_sub-1
+           do i=1,nctl-k+2
+              D  = norm(x0(ipt,:)-curve_vals(counter,:),ndim)
+              counter = counter + 1
+              if (D<D0) then
+                 s0(ipt) = t(i+k-1)
+                 D0 = D
+              end if
+           end do
+           
+           do i=1,nctl-k+1
+              do j=1,n_sub
                  D  = norm(x0(ipt,:)-curve_vals(counter,:),ndim)
                  counter = counter + 1
                  if (D<D0) then
-                    s0(ipt) = t(i+k-1) + (real(j)/(n_sub-1)*(t(i+k)-t(i+k-1)))
+                    s0(ipt) = t(i+k-1) + (real(j)/(n_sub+1)*(t(i+k)-t(i+k-1)))
                     D0 = D
                  end if
               end do
@@ -105,7 +116,7 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
      call eval_curve_deriv2(s0(ipt),t,k,coef,nctl,ndim,deriv2)
      Diff(ipt,:) = val-x0(ipt,:)
      s(ipt) = s0(ipt) - dot_product(deriv,Diff(ipt,:))/(dot_product(deriv2,Diff(ipt,:)) + norm(deriv,ndim)**2)
-     iteration_loop: do i =1,Niter
+     iteration_loop: do i=1,Niter
         ! Check the Convergence Criteria
         if (norm(Diff(ipt,:),ndim) <= eps1) then
            exit iteration_loop
@@ -135,7 +146,7 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
         s(ipt) = s0(ipt) - dot_product(deriv,Diff(ipt,:))/(dot_product(deriv2,Diff(ipt,:)) + norm(deriv,ndim)**2)
      end do iteration_loop
   end do 
-  if (brute_force == .true.) then
+  if (brute_force .eqv. .true.) then
      deallocate(curve_vals)
   end if
 
@@ -208,16 +219,25 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
      end if
   end do point_loop
 
-  if (brute_force == .True.) then
+  if (brute_force .eqv. .True.) then
      ! Dynamically allot the required space for the brute-force search search
-     allocate(surface_vals((nctlu-ku+1)*n_sub*(nctlv-kv+1)*n_sub,ndim))
+     allocate(surface_vals( (nctlu-ku+2)*(nctlv-kv+2) +&
+          (nctlu-ku+1)*(nctlv-kv+1)*n_sub*n_sub,ndim))
      counter = 1
-     do i = 1,nctlu-ku+1
-        do ii = 1,n_sub
-           do j = 1,nctlv-kv+1
-              do jj =1,n_sub
-                 uu = tu(i+ku-1) + (real(ii)/n)*(tu(i+ku)-tu(i+ku-1))
-                 vv = tv(j+kv-1) + (real(jj)/n)*(tv(i+kv)-tv(i+kv-1))
+     do i = 1,nctlu-ku+2
+        do j = 1,nctlv-kv+2
+           call eval_surface(tu(i+ku-1),tv(i+kv-1),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,&
+                surface_vals(counter,:))
+           counter = counter + 1
+        end do
+     end do
+
+     do i=1,nctlu-ku+1
+        do j=1,nctlv-kv+1
+           do ii=1,n_sub
+              do jj=1,n_sub
+                 uu = tu(i+ku-1) + real(ii)/(n_sub+1)*(tu(i+ku)-tu(i+ku-1))
+                 vv = tv(j+kv-1) + real(jj)/(n_sub+1)*(tv(j+kv)-tv(j+kv-1))
                  call eval_surface(uu,vv,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,&
                       surface_vals(counter,:))
                  counter = counter + 1
@@ -232,15 +252,28 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
            call eval_surface(tu(1),tv(1),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val0)
            D0 = norm(val0-x0(i,:),ndim)
            counter = 1
-           do i = 1,nctlu-ku+1
-              do ii = 1,n_sub
-                 do j = 1,nctlv-kv+1
-                    do jj =1,n_sub
+
+           do i = 1,nctlu-ku+2
+              do j = 1,nctlv-kv+2
+                 D  = norm(x0(ipt,:)-surface_vals(counter,:),ndim)
+                 counter = counter + 1
+                 if (D<D0) then
+                    u0(ipt) = tu(i+ku-1)
+                    v0(ipt) = tv(j+kv-1)
+                    D0 = D
+                 end if
+              end do
+           end do
+
+           do i=1,nctlu-ku+1
+              do j=1,nctlv-kv+1
+                 do ii=1,n_sub
+                    do jj=1,n_sub
                        D  = norm(x0(ipt,:)-surface_vals(counter,:),ndim)
                        counter = counter + 1
                        if (D<D0) then
-                          u0(ipt) = tu(i+ku-1) + (real(ii)/n)*(tu(i+ku)-tu(i+ku-1))
-                          v0(ipt) = tv(j+kv-1) + (real(jj)/n)*(tv(i+kv)-tv(i+kv-1))
+                          u0(ipt) = tu(i+ku-1) + real(ii)/(n_sub+1)*(tu(i+ku)-tu(i+ku-1))
+                          v0(ipt) = tv(j+kv-1) + real(jj)/(n_sub+1)*(tv(j+kv)-tv(j+kv-1))
                           D0 = D
                        end if
                     end do
@@ -256,7 +289,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
      u0(:) = u(:)   
      v0(:) = v(:)
   end if
- 
+
   ! Now we have u0 and v0 so we can do the newton 
   do ipt=1,N
      call eval_surface(u0(ipt),v0(ipt),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
@@ -320,7 +353,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
         end if
      end do iteration_loop
   end do
-  if (brute_force == .true.) then
+  if (brute_force .eqv. .true.) then
      deallocate(surface_vals)
   end if
 end subroutine point_surface
@@ -399,7 +432,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
      end if
   end do point_loop
 
-  if (brute_force == .True.) then
+  if (brute_force .eqv. .True.) then
      print *,'Brute Force Not Implemented Yet'
      stop
   else
@@ -494,7 +527,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
         end if
      end do iteration_loop
   end do
-  if (brute_force == .true.) then
+  if (brute_force .eqv. .true.) then
      deallocate(volume_vals)
   end if
 end subroutine point_volume
@@ -736,29 +769,38 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
   
   if (u < 0 .or. u > 1 .or. v < 0 .or. v > 1 .or. s < 0 .or. s > 1) then
      brute_force = .True.
-     allocate(curve_vals((nctlc-kc+1) * nc,ndim))
-     allocate(surface_vals((nctlu-ku+1)*n*(nctlv-kv+1)*n,ndim))
-
+     allocate(curve_vals((nctlc-kc+2) + (nctlc-kc+1)*nc,ndim))
+     allocate(surface_vals( (nctlu-ku+2)*(nctlv-kv+2) +&
+          (nctlu-ku+1)*(nctlv-kv+1)*n*n,ndim))
      ! Get Curve Values
      counter1 = 1 
-
-     do i=1,nctlc-kc+1 ! Number of knot spans for k-repeated knots at end
-        do j=0,nc-1
-           ss = tc(i+kc-1) + (real(j)/(nc-1)*(tc(i+kc)-tc(i+kc-1)))
+     do i=1,nctlc-kc+2 ! Number of knot spans for k-repeated knots at end
+        call eval_curve(tc(i+kc-1),tc,kc,coefc,nctlc,ndim,curve_vals(counter1,:))
+        counter1 = counter1 + 1
+     end do
+     do i=1,nctlc-kc+1
+        do j =1,nc
+           ss = tc(i+kc-1) + (real(j)/(nc+1)*(tc(i+kc)-tc(i+kc-1)))
            call eval_curve(ss,tc,kc,coefc,nctlc,ndim,curve_vals(counter1,:))
            counter1 = counter1 + 1
         end do
      end do
-     
-     counter2 = 1
 
-     ! Get Surface Values
-     do i = 1,nctlu-ku+1
-        do ii = 1,n
-           do j = 1,nctlv-kv+1
-              do jj =1,n
-                 uu = tu(i+ku-1) + (real(ii)/n)*(tu(i+ku)-tu(i+ku-1))
-                 vv = tv(j+kv-1) + (real(jj)/n)*(tv(i+kv)-tv(i+kv-1))
+     counter2 = 1
+     do i = 1,nctlu-ku+2
+        do j = 1,nctlv-kv+2
+           call eval_surface(tu(i+ku-1),tv(i+kv-1),tu,tv,ku,kv,coefs,nctlu,nctlv,ndim,&
+                surface_vals(counter2,:))
+           counter2 = counter2 + 1
+        end do
+     end do
+
+     do i=1,nctlu-ku+1
+        do j=1,nctlv-kv+1
+           do ii=1,n
+              do jj=1,n
+                 uu = tu(i+ku-1) + real(ii)/(n+1)*(tu(i+ku)-tu(i+ku-1))
+                 vv = tv(j+kv-1) + real(jj)/(n+1)*(tv(j+kv)-tv(j+kv-1))
                  call eval_surface(uu,vv,tu,tv,ku,kv,coefs,nctlu,nctlv,ndim,&
                       surface_vals(counter2,:))
                  counter2 = counter2 + 1
@@ -767,7 +809,7 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
         end do
      end do
 
-     ! Now do comparison
+    ! Now do comparison
 
      call eval_surface(tu(1),tv(1),tu,tv,ku,kv,coefs,nctlu,nctlv,ndim,val0_s)
      call eval_curve(tc(1),tc,kc,coefc,nctlc,ndim,val0_c)
@@ -894,7 +936,7 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
 
   end do iteration_loop
 
-  if (brute_force == .True.) then
+  if (brute_force .eqv. .True.) then
      deallocate(curve_vals,surface_vals)
   end if
 

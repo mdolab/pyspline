@@ -12,15 +12,15 @@ u = linspace(0,4,nu)
 v = linspace(0,4,nv)
 [V,U] = meshgrid(v,u)
 Z = cos(U)*sin(V)
-
 surf = pySpline.surface(x=U,y=V,z=Z,ku=4,kv=4,Nctlu=5,Nctlv=5)
 surf.writeTecplot('surface.dat')
 
 # Test the project point Algorithim
 x0 = [3,3,2]
-u,v,D = surf.projectPoint(x0)
-val = surf(u,v)
 
+u,v,D = surf.projectPoint(x0)
+
+val = surf(u,v)
 # Output the data
 f = open('projections2.dat','w')
 f.write('Zone T=surf_proj_pt I=2 \n')
