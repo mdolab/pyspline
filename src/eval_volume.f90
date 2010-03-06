@@ -346,7 +346,8 @@ subroutine eval_volume_T(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
               do j=1,kv
                  do k=1,kw
                     do idim=1,ndim
-                       val(ii,jj,kk,idim) = val(ii,jj,kk,idim) + basisu(i)*basisv(j)*basisw(k)*coef(istartu+i,istartv+j,istartw+k,idim)
+                       val(ii,jj,kk,idim) = val(ii,jj,kk,idim) + &
+                            basisu(i)*basisv(j)*basisw(k)*coef(istartu+i,istartv+j,istartw+k,idim)
                     end do
                  end do
               end do
@@ -466,7 +467,7 @@ subroutine eval_volume_deriv2(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndi
      val(1,3,idim) = b3val(u,v,w,1,0,1,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
 
      ! Row 2
-     val(2,1,idim) = val(1,2,dim)
+     val(2,1,idim) = val(1,2,idim)
      if (kv>=3) then
         val(2,2,idim) = b3val(u,v,w,0,2,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
      else

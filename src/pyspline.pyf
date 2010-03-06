@@ -575,7 +575,7 @@
        integer optional,intent(in),check(len(a_val)>=annz),depend(a_val) :: annz=len(a_val)
        integer optional,intent(in),check(len(b_val)>=bnnz),depend(b_val) :: bnnz=len(b_val)
        integer optional,intent(in),check(len(c_val)>=cnnz),depend(c_val) :: cnnz=len(c_val)
-       double precision dimension(annz+bnnz+cnnz),intent(out),depend(annz,bnnz,cnnz) :: j_val
+      double precision dimension(annz+bnnz+cnnz),intent(out),depend(annz,bnnz,cnnz) :: j_val
        integer dimension(annz+bnnz+cnnz),intent(out),depend(annz,bnnz,cnnz) :: j_col_ind
        integer dimension(am+cm+1),intent(out),depend(am,cm) :: j_row_ptr
      end subroutine constr_jac
@@ -592,8 +592,44 @@
        double precision dimension(n,ndim),intent(in),depend(n,ndim) :: x
      end subroutine curve_para_corr
      
-     subroutine cgns_test()
-     end subroutine cgns_test
+
+ ! ----------------- Tecplot Binary Functions -----------------------------
+  
+     subroutine i_ordered(name,data,n,ndim) ! in :test:tecplot_functions.F90
+       character*(*) intent(in) :: name
+       double precision dimension(n,ndim),intent(in) :: data
+       integer optional,check(shape(data,0)==n),depend(data) :: n=shape(data,0)
+       integer optional,check(shape(data,1)==ndim),depend(data) :: ndim=shape(data,1)
+     end subroutine i_ordered
+
+     subroutine ij_ordered(name,data,n,m,ndim) ! in :test:tecplot_functions.F90
+       character*(*) intent(in) :: name
+       double precision dimension(n,m,ndim),intent(in) :: data
+       integer optional,check(shape(data,0)==n),depend(data) :: n=shape(data,0)
+       integer optional,check(shape(data,1)==m),depend(data) :: m=shape(data,1)
+       integer optional,check(shape(data,2)==ndim),depend(data) :: ndim=shape(data,2)
+     end subroutine ij_ordered
+
+     subroutine ijk_ordered(name,data,n,m,l,ndim) ! in :test:tecplot_functions.F90
+       character*(*) intent(in) :: name
+       double precision dimension(n,m,ndim),intent(in) :: data
+       integer optional,check(shape(data,0)==n),depend(data) :: n=shape(data,0)
+       integer optional,check(shape(data,1)==m),depend(data) :: m=shape(data,1)
+       integer optional,check(shape(data,2)==l),depend(data) :: l=shape(data,2)
+       integer optional,check(shape(data,3)==ndim),depend(data) :: ndim=shape(data,3)
+     end subroutine ijk_ordered
+
+     subroutine tecplot_test(available)
+       integer intent(out) :: available
+     end subroutine tecplot_test
+
+     subroutine open_tecplot(fname,ndim) ! in :test:tecplot_functions.F90
+       character*(*) intent(in) :: fname
+       integer intent(in)       :: ndim
+     end subroutine open_tecplot
+
+     subroutine close_tecplot()
+     end subroutine close_tecplot`
 
   end interface
 end program
