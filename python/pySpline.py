@@ -149,7 +149,6 @@ def closeTecplot(f,tecio=USE_TECIO):
 # pySpline classes
 # =============================================================================
   
-
 class surface(object):
 
     def __init__(self,*args,**kwargs):
@@ -1458,42 +1457,141 @@ class volume(object):
             self.wmax = self.tw[-1]
             self.orig_data = False
             self._setFaceSurfaces()
-        else:
-            # We can do linear splines easily 
+        else: # We have LMS/Interpolate
+            # Do some checking on the number of control points
+            assert 'ku' in kwargs and 'kv' in kwargs and 'kw' in kwargs and \
+                ( 'X' in kwargs or 'x' in kwargs or \
+                      ( 'x' in kwargs and 'y' in kwargs) or \
+                      ( 'x' in kwargs and 'y' in kwargs and 'z' in kwargs)), \
+                      'Error: ku,kv, and X (or x or x and y or x and y and z \
+MUST be defined for task lms or interpolate'
+
             if 'X' in kwargs:
                 self.X  = array(kwargs['X'])
                 if len(self.X.shape) == 1:
                     self.nDim =1
                 else:
                     self.nDim = self.X.shape[3]
+            elif 'x' in kwargs and 'y' in kwargs and 'z'in kwargs:
+                self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],3))
+                self.X[:,:,:,0] = kwargs['x']
+                self.X[:,:,:,1] = kwargs['y']
+                self.X[:,:,:,2] = kwargs['z']
+                self.nDim = 3
+            elif 'x' in kwargs and 'y' in kwargs:
+                self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],2))
+                self.X[:,:,:,0] = kwargs['x']
+                self.X[:,:,:,1] = kwargs['y']
+                self.nDim = 2
+            elif 'x' in kwargs:
+                self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],1))
+                self.X[:,:,:,0] = kwargs['x']
+                self.nDim = 1
+            # enf if
+
+            self.Nu = self.X.shape[0]
+            self.Nv = self.X.shape[1]
+            self.Nw = self.X.shape[2]
+            self.ku = int(kwargs['ku'])
+            self.kv = int(kwargs['kv'])
+            self.kw = int(kwargs['kv'])
+
+            if 'Nctlu' in kwargs and 'Nctlv' in kwargs:
+                self.Nctlu = kwargs['Nctlu']
+                self.Nctlv = kwargs['Nctlv']
+                self.interp = False
             else:
-                mpiPrint('Only X=<Nu,Nv,Nw,3> is currently supported')
+                self.Nctlu = self.Nu
+                self.Nctlv = self.Nv
+                self.interp = True
+                
+            self.orig_data = True
+
+            # Sanity Check on Inputs
+            if self.Nctlu >= self.Nu:  self.Nctlu = self.Nu
+            if self.Nctlv >= self.Nv:  self.Nctlv = self.Nv
+            if self.Nctlw >= self.Nw:  self.Nctlw = self.Nw
+
+            # Sanity check to make sure k is less than N
+            if self.Nu < self.ku: self.ku = self.Nu
+            if self.Nv < self.kv: self.kv = self.Nv
+            if self.Nw < self.kw: self.kw = self.Nw
+            if self.Nctlu < self.ku: self.ku = self.Nctlu
+            if self.Nctlv < self.kv: self.kv = self.Nctlv
+            if self.Nctlw < self.kv: self.kv = self.Nctlw
+
+            if 'niter' in kwargs:
+                self.niter = kwargs['niter']
+            else:
+                self.niter = 1
             # end if
 
-            self.Nctlu = self.X.shape[0]
-            self.Nctlv = self.X.shape[1]
-            self.Nctlw = self.X.shape[2]
-            self.ku    = 2
-            self.kv    = 2
-            self.kw    = 2
-            self.coef = self.X
-            # Cheat on the knot vectors
-            u = linspace(0,1,self.Nctlu)
-            v = linspace(0,1,self.Nctlv)
-            w = linspace(0,1,self.Nctlw)
-            self.tu = pyspline.knots_interp(u,array([],'d'),self.ku)
-            self.tv = pyspline.knots_interp(v,array([],'d'),self.kv)
-            self.tw = pyspline.knots_interp(w,array([],'d'),self.kw)
-            self.umin = self.tu[0]
-            self.umax = self.tu[-1]
-            self.vmin = self.tv[0]
-            self.vmax = self.tv[-1]
-            self.wmin = self.tw[0]
-            self.wmax = self.tw[-1]
-            self.orig_data = False
-            self._setFaceSurfaces()
+            if 'u' in kwargs and 'v' in kwargs and 'w' in kwargs:
+                self.u = kwargs['u']
+                self.v = kwargs['v']
+                self.w = kwargs['w']
+            else:
+                if self.nDim == 3:
+                    self.u,self.v,self.w,self.U,self.V,self.W = \
+                        self._calcParameterization()
+                else:
+                    mpiPrint('Automatic parameterization of ONLY available\
+ for spatial data in 3 dimensions. Please supply u and v key word arguments\
+ otherwise.')
+                    sys.exit(1)
+                # end if
+            # end if
+            self.umin = 0
+            self.umax = 1
+            self.vmin = 0
+            self.vmax = 1
+            self.wmin = 0
+            self.wmax = 1
+            self._calcKnots()
+            self.recompute()
+        # end if
+
+    def recompute(self):
+        '''Recompute the volume if any driving data has been modified
+         Required:
+             None
+         Returns:
+             None
+             '''
+        vals,row_ptr,col_ind = pyspline.volume_jacobian_wrap(\
+            self.U,self.V,self.W,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw\
+                self.Nctlu,self.Nctlv,self.Nctlw)
+        N = sparse.csr_matrix((vals,col_ind,row_ptr),
+                                 shape=[self.Nu*self.Nv*self.Nw,self.Nctlu*self.Nctlv*self.Nctlw])
+        self.coef = zeros((self.Nctlu,self.Nctlv,self.Nctlw,self.nDim))
+
+        if self.interp:
+            solve = factorized( N )
+            for idim in xrange(self.nDim):
+                self.coef[:,:,:,idim] =  solve(self.X[:,:,:,idim].flatten()).reshape([self.Nctlu,self.Nctlv,self.Nctlw])
+            # end for
+        else:
+            solve = factorized (N.transpose()*N)
+            for idim in xrange(self.nDim):
+                rhs  = N.transpose()*self.X[:,:,idim].flatten()
+                self.coef[:,:,:,idim] = solve(rhs).reshape([self.Nctlu,self.Nctlv,self.Nctlw])
+            # end for
+        # end if
+        self._setFaceSurfaces()
+        return
+    
+    def _calcKnots(self):
+        if self.interp:
+            self.tu = pyspline.knots_interp(self.u,array([],'d'),self.ku)
+            self.tv = pyspline.knots_interp(self.v,array([],'d'),self.kv)
+            self.tw = pyspline.knots_interp(self.w,array([],'d'),self.kv)
+        else:
+            self.tu = pyspline.knots_lms(self.u,self.Nctlu,self.ku)
+            self.tv = pyspline.knots_lms(self.v,self.Nctlv,self.kv)
+            self.tw = pyspline.knots_lms(self.w,self.Nctlw,self.kw)
         # end if
             
+        return
 
     def _setFaceSurfaces(self):
         '''Create face spline objects for each of the faces'''
