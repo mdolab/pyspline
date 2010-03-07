@@ -1617,6 +1617,27 @@ MUST be defined for task lms or interpolate'
         '''
         return self.getValue(u,v,w)
 
+    def _readPlot3D(self,file_name):
+        f = open('test.xyz','rb')
+        nblocks = fromfile(f,dtype='int',count=1)[0]
+        sizes   = fromfile(f,dtype='int',count=nblocks*3).reshape((nblocks,3))
+        blocks = []
+        timeA = time.time()
+        print sizes
+        for i in xrange(nblocks):
+            print 'Reading block %d, size: %d %d %d'%(i,sizes[i,0],sizes[i,2],sizes[i,2])
+            cur_size = sizes[i,0]*sizes[i,1]*sizes[i,2]
+            blocks.append(zeros([sizes[i,0],sizes[i,1],sizes[i,2],3]))
+            for idim in xrange(3):
+                blocks[-1][:,:,:,idim] = fromfile(f,dtype='d',count=cur_size).reshape((sizes[i,0],sizes[i,1],sizes[i,2]),order='F')
+            # end for
+        f.close()
+
+    def _readCGNS(self,file_name):
+        return
+
+
+
     def getValue(self,u,v,w):
         '''Get the value at the volume points(s) u,v,w
         Required Arguments:
@@ -1727,8 +1748,6 @@ MUST be defined for task lms or interpolate'
             return result[0],result[1],result[2],result[3]
         # end if
 
-
-
     def _writeTecplotVolume(self,handle):
         '''Output this volume\'s data to a open file handle \'handle\' '''
         
@@ -1757,7 +1776,6 @@ MUST be defined for task lms or interpolate'
         _writeTecplot3D(handle,'control_pts',self.coef)
 
         return
-
 
     def _writeTecplotOrigData(self,handle):
         if self.orig_data:
