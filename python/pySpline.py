@@ -34,6 +34,7 @@ import scipy
 from scipy import sparse,io
 from scipy.sparse.linalg.dsolve import factorized
 scipy.sparse.linalg.use_solver(useUmfpack=False)
+from scipy.sparse.linalg import gmres
 
 # =============================================================================
 # Custom Python modules
@@ -98,6 +99,7 @@ def _writeTecplot3D(handle,name,data):
         nx = data.shape[0]
         ny = data.shape[1]
         nz = data.shape[2]
+        ndim = data.shape[3]
         handle.write('Zone T=\"%s\" I=%d J=%d K=%d\n'%(name,nx,ny,nz))
         handle.write('DATAPACKING=POINT\n')
         for k in xrange(nz):
@@ -136,8 +138,8 @@ def openTecplot(file_name,ndim,tecio=USE_TECIO):
     # end if
     return f
 
-def closeTecplot(f,tecio=USE_TECIO):
-    if tecio:
+def closeTecplot(f):
+    if f == None:
         pyspline.close_tecplot()
     else:
         f.close()
@@ -1499,10 +1501,12 @@ MUST be defined for task lms or interpolate'
             if 'Nctlu' in kwargs and 'Nctlv' in kwargs:
                 self.Nctlu = kwargs['Nctlu']
                 self.Nctlv = kwargs['Nctlv']
+                self.Nctlw = kwargs['Nctlw']
                 self.interp = False
             else:
                 self.Nctlu = self.Nu
                 self.Nctlv = self.Nv
+                self.Nctlw = self.Nw
                 self.interp = True
                 
             self.orig_data = True
@@ -1532,8 +1536,9 @@ MUST be defined for task lms or interpolate'
                 self.w = kwargs['w']
             else:
                 if self.nDim == 3:
-                    self.u,self.v,self.w,self.U,self.V,self.W = \
-                        self._calcParameterization()
+                    #self.u,self.v,self.w,self.U,self.V,self.W = \
+                    #    self._calcParameterization()
+                    self._calcParameterization()
                 else:
                     mpiPrint('Automatic parameterization of ONLY available\
  for spatial data in 3 dimensions. Please supply u and v key word arguments\
@@ -1548,7 +1553,7 @@ MUST be defined for task lms or interpolate'
             self.wmin = 0
             self.wmax = 1
             self._calcKnots()
-            self.recompute()
+            #self.recompute()
         # end if
 
     def recompute(self):
@@ -1559,8 +1564,9 @@ MUST be defined for task lms or interpolate'
              None
              '''
         vals,row_ptr,col_ind = pyspline.volume_jacobian_wrap(\
-            self.U,self.V,self.W,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw\
+            self.U,self.V,self.W,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,\
                 self.Nctlu,self.Nctlv,self.Nctlw)
+        
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
                                  shape=[self.Nu*self.Nv*self.Nw,self.Nctlu*self.Nctlv*self.Nctlw])
         self.coef = zeros((self.Nctlu,self.Nctlv,self.Nctlw,self.nDim))
@@ -1570,16 +1576,27 @@ MUST be defined for task lms or interpolate'
             for idim in xrange(self.nDim):
                 self.coef[:,:,:,idim] =  solve(self.X[:,:,:,idim].flatten()).reshape([self.Nctlu,self.Nctlv,self.Nctlw])
             # end for
+            
         else:
             solve = factorized (N.transpose()*N)
             for idim in xrange(self.nDim):
-                rhs  = N.transpose()*self.X[:,:,idim].flatten()
+                rhs  = N.transpose()*self.X[:,:,:,idim].flatten()
                 self.coef[:,:,:,idim] = solve(rhs).reshape([self.Nctlu,self.Nctlv,self.Nctlw])
             # end for
         # end if
         self._setFaceSurfaces()
         return
     
+    def _calcParameterization(self):
+        S,u,v,w = pyspline.para3d(self.X)
+        self.u = u
+        self.v = v
+        self.w = w
+        self.U = S[:,:,:,0]
+        self.V = S[:,:,:,1]
+        self.W = S[:,:,:,2]
+        return
+
     def _calcKnots(self):
         if self.interp:
             self.tu = pyspline.knots_interp(self.u,array([],'d'),self.ku)
@@ -1593,6 +1610,56 @@ MUST be defined for task lms or interpolate'
             
         return
 
+    def getMidPointFace(self,face):
+        '''Get the midpoint of the face
+        on edge.
+        Required:
+           edge: face index = 0,1,2,3,4,5
+        Returns:
+            midpoint 
+            '''
+        assert face in [0,1,2,3,4,5] and self.orig_data == True,'Error, getMidPointFace: No \
+original data for this surface or face is not in range 0->5'
+
+        if mod(self.Nu,2) == 1:
+            midu = [(self.Nu-1)/2,(self.Nu-1)/2]
+        else:
+            midu = [self.Nu/2,self.Nu/2-1]
+        # end if
+
+        if mod(self.Nv,2) == 1:
+            midv = [(self.Nv-1)/2,(self.Nv-1)/2]
+        else:
+            midv = [self.Nv/2,self.Nv/2-1]
+        # end if
+
+        if mod(self.Nw,2) == 1:
+            midw = [(self.Nw-1)/2,(self.Nw-1)/2]
+        else:
+            midw = [self.Nw/2,self.Nw/2-1]
+        # end if
+
+        if   face == 0:
+            val = (self.X[midu[0],midv[0],0] + self.X[midu[1],midv[0],0] +
+                   self.X[midu[0],midv[1],0] + self.X[midu[1],midv[1],0])/4.0
+        elif face == 1:
+            val = (self.X[midu[0],midv[0],-1] + self.X[midu[1],midv[0],-1] +
+                   self.X[midu[0],midv[1],-1] + self.X[midu[1],midv[1],-1])/4.0
+        elif face == 2:
+            val = (self.X[0,midv[0],midw[0]] + self.X[0,midv[1],midw[0]] +
+                   self.X[0,midv[0],midw[1]] + self.X[0,midv[1],midw[1]])/4.0
+        elif face == 3:
+            val = (self.X[-1,midv[0],midw[0]] + self.X[-1,midv[1],midw[0]] +
+                   self.X[-1,midv[0],midw[1]] + self.X[-1,midv[1],midw[1]])/4.0
+        elif face == 4:
+            val = (self.X[midu[0],0,midw[0]] + self.X[midu[1],0,midw[0]] +
+                   self.X[midu[0],0,midw[1]] + self.X[midu[1],0,midw[1]])/4.0
+        elif face == 5:
+            val = (self.X[midu[0],-1,midw[0]] + self.X[midu[1],-1,midw[0]] +
+                   self.X[midu[0],-1,midw[1]] + self.X[midu[1],-1,midw[1]])/4.0
+        # end if
+        return val
+ 
     def _setFaceSurfaces(self):
         '''Create face spline objects for each of the faces'''
         self.face_surfaces = [None,None,None,None,None,None]
@@ -1616,27 +1683,6 @@ MUST be defined for task lms or interpolate'
         Equivalant to getValue
         '''
         return self.getValue(u,v,w)
-
-    def _readPlot3D(self,file_name):
-        f = open('test.xyz','rb')
-        nblocks = fromfile(f,dtype='int',count=1)[0]
-        sizes   = fromfile(f,dtype='int',count=nblocks*3).reshape((nblocks,3))
-        blocks = []
-        timeA = time.time()
-        print sizes
-        for i in xrange(nblocks):
-            print 'Reading block %d, size: %d %d %d'%(i,sizes[i,0],sizes[i,2],sizes[i,2])
-            cur_size = sizes[i,0]*sizes[i,1]*sizes[i,2]
-            blocks.append(zeros([sizes[i,0],sizes[i,1],sizes[i,2],3]))
-            for idim in xrange(3):
-                blocks[-1][:,:,:,idim] = fromfile(f,dtype='d',count=cur_size).reshape((sizes[i,0],sizes[i,1],sizes[i,2]),order='F')
-            # end for
-        f.close()
-
-    def _readCGNS(self,file_name):
-        return
-
-
 
     def getValue(self,u,v,w):
         '''Get the value at the volume points(s) u,v,w
@@ -1758,7 +1804,6 @@ MUST be defined for task lms or interpolate'
         u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
         v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
         w_plot = 0.5*(1-cos(linspace(0,pi,Nz)))
-
         # Dump re-interpolated surface
         W_plot = zeros((Nx,Ny,Nz))
         V_plot = zeros((Nx,Ny,Nz))
@@ -1767,7 +1812,8 @@ MUST be defined for task lms or interpolate'
             [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
             W_plot[i,:,:] = w_plot[i]
         # end for
-        _writeTecplot3D(handle,'interpolated',self.getValue(U_plot,V_plot,W_plot))
+        values = self.getValue(U_plot,V_plot,W_plot)
+        _writeTecplot3D(handle,'interpolated',values)
 
         return
 
@@ -1795,15 +1841,14 @@ MUST be defined for task lms or interpolate'
             dir  : Boolean to write out surface direction indicators (default=False)
 
             '''
-        openTecplot(file_name,self.nDim,tecio)
-        
+        f = openTecplot(file_name,self.nDim,tecio)
         if vols:
             self._writeTecplotVolume(f)
         if coef:
             self._writeTecplotCoef(f)
         if orig:
             self._writeTecplotOrigData(f)
-        closeTecplot()
+        closeTecplot(f)
 
 # ----------------------------------------------------------------------
 #                     Misc Helper Functions

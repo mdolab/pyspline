@@ -17,6 +17,7 @@ OBJ =	lsqrDataModule.o\
 	lms_jacobian.o\
 	compute_curve.o\
 	compute_surface.o\
+	compute_volume.o\
 	eval_curve.o\
 	eval_surface.o\
 	eval_volume.o\
@@ -35,6 +36,7 @@ OBJ =	lsqrDataModule.o\
 	getBasisPt.o\
 	cgns_test.o\
 	tecplot_functions.o\
+	parameterizations.o\
 	machcon/i1mach.o\
 	machcon/r1mach.o\
 	xerror/fdump.o\
