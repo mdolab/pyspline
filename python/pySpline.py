@@ -1553,7 +1553,7 @@ MUST be defined for task lms or interpolate'
             self.wmin = 0
             self.wmax = 1
             self._calcKnots()
-            #self.recompute()
+            self.recompute()
         # end if
 
     def recompute(self):
@@ -1609,6 +1609,74 @@ MUST be defined for task lms or interpolate'
         # end if
             
         return
+
+    def getOrigValuesFace(self,face):
+        '''Return an array of length 8*ndim which cooresponds to the
+        the four corners (node 0-3) and the four midpoints (on edges
+        0-3) for face face
+        Required: 
+            face: integer (0-5)
+        Returns:
+            coordinates: size(8,ndim)
+            '''
+        if mod(self.Nu,2) == 1:
+            midu = [(self.Nu-1)/2,(self.Nu-1)/2]
+        else:
+            midu = [self.Nu/2,self.Nu/2-1]
+        # end if
+
+        if mod(self.Nv,2) == 1:
+            midv = [(self.Nv-1)/2,(self.Nv-1)/2]
+        else:
+            midv = [self.Nv/2,self.Nv/2-1]
+        # end if
+
+        if mod(self.Nw,2) == 1:
+            midw = [(self.Nw-1)/2,(self.Nw-1)/2]
+        else:
+            midw = [self.Nw/2,self.Nw/2-1]
+        # end if
+
+        if   face == 0:
+            values = [self.X[0,0,0],self.X[-1,0,0],self.X[0,-1,0],self.X[-1,-1,0],
+                      0.5*(self.X[midu[0],0,0 ] + self.X[midu[1],0,0]),
+                      0.5*(self.X[midu[0],-1,0] + self.X[midu[1],-1,0]),
+                      0.5*(self.X[0,midv[0],0 ] + self.X[0,midv[1],0]),
+                      0.5*(self.X[-1,midv[0],0] + self.X[-1,midv[1],0])]
+        elif face == 1:
+            values = [self.X[0,0,-1],self.X[-1,0,-1],self.X[0,-1,-1],self.X[-1,-1,-1],
+                      0.5*(self.X[midu[0],0,-1 ] + self.X[midu[1],0,-1]),
+                      0.5*(self.X[midu[0],-1,-1] + self.X[midu[1],-1,-1]),
+                      0.5*(self.X[0,midv[0],-1 ] + self.X[0,midv[1],-1]),
+                      0.5*(self.X[-1,midv[0],-1] + self.X[-1,midv[1],-1])]
+        elif face == 2:
+            values = [self.X[0,0,0],self.X[0,-1,0],self.X[0,0,-1],self.X[0,-1,-1],
+                      0.5*(self.X[0,midv[0], 0] + self.X[0,midv[1],0 ]),
+                      0.5*(self.X[0,midv[0],-1] + self.X[0,midv[1],-1]),
+                      0.5*(self.X[0,0,midw[0] ] + self.X[0,0,midw[1] ]),
+                      0.5*(self.X[0,-1,midw[0]] + self.X[0,-1,midw[1]])]
+        elif face == 3:
+            values = [self.X[-1,0,0],self.X[-1,-1,0],self.X[-1,0,-1],self.X[-1,-1,-1],
+                      0.5*(self.X[-1,midv[0], 0] + self.X[-1,midv[1],0 ]),
+                      0.5*(self.X[-1,midv[0],-1] + self.X[-1,midv[1],-1]),
+                      0.5*(self.X[-1,0,midw[0] ] + self.X[-1,0,midw[1] ]),
+                      0.5*(self.X[-1,-1,midw[0]] + self.X[-1,-1,midw[1]])]
+        elif face == 4:
+            values = [self.X[0,0,0],self.X[-1,0,0],self.X[0,0,-1],self.X[-1,0,-1],
+                      0.5*(self.X[midu[0],0,0 ] + self.X[midu[1],0,0 ]),
+                      0.5*(self.X[midu[0],0,-1] + self.X[midu[1],0,-1]),
+                      0.5*(self.X[0,0,midw[0] ] + self.X[0,0,midw[1] ]),
+                      0.5*(self.X[-1,0,midw[0]] + self.X[-1,0,midw[1]])]
+        elif face == 5:
+            values = [self.X[0,-1,0],self.X[-1,-1,0],self.X[0,-1,-1],self.X[-1,-1,-1],
+                      0.5*(self.X[midu[0],-1,0 ] + self.X[midu[1],-1,0 ]),
+                      0.5*(self.X[midu[0],-1,-1] + self.X[midu[1],-1,-1]),
+                      0.5*(self.X[0,-1,midw[0] ] + self.X[0,-1,midw[1] ]),
+                      0.5*(self.X[-1,-1,midw[0]] + self.X[-1,-1,midw[1]])]
+        # end if
+        return array(values)
+
+
 
     def getMidPointFace(self,face):
         '''Get the midpoint of the face

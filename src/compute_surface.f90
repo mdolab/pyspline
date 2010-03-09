@@ -188,7 +188,7 @@ subroutine surface_jacobian_wrap(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,vals,row_ptr,
         ! Get u interval
         call intrv(tu,nctlu+ku,u(i,j),ilou,ileftu,mflagu)
         if (mflagu == 0) then
-           call bspvn(tu,ku,ku,1,u(i,j),ileftu,vniku,worku,iwork)
+           call bspvn(tu,nctlu+ku,ku,ku,1,u(i,j),ileftu,vniku,worku,iwork)
         else if (mflagu == 1) then
            ileftu = nctlu
            vniku(:) = 0.0
@@ -198,7 +198,7 @@ subroutine surface_jacobian_wrap(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,vals,row_ptr,
         ! Get v interval
         call intrv(tv,nctlv+kv,v(i,j),ilov,ileftv,mflagv)
         if (mflagv == 0) then
-           call bspvn(tv,kv,kv,1,v(i,j),ileftv,vnikv,workv,iwork)
+           call bspvn(tv,nctlv+kv,kv,kv,1,v(i,j),ileftv,vnikv,workv,iwork)
         else if (mflagv == 1) then
            ileftv = nctlv
            vnikv(:) = 0.0
