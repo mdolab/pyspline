@@ -47,7 +47,7 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   if (mflagu == 1) then
      ileftu = ileftu-ku
   end if
-  call BSPVN(tu,ku,ku,1,u,ileftu,basisu,worku,iworku)
+  call BSPVN(tu,nctlu+ku,ku,ku,1,u,ileftu,basisu,worku,iworku)
   istartu = ileftu-ku
   
   ! V
@@ -55,7 +55,7 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   if (mflagv == 1) then
      ileftv = ileftv-kv
   end if
-  call BSPVN(tv,kv,kv,1,v,ileftv,basisv,workv,iworkv)
+  call BSPVN(tv,nctlv+kv,kv,kv,1,v,ileftv,basisv,workv,iworkv)
   istartv = ileftv-kv
 
   do i=1,ku
@@ -119,7 +119,7 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
      if (mflagu == 1) then
         ileftu = ileftu-ku
      end if
-     call BSPVN(tu,ku,ku,1,u(ii),ileftu,basisu,worku,iworku)
+     call BSPVN(tu,nctlu+ku,ku,ku,1,u(ii),ileftu,basisu,worku,iworku)
      istartu = ileftu-ku
      
      ! V
@@ -127,7 +127,7 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
      if (mflagv == 1) then
         ileftv = ileftv-kv
      end if
-     call BSPVN(tv,kv,kv,1,v(ii),ileftv,basisv,workv,iworkv)
+     call BSPVN(tv,nctlv+kv,kv,kv,1,v(ii),ileftv,basisv,workv,iworkv)
      istartv = ileftv-kv
      
      do i=1,ku
@@ -191,7 +191,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
         if (mflagu == 1) then
            ileftu = ileftu-ku
         end if
-        call BSPVN(tu,ku,ku,1,u(ii,jj),ileftu,basisu,worku,iworku)
+        call BSPVN(tu,nctlu+ku,ku,ku,1,u(ii,jj),ileftu,basisu,worku,iworku)
         istartu = ileftu-ku
         
         ! V
@@ -199,7 +199,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
         if (mflagv == 1) then
            ileftv = ileftv-kv
         end if
-        call BSPVN(tv,kv,kv,1,v(ii,jj),ileftv,basisv,workv,iworkv)
+        call BSPVN(tv,nctlv+kv,kv,kv,1,v(ii,jj),ileftv,basisv,workv,iworkv)
         istartv = ileftv-kv
      
         do i=1,ku
