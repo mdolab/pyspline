@@ -1553,7 +1553,7 @@ MUST be defined for task lms or interpolate'
             self.wmin = 0
             self.wmax = 1
             self._calcKnots()
-            self.recompute()
+            #self.recompute()
         # end if
 
     def recompute(self):
@@ -1609,6 +1609,26 @@ MUST be defined for task lms or interpolate'
         # end if
             
         return
+
+    def getOrigValueCorner(self,corner):
+        '''Return the original value on corner corner'''
+        if corner == 0:
+            return self.X[0,0,0]
+        elif corner == 1:
+            return self.X[-1,0,0]
+        elif corner == 2:
+            return self.X[0,-1,0]
+        elif corner == 3:
+            return self.X[-1,-1,0]
+        elif corner == 4:
+            return self.X[0,0,-1]
+        elif corner == 5:
+            return self.X[-1,0,-1]
+        elif corner == 6:
+            return self.X[0,-1,-1]
+        elif corner == 7:
+            return self.X[-1,-1,-1]
+
 
     def getOrigValuesFace(self,face):
         '''Return an array of length 8*ndim which cooresponds to the
