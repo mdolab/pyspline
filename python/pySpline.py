@@ -1553,7 +1553,7 @@ MUST be defined for task lms or interpolate'
             self.wmin = 0
             self.wmax = 1
             self._calcKnots()
-            #self.recompute()
+            self.recompute()
         # end if
 
     def recompute(self):
