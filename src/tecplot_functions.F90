@@ -151,7 +151,7 @@ subroutine open_tecplot(fname,ndim)
   character(80)                :: var_names 
   ! These Never Change
   integer VIsDouble                /1/
-  integer debug                    /0/
+  integer debug                    /1/
   integer FileType                 /0/ 
   INTEGER ZoneType                 /0/
   integer I

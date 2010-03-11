@@ -129,6 +129,7 @@ def _writeHeader(f,ndim):
 def openTecplot(file_name,ndim,tecio=USE_TECIO):
     if tecio:
         mpiPrint('Opening binary Tecplot File: %s'%(file_name))
+        pdb.set_trace()
         pyspline.open_tecplot(file_name,ndim)
         f = None
     else:
@@ -1553,7 +1554,7 @@ MUST be defined for task lms or interpolate'
             self.wmin = 0
             self.wmax = 1
             self._calcKnots()
-            self.recompute()
+            # self.recompute()
         # end if
 
     def recompute(self):
@@ -1567,8 +1568,11 @@ MUST be defined for task lms or interpolate'
             self.U,self.V,self.W,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,\
                 self.Nctlu,self.Nctlv,self.Nctlw)
         
+        #print 'done jacobian'
+        #print len(vals)
+
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
-                                 shape=[self.Nu*self.Nv*self.Nw,self.Nctlu*self.Nctlv*self.Nctlw])
+                              shape=[self.Nu*self.Nv*self.Nw,self.Nctlu*self.Nctlv*self.Nctlw])
         self.coef = zeros((self.Nctlu,self.Nctlv,self.Nctlw,self.nDim))
 
         if self.interp:
@@ -1588,20 +1592,43 @@ MUST be defined for task lms or interpolate'
         return
     
     def _calcParameterization(self):
-        S,u,v,w = pyspline.para3d(self.X)
-        self.u = u
-        self.v = v
-        self.w = w
-        self.U = S[:,:,:,0]
-        self.V = S[:,:,:,1]
-        self.W = S[:,:,:,2]
+#         S,u,v,w = pyspline.para3d(self.X)
+#         self.u = u
+#         self.v = v
+#         self.w = w
+#         self.U = S[:,:,:,0]
+#         self.V = S[:,:,:,1]
+#         self.W = S[:,:,:,2]
+        Nx = self.Nu
+        Ny = self.Nv
+        Nz = self.Nw
+        u_plot = linspace(0,1,self.Nu)
+        v_plot = linspace(0,1,self.Nv)
+        w_plot = linspace(0,1,self.Nw)
+        # Dump re-interpolated surface
+        W_plot = zeros((Nx,Ny,Nz))
+        V_plot = zeros((Nx,Ny,Nz))
+        U_plot = zeros((Nx,Ny,Nz))
+        for i in xrange(Nx):
+            [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
+            W_plot[i,:,:] = w_plot[i]
+        # end for
+        self.u = u_plot
+        self.v = v_plot
+        self.w = w_plot
+        self.U = U_plot
+        self.V = V_plot
+        self.W = W_plot
+
+
+
         return
 
     def _calcKnots(self):
         if self.interp:
             self.tu = pyspline.knots_interp(self.u,array([],'d'),self.ku)
             self.tv = pyspline.knots_interp(self.v,array([],'d'),self.kv)
-            self.tw = pyspline.knots_interp(self.w,array([],'d'),self.kv)
+            self.tw = pyspline.knots_interp(self.w,array([],'d'),self.kw)
         else:
             self.tu = pyspline.knots_lms(self.u,self.Nctlu,self.ku)
             self.tv = pyspline.knots_lms(self.v,self.Nctlv,self.kv)
@@ -1938,6 +1965,36 @@ original data for this surface or face is not in range 0->5'
             self._writeTecplotOrigData(f)
         closeTecplot(f)
 
+    def _writeBvol(self,handle,binary):
+        '''Write the data to an open file handle'''
+        # Initial Integers
+        init_values = array([self.Nctlu,self.Nctlv,self.Nctlw,
+                             self.ku,self.kv,self.kw])
+        if binary:
+            init_values.tofile(handle,sep="")
+            # Knot Vectors
+            self.tu.tofile(handle,sep="")
+            self.tv.tofile(handle,sep="")
+            self.tw.tofile(handle,sep="")
+            # Control Points
+            self.coef.flatten().tofile(handle)
+        else:
+            init_values.tofile(handle,sep="\n",format="%d")
+            handle.write('\n')
+            # Knot Vectors
+            self.tu.tofile(handle,sep="\n",format="%f")
+            handle.write('\n')
+            self.tv.tofile(handle,sep="\n",format="%f")
+            handle.write('\n')
+            self.tw.tofile(handle,sep="\n",format="%f")
+            handle.write('\n')
+            # Control Points
+            self.coef.flatten().tofile(handle,sep="\n",format="%f")
+            handle.write('\n')
+        # end if
+        
+        return 
+        
 # ----------------------------------------------------------------------
 #                     Misc Helper Functions
 # ----------------------------------------------------------------------

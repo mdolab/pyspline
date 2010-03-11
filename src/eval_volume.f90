@@ -42,7 +42,7 @@ subroutine eval_volume(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,val)
   integer                               :: ileftv,iworkv,ilov,mflagv
   integer                               :: ileftw,iworkw,ilow,mflagw
   double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-  double precision                      :: worku(2*ku),workv(2*kv),workw(2*kw)
+  double precision                      :: worku(4*ku),workv(4*kv),workw(4*kw)
 
   val(:) = 0.0
   ilou = 1
@@ -128,7 +128,7 @@ subroutine eval_volume_V(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,v
   integer                               :: ileftv,iworkv,ilov,mflagv
   integer                               :: ileftw,iworkw,ilow,mflagw
   double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-  double precision                      :: worku(2*ku),workv(2*kv),workw(2*kw)
+  double precision                      :: worku(4*ku),workv(4*kv),workw(4*kw)
 
   val(:,:) = 0.0
   ilou = 1
@@ -218,7 +218,7 @@ subroutine eval_volume_M(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
   integer                               :: ileftv,iworkv,ilov,mflagv
   integer                               :: ileftw,iworkw,ilow,mflagw
   double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-  double precision                      :: worku(2*ku),workv(2*kv),workw(2*kw)
+  double precision                      :: worku(4*ku),workv(4*kv),workw(4*kw)
 
   val(:,:,:) = 0.0
   ilou = 1
@@ -308,7 +308,7 @@ subroutine eval_volume_T(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
   integer                               :: ileftv,iworkv,ilov,mflagv
   integer                               :: ileftw,iworkw,ilow,mflagw
   double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-  double precision                      :: worku(2*ku),workv(2*kv),workw(2*kw)
+  double precision                      :: worku(4*ku),workv(4*kv),workw(4*kw)
 
   val(:,:,:,:) = 0.0
   ilou = 1
