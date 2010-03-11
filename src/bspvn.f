@@ -119,4 +119,4 @@ C$$$C
       CALL XERROR( ' BSPVN,  X DOES NOT SATISFY T(ILEFT).LE.X.LE.T(ILEFT
      1+1)', 55, 2, 1)
       RETURN
-      END
+      end 

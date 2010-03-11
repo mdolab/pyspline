@@ -26,6 +26,7 @@ OBJ =	lsqrDataModule.o\
 	intrv.o\
 	bspvn.o\
 	bspvd.o\
+	basis.o\
 	knots_lms.o\
 	knots_interp.o\
 	b2val.o\
