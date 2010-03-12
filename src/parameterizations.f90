@@ -17,8 +17,9 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
   implicit none
 
   ! Input
-  double precision , intent(in)   :: X(n,m,l,ndim)
   integer          , intent(in)   :: n,m,l,ndim
+  double precision , intent(in)   :: X(n,m,l,ndim)
+  
 
   ! Output
   double precision , intent(out)  :: S(n,m,l,ndim)

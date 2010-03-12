@@ -1592,35 +1592,13 @@ MUST be defined for task lms or interpolate'
         return
     
     def _calcParameterization(self):
-#         S,u,v,w = pyspline.para3d(self.X)
-#         self.u = u
-#         self.v = v
-#         self.w = w
-#         self.U = S[:,:,:,0]
-#         self.V = S[:,:,:,1]
-#         self.W = S[:,:,:,2]
-        Nx = self.Nu
-        Ny = self.Nv
-        Nz = self.Nw
-        u_plot = linspace(0,1,self.Nu)
-        v_plot = linspace(0,1,self.Nv)
-        w_plot = linspace(0,1,self.Nw)
-        # Dump re-interpolated surface
-        W_plot = zeros((Nx,Ny,Nz))
-        V_plot = zeros((Nx,Ny,Nz))
-        U_plot = zeros((Nx,Ny,Nz))
-        for i in xrange(Nx):
-            [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
-            W_plot[i,:,:] = w_plot[i]
-        # end for
-        self.u = u_plot
-        self.v = v_plot
-        self.w = w_plot
-        self.U = U_plot
-        self.V = V_plot
-        self.W = W_plot
-
-
+        S,u,v,w = pyspline.para3d(self.X)
+        self.u = u
+        self.v = v
+        self.w = w
+        self.U = S[:,:,:,0]
+        self.V = S[:,:,:,1]
+        self.W = S[:,:,:,2]
 
         return
 
@@ -1809,6 +1787,9 @@ original data for this surface or face is not in range 0->5'
         u = array(u)
         v = array(v)
         w = array(w)
+
+        print 'shapes:',u.shape,v.shape,w.shape
+
         assert u.shape == v.shape == w.shape,'Error, getValue: u and v must have the same shape'
         if len(u.shape) == 0:
             return pyspline.eval_volume(u,v,w,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,self.coef)
@@ -1913,23 +1894,24 @@ original data for this surface or face is not in range 0->5'
         '''Output this volume\'s data to a open file handle \'handle\' '''
         
         # This works really well actually
-        Nx = self.Nctlu*self.ku+1
-        Ny = self.Nctlv*self.kv+1
-        Nz = self.Nctlw*self.kw+1
-        u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
-        v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
-        w_plot = 0.5*(1-cos(linspace(0,pi,Nz)))
-        # Dump re-interpolated surface
-        W_plot = zeros((Nx,Ny,Nz))
-        V_plot = zeros((Nx,Ny,Nz))
-        U_plot = zeros((Nx,Ny,Nz))
-        for i in xrange(Nx):
-            [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
-            W_plot[i,:,:] = w_plot[i]
-        # end for
-        values = self.getValue(U_plot,V_plot,W_plot)
+#         Nx = self.Nctlu*self.ku+1
+#         Ny = self.Nctlv*self.kv+1
+#         Nz = self.Nctlw*self.kw+1
+#         u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
+#         v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
+#         w_plot = 0.5*(1-cos(linspace(0,pi,Nz)))
+#         # Dump re-interpolated surface
+#         W_plot = zeros((Nx,Ny,Nz))
+#         V_plot = zeros((Nx,Ny,Nz))
+#         U_plot = zeros((Nx,Ny,Nz))
+#         for i in xrange(Nx):
+#             [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
+#             W_plot[i,:,:] = w_plot[i]
+#         # end for
+#         #values = self.getValue(U_plot,V_plot,W_plot)
+        values = self.getValue(self.U,self.V,self.W)
         _writeTecplot3D(handle,'interpolated',values)
-
+        
         return
 
     def _writeTecplotCoef(self,handle):
