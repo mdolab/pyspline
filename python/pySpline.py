@@ -491,8 +491,8 @@ original data for this surface or node is not in range 0->3'
         # matrix. vals,row_ptr,col_ind is the CSR data and 
         # l_index in the local -> global mapping for this 
         # surface
-        return pyspline.getbasispt(u,v,self.tu,self.tv,self.ku,self.kv,vals,
-                                   col_ind,istart,l_index)
+        return pyspline.getbasisptsurface(u,v,self.tu,self.tv,self.ku,self.kv,vals,
+                                          col_ind,istart,l_index)
                                 
     def __call__(self,u,v):
         '''
@@ -917,7 +917,10 @@ class curve(object):
             self.orig_data = False
             self.smin = self.t[0]
             self.smax = self.t[-1]
-            self.nDim = self.coef.shape[1]
+            if len(self.coef.shape) == 1:
+                self.nDim = 1
+            else:
+                self.nDim = self.coef.shape[1]
             self._calcGrevillePoints()
         else: #lms or interpolate function
             assert 'k' in kwargs and ('X' in kwargs or 'x' in kwargs),\
@@ -1790,8 +1793,6 @@ original data for this surface or face is not in range 0->5'
         v = array(v)
         w = array(w)
 
-        print 'shapes:',u.shape,v.shape,w.shape
-
         assert u.shape == v.shape == w.shape,'Error, getValue: u and v must have the same shape'
         if len(u.shape) == 0:
             return pyspline.eval_volume(u,v,w,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,self.coef)
@@ -1826,6 +1827,19 @@ original data for this surface or face is not in range 0->5'
         Xmax[2] = max(cz)
 
         return Xmin,Xmax
+
+
+    def _getBasisPt(self,u,v,w,vals,istart,col_ind,l_index):
+        # This function should only be called from pyBlock The purpose
+        # is to compute the basis function for a u,v,w point and add
+        # it to pyBlcoks's global dPt/dCoef
+        # matrix. vals,row_ptr,col_ind is the CSR data and l_index in
+        # the local -> global mapping for this volume
+
+        return pyspline.getbasisptvolume(u,v,w,self.tu,self.tv,self.tw,
+                                         self.ku,self.kv,self.kw,vals,
+                                         col_ind,istart,l_index)
+    
 
     def projectPoint(self,x0,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
@@ -1896,22 +1910,21 @@ original data for this surface or face is not in range 0->5'
         '''Output this volume\'s data to a open file handle \'handle\' '''
         
         # This works really well actually
-#         Nx = self.Nctlu*self.ku+1
-#         Ny = self.Nctlv*self.kv+1
-#         Nz = self.Nctlw*self.kw+1
-#         u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
-#         v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
-#         w_plot = 0.5*(1-cos(linspace(0,pi,Nz)))
-#         # Dump re-interpolated surface
-#         W_plot = zeros((Nx,Ny,Nz))
-#         V_plot = zeros((Nx,Ny,Nz))
-#         U_plot = zeros((Nx,Ny,Nz))
-#         for i in xrange(Nx):
-#             [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
-#             W_plot[i,:,:] = w_plot[i]
-#         # end for
-#         #values = self.getValue(U_plot,V_plot,W_plot)
-        values = self.getValue(self.U,self.V,self.W)
+        Nx = self.Nctlu*self.ku+1
+        Ny = self.Nctlv*self.kv+1
+        Nz = self.Nctlw*self.kw+1
+        u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
+        v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
+        w_plot = 0.5*(1-cos(linspace(0,pi,Nz)))
+        # Dump re-interpolated surface
+        W_plot = zeros((Nx,Ny,Nz))
+        V_plot = zeros((Nx,Ny,Nz))
+        U_plot = zeros((Nx,Ny,Nz))
+        for i in xrange(Nx):
+            [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
+            W_plot[i,:,:] = w_plot[i]
+        # end for
+        values = self.getValue(U_plot,V_plot,W_plot)
         _writeTecplot3D(handle,'interpolated',values)
         
         return

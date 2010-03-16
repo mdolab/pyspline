@@ -506,7 +506,7 @@
        integer optional,check(shape(coef,0)==ncoef),depend(coef) :: ncoef=shape(coef,0)
      end subroutine updatecoefficients
 
-     subroutine getbasispt(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,nctlv,nnz) ! in :test:getBasisPt.f90
+     subroutine getbasisptsurface(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,nctlv,nnz) ! in :test:getBasisPt.f90
        double precision intent(in) :: u
        double precision intent(in) :: v
        double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
@@ -521,6 +521,26 @@
        integer optional,intent(in),check(shape(l_index,1)==nctlv),depend(l_index) :: nctlv=shape(l_index,1)
        integer optional,intent(in),check(len(vals)>=nnz),depend(vals) :: nnz=len(vals)
      end subroutine getbasispt
+
+     subroutine getbasisptvolume(u,v,w,tu,tv,tw,ku,kv,kw,vals,col_ind,istart,l_index,nctlu,nctlv,nctlw,nnz) ! in :test:getBasisPt.f90
+       double precision intent(in) :: u
+       double precision intent(in) :: v
+       double precision intent(in) :: w
+       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       double precision dimension(nctlw+kw),intent(in),depend(kw,nctlw) :: tw
+       integer intent(in) :: ku
+       integer intent(in) :: kv
+       integer intent(in) :: kw
+       double precision dimension(nnz),intent(in,out) :: vals
+       integer dimension(nnz),intent(in,out),depend(nnz) :: col_ind
+       integer intent(in) :: istart
+       integer dimension(nctlu,nctlv,nctlw),intent(in) :: l_index
+       integer optional,intent(in),check(shape(l_index,0)==nctlu),depend(l_index) :: nctlu=shape(l_index,0)
+       integer optional,intent(in),check(shape(l_index,1)==nctlv),depend(l_index) :: nctlv=shape(l_index,1)
+       integer optional,intent(in),check(shape(l_index,2)==nctlw),depend(l_index) :: nctlw=shape(l_index,2)
+       integer optional,intent(in),check(len(vals)>=nnz),depend(vals) :: nnz=len(vals)
+     end subroutine getbasisptvolume
 
      subroutine updatecoefficients_c(type_bn,s_pos,links,coef,indicies,s,t,x,rotx,roty,rotz,scale,rot_type,nref,ns,ncoef) ! in :test:updatecoefficients_c.f90
        integer intent(in) :: type_bn
@@ -643,7 +663,7 @@
 
      subroutine ijk_ordered(name,data,n,m,l,ndim) ! in :test:tecplot_functions.F90
        character*(*) intent(in) :: name
-       double precision dimension(n,m,ndim),intent(in) :: data
+       double precision dimension(n,m,l,ndim),intent(in) :: data
        integer optional,check(shape(data,0)==n),depend(data) :: n=shape(data,0)
        integer optional,check(shape(data,1)==m),depend(data) :: m=shape(data,1)
        integer optional,check(shape(data,2)==l),depend(data) :: l=shape(data,2)
