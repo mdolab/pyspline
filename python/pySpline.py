@@ -129,7 +129,6 @@ def _writeHeader(f,ndim):
 def openTecplot(file_name,ndim,tecio=USE_TECIO):
     if tecio:
         mpiPrint('Opening binary Tecplot File: %s'%(file_name))
-        pdb.set_trace()
         pyspline.open_tecplot(file_name,ndim)
         f = None
     else:
@@ -285,8 +284,11 @@ MUST be defined for task lms or interpolate'
             # end if
 
             if 'u' in kwargs and 'v' in kwargs:
-                self.u = kwargs['u']
-                self.v = kwargs['v']
+                self.u = array(kwargs['u'],'f')
+                self.v = array(kwargs['v'],'f')
+                self.u/=self.u[-1]
+                self.v/=self.v[-1]
+                [self.V,self.U] = meshgrid(self.v,self.u)
             else:
                 if self.nDim == 3:
                     self.u,self.v,self.U,self.V = self._calcParameterization()
@@ -744,7 +746,7 @@ original data for this surface or node is not in range 0->3'
             self._writeTecplotOrigData(f)
         if dir:
             self._writeDirections(f)
-        closeTecplot()
+        closeTecplot(f)
 
     def _writeIGES_directory(self,handle,Dcount,Pcount):
         '''
@@ -1554,7 +1556,7 @@ MUST be defined for task lms or interpolate'
             self.wmin = 0
             self.wmax = 1
             self._calcKnots()
-            # self.recompute()
+            #self.recompute()
         # end if
 
     def recompute(self):
