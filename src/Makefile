@@ -10,12 +10,7 @@ include ${RULES}
 
 SPLINE_LIB = libspline.a
 SPLINE_LIB_SHARED = libspline.so
-OBJ =	lsqrDataModule.o\
-	lsqrblasInterface.o\
-	lsqrCheckModule.o\
-	lsqrModule.o\
-	lms_jacobian.o\
-	compute_curve.o\
+OBJ =	compute_curve.o\
 	compute_surface.o\
 	compute_volume.o\
 	eval_curve.o\
@@ -61,5 +56,5 @@ clean:
 libspline: $(OBJ) 
 	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(OBJ)
 	$(FC)  -shared $(OBJ) -o $(SPLINE_LIB_SHARED) 
-	f2py  --fcompiler=${COMPILER_NAME} --f90flags='${FFLAGS}' -c -m pyspline pyspline.pyf libspline.a ${TEC_LIB} ${LIBSTDCpp} -lblas
+	f2py  --fcompiler=${COMPILER_NAME} --f90flags='${FFLAGS}' -c -m pyspline pyspline.pyf libspline.a ${TEC_LIB} ${LIBSTDCpp} 
 	mv pyspline.so ../python	
