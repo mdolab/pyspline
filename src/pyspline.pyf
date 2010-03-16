@@ -5,22 +5,22 @@
   interface  ! in :pyspline
 
      ! --------------------- Curve Functions ------------------
-     subroutine compute_curve(s,x,t,k,n,nctl,ndim,coef,niter,tol,rms) ! in :test:compute_curve.f90
-       use lms_jacobian
-       use lsqrmodule,,only: lsqr
-       use lsqrcheckmodule,,only: acheck,xcheck
-       double precision dimension(n),intent(in,out) :: s
-       double precision dimension(n,ndim),intent(in),depend(n) :: x
-       double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
-       integer intent(in) :: k
-       integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
-       integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
-       integer optional,intent(in),check(shape(x,1)==ndim),depend(x) :: ndim=shape(x,1)
-       double precision dimension(nctl,ndim),intent(in,out),depend(ndim) :: coef
-       integer intent(in) :: niter
-       double precision intent(in) :: tol
-       double precision intent(out) :: rms
-     end subroutine compute_curve
+!      subroutine compute_curve(s,x,t,k,n,nctl,ndim,coef,niter,tol,rms) ! in :test:compute_curve.f90
+!        use lms_jacobian
+!        use lsqrmodule,,only: lsqr
+!        use lsqrcheckmodule,,only: acheck,xcheck
+!        double precision dimension(n),intent(in,out) :: s
+!        double precision dimension(n,ndim),intent(in),depend(n) :: x
+!        double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
+!        integer intent(in) :: k
+!        integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
+!        integer optional,intent(in),check(shape(coef,0)==nctl),depend(coef) :: nctl=shape(coef,0)
+!        integer optional,intent(in),check(shape(x,1)==ndim),depend(x) :: ndim=shape(x,1)
+!        double precision dimension(nctl,ndim),intent(in,out),depend(ndim) :: coef
+!        integer intent(in) :: niter
+!        double precision intent(in) :: tol
+!        double precision intent(out) :: rms
+!      end subroutine compute_curve
    
   subroutine eval_curve(s,t,k,coef,nctl,ndim,val) ! in :test:eval_curve.f90
        double precision intent(in) :: s
@@ -87,27 +87,27 @@
 
      ! --------------------- Surface Function -----------------
 
-     subroutine compute_surface(x,u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,ndim,coef,niter,tol,rms) ! in :test.pyf:compute_surface.f90
-       use lms_jacobian
-       use lsqrmodule,,only: lsqr
-       use lsqrcheckmodule,,only: acheck,xcheck
-       double precision dimension(nu,nv,ndim),intent(in) :: x
-       double precision dimension(nu,nv),intent(in,out),depend(nu,nv) :: u
-       double precision dimension(nu,nv),intent(in,out),depend(nu,nv) :: v
-       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
-       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
-       integer intent(in) :: ku
-       integer intent(in) :: kv
-       integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
-       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
-       integer optional,intent(in),check(shape(x,0)==nu),depend(x) :: nu=shape(x,0)
-       integer optional,intent(in),check(shape(x,1)==nv),depend(x) :: nv=shape(x,1)
-       integer optional,intent(in),check(shape(x,2)==ndim),depend(x) :: ndim=shape(x,2)
-       double precision dimension(nctlu,nctlv,ndim),intent(in,out),depend(ndim) :: coef
-       integer intent(in) :: niter
-       double precision intent(in) :: tol
-       double precision intent(out) :: rms
-     end subroutine compute_surface
+!      subroutine compute_surface(x,u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,ndim,coef,niter,tol,rms) ! in :test.pyf:compute_surface.f90
+!        use lms_jacobian
+!        use lsqrmodule,,only: lsqr
+!        use lsqrcheckmodule,,only: acheck,xcheck
+!        double precision dimension(nu,nv,ndim),intent(in) :: x
+!        double precision dimension(nu,nv),intent(in,out),depend(nu,nv) :: u
+!        double precision dimension(nu,nv),intent(in,out),depend(nu,nv) :: v
+!        double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+!        double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+!        integer intent(in) :: ku
+!        integer intent(in) :: kv
+!        integer optional,intent(in),check(shape(coef,0)==nctlu),depend(coef) :: nctlu=shape(coef,0)
+!        integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+!        integer optional,intent(in),check(shape(x,0)==nu),depend(x) :: nu=shape(x,0)
+!        integer optional,intent(in),check(shape(x,1)==nv),depend(x) :: nv=shape(x,1)
+!        integer optional,intent(in),check(shape(x,2)==ndim),depend(x) :: ndim=shape(x,2)
+!        double precision dimension(nctlu,nctlv,ndim),intent(in,out),depend(ndim) :: coef
+!        integer intent(in) :: niter
+!        double precision intent(in) :: tol
+!        double precision intent(out) :: rms
+!      end subroutine compute_surface
 
      subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val) ! in :test:eval_surface.f90
        double precision intent(in) :: u
