@@ -1,55 +1,24 @@
-SUBROUTINE basis(T,N,JHIGH,K,INDEX,X,ILEFT,VNIKX,WORK,IWORK)
+SUBROUTINE basis(t,nctl,k,x,ileft,B)
 
   implicit none
-  INTEGER ILEFT, IMJP1, INDEX, IPJ, IWORK, JHIGH, JP1, JP1ML, K, L,N
-  double precision          :: T(N+K), VM, VMPREV, VNIKX(k), WORK(4*k), X
+  integer nctl,k,ileft,l,j,ipj,jp1ml,jp1
+  double precision :: t(nctl+k),B(k),vm,vmprev,x,diff1(k),diff2(k)
+    
+  B(:) = 0.0
+  B(1) = 1.0
 
-  vnikx(:) = 0.0
-  !IF(K.LT.1) GO TO 90
-  !IF(JHIGH.GT.K .OR. JHIGH.LT.1) GO TO 100
-  !IF(INDEX.LT.1 .OR. INDEX.GT.2) GO TO 105
-  !IF(X.LT.T(ILEFT) .OR. X.GT.T(ILEFT+1)) GO TO 110
-
-
-
-!   GO TO (10, 20), INDEX
-  IWORK = 1
-  VNIKX(1) = 1.0E0
-  !IF (IWORK.GE.JHIGH) GO TO 40
-
-20   IPJ = ILEFT + IWORK
-  WORK(IWORK) = T(IPJ) - X
-  IMJP1 = ILEFT - IWORK + 1
-  WORK(K+IWORK) = X - T(IMJP1)
-  VMPREV = 0.0E0
-  JP1 = IWORK + 1
-
-  do L=1,IWORK
-     JP1ML = JP1 - L
-     VM = VNIKX(L)/(WORK(L)+WORK(K+JP1ML))
-     VNIKX(L) = VM*WORK(L) + VMPREV
-     VMPREV = VM*WORK(K+JP1ML)
+  do j=1,k-1
+     ipj = ileft + j
+     diff1(j) = t(ipj)-x
+     diff2(j) = x-t(ileft-j+1)
+     vmprev = 0.0
+     jp1 = j+1
+     do l=1,j
+        jp1ml = jp1-l
+        vm = B(l)/(diff1(l)+diff2(jp1ml))
+        B(l) = vm*diff1(l) + vmprev
+        vmprev = vm*diff2(jp1ml)
+     end do
+     B(jp1) = vmprev
   end do
-
-  VNIKX(JP1) = VMPREV
-  IWORK = JP1
-
-  IF (IWORK.LT.JHIGH) GO TO 20
-
-! 90 CONTINUE
-!   print *,'Error:BSPVN,  K DOES NOT SATISFY K.GE.1'
-!   stop
-!   RETURN
-! 100 CONTINUE
-!   print *,'Error:BSPVN,  JHIGH DOES NOT SATISFY 1.LE.JHIGH.LE.K'
-!   stop
-!   RETURN
-! 105 CONTINUE
-!   print *,'Error:BSPVN,  INDEX IS NOT 1 OR 2'
-!   stop
-!   RETURN
-! 110 CONTINUE
-!   print *,'Error:BSPVN,  X DOES NOT SATISFY T(ILEFT).LE.X.LE.T(ILEFT+1)'
-!   stop
 end SUBROUTINE basis
-

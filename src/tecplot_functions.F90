@@ -135,8 +135,9 @@ subroutine ijk_ordered(name,data,n,m,l,ndim)
        SolTime,StrandID,ParentZn,IsBlock,NFConns,FNMode,&
        TotalNumFaceNodes,TotalNumBndryFaces,TotalNumBndryConnections,&
        PassiveVarList, ValueLocation, ShareVarFromZone,ShrConn)
+
   do idim=1,ndim
-     I   = TECDAT112(n*m, data(:,:,:,idim), DIsDouble)
+     I   = TECDAT112(n*m*l, data(:,:,:,idim), DIsDouble)
   end do
 #ENDIF
 end subroutine ijk_ordered
@@ -151,7 +152,7 @@ subroutine open_tecplot(fname,ndim)
   character(80)                :: var_names 
   ! These Never Change
   integer VIsDouble                /1/
-  integer debug                    /1/
+  integer debug                    /0/
   integer FileType                 /0/ 
   INTEGER ZoneType                 /0/
   integer I

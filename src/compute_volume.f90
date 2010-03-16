@@ -27,7 +27,7 @@ subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,
           
            call intrv(tu,nctlu+ku,u(i,j,k),ilou,ileftu,mflagu)
            if (mflagu == 0) then
-              call basis(tu,nctlu,ku,ku,1,u(i,j,k),ileftu,basisu,worku,iworku)
+              call basis(tu,nctlu,ku,u(i,j,k),ileftu,basisu)
            else if (mflagu == 1) then
               ileftu = nctlu
               basisu(:) = 0.0
@@ -37,7 +37,7 @@ subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,
            ! Get v interval
             call intrv(tv,nctlv+kv,v(i,j,k),ilov,ileftv,mflagv)
            if (mflagv == 0) then
-              call basis(tv,nctlv,kv,kv,1,v(i,j,k),ileftv,basisv,workv,iworkv)
+              call basis(tv,nctlv,kv,v(i,j,k),ileftv,basisv)
            else if (mflagv == 1) then
               ileftv = nctlv
               basisv(:) = 0.0
@@ -48,7 +48,7 @@ subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,
            ! Get w interval
             call intrv(tw,nctlw+kw,w(i,j,k),ilow,ileftw,mflagw)
            if (mflagw == 0) then
-              call basis(tw,nctlw,kw,kw,1,w(i,j,k),ileftw,basisw,workw,iworkw)
+              call basis(tw,nctlw,kw,w(i,j,k),ileftw,basisw)
            else if (mflagw == 1) then
               ileftw = nctlw
               basisw(:) = 0.0

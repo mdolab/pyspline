@@ -1,4 +1,4 @@
-subroutine getBasisPt(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,nctlv,nnz)
+subroutine getBasisPtSurface(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,nctlv,nnz)
 
   implicit none
   ! Input
@@ -50,5 +50,72 @@ subroutine getBasisPt(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,nctlv,nn
         end do
      end do
   end do
-end subroutine getBasisPt
+end subroutine getBasisPtSurface
+
+subroutine getBasisPtVolume(u,v,w,tu,tv,tw,ku,kv,kw,vals,col_ind,istart,l_index,nctlu,nctlv,nctlw,nnz)
+
+  implicit none
+  ! Input
+  integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,nnz,istart
+  double precision, intent(in)          :: u,v,w
+  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw,kw)
+  integer         , intent(in)          :: l_index(Nctlu,Nctlv,Nctlw)
+  double precision, intent(inout)       :: vals(nnz)
+  integer         , intent(inout)       :: col_ind(nnz)
+  ! Working
+  double precision                      :: basisu(ku),basisv(kv),basisw(kw)
+  integer                               :: ileftu,mflagu,ilou
+  integer                               :: ileftv,mflagv,ilov
+  integer                               :: ileftw,mflagw,ilow
+
+  integer                               :: i,j,ii,jj,kk,counter,start
+
+  ilou = 1
+  ilov = 1
+  ilow = 1
+  ! Get u interval
+
+  call intrv(tu,nctlu+ku,u,ilou,ileftu,mflagu)
+  if (mflagu == 0) then
+     call basis(tu,nctlu,ku,u,ileftu,basisu)
+  else if (mflagu == 1) then
+     ileftu = nctlu
+     basisu(:) = 0.0
+     basisu(ku) = 1.0
+  end if
+
+  ! Get v interval
+  call intrv(tv,nctlv+kv,v,ilov,ileftv,mflagv)
+  if (mflagv == 0) then
+     call basis(tv,nctlv,kv,v,ileftv,basisv)
+  else if (mflagv == 1) then
+     ileftv = nctlv
+     basisv(:) = 0.0
+     basisv(kv) = 1.0
+  end if
+
+  ! Get w interval
+  call intrv(tw,nctlw+kw,w,ilow,ileftw,mflagw)
+  if (mflagw == 0) then
+     call basis(tw,nctlw,kw,w,ileftw,basisw)
+  else if (mflagw == 1) then
+     ileftw = nctlw
+     basisw(:) = 0.0
+     basisw(kw) = 1.0
+  end if
+
+  counter = 0
+  do ii=1,ku
+     do jj = 1,kv
+        do kk = 1,kw
+           ! Get the local row/col for this surface
+           start = istart + counter + 1
+           col_ind(start) = l_index(ileftu-ku+ii,ileftv-kv+jj,ileftw-kw+kk)
+
+           vals(start) = basisu(ii)*basisv(jj)*basisw(kk)
+           counter = counter + 1
+        end do
+     end do
+  end do
+end subroutine getBasisPtVolume
 
