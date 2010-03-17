@@ -1542,8 +1542,6 @@ MUST be defined for task lms or interpolate'
                 self.w = kwargs['w']
             else:
                 if self.nDim == 3:
-                    #self.u,self.v,self.w,self.U,self.V,self.W = \
-                    #    self._calcParameterization()
                     self._calcParameterization()
                 else:
                     mpiPrint('Automatic parameterization of ONLY available\
@@ -1559,6 +1557,7 @@ MUST be defined for task lms or interpolate'
             self.wmin = 0
             self.wmax = 1
             self._calcKnots()
+            self.coef = zeros((self.Nctlu,self.Nctlv,self.Nctlw,self.nDim))
             #self.recompute()
         # end if
 
@@ -1578,8 +1577,7 @@ MUST be defined for task lms or interpolate'
 
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
                               shape=[self.Nu*self.Nv*self.Nw,self.Nctlu*self.Nctlv*self.Nctlw])
-        self.coef = zeros((self.Nctlu,self.Nctlv,self.Nctlw,self.nDim))
-
+     
         if self.interp:
             solve = factorized( N )
             for idim in xrange(self.nDim):
@@ -1924,7 +1922,9 @@ original data for this surface or face is not in range 0->5'
             [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
             W_plot[i,:,:] = w_plot[i]
         # end for
-        values = self.getValue(U_plot,V_plot,W_plot)
+        #values = self.getValue(U_plot,V_plot,W_plot)
+
+        values = self.getValue(self.U,self.V,self.W)
         _writeTecplot3D(handle,'interpolated',values)
         
         return
