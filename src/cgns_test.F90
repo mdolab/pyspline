@@ -1,13 +1,13 @@
 subroutine cgns_test()
 
-#IFDEF USE_CGNS 
+#ifdef USE_CGNS 
 
 print *,'CGNS enabled in this build'
   
-#ELSE
+#else
 
 print *,'CGNS not enabled in this build'
 
-#ENDIF
+#endif
 
 end subroutine cgns_test
