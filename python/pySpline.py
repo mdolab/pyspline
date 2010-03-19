@@ -1347,8 +1347,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
         Returns:
             None
             '''
-        openTecplot(file_name,self.nDim,tecio)
-
+        f = openTecplot(file_name,self.nDim,tecio)
         if curve:
             self._writeTecplotCurve(f)
         if coef:
@@ -1390,10 +1389,10 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 X = self.getValue(self.s)
             else:
                 s = 0.5*(1-cos(linspace(0,pi,25)))
-
                 X = self.getValue(s)
             # end if
         # end if
+
         _writeTecplot1D(handle,'interpolated',X)
 
         return 
@@ -1908,21 +1907,25 @@ original data for this surface or face is not in range 0->5'
         '''Output this volume\'s data to a open file handle \'handle\' '''
         
         # This works really well actually
-        Nx = self.Nctlu*self.ku+1
-        Ny = self.Nctlv*self.kv+1
-        Nz = self.Nctlw*self.kw+1
-        u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
-        v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
-        w_plot = 0.5*(1-cos(linspace(0,pi,Nz)))
-        # Dump re-interpolated surface
-        W_plot = zeros((Nx,Ny,Nz))
-        V_plot = zeros((Nx,Ny,Nz))
-        U_plot = zeros((Nx,Ny,Nz))
-        for i in xrange(Nx):
-            [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
-            W_plot[i,:,:] = w_plot[i]
-        # end for
-        #values = self.getValue(U_plot,V_plot,W_plot)
+#         Nx = self.Nctlu*self.ku+1
+#         Ny = self.Nctlv*self.kv+1
+#         Nz = self.Nctlw*self.kw+1
+#         u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
+#         v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
+#         w_plot = 0.5*(1-cos(linspace(0,pi,Nz)))
+#         #u_plot = linspace(0,1,Nx)**2
+#         #v_plot = linspace(0,1,Ny)**2
+#         #w_plot = linspace(0,1,Nz)**2
+        
+#         # Dump re-interpolated surface
+#         W_plot = zeros((Nx,Ny,Nz))
+#         V_plot = zeros((Nx,Ny,Nz))
+#         U_plot = zeros((Nx,Ny,Nz))
+#         for i in xrange(Nx):
+#             [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
+#             W_plot[i,:,:] = w_plot[i]
+#         # end for
+#         values = self.getValue(U_plot,V_plot,W_plot)
 
         values = self.getValue(self.U,self.V,self.W)
         _writeTecplot3D(handle,'interpolated',values)

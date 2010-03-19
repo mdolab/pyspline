@@ -61,7 +61,7 @@ subroutine eval_volume(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,val)
   if (mflagv == 1) then
      ileftv = ileftv-kv
   end if
-  call BSPVN(tv,nctlv,nctlv,kv,kv,1,v,ileftv,basisv,workv,iworkv)
+  call BSPVN(tv,nctlv,kv,kv,kv,1,v,ileftv,basisv,workv,iworkv)
   istartv = ileftv-kv
 
   ! W
@@ -69,7 +69,7 @@ subroutine eval_volume(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,val)
   if (mflagw == 1) then
      ileftw = ileftw-kw
   end if
-  call BSPVN(tw,nctlw,nctlw,kw,kw,1,w,ileftw,basisw,workw,iworkw)
+  call BSPVN(tw,nctlw,kw,kw,kw,1,w,ileftw,basisw,workw,iworkw)
   istartw = ileftw-kw
 
   do i=1,ku
@@ -149,7 +149,7 @@ subroutine eval_volume_V(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,v
      if (mflagv == 1) then
         ileftv = ileftv-kv
      end if
-     call BSPVN(tv,nctlv,nctlv,kv,kv,1,v(ii),ileftv,basisv,workv,iworkv)
+     call BSPVN(tv,nctlv,kv,kv,kv,1,v(ii),ileftv,basisv,workv,iworkv)
      istartv = ileftv-kv
      
      ! W
