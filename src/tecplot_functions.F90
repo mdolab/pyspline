@@ -1,5 +1,5 @@
 subroutine i_ordered(name,data,n,ndim)
-#IFDEF USE_TECIO
+#ifdef USE_TECIO
   implicit none
   integer         , intent(in) :: n,ndim
   character*(*)   , intent(in) :: name
@@ -42,11 +42,11 @@ subroutine i_ordered(name,data,n,ndim)
   do idim=1,ndim
      I   = TECDAT112(n, data(:,idim), DIsDouble)
   end do
-#ENDIF
+#endif
 end subroutine i_ordered
 
 subroutine ij_ordered(name,data,n,m,ndim)
-#IFDEF USE_TECIO
+#ifdef USE_TECIO
   implicit none
   integer         , intent(in) :: n,m,ndim
   character*(*)   , intent(in) :: name
@@ -90,11 +90,11 @@ subroutine ij_ordered(name,data,n,m,ndim)
   do idim=1,ndim
      I   = TECDAT112(n*m, data(:,:,idim), DIsDouble)
   end do
-#ENDIF
+#endif
 end subroutine ij_ordered
 
 subroutine ijk_ordered(name,data,n,m,l,ndim)
-#IFDEF USE_TECIO
+#ifdef USE_TECIO
   implicit none
   integer         , intent(in) :: n,m,l,ndim
   character*(*)   , intent(in) :: name
@@ -139,12 +139,12 @@ subroutine ijk_ordered(name,data,n,m,l,ndim)
   do idim=1,ndim
      I   = TECDAT112(n*m*l, data(:,:,:,idim), DIsDouble)
   end do
-#ENDIF
+#endif
 end subroutine ijk_ordered
 
 subroutine open_tecplot(fname,ndim)
  
-#IFDEF USE_TECIO
+#ifdef USE_TECIO
 
   character*(*)   , intent(in) :: fname
   integer         , intent(in) :: ndim
@@ -167,24 +167,24 @@ subroutine open_tecplot(fname,ndim)
 
   I = TECINI112("pyPSG Data"//char(0),var_names,fname,"."//char(0),&
        FileType,Debug,VIsDouble)
-#ENDIF
+#endif
 end subroutine open_tecplot
 
 subroutine close_tecplot()
   integer I,TECEND112
-#IFDEF USE_TECIO
+#ifdef USE_TECIO
   I = TECEND112()
-#ENDIF
+#endif
 end subroutine close_tecplot
 
 subroutine tecplot_test(available)
   
   integer, intent(out) :: available
   
-#IFDEF USE_TECIO
+#ifdef USE_TECIO
   available = 1
-#ELSE
+#else
   available = 0
-#ENDIF
+#endif
 
 end subroutine tecplot_test
