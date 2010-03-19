@@ -81,7 +81,7 @@ subroutine eval_curve_V(s,t,k,coef,nctl,ndim,n,val)
      if (mflag == 1) then
         ileft = ileft-k
      end if
-     call BSPVN(T,K,K,1,s(i),ILEFT,VNIKX,WORK,IWORK)
+     call BSPVN(T,NCTL,K,K,1,s(i),ILEFT,VNIKX,WORK,IWORK)
      istart = ileft-k
      do l=1,k
         do idim=1,ndim
@@ -323,7 +323,7 @@ subroutine eval_curve_c(s,t,k,coef,nctl,ndim,val)
   do idim=1,ndim
      call intrv(t,nctl+k,s,ilo,ileft,mflag)
      if (mflag == 0) then
-        call bspvn(t,k,k,1,s,ileft,vnikx,work,iwork)
+        call bspvn(t,nctl,k,k,1,s,ileft,vnikx,work,iwork)
      else if (mflag == 1) then
         ileft = nctl
         vnikx(:) = 0.0
