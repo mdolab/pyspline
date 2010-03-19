@@ -127,6 +127,7 @@ def _writeHeader(f,ndim):
     # end if
 
 def openTecplot(file_name,ndim,tecio=USE_TECIO):
+    mpiPrint(' ')
     if tecio:
         mpiPrint('Opening binary Tecplot File: %s'%(file_name))
         pyspline.open_tecplot(file_name,ndim)

@@ -680,7 +680,7 @@
      end subroutine open_tecplot
 
      subroutine close_tecplot()
-     end subroutine close_tecplot`
+     end subroutine close_tecplot
 
   end interface
 end program
