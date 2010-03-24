@@ -446,6 +446,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
      call eval_volume(u0(ipt),v0(ipt),w0(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,val)
      call eval_volume_deriv(u0(ipt),v0(ipt),w0(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,deriv)
      call eval_volume_deriv2(u0(ipt),v0(ipt),w0(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,deriv2)
+
      Diff(ipt,:) = val-x0(ipt,:)
      u(ipt) = u0(ipt)
      v(ipt) = v0(ipt)

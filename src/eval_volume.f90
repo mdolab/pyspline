@@ -42,7 +42,6 @@ subroutine eval_volume(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,val)
   integer                               :: ileftv,iworkv,ilov,mflagv
   integer                               :: ileftw,iworkw,ilow,mflagw
   double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-  double precision                      :: worku(4*ku),workv(4*kv),workw(4*kw)
 
   val(:) = 0.0
   ilou = 1
@@ -53,23 +52,21 @@ subroutine eval_volume(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,val)
   if (mflagu == 1) then
      ileftu = ileftu-ku
   end if
-  call BSPVN(tu,nctlu,ku,ku,1,u,ileftu,basisu,worku,iworku)
+  call basis(tu,nctlu,ku,u,ileftu,basisu)
   istartu = ileftu-ku
-  
   ! V
   call INTRV(tv,nctlv+kv,v,ilov,ileftv,mflagv)
   if (mflagv == 1) then
      ileftv = ileftv-kv
   end if
-  call BSPVN(tv,nctlv,kv,kv,kv,1,v,ileftv,basisv,workv,iworkv)
+  call basis(tv,nctlv,kv,v,ileftv,basisv)
   istartv = ileftv-kv
-
   ! W
   call INTRV(tw,nctlw+kw,w,ilow,ileftw,mflagw)
   if (mflagw == 1) then
      ileftw = ileftw-kw
   end if
-  call BSPVN(tw,nctlw,kw,kw,kw,1,w,ileftw,basisw,workw,iworkw)
+  call basis(tw,nctlw,kw,w,ileftw,basisw)
   istartw = ileftw-kw
 
   do i=1,ku
@@ -128,7 +125,6 @@ subroutine eval_volume_V(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,v
   integer                               :: ileftv,iworkv,ilov,mflagv
   integer                               :: ileftw,iworkw,ilow,mflagw
   double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-  double precision                      :: worku(4*ku),workv(4*kv),workw(4*kw)
 
   val(:,:) = 0.0
   ilou = 1
@@ -141,7 +137,7 @@ subroutine eval_volume_V(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,v
      if (mflagu == 1) then
         ileftu = ileftu-ku
      end if
-     call BSPVN(tu,nctlu,ku,ku,1,u(ii),ileftu,basisu,worku,iworku)
+     call basis(tu,nctlu,ku,u(ii),ileftu,basisu)
      istartu = ileftu-ku
      
      ! V
@@ -149,7 +145,7 @@ subroutine eval_volume_V(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,v
      if (mflagv == 1) then
         ileftv = ileftv-kv
      end if
-     call BSPVN(tv,nctlv,kv,kv,kv,1,v(ii),ileftv,basisv,workv,iworkv)
+     call basis(tv,nctlv,kv,v(ii),ileftv,basisv)
      istartv = ileftv-kv
      
      ! W
@@ -157,7 +153,7 @@ subroutine eval_volume_V(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,v
      if (mflagw == 1) then
         ileftw = ileftw-kw
      end if
-     call BSPVN(tw,nctlw,kw,kw,1,w(ii),ileftw,basisw,workw,iworkw)
+     call basis(tw,nctlw,kw,w(ii),ileftw,basisw)
      istartw = ileftw-kw
 
      do i=1,ku
@@ -218,7 +214,6 @@ subroutine eval_volume_M(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
   integer                               :: ileftv,iworkv,ilov,mflagv
   integer                               :: ileftw,iworkw,ilow,mflagw
   double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-  double precision                      :: worku(4*ku),workv(4*kv),workw(4*kw)
 
   val(:,:,:) = 0.0
   ilou = 1
@@ -232,7 +227,7 @@ subroutine eval_volume_M(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
         if (mflagu == 1) then
            ileftu = ileftu-ku
         end if
-        call BSPVN(tu,nctlu,ku,ku,1,u(ii,jj),ileftu,basisu,worku,iworku)
+        call basis(tu,nctlu,ku,u(ii,jj),ileftu,basisu)
         istartu = ileftu-ku
      
         ! V
@@ -240,7 +235,7 @@ subroutine eval_volume_M(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
         if (mflagv == 1) then
            ileftv = ileftv-kv
         end if
-        call BSPVN(tv,nctlv,kv,kv,1,v(ii,jj),ileftv,basisv,workv,iworkv)
+        call basis(tv,nctlv,kv,v(ii,jj),ileftv,basisv)
         istartv = ileftv-kv
         
         ! W
@@ -248,7 +243,7 @@ subroutine eval_volume_M(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
         if (mflagw == 1) then
            ileftw = ileftw-kw
         end if
-        call BSPVN(tw,nctlw,kw,kw,1,w(ii,jj),ileftw,basisw,workw,iworkw)
+        call basis(tw,nctlw,kw,w(ii,jj),ileftw,basisw)
         istartw = ileftw-kw
         
         do i=1,ku
@@ -308,7 +303,6 @@ subroutine eval_volume_T(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
   integer                               :: ileftv,iworkv,ilov,mflagv
   integer                               :: ileftw,iworkw,ilow,mflagw
   double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-  double precision                      :: worku(4*ku),workv(4*kv),workw(4*kw)
 
   val(:,:,:,:) = 0.0
   ilou = 1
@@ -322,7 +316,7 @@ subroutine eval_volume_T(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
            if (mflagu == 1) then
               ileftu = ileftu-ku
            end if
-           call BSPVN(tu,nctlu,ku,ku,1,u(ii,jj,kk),ileftu,basisu,worku,iworku)
+           call basis(tu,nctlu,ku,u(ii,jj,kk),ileftu,basisu)
            istartu = ileftu-ku
            
            ! V
@@ -330,7 +324,7 @@ subroutine eval_volume_T(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
            if (mflagv == 1) then
               ileftv = ileftv-kv
            end if
-           call BSPVN(tv,nctlv,kv,kv,1,v(ii,jj,kk),ileftv,basisv,workv,iworkv)
+           call basis(tv,nctlv,kv,v(ii,jj,kk),ileftv,basisv)
            istartv = ileftv-kv
            
            ! W
@@ -338,7 +332,7 @@ subroutine eval_volume_T(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
            if (mflagw == 1) then
               ileftw = ileftw-kw
            end if
-           call BSPVN(tw,nctlw,kw,kw,1,w(ii,jj,kk),ileftw,basisw,workw,iworkw)
+           call basis(tw,nctlw,kw,w(ii,jj,kk),ileftw,basisw)
            istartw = ileftw-kw
            
            do i=1,ku

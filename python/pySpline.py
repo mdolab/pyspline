@@ -154,7 +154,7 @@ def closeTecplot(f):
   
 class surface(object):
 
-    def __init__(self,*args,**kwargs):
+    def __init__(self,recompute=True,*args,**kwargs):
         '''
         Create an instance of a b-spline surface. There are two
         ways to initialize the class
@@ -305,18 +305,10 @@ MUST be defined for task lms or interpolate'
             self.vmin = 0
             self.vmax = 1
             self._calcKnots()
-            self.recompute()
-        return
+            self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
+            if recompute:
+                self.recompute()
 
-    def _calcKnots(self):
-        if self.interp:
-            self.tu = pyspline.knots_interp(self.u,array([],'d'),self.ku)
-            self.tv = pyspline.knots_interp(self.v,array([],'d'),self.kv)
-        else:
-            self.tu = pyspline.knots_lms(self.u,self.Nctlu,self.ku)
-            self.tv = pyspline.knots_lms(self.v,self.Nctlv,self.kv)
-        # end if
-            
         return
 
     def recompute(self):
@@ -330,8 +322,6 @@ MUST be defined for task lms or interpolate'
             self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
                                  shape=[self.Nu*self.Nv,self.Nctlu*self.Nctlv])
-        self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
-
         if self.interp:
             solve = factorized( N )
             for idim in xrange(self.nDim):
@@ -345,6 +335,7 @@ MUST be defined for task lms or interpolate'
             # end for
         # end if
         self._setEdgeCurves()
+
         return
 
     def _calcParameterization(self):
@@ -395,6 +386,17 @@ MUST be defined for task lms or interpolate'
         v = v/(self.Nu-singular_counter) #divide by the number of 'i's we had
 
         return u,v,U,V
+
+    def _calcKnots(self):
+        if self.interp:
+            self.tu = pyspline.knots_interp(self.u,array([],'d'),self.ku)
+            self.tv = pyspline.knots_interp(self.v,array([],'d'),self.kv)
+        else:
+            self.tu = pyspline.knots_lms(self.u,self.Nctlu,self.ku)
+            self.tv = pyspline.knots_lms(self.v,self.Nctlv,self.kv)
+        # end if
+            
+        return
 
     def _setEdgeCurves(self):
         '''Create curve spline objects for each of the edges'''
@@ -599,7 +601,6 @@ original data for this surface or node is not in range 0->3'
 
         return Xmin,Xmax
     
-
     def projectPoint(self,x0,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
         Project a point x0 onto the surface and return parametric position
@@ -678,8 +679,6 @@ original data for this surface or node is not in range 0->3'
             curve.t,curve.k,curve.coef,self.tu,self.tv,\
                 self.ku,self.kv,self.coef,Niter,eps1,eps2,u,v,s)
    
-  
-
     def _writeTecplotOrigData(self,handle):
         if self.orig_data:
             _writeTecplot2D(handle,'orig_data',self.X)
@@ -1400,7 +1399,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
   
 class volume(object):
 
-    def __init__(self,*args,**kwargs):
+    def __init__(self,recompute=True,*args,**kwargs):
         '''
         Create an instance of a b-spline surface. There are two
         ways to initialize the class
@@ -1426,16 +1425,17 @@ class volume(object):
             kw, integer: Order for spline in w
             X, real, array, size(len(u),len(v),len(w),nDim): Array of data to fit 
             u,v,w real, arrays: (OPTIONAL for nDim == 3 ) Arrays of u,v,w values
-            
-        For LMS spline:
-            NOT IMPLEMENTED
+
+
+        Optional: recompute: Specifies whether the actual fitting is complted.
+                             Default is True
             '''
         if 'no_print' in kwargs:
             self.NO_PRINT = kwargs['no_print']
         else:
             self.NO_PRINT = False
         # end if      
-        
+            
         if 'ku' in kwargs and 'kv' in kwargs and 'kw' in kwargs and \
                 'tu' in kwargs and 'tv' in kwargs and 'tw' in kwargs and \
                 'coef' in kwargs:
@@ -1481,7 +1481,7 @@ MUST be defined for task lms or interpolate'
                 else:
                     self.nDim = self.X.shape[3]
             elif 'x' in kwargs and 'y' in kwargs and 'z'in kwargs:
-                self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],3))
+                self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],kwargs['x'].shape[2],3))
                 self.X[:,:,:,0] = kwargs['x']
                 self.X[:,:,:,1] = kwargs['y']
                 self.X[:,:,:,2] = kwargs['z']
@@ -1492,7 +1492,7 @@ MUST be defined for task lms or interpolate'
                 self.X[:,:,:,1] = kwargs['y']
                 self.nDim = 2
             elif 'x' in kwargs:
-                self.X = zeros((kwargs['x'].shape[0],kwargs['x'].shape[1],1))
+                self.X = zeros((kwargs['x'].shape[0],1))
                 self.X[:,:,:,0] = kwargs['x']
                 self.nDim = 1
             # enf if
@@ -1558,7 +1558,8 @@ MUST be defined for task lms or interpolate'
             self.wmax = 1
             self._calcKnots()
             self.coef = zeros((self.Nctlu,self.Nctlv,self.Nctlw,self.nDim))
-            #self.recompute()
+            if recompute:
+                self.recompute()
         # end if
 
     def recompute(self):
@@ -1572,9 +1573,6 @@ MUST be defined for task lms or interpolate'
             self.U,self.V,self.W,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,\
                 self.Nctlu,self.Nctlv,self.Nctlw)
         
-        #print 'done jacobian'
-        #print len(vals)
-
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
                               shape=[self.Nu*self.Nv*self.Nw,self.Nctlu*self.Nctlv*self.Nctlw])
      
@@ -1636,7 +1634,6 @@ MUST be defined for task lms or interpolate'
             return self.X[0,-1,-1]
         elif corner == 7:
             return self.X[-1,-1,-1]
-
 
     def getOrigValuesFace(self,face):
         '''Return an array of length 8*ndim which cooresponds to the
@@ -1703,7 +1700,6 @@ MUST be defined for task lms or interpolate'
                       0.5*(self.X[-1,-1,midw[0]] + self.X[-1,-1,midw[1]])]
         # end if
         return array(values)
-
 
 
     def getMidPointFace(self,face):
@@ -1773,7 +1769,18 @@ original data for this surface or face is not in range 0->5'
                                       tv=self.tw,coef=self.coef[-1,:,:,:])
         
         return
-                               
+
+    def _getBasisPt(self,u,v,w,vals,istart,col_ind,l_index):
+        # This function should only be called from pyBlock The purpose
+        # is to compute the basis function for a u,v,w point and add
+        # it to pyBlcoks's global dPt/dCoef
+        # matrix. vals,row_ptr,col_ind is the CSR data and l_index in
+        # the local -> global mapping for this volume
+
+        return pyspline.getbasisptvolume(u,v,w,self.tu,self.tv,self.tw,
+                                         self.ku,self.kv,self.kw,vals,
+                                         col_ind,istart,l_index)
+    
     def __call__(self,u,v,w):
         '''
         Equivalant to getValue
@@ -1826,19 +1833,6 @@ original data for this surface or face is not in range 0->5'
 
         return Xmin,Xmax
 
-
-    def _getBasisPt(self,u,v,w,vals,istart,col_ind,l_index):
-        # This function should only be called from pyBlock The purpose
-        # is to compute the basis function for a u,v,w point and add
-        # it to pyBlcoks's global dPt/dCoef
-        # matrix. vals,row_ptr,col_ind is the CSR data and l_index in
-        # the local -> global mapping for this volume
-
-        return pyspline.getbasisptvolume(u,v,w,self.tu,self.tv,self.tw,
-                                         self.ku,self.kv,self.kw,vals,
-                                         col_ind,istart,l_index)
-    
-
     def projectPoint(self,x0,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
         Project a point x0 onto the volume and return parametric position
@@ -1877,7 +1871,6 @@ original data for this surface or face is not in range 0->5'
             else:
                 w = array([.5])
             # end if
-
             result = pyspline.point_volume(array([x0]),self.tu,self.tv,self.tw,
                                            self.ku,self.kv,self.kw,
                                            self.coef,Niter,eps1,eps2,u,v,w)
@@ -1904,31 +1897,37 @@ original data for this surface or face is not in range 0->5'
             return result[0],result[1],result[2],result[3]
         # end if
 
+
+    def _writeTecplotOrigData(self,handle):
+        if self.orig_data:
+            _writeTecplot3D(handle,'orig_data',self.X)
+        # end if
+
+        return
     def _writeTecplotVolume(self,handle):
         '''Output this volume\'s data to a open file handle \'handle\' '''
         
-        # This works really well actually
-#         Nx = self.Nctlu*self.ku+1
-#         Ny = self.Nctlv*self.kv+1
-#         Nz = self.Nctlw*self.kw+1
-#         u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
-#         v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
-#         w_plot = 0.5*(1-cos(linspace(0,pi,Nz)))
-#         #u_plot = linspace(0,1,Nx)**2
-#         #v_plot = linspace(0,1,Ny)**2
-#         #w_plot = linspace(0,1,Nz)**2
+        if self.U ==None:
+            # This works really well actually
+            Nx = self.Nctlu*self.ku+1
+            Ny = self.Nctlv*self.kv+1
+            Nz = self.Nctlw*self.kw+1
+            u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
+            v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
+            w_plot = 0.5*(1-cos(linspace(0,pi,Nz)))
         
-#         # Dump re-interpolated surface
-#         W_plot = zeros((Nx,Ny,Nz))
-#         V_plot = zeros((Nx,Ny,Nz))
-#         U_plot = zeros((Nx,Ny,Nz))
-#         for i in xrange(Nx):
-#             [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
-#             W_plot[i,:,:] = w_plot[i]
-#         # end for
-#         values = self.getValue(U_plot,V_plot,W_plot)
+            # Dump re-interpolated surface
+            W_plot = zeros((Nx,Ny,Nz))
+            V_plot = zeros((Nx,Ny,Nz))
+            U_plot = zeros((Nx,Ny,Nz))
+            for i in xrange(Nx):
+                [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
+                W_plot[i,:,:] = w_plot[i]
+            # end for
+            values = self.getValue(U_plot,V_plot,W_plot)
+        else:
+            values = self.getValue(self.U,self.V,self.W)
 
-        values = self.getValue(self.U,self.V,self.W)
         _writeTecplot3D(handle,'interpolated',values)
         
         return
@@ -1936,13 +1935,6 @@ original data for this surface or face is not in range 0->5'
     def _writeTecplotCoef(self,handle):
         '''Write the Spline coefficients to handle'''
         _writeTecplot3D(handle,'control_pts',self.coef)
-
-        return
-
-    def _writeTecplotOrigData(self,handle):
-        if self.orig_data:
-            _writeTecplot3D(handle,'orig_data',self.X)
-        # end if
 
         return
 
@@ -1999,7 +1991,6 @@ original data for this surface or face is not in range 0->5'
 # ----------------------------------------------------------------------
 #                     Misc Helper Functions
 # ----------------------------------------------------------------------
-
 
 def trilinear_volume(*args,**kwargs):
     '''This is a short-cut function to create a trilinear b-spline volume
