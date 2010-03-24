@@ -210,9 +210,6 @@ subroutine surface_jacobian_wrap(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,vals,row_ptr,
            do jj = 1,kv
               col_ind(counter) = (ileftu-ku+ii-1)*Nctlv + (ileftv-kv+jj-1)
               vals(counter) = vniku(ii)*vnikv(jj)
-              !print *,'fuck ileftu,ileftv:',ileftu,ileftv
-              !print*, col_ind(counter)
-
               counter = counter + 1
               
            end do
