@@ -1557,7 +1557,8 @@ MUST be defined for task lms or interpolate'
             self.wmin = 0
             self.wmax = 1
             self._calcKnots()
-            self.coef = zeros((self.Nctlu,self.Nctlv,self.Nctlw,self.nDim))
+            self._setCoefSize()
+
             if recompute:
                 self.recompute()
         # end if
@@ -1569,6 +1570,8 @@ MUST be defined for task lms or interpolate'
          Returns:
              None
              '''
+        self._setCoefSize()
+        
         vals,row_ptr,col_ind = pyspline.volume_jacobian_wrap(\
             self.U,self.V,self.W,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,\
                 self.Nctlu,self.Nctlv,self.Nctlw)
@@ -1592,6 +1595,10 @@ MUST be defined for task lms or interpolate'
         self._setFaceSurfaces()
         return
     
+    def _setCoefSize(self):
+        self.coef = zeros((self.Nctlu,self.Nctlv,self.Nctlw,self.nDim))
+        return 
+
     def _calcParameterization(self):
         S,u,v,w = pyspline.para3d(self.X)
         self.u = u
