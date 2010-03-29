@@ -1465,6 +1465,7 @@ class volume(object):
             self.wmax = self.tw[-1]
             self.orig_data = False
             self._setFaceSurfaces()
+            self.faceBCs = [None,None,None,None,None,None]
         else: # We have LMS/Interpolate
             # Do some checking on the number of control points
             assert 'ku' in kwargs and 'kv' in kwargs and 'kw' in kwargs and \
@@ -1496,6 +1497,12 @@ MUST be defined for task lms or interpolate'
                 self.X[:,:,:,0] = kwargs['x']
                 self.nDim = 1
             # enf if
+
+            if 'faceBCs' in kwargs:
+                self.faceBCs = kwargs['faceBCs']
+            else:
+                self.faceBCs = [None,None,None,None,None,None]
+            # end if
 
             self.Nu = self.X.shape[0]
             self.Nv = self.X.shape[1]

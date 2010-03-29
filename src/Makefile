@@ -30,7 +30,7 @@ OBJ =	compute_curve.o\
 	updatecoefficients.o\
 	updatecoefficients_c.o\
 	getBasisPt.o\
-	cgns_test.o\
+	cgns_functions.o\
 	tecplot_functions.o\
 	parameterizations.o\
 	machcon/i1mach.o\
@@ -56,5 +56,5 @@ clean:
 libspline: $(OBJ) 
 	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(OBJ)
 	$(FC)  -shared $(OBJ) -o $(SPLINE_LIB_SHARED) 
-	f2py  --fcompiler=${COMPILER_NAME} --f90flags='${FFLAGS}' -c -m pyspline pyspline.pyf libspline.a ${TEC_LIB} ${LIBSTDCpp} 
+	f2py  --fcompiler=${COMPILER_NAME} --f90flags='${FFLAGS}' -c -m pyspline pyspline.pyf libspline.a ${USER_LIBS}
 	mv pyspline.so ../python	
