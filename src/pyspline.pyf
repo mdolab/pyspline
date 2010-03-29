@@ -682,6 +682,34 @@
      subroutine close_tecplot()
      end subroutine close_tecplot
 
+     ! ----------------- CGNS IO -----------------------------
+     subroutine cgns_test ! in :test:cgns_functions.F90
+     end subroutine cgns_test
+     subroutine open_cgns(filename,cg,nzones) ! in :test:cgns_functions.F90
+       character*32 intent(in) :: filename
+       integer intent(out) :: cg
+       integer intent(out) :: nzones
+     end subroutine open_cgns
+     subroutine read_cgns_zone_shape(cg,zone,zoneshape) ! in :test:cgns_functions.F90
+       integer intent(in) :: cg
+       integer intent(in) :: zone
+       integer dimension(3),intent(out) :: zoneshape
+     end subroutine read_cgns_zone_shape
+
+     subroutine read_cgns_zone(cg,zone,x,nx,ny,nz,facebcs) ! in :test:cgns_functions.F90
+       integer intent(in) :: cg
+       integer intent(in) :: zone
+       double precision dimension(nx,ny,nz,3),intent(out),depend(nx,ny,nz) :: x
+       integer intent(in) :: nx
+       integer intent(in) :: ny
+       integer intent(in) :: nz
+       integer dimension(6),intent(out) :: facebcs
+     end subroutine read_cgns_zone
+
+     subroutine close_cgns(cg) 
+       integer intent(in) :: cg
+     end subroutine close_cgns
+     
   end interface
 end program
 
