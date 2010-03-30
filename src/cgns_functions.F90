@@ -1,9 +1,9 @@
 subroutine cgns_test()
 
 #ifdef USE_CGNS 
-print *,'CGNS enabled in this build'
+  print *,'CGNS enabled in this build'
 #else
-print *,'CGNS not enabled in this build'
+  print *,'CGNS not enabled in this build'
 #endif
 
 end subroutine cgns_test
@@ -14,7 +14,7 @@ subroutine open_cgns(filename,cg,nzones)
 
   implicit none
   include 'cgnslib_f.h'
-  
+
   character*32,intent(in) :: filename
   integer , intent(out) ::cg,nzones
 
@@ -25,7 +25,7 @@ subroutine open_cgns(filename,cg,nzones)
 
   call cg_open_f(filename, MODE_READ, cg, ier)
   if (ier .eq. ERROR) call cg_error_exit_f
-  
+
   call cg_nbases_f(cg, nbases, ier)
   if (ier .eq. ERROR) call cg_error_exit_f
 
@@ -54,7 +54,7 @@ subroutine read_cgns_zone_shape(cg,zone,zoneshape)
 #ifdef USE_CGNS
   implicit none
   include 'cgnslib_f.h'
-  
+
   ! Input/Output
   integer, intent(in) :: cg,zone
   integer, intent(out) :: zoneshape(3)
@@ -66,7 +66,7 @@ subroutine read_cgns_zone_shape(cg,zone,zoneshape)
   base = 1
   call cg_zone_read_f(cg, base, zone, zonename, zonesize, ier)
   zoneshape(1:3) = zonesize(1:3)
-  
+
 #endif
 end subroutine read_cgns_zone_shape
 
@@ -75,7 +75,7 @@ subroutine read_cgns_zone(cg,zone,X,nx,ny,nz,faceBCs)
 #ifdef USE_CGNS
   implicit none
   include 'cgnslib_f.h'
-  
+
   ! Input/Output
   integer, intent(in) :: cg,zone,nx,ny,nz
   double precision, intent(out):: X(nx,ny,nz,3)
@@ -109,15 +109,17 @@ subroutine read_cgns_zone(cg,zone,X,nx,ny,nz,faceBCs)
           ptset_type,npts,NormalIndex,NormalListFlag,datatype,ndataset,ier)
      if (ier .eq. ERROR) call cg_error_exit_f
 
-     if (BCTypeName(bocotype) == 'BCWallViscous') then
-
-        call cg_boco_read_f(cg, base, zone, boco, points,data_double, ier)
-
+     call cg_boco_read_f(cg, base, zone, boco, points,data_double, ier)
+     if (BCTypeName(bocotype) == 'BCWallViscous' .or. &
+          BCTypeName(bocotype) == 'BCInflow' .or. &
+          BCTypeName(bocotype) == 'BCOutflow' .or. &
+          BCTypeName(bocotype) == 'BCFarfield') then
+        
         ! Make sure its a SURFACE BC
         if ( (points(4)-points(1) > 0 .and. points(5)-points(2) > 0 ) .or. &
              (points(4)-points(1) > 0 .and. points(6)-points(3) > 0 ) .or. &
              (points(5)-points(2) > 0 .and. points(6)-points(3) > 0 )) then
-           
+
            if (points(6) == points(3) .and. points(3) == 1) then ! Face 1 - Zmin
               faceID = 1
            else if (points(6) == points(3) .and. points(3) == nz) then ! face 2 Zmax
@@ -131,21 +133,33 @@ subroutine read_cgns_zone(cg,zone,X,nx,ny,nz,faceBCs)
            else if (points(5) == points(2) .and. points(5) == ny) then ! Face 6 J max
               faceID = 6
            end if
-           faceBCs(faceID) = 1
+           
+           if (BCTypeName(bocotype) == 'BCWallViscous' ) then
+              faceBCs(faceID) = 1
+           end if
+           if (BCTypeName(bocotype) == 'BCInflow' ) then
+              faceBCs(faceID) = 2
+           end if
+           if (BCTypeName(bocotype) == 'BCOutflow' ) then
+              faceBCs(faceID) = 2
+           end if
+           if (BCTypeName(bocotype) == 'BCFarfield' ) then
+              faceBCs(faceID) = 2
+           end if
+           
         end if
      end if
   end do
-
 #endif
-end subroutine read_cgns_zone
+   end subroutine read_cgns_zone
 
-subroutine close_cgns(cg)
+   subroutine close_cgns(cg)
 #ifdef USE_CGNS
-  implicit none
-  include 'cgnslib_f.h'
-  integer, intent(in) :: cg
-  integer ier
-  call cg_close_f(cg, ier)
-  if (ier .eq. ERROR) call cg_error_exit_f
+     implicit none
+     include 'cgnslib_f.h'
+     integer, intent(in) :: cg
+     integer ier
+     call cg_close_f(cg, ier)
+     if (ier .eq. ERROR) call cg_error_exit_f
 #endif
-end subroutine close_cgns
+   end subroutine close_cgns
