@@ -113,7 +113,8 @@ subroutine read_cgns_zone(cg,zone,X,nx,ny,nz,faceBCs)
      if (BCTypeName(bocotype) == 'BCWallViscous' .or. &
           BCTypeName(bocotype) == 'BCInflow' .or. &
           BCTypeName(bocotype) == 'BCOutflow' .or. &
-          BCTypeName(bocotype) == 'BCFarfield') then
+          BCTypeName(bocotype) == 'BCFarfield' .or. &
+          BCTypeName(bocotype) == 'BCSymmetryPlane') then
         
         ! Make sure its a SURFACE BC
         if ( (points(4)-points(1) > 0 .and. points(5)-points(2) > 0 ) .or. &
@@ -133,7 +134,7 @@ subroutine read_cgns_zone(cg,zone,X,nx,ny,nz,faceBCs)
            else if (points(5) == points(2) .and. points(5) == ny) then ! Face 6 J max
               faceID = 6
            end if
-           
+
            if (BCTypeName(bocotype) == 'BCWallViscous' ) then
               faceBCs(faceID) = 1
            end if
@@ -146,7 +147,9 @@ subroutine read_cgns_zone(cg,zone,X,nx,ny,nz,faceBCs)
            if (BCTypeName(bocotype) == 'BCFarfield' ) then
               faceBCs(faceID) = 2
            end if
-           
+           if (BCTypeName(bocotype) == 'BCSymmetryPlane') then
+              faceBCs(faceID) = 3
+           end if
         end if
      end if
   end do
