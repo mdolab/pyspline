@@ -1465,6 +1465,7 @@ class volume(object):
             self.wmax = self.tw[-1]
             self.orig_data = False
             self._setFaceSurfaces()
+            self._setEdgeCurves()
             self.faceBCs = [None,None,None,None,None,None]
         else: # We have LMS/Interpolate
             # Do some checking on the number of control points
@@ -1600,6 +1601,7 @@ MUST be defined for task lms or interpolate'
             # end for
         # end if
         self._setFaceSurfaces()
+        self._setEdgeCurves()
         return
     
     def _setCoefSize(self):
@@ -1783,6 +1785,23 @@ original data for this surface or face is not in range 0->5'
                                       tv=self.tw,coef=self.coef[-1,:,:,:])
         
         return
+
+    def _setEdgeCurves(self):
+        '''Create edge spline objects for each edge'''
+        self.edge_curves = [None,None,None,None,None,None,None,None,None,None,None,None]
+        self.edge_curves[0] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,0,0,:])
+        self.edge_curves[1] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,-1,0,:])
+        self.edge_curves[2] = curve('create',k=self.kv,t=self.tv,coef=self.coef[0,:,0,:])
+        self.edge_curves[3] = curve('create',k=self.kv,t=self.tv,coef=self.coef[-1,:,0,:])
+        self.edge_curves[4] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,0,-1,:])
+        self.edge_curves[5] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,-1,-1,:])
+        self.edge_curves[6] = curve('create',k=self.kv,t=self.tv,coef=self.coef[0,:,-1,:])
+        self.edge_curves[7] = curve('create',k=self.kv,t=self.tv,coef=self.coef[-1,:,-1,:])
+        self.edge_curves[8] = curve('create',k=self.kw,t=self.tw,coef=self.coef[0,0,:,:])
+        self.edge_curves[9] = curve('create',k=self.kw,t=self.tw,coef=self.coef[-1,0,:,:])
+        self.edge_curves[10] = curve('create',k=self.kw,t=self.tw,coef=self.coef[0,-1,:,:])
+        self.edge_curves[11] = curve('create',k=self.kw,t=self.tw,coef=self.coef[-1,-1,:,:])
+        return 
 
     def _getBasisPt(self,u,v,w,vals,istart,col_ind,l_index):
         # This function should only be called from pyBlock The purpose
