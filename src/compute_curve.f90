@@ -116,7 +116,7 @@ subroutine curve_jacobian_wrap(s,sd,t,k,nctl,n,nd,vals,row_ptr,col_ind)
   double precision     ,intent(inout)   :: vals((n+nd)*k)
   integer              ,intent(inout)   :: row_ptr(n+nd+1)
   integer              ,intent(inout)   :: col_ind((n+nd)*k)
-  double precision                      :: vnikx(k),work((k+1)*(k+2)/2),vdikx(k,2)
+  double precision                      :: basisu(k),work((k+1)*(k+2)/2),vdikx(k,2)
   integer                               :: i,j,counter
   integer                               :: ilo,ileft,mflag,iwork
   ilo = 1
@@ -126,11 +126,12 @@ subroutine curve_jacobian_wrap(s,sd,t,k,nctl,n,nd,vals,row_ptr,col_ind)
      if (mflag == 1) then
         ileft = ileft - k
      end if
-     call bspvn(t,k,k,1,s(i),ileft,vnikx,work,iwork)
+     call basis(t,nctl,k,s(i),ileft,basisu)
+
      row_ptr(i) = counter-1
      do j=1,k
         col_ind(counter) = ileft-k+j-1
-        vals(counter) =vnikx(j)
+        vals(counter) = basisu(j)
         counter = counter + 1
      end do
   end do

@@ -828,7 +828,7 @@ original data for this surface or node is not in range 0->3'
                 # end for
             # end for
         # end for
-        
+                        
         # Ouput the ranges
         for  i in xrange(4):
             pos_counter += 1
@@ -975,7 +975,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 self.deriv = None
                 self.deriv_ptr = array([])
             # end if
-            if 'deriv_weights' in kwargs and deriv != None:
+            if 'deriv_weights' in kwargs and self.deriv != None:
                 self.deriv_weights = array(kwargs['deriv_weights'])
             else:
                 if self.deriv != None:
@@ -1008,12 +1008,12 @@ Nctl=<number of control points> must be specified for a LMS fit'
         # Now do the sparation between the constrained and unconstrained
         su_select = where(self.weights > 0.0)
         sc_select = where(self.weights <= 0.0)
-                          
         S  = self.X[su_select]
         su = self.s[su_select]
         T  = self.X[sc_select]
         sc = self.s[sc_select]
-        self.weights = self.weights[where(self.weights > 0.0)]
+        weights = self.weights[where(self.weights > 0.0)]
+
         nu = len(S)
         nc = len(T)
      
@@ -1025,7 +1025,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             sdu = self.s[self.deriv_ptr][sdu_select]
             T = vstack((T,self.deriv[sdc_select]))
             sdc = self.s[self.deriv_ptr][sdc_select]
-            self.weights = append(self.weights,self.deriv_weights[where(self.deriv_weights > 0.0)])
+            weights = append(weights,self.deriv_weights[where(self.deriv_weights > 0.0)])
             ndu = len(sdu)
             ndc = len(sdc)
         else:
@@ -1034,7 +1034,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             ndu = 0
             ndc = 0
         # end if
-        W = sparse.csr_matrix((self.weights,arange(len(self.weights)),arange(len(self.weights)+1))) # Diagonal
+        W = sparse.csr_matrix((weights,arange(len(weights)),arange(len(weights)+1))) # Diagonal
             
         if self.interp:
             self.Nctl = nu+nc+ndu+ndc
@@ -1347,9 +1347,10 @@ Nctl=<number of control points> must be specified for a LMS fit'
         Returns:
             None
             '''
+
         f = openTecplot(file_name,self.nDim,tecio)
         if curve:
-            self._writeTecplotCurve(f)
+            self._writeTecplotCurve(f,size=0.1)
         if coef:
             self._writeTecplotCoef(f)
         if orig:
@@ -1383,12 +1384,13 @@ Nctl=<number of control points> must be specified for a LMS fit'
         if 'size' in kwargs:
             length = self.getLength()
             n=int(floor(real(length/kwargs['size'])))
+            print 'n',n
             X = self.getValue(linspace(0,1,n))
         else:
             if not self.s == None:
                 X = self.getValue(self.s)
             else:
-                s = 0.5*(1-cos(linspace(0,pi,25)))
+                s = 0.5*(1-cos(linspace(0,pi,self.k*self.Nctl+2)))
                 X = self.getValue(s)
             # end if
         # end if

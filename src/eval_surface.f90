@@ -107,7 +107,6 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
   integer                               :: ileftu,iworku,ilou,mflagu
   integer                               :: ileftv,iworkv,ilov,mflagv
   double precision                      :: basisu(ku),basisv(kv)
-  double precision                      :: worku(2*ku),workv(2*kv)
 
   ilou = 1
   ilov = 1
@@ -119,7 +118,7 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
      if (mflagu == 1) then
         ileftu = ileftu-ku
      end if
-     call BSPVN(tu,nctlu+ku,ku,ku,1,u(ii),ileftu,basisu,worku,iworku)
+     call basis(tu,nctlu,ku,u(ii),ileftu,basisu)
      istartu = ileftu-ku
      
      ! V
@@ -127,7 +126,7 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
      if (mflagv == 1) then
         ileftv = ileftv-kv
      end if
-     call BSPVN(tv,nctlv+kv,kv,kv,1,v(ii),ileftv,basisv,workv,iworkv)
+     call basis(tv,nctlv,kv,v(ii),ileftv,basisv)
      istartv = ileftv-kv
      
      do i=1,ku
@@ -179,7 +178,6 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
   integer                               :: ileftu,iworku,ilou,mflagu
   integer                               :: ileftv,iworkv,ilov,mflagv
   double precision                      :: basisu(ku),basisv(kv)
-  double precision                      :: worku(2*ku),workv(2*kv)
 
   ilou = 1
   ilov = 1
@@ -191,7 +189,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
         if (mflagu == 1) then
            ileftu = ileftu-ku
         end if
-        call BSPVN(tu,nctlu+ku,ku,ku,1,u(ii,jj),ileftu,basisu,worku,iworku)
+        call basis(tu,nctlu,ku,u(ii,jj),ileftu,basisu)
         istartu = ileftu-ku
         
         ! V
@@ -199,7 +197,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
         if (mflagv == 1) then
            ileftv = ileftv-kv
         end if
-        call BSPVN(tv,nctlv+kv,kv,kv,1,v(ii,jj),ileftv,basisv,workv,iworkv)
+        call basis(tv,nctlv,kv,v(ii,jj),ileftv,basisv)
         istartv = ileftv-kv
      
         do i=1,ku
