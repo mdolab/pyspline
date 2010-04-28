@@ -1,18 +1,17 @@
-      SUBROUTINE BSPVN(T,N,JHIGH,K,INDEX,X,ILEFT,VNIKX,WORK,IWORK)
+*DECK BSPVN
+      SUBROUTINE BSPVN (T, JHIGH, K, INDEX, X, ILEFT, VNIKX, WORK,
+     +   IWORK)
 C***BEGIN PROLOGUE  BSPVN
-C***DATE WRITTEN   800901   (YYMMDD)
-C***REVISION DATE  820801   (YYMMDD)
-C***CATEGORY NO.  E3,K6
-C***KEYWORDS  B-SPLINE,DATA FITTING,INTERPOLATION,SPLINE
-C***AUTHOR  AMOS, D. E., (SNLA)
-C***PURPOSE  Calculates the value of all (possibly) nonzero basis
+C***PURPOSE  Calculate the value of all (possibly) nonzero basis
 C            functions at X.
+C***LIBRARY   SLATEC
+C***CATEGORY  E3, K6
+C***TYPE      SINGLE PRECISION (BSPVN-S, DBSPVN-D)
+C***KEYWORDS  EVALUATION OF B-SPLINE
+C***AUTHOR  Amos, D. E., (SNLA)
 C***DESCRIPTION
 C
 C     Written by Carl de Boor and modified by D. E. Amos
-C
-C     Reference
-C         SIAM J. Numerical Analysis, 14, No. 3, June, 1977, pp.441-472.
 C
 C     Abstract
 C         BSPVN is the BSPLVN routine of the reference.
@@ -56,67 +55,70 @@ C                    variables and can be used for other purposes.
 C
 C     Error Conditions
 C         Improper input is a fatal error.
-C***REFERENCES  C. DE BOOR, *PACKAGE FOR CALCULATING WITH B-SPLINES*,
-C                 SIAM JOURNAL ON NUMERICAL ANALYSIS, VOLUME 14, NO. 3,
-C                 JUNE 1977, PP. 441-472.
-C***ROUTINES CALLED  XERROR
+C
+C***REFERENCES  Carl de Boor, Package for calculating with B-splines,
+C                 SIAM Journal on Numerical Analysis 14, 3 (June 1977),
+C                 pp. 441-472.
+C***ROUTINES CALLED  XERMSG
+C***REVISION HISTORY  (YYMMDD)
+C   800901  DATE WRITTEN
+C   890831  Modified array declarations.  (WRB)
+C   890831  REVISION DATE from Version 3.2
+C   891214  Prologue converted to Version 4.0 format.  (BAB)
+C   900315  CALLs to XERROR changed to CALLs to XERMSG.  (THJ)
+C   900326  Removed duplicate information from DESCRIPTION section.
+C           (WRB)
+C   920501  Reformatted the REFERENCES section.  (WRB)
 C***END PROLOGUE  BSPVN
 C
-C
-      INTEGER ILEFT, IMJP1, INDEX, IPJ, IWORK, JHIGH, JP1, JP1ML, K, L,N
+      INTEGER ILEFT, IMJP1, INDEX, IPJ, IWORK, JHIGH, JP1, JP1ML, K, L
       REAL T, VM, VMPREV, VNIKX, WORK, X
 C     DIMENSION T(ILEFT+JHIGH)
-      DIMENSION T(N+K), VNIKX(K), WORK(2*k)
+      DIMENSION T(*), VNIKX(*), WORK(*)
 C     CONTENT OF J, DELTAM, DELTAP IS EXPECTED UNCHANGED BETWEEN CALLS.
 C     WORK(I) = DELTAP(I), WORK(K+I) = DELTAM(I), I = 1,K
 C***FIRST EXECUTABLE STATEMENT  BSPVN
-      vnikx(:) = 0.0
       IF(K.LT.1) GO TO 90
       IF(JHIGH.GT.K .OR. JHIGH.LT.1) GO TO 100
       IF(INDEX.LT.1 .OR. INDEX.GT.2) GO TO 105
       IF(X.LT.T(ILEFT) .OR. X.GT.T(ILEFT+1)) GO TO 110
-
       GO TO (10, 20), INDEX
- 10   IWORK = 1
+   10 IWORK = 1
       VNIKX(1) = 1.0E0
       IF (IWORK.GE.JHIGH) GO TO 40
-
- 20   IPJ = ILEFT + IWORK
+C
+   20 IPJ = ILEFT + IWORK
       WORK(IWORK) = T(IPJ) - X
       IMJP1 = ILEFT - IWORK + 1
       WORK(K+IWORK) = X - T(IMJP1)
       VMPREV = 0.0E0
       JP1 = IWORK + 1
       DO 30 L=1,IWORK
-         JP1ML = JP1 - L
-         VM = VNIKX(L)/(WORK(L)+WORK(K+JP1ML))
+        JP1ML = JP1 - L
+        VM = VNIKX(L)/(WORK(L)+WORK(K+JP1ML))
         VNIKX(L) = VM*WORK(L) + VMPREV
         VMPREV = VM*WORK(K+JP1ML)
- 30   CONTINUE
+   30 CONTINUE
       VNIKX(JP1) = VMPREV
       IWORK = JP1
-
       IF (IWORK.LT.JHIGH) GO TO 20
-C$$$C
+C
    40 RETURN
-     
-
- 90   CONTINUE
-      CALL XERROR( ' BSPVN,  K DOES NOT SATISFY K.GE.1', 34, 2, 1)
+C
+C
+   90 CONTINUE
+      CALL XERROR ('SLATEC', 'BSPVN', 'K DOES NOT SATISFY K.GE.1', 2,
+     +   1)
       RETURN
   100 CONTINUE
-      CALL XERROR( ' BSPVN,  JHIGH DOES NOT SATISFY 1.LE.JHIGH.LE.K',
-     1 47, 2, 1)
+      CALL XERROR ('SLATEC', 'BSPVN',
+     +   'JHIGH DOES NOT SATISFY 1.LE.JHIGH.LE.K', 2, 1)
       RETURN
   105 CONTINUE
-      CALL XERROR( ' BSPVN,  INDEX IS NOT 1 OR 2',28,2,1)
+      CALL XERROR ('SLATEC', 'BSPVN', 'INDEX IS NOT 1 OR 2', 2, 1)
       RETURN
   110 CONTINUE
-      print *,'X:',X
-      print *,'ILEFT:',ILEFT
-      print *,'T(ILEFT):',T(ILEFT)
-      print *,'T(ILEFT+1)',T(ILEFT+1)
-      CALL XERROR( ' BSPVN,  X DOES NOT SATISFY T(ILEFT).LE.X.LE.T(ILEFT
-     1+1)', 55, 2, 1)
+      CALL XERROR ('SLATEC', 'BSPVN',
+     +   'X DOES NOT SATISFY T(ILEFT).LE.X.LE.T(ILEFT+1)', 2, 1)
       RETURN
-      end 
+      END

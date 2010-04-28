@@ -72,7 +72,7 @@ subroutine eval_curve_V(s,t,k,coef,nctl,ndim,n,val)
   ! Working
   integer                               :: i,l,idim,istart
   integer                               :: ILEFT,IWORK,ILO,mflag
-  double precision                      :: VNIKX(k),WORK(2*K)
+  double precision                      :: basisu(k)
 
  val(:,:) = 0.0
  ILO = 1
@@ -81,11 +81,11 @@ subroutine eval_curve_V(s,t,k,coef,nctl,ndim,n,val)
      if (mflag == 1) then
         ileft = ileft-k
      end if
-     call BSPVN(T,NCTL,K,K,1,s(i),ILEFT,VNIKX,WORK,IWORK)
+     call basis(t,nctl,k,s(i),ileft,basisu)
      istart = ileft-k
      do l=1,k
         do idim=1,ndim
-           val(i,idim) = val(i,idim) + vnikx(l)*coef(istart+l,idim)
+           val(i,idim) = val(i,idim) + basisu(l)*coef(istart+l,idim)
         end do
      end do
   end do
@@ -312,7 +312,7 @@ subroutine eval_curve_c(s,t,k,coef,nctl,ndim,val)
   ! Working
   integer                               :: idim,ilow,ileft,mflag,iwork,i,ilo
   double precision                      :: work(3*k),temp_val,temp_deriv
-  double precision                      :: vnikx(k)
+  double precision                      :: basisu(k)
 
   ! Functions
   double precision bvalu
@@ -323,11 +323,11 @@ subroutine eval_curve_c(s,t,k,coef,nctl,ndim,val)
   do idim=1,ndim
      call intrv(t,nctl+k,s,ilo,ileft,mflag)
      if (mflag == 0) then
-        call bspvn(t,nctl,k,k,1,s,ileft,vnikx,work,iwork)
+        call basis(t,nctl,k,s,ileft,basisu)
      else if (mflag == 1) then
         ileft = nctl
-        vnikx(:) = 0.0
-        vnikx(k) = 1.0
+        basisu(:) = 0.0
+        basisu(k) = 1.0
      end if
 
      ! Get the value...we can use the ileft computed above
@@ -335,7 +335,7 @@ subroutine eval_curve_c(s,t,k,coef,nctl,ndim,val)
      ! Now get the derivative
      temp_deriv = 0.0
      do i=1,k
-        temp_deriv = temp_deriv + vnikx(i)*aimag(coef(ileft-k+i,idim))
+        temp_deriv = temp_deriv + basisu(i)*aimag(coef(ileft-k+i,idim))
      end do
 
      val(idim) = cmplx(temp_val,temp_deriv)
