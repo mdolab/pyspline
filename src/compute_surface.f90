@@ -170,10 +170,8 @@ subroutine surface_jacobian_wrap(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,vals,row_ptr,
   double precision, intent(out)         :: vals(nu*nv*ku*kv)
   integer         , intent(out)         :: col_ind(nu*nv*ku*kv),row_ptr(nu*nv+1)
   ! Working
-  double precision                      :: vniku(ku),worku(2*ku)
+  double precision                      :: basisu(ku),basisv(kv)
   integer                               :: ilou,ileftu,mflagu
-
-  double precision                      :: vnikv(kv),workv(2*kv)
   integer                               :: ilov,ileftv,mflagv
 
   integer                               :: i,j,ii,jj,iwork,counter
@@ -188,28 +186,28 @@ subroutine surface_jacobian_wrap(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,vals,row_ptr,
         ! Get u interval
         call intrv(tu,nctlu+ku,u(i,j),ilou,ileftu,mflagu)
         if (mflagu == 0) then
-           call bspvn(tu,nctlu+ku,ku,ku,1,u(i,j),ileftu,vniku,worku,iwork)
+           call basis(tu,nctlu,ku,u(i,j),ileftu,basisu)
         else if (mflagu == 1) then
            ileftu = nctlu
-           vniku(:) = 0.0
-           vniku(ku) = 1.0
+           basisu(:) = 0.0
+           basisu(ku) = 1.0
         end if
-
+        
         ! Get v interval
         call intrv(tv,nctlv+kv,v(i,j),ilov,ileftv,mflagv)
         if (mflagv == 0) then
-           call bspvn(tv,nctlv+kv,kv,kv,1,v(i,j),ileftv,vnikv,workv,iwork)
+           call basis(tv,nctlv,kv,v(i,j),ileftv,basisv)
         else if (mflagv == 1) then
            ileftv = nctlv
-           vnikv(:) = 0.0
-           vnikv(kv) = 1.0
+           basisv(:) = 0.0
+           basisv(kv) = 1.0
         end if
-        
+
         row_ptr( (i-1)*nv + j  ) = counter-1
         do ii=1,ku
            do jj = 1,kv
               col_ind(counter) = (ileftu-ku+ii-1)*Nctlv + (ileftv-kv+jj-1)
-              vals(counter) = vniku(ii)*vnikv(jj)
+              vals(counter) = basisu(ii)*basisv(jj)
               counter = counter + 1
               
            end do
@@ -328,56 +326,56 @@ function compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X)
 end function compute_rms_surface
 
 
-subroutine surface_jacobian_wrap2(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,Jac)
+! subroutine surface_jacobian_wrap2(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,Jac)
 
-  implicit none
-  ! Input
-  integer         , intent(in)          :: ku,kv,nctlu,nctlv,nu,nv
-  double precision, intent(in)          :: u(nu,nv),v(nu,nv)
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
-  double precision, intent(out)         :: Jac(nu*nv,nctlu*nctlv)
-  ! Working
-  double precision                      :: vniku(ku),worku(2*ku)
-  integer                               :: ilou,ileftu,mflagu
+!   implicit none
+!   ! Input
+!   integer         , intent(in)          :: ku,kv,nctlu,nctlv,nu,nv
+!   double precision, intent(in)          :: u(nu,nv),v(nu,nv)
+!   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+!   double precision, intent(out)         :: Jac(nu*nv,nctlu*nctlv)
+!   ! Working
+!   double precision                      :: vniku(ku),worku(2*ku)
+!   integer                               :: ilou,ileftu,mflagu
 
-  double precision                      :: vnikv(kv),workv(2*kv)
-  integer                               :: ilov,ileftv,mflagv
+!   double precision                      :: vnikv(kv),workv(2*kv)
+!   integer                               :: ilov,ileftv,mflagv
 
-  integer                               :: i,j,ii,jj,iwork
+!   integer                               :: i,j,ii,jj,iwork
 
-  ilou = 1
-  ilov = 1
-  do i=1,nu
-     do j = 1,nv
-        ! Get u interval
-        call intrv(tu,nctlu+ku,u(i,j),ilou,ileftu,mflagu)
-        if (mflagu == 0) then
-           call bspvn(tu,ku,ku,1,u(i,j),ileftu,vniku,worku,iwork)
-        else if (mflagu == 1) then
-           ileftu = nctlu
-           vniku(:) = 0.0
-           vniku(ku) = 1.0
-        end if
+!   ilou = 1
+!   ilov = 1
+!   do i=1,nu
+!      do j = 1,nv
+!         ! Get u interval
+!         call intrv(tu,nctlu+ku,u(i,j),ilou,ileftu,mflagu)
+!         if (mflagu == 0) then
+!            call bspvn(tu,ku,ku,1,u(i,j),ileftu,vniku,worku,iwork)
+!         else if (mflagu == 1) then
+!            ileftu = nctlu
+!            vniku(:) = 0.0
+!            vniku(ku) = 1.0
+!         end if
 
-        ! Get v interval
-        call intrv(tv,nctlv+kv,v(i,j),ilov,ileftv,mflagv)
-        if (mflagv == 0) then
-           call bspvn(tv,kv,kv,1,v(i,j),ileftv,vnikv,workv,iwork)
-        else if (mflagv == 1) then
-           ileftv = nctlv
-           vnikv(:) = 0.0
-           vnikv(kv) = 1.0
-        end if
+!         ! Get v interval
+!         call intrv(tv,nctlv+kv,v(i,j),ilov,ileftv,mflagv)
+!         if (mflagv == 0) then
+!            call bspvn(tv,kv,kv,1,v(i,j),ileftv,vnikv,workv,iwork)
+!         else if (mflagv == 1) then
+!            ileftv = nctlv
+!            vnikv(:) = 0.0
+!            vnikv(kv) = 1.0
+!         end if
         
-        do ii=1,ku
-           do jj = 1,kv
-              Jac( (i-1)*nv + j, (ileftu-ku+ii-1)*Nctlv + (ileftv-kv+jj)) = &
-                   vniku(ii)*vnikv(jj)
-           end do
-        end do
-     end do
-  end do
-end subroutine surface_jacobian_wrap2
+!         do ii=1,ku
+!            do jj = 1,kv
+!               Jac( (i-1)*nv + j, (ileftu-ku+ii-1)*Nctlv + (ileftv-kv+jj)) = &
+!                    vniku(ii)*vnikv(jj)
+!            end do
+!         end do
+!      end do
+!   end do
+! end subroutine surface_jacobian_wrap2
 
 
 

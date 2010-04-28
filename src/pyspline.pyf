@@ -561,20 +561,6 @@
        integer optional,check(shape(coef,0)==ncoef),depend(coef) :: ncoef=shape(coef,0)
      end subroutine updatecoefficients_c
 
-     subroutine surface_jacobian_wrap2(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,jac) ! in :test:compute_surface.f90
-       double precision dimension(nu,nv),intent(in) :: u
-       double precision dimension(nu,nv),intent(in),depend(nu,nv) :: v
-       double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
-       double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
-       integer intent(in) :: ku
-       integer intent(in) :: kv
-       integer intent(in) :: nctlu
-       integer intent(in) :: nctlv
-       integer optional,intent(in),check(shape(u,0)==nu),depend(u) :: nu=shape(u,0)
-       integer optional,intent(in),check(shape(u,1)==nv),depend(u) :: nv=shape(u,1)
-       double precision dimension(nu*nv,nctlu*nctlv),intent(out),depend(nu,nv,nctlu,nctlv) :: jac
-     end subroutine surface_jacobian_wrap2
-
      subroutine insertknot(u,r,t,k,coef,nctl,ndim,t_new,coef_new,ileft) ! in :test:insertKnot.f90
        double precision intent(in) :: u
        integer intent(in,out) :: r
