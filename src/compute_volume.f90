@@ -43,8 +43,7 @@ subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,
               basisv(:) = 0.0
               basisv(kv) = 1.0
            end if
-           
-
+          
            ! Get w interval
             call intrv(tw,nctlw+kw,w(i,j,k),ilow,ileftw,mflagw)
            if (mflagw == 0) then

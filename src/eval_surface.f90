@@ -21,7 +21,7 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   !
   !     Ouput 
   !     val     - Real, Evaluated point, size ndim
-  
+
   implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim
@@ -37,7 +37,7 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   integer                               :: ileftu,iworku,ilou,mflagu
   integer                               :: ileftv,iworkv,ilov,mflagv
   double precision                      :: basisu(ku),basisv(kv)
-  double precision                      :: worku(2*ku),workv(2*kv)
+
 
   val(:) = 0.0
   ilou = 1
@@ -47,16 +47,17 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   if (mflagu == 1) then
      ileftu = ileftu-ku
   end if
-  call BSPVN(tu,nctlu+ku,ku,ku,1,u,ileftu,basisu,worku,iworku)
+  call basis(tu,nctlu,ku,u,ileftu,basisu)
   istartu = ileftu-ku
-  
+
   ! V
   call INTRV(tv,nctlv+kv,v,ilov,ileftv,mflagv)
   if (mflagv == 1) then
      ileftv = ileftv-kv
   end if
-  call BSPVN(tv,nctlv+kv,kv,kv,1,v,ileftv,basisv,workv,iworkv)
+  call basis(tv,nctlv,kv,v,ileftv,basisv)
   istartv = ileftv-kv
+
 
   do i=1,ku
      do j=1,kv
@@ -65,7 +66,7 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
         end do
      end do
   end do
-  
+
 end subroutine eval_surface
 
 subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
@@ -91,7 +92,7 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
   !
   !     Ouput 
   !     val     - Real, Evaluated point, size n,ndim
-  
+
   implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,n
@@ -102,7 +103,7 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
   ! Output
   double precision, intent(out)         :: val(n,ndim)
 
- ! Working
+  ! Working
   integer                               :: idim,istartu,istartv,i,j,ii
   integer                               :: ileftu,iworku,ilou,mflagu
   integer                               :: ileftv,iworkv,ilov,mflagv
@@ -120,7 +121,7 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
      end if
      call basis(tu,nctlu,ku,u(ii),ileftu,basisu)
      istartu = ileftu-ku
-     
+
      ! V
      call INTRV(tv,nctlv+kv,v(ii),ilov,ileftv,mflagv)
      if (mflagv == 1) then
@@ -128,7 +129,7 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
      end if
      call basis(tv,nctlv,kv,v(ii),ileftv,basisv)
      istartv = ileftv-kv
-     
+
      do i=1,ku
         do j=1,kv
            do idim=1,ndim
@@ -162,7 +163,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
   !
   !     Ouput 
   !     val     - Real, Evaluated point, size (n,m,ndim)
-  
+
   implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,n,m
@@ -173,7 +174,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
   ! Output
   double precision, intent(out)         :: val(n,m,ndim)
 
-! Working
+  ! Working
   integer                               :: idim,istartu,istartv,i,j,ii,jj
   integer                               :: ileftu,iworku,ilou,mflagu
   integer                               :: ileftv,iworkv,ilov,mflagv
@@ -191,7 +192,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
         end if
         call basis(tu,nctlu,ku,u(ii,jj),ileftu,basisu)
         istartu = ileftu-ku
-        
+
         ! V
         call INTRV(tv,nctlv+kv,v(ii,jj),ilov,ileftv,mflagv)
         if (mflagv == 1) then
@@ -199,7 +200,7 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
         end if
         call basis(tv,nctlv,kv,v(ii,jj),ileftv,basisv)
         istartv = ileftv-kv
-     
+
         do i=1,ku
            do j=1,kv
               do idim=1,ndim
@@ -236,7 +237,7 @@ subroutine eval_surface_deriv(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   !
   !     Ouput 
   !     val     - Real, Evaluated derivatives (du,dv), size (2,ndim)
-    
+
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim
   double precision, intent(in)          :: u,v
@@ -250,7 +251,7 @@ subroutine eval_surface_deriv(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   integer                               :: idim
   double precision                      :: work(3*max(ku,kv) + kv)
   double precision b2val
-  
+
   do idim=1,ndim
      val(1,idim) = b2val(u,v,1,0,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
      val(2,idim) = b2val(u,v,0,1,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
@@ -280,8 +281,8 @@ subroutine eval_surface_deriv_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
   !
   !     Ouput 
   !     val     - Real, Evaluated points, size n,2,ndim
-  
-  
+
+
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,n
   double precision, intent(in)          :: u(n),v(n)
@@ -329,8 +330,8 @@ subroutine eval_surface_deriv_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
   !
   !     Ouput 
   !     val     - Real, Evaluated point, size (n,m,2,2,ndim)
-  
-  
+
+
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,n,m
   double precision, intent(in)          :: u(n,m),v(n,m)
@@ -382,7 +383,7 @@ subroutine eval_surface_deriv2(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   !
   !     Ouput 
   !     val     - Real, Evaluated derivatives (d2u2,dudv,d2v2), size (2,2,ndim)
-    
+
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim
   double precision, intent(in)          :: u,v
@@ -404,17 +405,17 @@ subroutine eval_surface_deriv2(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
      else
         val(1,1,idim) = 0.0
      end if
-     
+
      val(1,2,idim) = b2val(u,v,1,1,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
      val(2,1,idim) = val(1,2,idim)
-     
+
      if (kv>=3) then
         val(2,2,idim) = b2val(u,v,0,2,tu,tv,nctlu,nctlv,ku,kv,coef(:,:,idim),work)
      else
         val(2,2,idim) = 0.0
      end if
   end do
-  
+
 end subroutine eval_surface_deriv2
 
 subroutine eval_surface_deriv2_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
@@ -440,8 +441,8 @@ subroutine eval_surface_deriv2_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
   !
   !     Ouput 
   !     val     - Real, Evaluated points, size (n,2,2,ndim)
-  
-  
+
+
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,n
   double precision, intent(in)          :: u(n),v(n)
@@ -494,8 +495,8 @@ subroutine eval_surface_deriv2_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
   !
   !     Ouput 
   !     val     - Real, Evaluated point, size (n,m,2,2,ndim)
-  
-  
+
+
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,n,m
   double precision, intent(in)          :: u(n,m),v(n,m)
