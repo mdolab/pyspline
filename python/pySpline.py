@@ -34,10 +34,8 @@ import scipy
 from scipy import sparse,io
 try:
     from scipy.sparse.linalg.dsolve import factorized # Version 0.8 of scipy
-    USE_SPARSE = True
 except:
     from scipy.linsolve import factorized
-    USE_SPARSE = False
 
 # =============================================================================
 # Custom Python modules
