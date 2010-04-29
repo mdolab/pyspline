@@ -28,13 +28,18 @@ import os, sys, string, time, copy, pdb
 # =============================================================================
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
     ones,vstack,real,where,arange,append,hstack,mgrid
-from numpy.linalg import norm,norm
+from numpy.linalg import norm
 
 import scipy
 from scipy import sparse,io
-from scipy.sparse.linalg.dsolve import factorized
-scipy.sparse.linalg.use_solver(useUmfpack=False)
-from scipy.sparse.linalg import gmres
+try:
+    from scipy.sparse.linalg.dsolve import factorized # Version 0.8 of scipy
+except:
+    pass
+try:
+    from scipy.linsolve import factorized
+except:
+    pass
 
 # =============================================================================
 # Custom Python modules
@@ -188,7 +193,7 @@ class surface(object):
         Optional Data:
            u    : array of u parameter locations (optional for ndim == 3)
            v    : array of v parameter locations (optional for ndim == 3)
-           niter:  The number of Hoschek's parameter corrections to run
+           niter:  The number of Hoschek\'s parameter corrections to run
            '''
         if 'no_print' in kwargs:
             self.NO_PRINT = kwargs['no_print']
@@ -321,7 +326,7 @@ MUST be defined for task lms or interpolate'
         vals,row_ptr,col_ind = pyspline.surface_jacobian_wrap(\
             self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
-                                 shape=[self.Nu*self.Nv,self.Nctlu*self.Nctlv])
+                              shape=[self.Nu*self.Nv,self.Nctlu*self.Nctlv])
         if self.interp:
             solve = factorized( N )
             for idim in xrange(self.nDim):
