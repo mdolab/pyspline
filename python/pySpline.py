@@ -34,12 +34,9 @@ import scipy
 from scipy import sparse,io
 try:
     from scipy.sparse.linalg.dsolve import factorized # Version 0.8 of scipy
+    USE_SPARSE = True
 except:
-    pass
-try:
-    from scipy.linsolve import factorized
-except:
-    pass
+    USE_SPARSE = False
 
 # =============================================================================
 # Custom Python modules
@@ -326,7 +323,7 @@ MUST be defined for task lms or interpolate'
         vals,row_ptr,col_ind = pyspline.surface_jacobian_wrap(\
             self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
-                              shape=[self.Nu*self.Nv,self.Nctlu*self.Nctlv])
+                             [self.Nu*self.Nv,self.Nctlu*self.Nctlv])
         if self.interp:
             solve = factorized( N )
             for idim in xrange(self.nDim):
@@ -1069,7 +1066,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
         N_row_ptr = zeros(nu+ndu+1,'intc')       # | ->  Standard CSR formulation
         N_col_ind = zeros((nu+ndu)*self.k,'intc')# |
         pyspline.curve_jacobian_wrap(su,sdu,self.t,self.k,self.Nctl,N_vals,N_row_ptr,N_col_ind)
-        N = sparse.csr_matrix((N_vals,N_col_ind,N_row_ptr),shape=[nu+ndu,self.Nctl])
+        N = sparse.csr_matrix((N_vals,N_col_ind,N_row_ptr),[nu+ndu,self.Nctl])
         if self.interp:
             solve = factorized( N ) # Factorize once for efficiency
             for idim in xrange(self.nDim):
@@ -1100,7 +1097,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 M_row_ptr = zeros(nc+ndc+1,'intc')       #| -> Standard CSR formulation
                 M_col_ind = zeros((nc+ndc)*self.k,'intc')#|
                 pyspline.curve_jacobian_wrap(sc,sdc,self.t,self.k,self.Nctl,M_vals,M_row_ptr,M_col_ind)
-                M = sparse.csr_matrix((M_vals,M_col_ind,M_row_ptr),shape=[nc+ndc,self.Nctl])
+                M = sparse.csr_matrix((M_vals,M_col_ind,M_row_ptr),[nc+ndc,self.Nctl])
                 # Now we must assemble the constrained jacobian
                 # [ N^T*W*T      M^T][P] = [ N^T*W*S]
                 # [ M            0  ][R]   [ T      ] 
@@ -1111,7 +1108,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                     NTWN.data,NTWN.indptr,NTWN.indices,MT.data,MT.indptr,MT.indices,
                     M.data,M.indptr,M.indices,self.Nctl)
                 # Create sparse csr matrix and factorize
-                J = sparse.csr_matrix((j_val,j_col_ind,j_row_ptr),shape=[self.Nctl+nc+ndc,self.Nctl+nc+ndc])
+                J = sparse.csr_matrix((j_val,j_col_ind,j_row_ptr),[self.Nctl+nc+ndc,self.Nctl+nc+ndc])
                 solve = factorized( J )
                 for idim in xrange(self.nDim):
                     rhs = hstack((N.transpose()*W*S[:,idim],T[:,idim]))
@@ -1615,7 +1612,7 @@ MUST be defined for task lms or interpolate'
                 self.Nctlu,self.Nctlv,self.Nctlw)
         
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
-                              shape=[self.Nu*self.Nv*self.Nw,self.Nctlu*self.Nctlv*self.Nctlw])
+                              [self.Nu*self.Nv*self.Nw,self.Nctlu*self.Nctlv*self.Nctlw])
      
         if self.interp:
             solve = factorized( N )
