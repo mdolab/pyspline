@@ -34,8 +34,8 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
 
   ! Working
   integer                               :: idim,istartu,istartv,i,j
-  integer                               :: ileftu,iworku,ilou,mflagu
-  integer                               :: ileftv,iworkv,ilov,mflagv
+  integer                               :: ileftu,ilou,mflagu
+  integer                               :: ileftv,ilov,mflagv
   double precision                      :: basisu(ku),basisv(kv)
 
 
@@ -44,9 +44,12 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   ilov = 1
   ! U
   call INTRV(tu,nctlu+ku,u,ilou,ileftu,mflagu)
+  !print *,'tu,nctlu,u,ilou,ileftu,mflagu:',tu,nctlu,u,ilou,ileftu,mflagu
   if (mflagu == 1) then
      ileftu = ileftu-ku
   end if
+
+
   call basis(tu,nctlu,ku,u,ileftu,basisu)
   istartu = ileftu-ku
 
@@ -105,8 +108,8 @@ subroutine eval_surface_V(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,val)
 
   ! Working
   integer                               :: idim,istartu,istartv,i,j,ii
-  integer                               :: ileftu,iworku,ilou,mflagu
-  integer                               :: ileftv,iworkv,ilov,mflagv
+  integer                               :: ileftu,ilou,mflagu
+  integer                               :: ileftv,ilov,mflagv
   double precision                      :: basisu(ku),basisv(kv)
 
   ilou = 1
@@ -176,8 +179,8 @@ subroutine eval_surface_M(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
 
   ! Working
   integer                               :: idim,istartu,istartv,i,j,ii,jj
-  integer                               :: ileftu,iworku,ilou,mflagu
-  integer                               :: ileftv,iworkv,ilov,mflagv
+  integer                               :: ileftu,ilou,mflagu
+  integer                               :: ileftv,ilov,mflagv
   double precision                      :: basisu(ku),basisv(kv)
 
   ilou = 1
