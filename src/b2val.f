@@ -93,7 +93,8 @@ C
       INTEGER
      *        IDX, IDY, NX, NY, KX, KY,j
       REAL
-     *     XVAL, YVAL, TX(1), TY(1), BCOEF(NX,NY), WORK(1)
+     *     XVAL, YVAL, TX(NX+KX), TY(NY+KX), BCOEF(NX,NY)
+      REAL WORK(3*MAX(KX,KY) + KY)
 C
 C  LOCAL VARIABLES
 C

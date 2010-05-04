@@ -617,7 +617,7 @@ original data for this surface or node is not in range 0->3'
         Returns:
             u    : Parametric position(s) u on surface
             v    : Parametric position(s) v on surface
-            D    : Distance(s) between curve(s) and surface(u,v)
+            D    : Distance(s) between point(s) and surface(u,v)
         '''
         # We will use a starting point u0,v0 if given
         x0 = array(x0)
@@ -690,8 +690,8 @@ original data for this surface or node is not in range 0->3'
     def _writeTecplotSurface(self,handle):
         '''Output this surface\'s data to a open file handle \'handle\' '''
         
-        Nx = self.Nctlu*self.ku+1
-        Ny = self.Nctlv*self.kv+1
+        Nx = self.Nctlu*(self.ku)*16
+        Ny = self.Nctlv*(self.kv)*16
         u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
         v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
         [V_plot,U_plot] = meshgrid(v_plot,u_plot)
@@ -1385,7 +1385,6 @@ Nctl=<number of control points> must be specified for a LMS fit'
         if 'size' in kwargs:
             length = self.getLength()
             n=int(floor(real(length/kwargs['size'])))
-            print 'n',n
             X = self.getValue(linspace(0,1,n))
         else:
             if not self.s == None:
@@ -2126,7 +2125,7 @@ def bilinear_surface(*args,**kwargs):
         # One argument passed in ... assume its X
         assert len(args[0]) == 4,'Error: a single argument passed to bilinear\
  surface must contain 4 points and be of size (4,3)'
-        return surface(coef=X.reshape[2,2,:],tu=[0,0,1,1],tv=[0,0,1,1],ku=2,kv=2)
+        return surface(coef=array(args[0]).reshape([2,2,3]),tu=[0,0,1,1],tv=[0,0,1,1],ku=2,kv=2)
     else:
         # Assume 4 arguments
         coef = zeros([2,2,3])
@@ -2163,9 +2162,9 @@ def line(*args,**kwargs):
         elif 'dir' in kwargs:
             # We have point and direction
             if 'length' in kwargs:
-                x2 = args[0] + kwargs['direction']/norm(kwargs['direction'])*kwargs['length']
+                x2 = args[0] + kwargs['dir']/norm(kwargs['dir'])*kwargs['length']
             else:
-                x2 = args[0] + kwargs['direction']
+                x2 = args[0] + kwargs['dir']
             # end if
             return curve(coef=[args[0],x2],k=2,t=[0,0,1,1])
         else:
