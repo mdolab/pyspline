@@ -690,8 +690,8 @@ original data for this surface or node is not in range 0->3'
     def _writeTecplotSurface(self,handle):
         '''Output this surface\'s data to a open file handle \'handle\' '''
         
-        Nx = self.Nctlu*(self.ku)*16
-        Ny = self.Nctlv*(self.kv)*16
+        Nx = self.Nctlu*(self.ku)*2
+        Ny = self.Nctlv*(self.kv)*2
         u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
         v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
         [V_plot,U_plot] = meshgrid(v_plot,u_plot)
@@ -2125,7 +2125,12 @@ def bilinear_surface(*args,**kwargs):
         # One argument passed in ... assume its X
         assert len(args[0]) == 4,'Error: a single argument passed to bilinear\
  surface must contain 4 points and be of size (4,3)'
-        return surface(coef=array(args[0]).reshape([2,2,3]),tu=[0,0,1,1],tv=[0,0,1,1],ku=2,kv=2)
+        coef = zeros((2,2,3))
+        coef[0,0] = args[0][0]
+        coef[1,0] = args[0][1]
+        coef[0,1] = args[0][2]
+        coef[1,1] = args[0][3]
+        return surface(coef=coef,tu=[0,0,1,1],tv=[0,0,1,1],ku=2,kv=2)
     else:
         # Assume 4 arguments
         coef = zeros([2,2,3])
