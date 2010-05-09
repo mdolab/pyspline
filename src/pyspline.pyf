@@ -437,6 +437,18 @@
        double precision dimension(ndim),intent(out),depend(ndim) :: diff
      end subroutine curve_surface
 
+     subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol) ! in :test:projections.f90
+       double precision dimension(3),intent(in) :: ia
+       double precision dimension(3),intent(in) :: vc
+       double precision dimension(n,3),intent(in) :: p0
+       double precision dimension(n,3),intent(in),depend(n) :: v1
+       double precision dimension(n,3),intent(in),depend(n) :: v2
+       integer optional,intent(in),check(shape(p0,0)==n),depend(p0) :: n=shape(p0,0)
+       double precision dimension(n,6),intent(out),depend(n) :: sol
+       integer intent(out) :: n_sol
+     end subroutine line_plane
+
+
      ! ----------------- Misc Functions -----------------------------
 
      function poly_length(x,n,ndim) ! in :test:compute_curve.f90

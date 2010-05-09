@@ -199,7 +199,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
   integer                               :: i,j,ii,jj,counter,ipt
   double precision                      :: D,D0,u0(N),v0(N),delta(2)
   double precision                      :: A(2,2),ki(2)
-  integer                               :: n_sub  ! Huristic Value
+  integer                               :: n_sub_u,n_sub_v  ! Huristic Value
   integer                               :: istart,nuu,nvv
 
   ! Alloctable
@@ -208,7 +208,19 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
   ! Functions     
   double precision                      :: norm
 
-  n_sub = 6
+
+  if (ku == 2) then
+     n_sub_u = 25
+  else
+     n_sub_u = 5
+  end if
+
+  if (kv == 2) then
+     n_sub_v = 25
+  else
+     n_sub_v = 5
+  end if
+
   brute_force = .false.
   ! First we will evaluate the surface at n points inside each knot span in each direction
 
@@ -221,8 +233,8 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
   end do point_loop
   if (brute_force) then
      ! Generate the uu and vv values
-     nuu = nctlu-ku+2 + (nctlu-ku+1)*n_sub
-     nvv = nctlv-kv+2 + (nctlv-kv+1)*n_sub
+     nuu = nctlu-ku+2 + (nctlu-ku+1)*n_sub_u
+     nvv = nctlv-kv+2 + (nctlv-kv+1)*n_sub_v
      allocate (uu(nuu),vv(nvv))
 
      counter = 1
@@ -232,8 +244,8 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
         else
            istart = 1
         end if
-        do j=istart,n_sub+1
-           uu(counter) = tu(i+ku-1) + (real(j)/(n_sub+1)*(tu(i+ku)-tu(i+ku-1)))
+        do j=istart,n_sub_u+1
+           uu(counter) = tu(i+ku-1) + (real(j)/(n_sub_u+1)*(tu(i+ku)-tu(i+ku-1)))
            counter = counter + 1
         end do
      end do
@@ -245,8 +257,8 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
         else
            istart = 1
         end if
-        do j=istart,n_sub+1
-           vv(counter) = tv(i+kv-1) + (real(j)/(n_sub+1)*(tv(i+kv)-tv(i+kv-1)))
+        do j=istart,n_sub_v+1
+           vv(counter) = tv(i+kv-1) + (real(j)/(n_sub_v+1)*(tv(i+kv)-tv(i+kv-1)))
            counter = counter + 1
         end do
      end do
@@ -752,10 +764,10 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
   double precision                      :: val_c(ndim),deriv_c(ndim),deriv2_C(ndim)
   double precision                      :: val0_s(ndim),val0_c(ndim)
   integer                               :: i,j,ii,jj,l,ll,counter1,counter2
-  double precision                      :: D,D0,u0,v0,s0,delta(3)
+  double precision                      :: D,D0,u0,v0,s0,delta(3),D2(3)
   double precision                      :: A(3,3),ki(3)
-  integer                               :: n,nc ! Huristic Value
-  integer                               :: istart,nss,nuu,nvv
+  integer                               :: n_sub_u,n_sub_v,nc ! Huristic Value
+  integer                               :: istart,nss,nuu,nvv,max_inner_iter
   logical                               :: brute_force
   ! Allocatable 
   double precision,allocatable          :: curve_vals(:,:),uu(:),vv(:),ss(:)
@@ -764,8 +776,27 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
   ! Functions     
   double precision                      :: norm
 
-  n = 6
-  nc = 12
+ max_inner_iter = 20
+
+ if (ku == 2) then
+     n_sub_u = 3
+  else
+     n_sub_u = 3
+  end if
+
+  if (kv == 2) then
+     n_sub_v = 3
+  else
+     n_sub_v = 3
+  end if
+
+  if (kc == 2) then
+     nc = 3
+  else
+     nc = 3
+  end if
+
+
   ! First we will evaluate the surface at n points inside each knot span in each direction
   !if we are given a bad guess do the brute force
 
@@ -774,8 +805,8 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
 
      ! Generate the ss,uu and vv values
      nss = nctlc-kc+2 + (nctlc-kc+1)*nc
-     nuu = nctlu-ku+2 + (nctlu-ku+1)*n
-     nvv = nctlv-kv+2 + (nctlv-kv+1)*n
+     nuu = nctlu-ku+2 + (nctlu-ku+1)*n_sub_u
+     nvv = nctlv-kv+2 + (nctlv-kv+1)*n_sub_v
      allocate (ss(nss),uu(nuu),vv(nvv))
 
      counter1 = 1
@@ -798,8 +829,8 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
         else
            istart = 1
         end if
-        do j=istart,n+1
-           uu(counter1) = tu(i+ku-1) + (real(j)/(n+1)*(tu(i+ku)-tu(i+ku-1)))
+        do j=istart,n_sub_u+1
+           uu(counter1) = tu(i+ku-1) + (real(j)/(n_sub_u+1)*(tu(i+ku)-tu(i+ku-1)))
            counter1 = counter1 + 1
         end do
      end do
@@ -811,8 +842,8 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
         else
            istart = 1
         end if
-        do j=istart,n+1
-           vv(counter1) = tv(i+kv-1) + (real(j)/(n+1)*(tv(i+kv)-tv(i+kv-1)))
+        do j=istart,n_sub_v+1
+           vv(counter1) = tv(i+kv-1) + (real(j)/(n_sub_v+1)*(tv(i+kv)-tv(i+kv-1)))
            counter1 = counter1 + 1
         end do
      end do
@@ -914,33 +945,50 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
      ki(3) = -dot_product(Diff,deriv_c)
      call solve_3by3(A,ki,delta)
 
-     u = u0 + delta(1)
-     v = v0 + delta(2)
-     s = s0 + delta(3)
+     ! Error Checking
+
      ! Bounds Checking
-     if (u < tu(1)) then
-        u = tu(1)
+     if (u0+delta(1) < tu(1)) then
+        delta(1) = tu(1)-u0
      end if
 
-     if (u > tu(nctlu+ku)) then
-        u = tu(nctlu+ku)
+     if (u0+delta(1) > tu(nctlu+ku)) then
+        delta(1) = tu(nctlu+ku)-u0
      end if
 
-     if (v < tv(1)) then
-        v = tv(1)
+     if (v0+delta(2) < tv(1)) then
+        delta(2) = tv(1)-v0
      end if
 
-     if (v > tv(nctlv+kv)) then
-        v = tv(nctlv+kv)
+     if (v0+delta(2) > tv(nctlv+kv)) then
+        delta(2) = tv(nctlv+kv)-v0
      end if
 
-     if (s < tc(1)) then
-        s = tc(1)
+     if (s0+delta(3) < tc(1)) then
+        delta(3) = tc(1)-s0
      end if
 
-     if (s > tc(nctlc+kc)) then
-        s = tc(nctlc+kc)
+     if (s0+delta(3) > tc(nctlc+kc)) then
+        delta(3) = tc(nctlc+kc) - s0
      end if
+
+     inner_loop: do j=1,max_inner_iter
+        u = u0 + delta(1)
+        v = v0 + delta(2)
+        s = s0 + delta(3)
+        call eval_surface(u,v,tu,tv,ku,kv,coefs,nctlu,nctlv,ndim,val_s)
+        call eval_curve(s,tc,kc,coefc,nctlc,ndim,val_c)
+
+        D2 = val_s-val_c
+        if ((norm(D2,ndim)-norm(Diff,ndim)) .ge. eps1) then
+           delta = 0.25*delta 
+           
+        else
+           exit inner_loop
+        end if
+     end do inner_loop
+        
+
 
      ! No Change convergence Test
 
@@ -986,3 +1034,54 @@ subroutine solve_3by3(A,b,x)
 
 
 end subroutine solve_3by3
+
+
+subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
+
+  implicit none 
+  ! Input
+  integer, intent(in) :: n
+  double precision , intent(in) :: ia(3),vc(3),p0(n,3),v1(n,3),v2(n,3)
+
+  ! Output
+  integer, intent(out) :: n_sol
+  double precision, intent(out) :: sol(n,6)
+
+  ! Worling 
+  integer :: i,ind(n)
+  double precision :: A(3,3),rhs(3),x(3),norm
+  
+  A(:,1) = -vc
+  n_sol = 0
+  sol(:,:) = 0.0
+  do i=1,n
+     A(:,2) = v1(i,:)
+     A(:,3) = v2(i,:)
+     rhs = ia-p0(i,:)
+     
+     call solve_3by3(A,rhs,x)
+     
+     if (x(1) .ge. 0.00 .and. x(1) .le. 1.00 .and. &
+         x(2) .ge. 0.00 .and. x(2) .le. 1.00 .and. &
+         x(3) .ge. 0.00 .and. x(3) .le. 1.00 .and. &
+         x(2)+x(3) .le. 1.00) then
+
+        ! Check the solutions is ACTUALLY FUCKING RIGHT:
+        n_sol = n_sol + 1
+        sol(n_sol,1:3) = x  ! t,u,v parametric locations
+        sol(n_sol,4:6) = ia + x(1)*vc ! Actual point value
+        ind(n_sol) = i
+
+     end if
+  end do
+!   if (n_sol > 2) then
+!      do i=1,n_sol
+!         print *,i,ind(i)
+!         print *,'t,u,v:',sol(i,1:3)
+!         print *,'x.y,z:',sol(i,4:6)
+!         print *,p0(ind(i),:)
+!      end do
+!   end if
+end subroutine line_plane
+  
+  
