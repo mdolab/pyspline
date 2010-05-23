@@ -451,12 +451,12 @@
 
      ! ----------------- Misc Functions -----------------------------
 
-     function poly_length(x,n,ndim) ! in :test:compute_curve.f90
-       double precision dimension(n,ndim),intent(in) :: x
-       integer optional,intent(in),check(shape(x,0)==n),depend(x) :: n=shape(x,0)
-       integer optional,intent(in),check(shape(x,1)==ndim),depend(x) :: ndim=shape(x,1)
-       double precision :: poly_length
-     end function poly_length
+!      function poly_length(x,n,ndim) ! in :test:compute_curve.f90
+!        double precision dimension(n,ndim),intent(in) :: x
+!        integer optional,intent(in),check(shape(x,0)==n),depend(x) :: n=shape(x,0)
+!        integer optional,intent(in),check(shape(x,1)==ndim),depend(x) :: ndim=shape(x,1)
+!        double precision :: poly_length
+!      end function poly_length
 
      subroutine knots_lms(x,n,nctl,k,t) ! in :test:knots_lms.f90
        double precision dimension(n),intent(in) :: x

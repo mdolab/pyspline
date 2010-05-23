@@ -86,6 +86,8 @@ subroutine read_cgns_zone(cg,zone,X,nx,ny,nz,faceBCs)
   integer ptset_type,normalIndex(3),NormalListFlag,datatype,ndataset
   integer faceID,points(6),bocotype,npts
   double precision data_double(6)
+  character*32 famName,FamilyName,fambcname
+  integer nfamilies,ifam,nfambc,ngeo,bctype
   ! Read the coordinates
   base = 1
   start(1) = 1
@@ -110,11 +112,13 @@ subroutine read_cgns_zone(cg,zone,X,nx,ny,nz,faceBCs)
      if (ier .eq. ERROR) call cg_error_exit_f
 
      call cg_boco_read_f(cg, base, zone, boco, points,data_double, ier)
+
      if (BCTypeName(bocotype) == 'BCWallViscous' .or. &
           BCTypeName(bocotype) == 'BCInflow' .or. &
           BCTypeName(bocotype) == 'BCOutflow' .or. &
           BCTypeName(bocotype) == 'BCFarfield' .or. &
-          BCTypeName(bocotype) == 'BCSymmetryPlane') then
+          BCTypeName(bocotype) == 'BCSymmetryPlane' .or. &
+          BCTypeName(bocotype) == 'FamilySpecified') then
         
         ! Make sure its a SURFACE BC
         if ( (points(4)-points(1) > 0 .and. points(5)-points(2) > 0 ) .or. &
@@ -149,6 +153,32 @@ subroutine read_cgns_zone(cg,zone,X,nx,ny,nz,faceBCs)
            end if
            if (BCTypeName(bocotype) == 'BCSymmetryPlane') then
               faceBCs(faceID) = 3
+           end if
+           if (BCTypeName(bocotype) == 'FamilySpecified') then
+              call cg_goto_f(cg,base,ier,"Zone_t",zone,"ZoneBC_t",1,"BC_t",boco,"end")
+              if (ier == 0) then ! Node exits
+                 call cg_famname_read_f(famName, ier)
+                 ! Loop over familes till we find the one we want
+                 call cg_nfamilies_f(cg, base, nfamilies , ier )
+                 do ifam=1,nfamilies
+                    call cg_family_read_f(cg,base,ifam,FamilyName,nFamBC,nGeo,ier)
+                    if (famName == FamilyName) then
+                       call cg_fambc_read_f(cg,base,ifam,1,FamBCName,BCType,ier)
+                       if (BCTypeName(BCType) == 'BCWallViscous') then
+                          faceBCs(faceID) = 1
+                       end if
+                       if (BCTypeName(BCType) == 'BCInflow') then
+                          faceBCs(faceID) = 2
+                       end if
+                       if (BCTypeName(BCType) == 'BCFarfield' ) then
+                          faceBCs(faceID) = 2
+                       end if
+                       if (BCTypeName(BCType) == 'BCSymmetryPlane') then
+                          faceBCs(faceID) = 3
+                       end if
+                    end if
+                 end do
+              end if
            end if
         end if
      end if
