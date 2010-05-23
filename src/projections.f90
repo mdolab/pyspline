@@ -593,20 +593,20 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   double precision                 :: val0(ndim),val1(ndim),val2(ndim)
   double precision                 :: deriv_c1(ndim),deriv2_c1(ndim)
   double precision                 :: deriv_c2(ndim),deriv2_c2(ndim)
-  integer                          :: i,j,ii,jj
-  double precision                 :: D,D0,s0,t0,delta(2)
+  integer                          :: i,j,ii,jj,max_inner_iter
+  double precision                 :: D,D0,s0,t0,delta(2),D2(3)
   double precision                 :: ki(2),A(2,2)
   integer                          :: n ! Huristic Value
 
   ! Functions 
   double precision                 :: norm
-
-
+  
+  max_inner_iter = 20
   ! Is 3 Good Here?? Huristic
   if (k1 == 2 .or. k2 == 2) then
-     n = 5
+     n = 10
   else
-     n = 3
+     n = 4
   end if
 
   if (s < 0 .or. s > 1 .or. t < 0 .or. t > 1) then
@@ -689,25 +689,34 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
 
      call solve_2by2(A,ki,delta)
 
-     s = s0 + delta(1)
-     t = t0 + delta(2)
 
      ! Bounds checking
-     if (s < t1(1)) then
-        s = t1(1)
+     if (s+delta(1) < t1(1)) then
+        delta(1) = t1(1)-s
+     end if
+     if (s+delta(1) > t1(n1+k1)) then
+        delta(1) = t1(n1+k1) - s
      end if
 
-     if (s > t1(n1+k1)) then
-        s = t1(n1+k1)
+     if (t+delta(2) < t2(1)) then
+        delta(2) = t2(1)-t
+     end if
+     if (t+delta(2) > t2(n2+k2)) then
+        delta(2) = t2(n2+k2) - t
      end if
 
-     if (t < t2(1)) then
-        t = t2(1)
-     end if
-
-     if (t > t2(n2+k2)) then
-        t = t2(n2+k2)
-     end if
+     inner_loop: do j=1,max_inner_iter
+        s = s0 + delta(1)
+        t = t0 + delta(2)
+        call eval_curve(s,t1,k1,coef1,n1,ndim,val1)
+        call eval_curve(t,t2,k2,coef2,n2,ndim,val2)
+        D2 = val1-val2
+        if ((norm(D2,ndim)-norm(Diff,ndim)) .ge. eps1) then
+           delta = 0.25*delta 
+        else
+           exit inner_loop
+        end if
+     end do inner_loop
 
      ! No change convergence Test
      if (norm( (s-s0)*deriv_c1 + (t-t0)*deriv_c2,ndim) <= eps1) then
@@ -1066,7 +1075,6 @@ subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
          x(3) .ge. 0.00 .and. x(3) .le. 1.00 .and. &
          x(2)+x(3) .le. 1.00) then
 
-        ! Check the solutions is ACTUALLY FUCKING RIGHT:
         n_sol = n_sol + 1
         sol(n_sol,1:3) = x  ! t,u,v parametric locations
         sol(n_sol,4:6) = ia + x(1)*vc ! Actual point value
@@ -1074,14 +1082,60 @@ subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
 
      end if
   end do
-!   if (n_sol > 2) then
-!      do i=1,n_sol
-!         print *,i,ind(i)
-!         print *,'t,u,v:',sol(i,1:3)
-!         print *,'x.y,z:',sol(i,4:6)
-!         print *,p0(ind(i),:)
-!      end do
-!   end if
 end subroutine line_plane
   
+
+subroutine point_plane(pt,p0,v1,v2,n,sol,n_sol,best_sol)
+
+  implicit none 
+  ! Input
+  integer, intent(in) :: n
+  double precision , intent(in) :: pt(3),p0(n,3),v1(n,3),v2(n,3)
+
+  ! Output
+  integer, intent(out) :: n_sol,best_sol
+  double precision, intent(out) :: sol(n,6)
+
+  ! Worling 
+  integer :: i,ind(n)
+  double precision :: A(2,2),rhs(2),x(2),norm,r(3),D,D0
+  
+
+  n_sol = 0
+  sol(:,:) = 0.0
+  do i=1,n
+     A(1,1) = v1(i,1)**2 + v1(i,2)**2 + v1(i,3)**2
+     A(1,2) = v1(i,1)*v2(i,1) + v1(i,2)*v2(i,2) + v1(i,3)+v2(i,3)
+     A(2,1) = A(1,2)
+     A(2,2) = v2(i,1)**2 + v2(i,2)**2 + v2(i,3)**2
+     r = p0(i,:)-pt
+     rhs(1) = r(1)*v1(i,1) + r(2)*v1(i,2) + r(3)*v1(i,3)
+     rhs(2) = r(1)*v2(i,1) + r(2)*v2(i,2) + r(3)*v2(i,3)
+     
+     call solve_2by2(A,rhs,x)
+     
+     if (x(1) .ge. 0.00 .and. x(1) .le. 1.00 .and. &
+         x(2) .ge. 0.00 .and. x(2) .le. 1.00 .and. &
+         x(1)+x(2) .le. 1.00) then
+
+        n_sol = n_sol + 1
+        sol(n_sol,2:3) = x  ! t,u,v parametric locations
+        sol(n_sol,4:6) = 0.0 ! Actual point value
+        ind(n_sol) = i
+     end if
+  end do
+
+  ! Now post-process to get the closest one
+  best_sol = 1
+  D0 = norm(p0(ind(1),:) + sol(ind(1),2)*v1(ind(1),:) + sol(ind(1),3)*v2(ind(1),:))
+
+  do i=1,n_sol
+     D = norm(p0(ind(i),:) + sol(ind(i),2)*v1(ind(i),:) + sol(ind(i),3)*v2(ind(i),:),3)
+     if (D<D0) then
+        D0 = D
+        best_sol = i
+     end if
+  end do
+end subroutine point_plane
+     
   

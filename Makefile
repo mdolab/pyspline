@@ -22,6 +22,13 @@ gfortran:
 	cp ./config/config.LINUX_GFORTRAN.mk ./common.mk
 	( cd src && $(MAKE)) || exit 1; 
 	-rm common.mk
+
+g95:
+	@echo "Linux - G95"
+	-rm common.mk
+	cp ./config/config.LINUX_G95.mk ./common.mk
+	( cd src && $(MAKE)) || exit 1; 
+	-rm common.mk
 scinet:
 	@echo "Scinet"
 	-rm common.mk
