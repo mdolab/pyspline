@@ -609,7 +609,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             return result[0],result[1] # s,D
         # end if
 
-    def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
+    def projectCurve(self,curve,Niter=250,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
         Find the minimum distance between this curve (self) and a second
         curve passed in (curve)
