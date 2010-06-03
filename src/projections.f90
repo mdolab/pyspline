@@ -593,46 +593,79 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   double precision                 :: val0(ndim),val1(ndim),val2(ndim)
   double precision                 :: deriv_c1(ndim),deriv2_c1(ndim)
   double precision                 :: deriv_c2(ndim),deriv2_c2(ndim)
-  integer                          :: i,j,ii,jj,max_inner_iter
+  integer                          :: i,j,ii,jj,max_inner_iter,counter1,istart
   double precision                 :: D,D0,s0,t0,delta(2),D2(3)
-  double precision                 :: ki(2),A(2,2)
-  integer                          :: n ! Huristic Value
-
+  double precision                 :: ki(2),A(2,2),val0_1(3),val0_2(3)
+  integer                          :: n,nss,ntt ! Huristic Value
+  double precision,allocatable     :: curve1_vals(:,:),curve2_vals(:,:)
+  double precision,allocatable     :: ss(:),tt(:)
+  logical                          :: brute_force
   ! Functions 
   double precision                 :: norm
   
   max_inner_iter = 20
   ! Is 3 Good Here?? Huristic
   if (k1 == 2 .or. k2 == 2) then
-     n = 10
+     n = 200
   else
-     n = 4
+     n = 10
   end if
-
+  brute_force = .False.
   if (s < 0 .or. s > 1 .or. t < 0 .or. t > 1) then
      ! Do a brute force approach to get good starting point
+     brute_force = .True.
+     nss = n1-k1+2 + (n1-k1+1)*n
+     ntt = n2-k2+2 + (n2-k2+1)*n
+     allocate (ss(nss),tt(ntt))
 
-     ! Starting point is end of each curve
-     call eval_curve(t1(1),t1,k1,coef1,n1,ndim,val1)
-     call eval_curve(t2(1),t2,k2,coef2,n2,ndim,val2)
-     D0 = norm(val1-val2,ndim)
-
+     counter1 = 1
      do i=1,n1-k1+1
-        do ii=1,n
-           do j=1,n2-k2+1
-              do jj=1,n
-                 s = t1(i+k1-1) + (real(ii)/n)*(t1(i+k1)-t1(i+k1-1))
-                 t = t2(j+k2-1) + (real(jj)/n)*(t2(j+k2)-t2(j+k2-1))
-                 call eval_curve(s,t1,k1,coef1,n1,ndim,val1)
-                 call eval_curve(t,t2,k2,coef2,n2,ndim,val2)
-                 D = norm(val1-val2,ndim)
-                 if (D<D0) then
-                    s0 = s
-                    t0 = t
-                    D0 = D
-                 end if
-              end do
-           end do
+        if (i==1) then
+           istart = 0
+        else
+           istart = 1
+        end if
+        do j=istart,n+1
+           ss(counter1) = t1(i+k1-1) + (real(j)/(n+1)*(t1(i+k1)-t1(i+k1-1)))
+           counter1 = counter1 + 1
+        end do
+     end do
+
+     counter1 = 1
+     do i=1,n2-k2+1
+        if (i==1) then
+           istart = 0
+        else
+           istart = 1
+        end if
+        do j=istart,n+1
+           tt(counter1) = t2(i+k2-1) + (real(j)/(n+1)*(t2(i+k2)-t2(i+k2-1)))
+           counter1 = counter1 + 1
+        end do
+     end do
+
+     allocate(curve1_vals(nss,ndim),curve2_vals(ntt,ndim))
+     do i=1,nss
+        call eval_curve(ss(i),t1,k1,coef1,n1,ndim,curve1_vals(i,:))
+     end do
+
+     do i=1,ntt
+        call eval_curve(tt(i),t2,k2,coef2,n2,ndim,curve2_vals(i,:))
+     end do
+     
+     val0_1 = curve1_vals(1,:)
+     val0_2 = curve2_vals(1,:)
+     D0 = norm(val0_1-val0_2,ndim)
+     s0 = ss(1)
+     t0 = tt(1)
+     do i = 1,nss
+        do j = 1,ntt
+           D = norm(curve1_vals(i,:)-curve2_vals(j,:),ndim)
+           if (D<D0) then
+              s0 = ss(i)
+              t0 = tt(j)
+              D0 = D
+           end if
         end do
      end do
   else
@@ -643,13 +676,13 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
      D0 = norm(val1-val2,ndim)
   end if
   ! Now we have s0 and t0 so we can do the newton iteration
-  call eval_curve(s,t1,k1,coef1,n1,ndim,val1)
-  call eval_curve_deriv(s,t1,k2,coef1,n1,ndim,deriv_c1)
-  call eval_curve_deriv2(s,t1,k2,coef1,n1,ndim,deriv2_c1)
+  call eval_curve(s0,t1,k1,coef1,n1,ndim,val1)
+  call eval_curve_deriv(s0,t1,k2,coef1,n1,ndim,deriv_c1)
+  call eval_curve_deriv2(s0,t1,k2,coef1,n1,ndim,deriv2_c1)
 
-  call eval_curve(t,t2,k2,coef2,n2,ndim,val2)
-  call eval_curve_deriv(t,t2,k2,coef2,n2,ndim,deriv_c2)
-  call eval_curve_deriv2(t,t2,k2,coef2,n2,ndim,deriv2_c2)
+  call eval_curve(t0,t2,k2,coef2,n2,ndim,val2)
+  call eval_curve_deriv(t0,t2,k2,coef2,n2,ndim,deriv_c2)
+  call eval_curve_deriv2(t0,t2,k2,coef2,n2,ndim,deriv2_c2)
   Diff = val1-val2
   s = s0
   t = t0
@@ -712,7 +745,7 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
         call eval_curve(t,t2,k2,coef2,n2,ndim,val2)
         D2 = val1-val2
         if ((norm(D2,ndim)-norm(Diff,ndim)) .ge. eps1) then
-           delta = 0.25*delta 
+           delta = 0.50*delta 
         else
            exit inner_loop
         end if
@@ -724,6 +757,11 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
      end if
 
   end do iteration_loop
+
+  if (brute_force .eqv. .True.) then
+     deallocate(curve1_vals,curve2_vals,ss,tt)
+  end if
+
 end subroutine curve_curve
 
 subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,niter,eps1,eps2,u,v,s,Diff)
@@ -808,7 +846,7 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
 
   ! First we will evaluate the surface at n points inside each knot span in each direction
   !if we are given a bad guess do the brute force
-
+  brute_force = .False.
   if (u < 0 .or. u > 1 .or. v < 0 .or. v > 1 .or. s < 0 .or. s > 1) then
      brute_force = .True.
 
