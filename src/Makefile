@@ -10,14 +10,7 @@ include ${RULES}
 
 SPLINE_LIB = libspline.a
 SPLINE_LIB_SHARED = libspline.so
-SPLINE_OBJ =	compute_curve.o\
-		compute_surface.o\
-		compute_volume.o\
-		eval_curve.o\
-		eval_surface.o\
-		eval_volume.o\
-		projections.o\
-		bvalu.o\
+SPLINE_OBJ =    bvalu.o\
 		intrv.o\
 		bspvn.o\
 		bspvd.o\
@@ -41,7 +34,14 @@ SPLINE_OBJ =	compute_curve.o\
 		xerror/xerror.o\
 		xerror/xerrwv.o\
 		xerror/xersav.o\
-		xerror/xgetua.o
+		xerror/xgetua.o\
+		compute_curve.o\
+		compute_surface.o\
+		compute_volume.o\
+		eval_curve.o\
+		eval_surface.o\
+		eval_volume.o\
+		projections.o\
 
 EXTRAS_LIB =    libspline_extras.a
 EXTRAS_OBJ = 	cgns_functions.o\
@@ -62,5 +62,6 @@ libspline: $(SPLINE_OBJ)
 	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(SPLINE_OBJ)
 	$(FC)  -shared $(SPLINE_OBJ) -o $(SPLINE_LIB_SHARED) 
 	f2py  --fcompiler=${COMPILER_NAME} --f90flags='${FFLAGS}' -c -m pyspline pyspline.pyf libspline.a libspline_extras.a ${USER_LIBS}
+	python importTest.py
 	mv pyspline.so ../python	
 

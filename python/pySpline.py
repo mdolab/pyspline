@@ -2086,7 +2086,8 @@ def trilinear_volume(*args,**kwargs):
     ku = 2
     kv = 2
     kw = 2
-    if len(args) == 0:
+
+    if len(args) == 1:
         return volume(coef=args[0],tu=tu,tv=tv,tw=tw,ku=ku,kv=kv,kw=kw)
     elif len(args) == 2:
         xmin = args[0]
