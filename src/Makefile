@@ -11,6 +11,7 @@ include ${RULES}
 SPLINE_LIB = libspline.a
 SPLINE_LIB_SHARED = libspline.so
 SPLINE_OBJ =    bvalu.o\
+		cbvalu.o\
 		intrv.o\
 		bspvn.o\
 		bspvd.o\
@@ -19,6 +20,8 @@ SPLINE_OBJ =    bvalu.o\
 		knots_interp.o\
 		b2val.o\
 		b3val.o\
+		cb2val.o\
+		cb3val.o\
 		insertKnot.o\
 		updatecoefficients.o\
 		updatecoefficients_c.o\
