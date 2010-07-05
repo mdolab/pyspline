@@ -221,6 +221,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             if 'X' in kwargs:
                 self.X  = array(kwargs['X'])
                 if len(self.X.shape) == 1:
+                    self.X = self.X.reshape((len(self.X),1))
                     self.nDim =1
                 else:
                     self.nDim = self.X.shape[1]
@@ -245,7 +246,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             # end if
 
             if 's' in kwargs:
-                self.s = checkInput(kwargs['s'],'s',float,self.N)
+                self.s = checkInput(kwargs['s'],'s',float,1,self.N)
             else:
                 assert self.nDim > 1,'Error, pySpline: For 1D splines, the basis, s must be given'
                 self._getParameterization()
@@ -255,20 +256,20 @@ Nctl=<number of control points> must be specified for a LMS fit'
             self.orig_data = True
             
             if 'weights' in kwargs:
-                self.weights = checkInput(kwargs['weights'],float,1,self.N)
+                self.weights = checkInput(kwargs['weights'],'weights',float,1,self.N)
             else:
                 self.weights = ones(self.N)
             # end if
 
             if 'deriv' in kwargs and 'deriv_ptr' in kwargs:
                 self.deriv = checkInput(kwargs['deriv'],float,2)
-                self.deriv_ptr = checkInput(kwargs['deriv_ptr'],int,1,len(self.deriv))
+                self.deriv_ptr = checkInput(kwargs['deriv_ptr'],'deriv_ptr',int,1,len(self.deriv))
             else:
                 self.deriv = None
                 self.deriv_ptr = array([])
             # end if
             if 'deriv_weights' in kwargs and self.deriv != None:
-                self.deriv_weights = checkInput(kwargs['deriv_weights'],float,1,len(self.deriv_ptr))
+                self.deriv_weights = checkInput(kwargs['deriv_weights'],'deriv_weights',float,1,len(self.deriv_ptr))
             else:
                 if self.deriv != None:
                     self.deriv_weights = ones(len(self.deriv))
@@ -436,7 +437,15 @@ Nctl=<number of control points> must be specified for a LMS fit'
         self.s /= self.s[-1]
 
         return
-     
+
+    def reverse(self):
+        '''
+        Reverse the direction of this curve
+        '''
+        self.coef = self.coef[::-1,:]
+        self.t    = 1-self.t[::-1]
+
+
     def insertKnot(self,u,r):
         '''
         Insert at knot at u
