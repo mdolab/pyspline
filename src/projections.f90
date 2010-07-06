@@ -606,9 +606,9 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   max_inner_iter = 20
   ! Is 3 Good Here?? Huristic
   if (k1 == 2 .or. k2 == 2) then
-     n = 200
+     n = 400
   else
-     n = 10
+     n = 400
   end if
   brute_force = .False.
   if (s < 0 .or. s > 1 .or. t < 0 .or. t > 1) then
@@ -675,6 +675,7 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
      call eval_curve(t,t2,k2,coef2,n2,ndim,val2)
      D0 = norm(val1-val2,ndim)
   end if
+
   ! Now we have s0 and t0 so we can do the newton iteration
   call eval_curve(s0,t1,k1,coef1,n1,ndim,val1)
   call eval_curve_deriv(s0,t1,k2,coef1,n1,ndim,deriv_c1)
@@ -722,7 +723,6 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
 
      call solve_2by2(A,ki,delta)
 
-
      ! Bounds checking
      if (s+delta(1) < t1(1)) then
         delta(1) = t1(1)-s
@@ -745,7 +745,7 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
         call eval_curve(t,t2,k2,coef2,n2,ndim,val2)
         D2 = val1-val2
         if ((norm(D2,ndim)-norm(Diff,ndim)) .ge. eps1) then
-           delta = 0.50*delta 
+           delta = 0.25*delta 
         else
            exit inner_loop
         end if
