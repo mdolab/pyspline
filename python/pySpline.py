@@ -190,8 +190,9 @@ class curve(object):
                              information at point indicies defined by deriv_ptr
         deriv_weights: A array of len deriv_ptr which contains derivative weighting
                        A value of -1 can be used to exactly constrain a derivative
-        niter:  The number of Hoschek's parameter corrections to run
+        niter:  The number of Hoscheks parameter corrections to run
         '''
+        
         if 'no_print' in kwargs:
             self.NO_PRINT = kwargs['no_print']
         else:
@@ -292,7 +293,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
 
     def recompute(self,niter):
         '''
-        Run iterations of Hoschek's Parameter Correction
+        Run iterations of Hoscheks Parameter Correction
         Required:
             niter: The number of parameter correction iterations to run
         Returns:
