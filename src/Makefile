@@ -45,8 +45,14 @@ SPLINE_OBJ =    bvalu.o\
 		eval_surface.o\
 		eval_volume.o\
 		projections.o\
+	        quality.o\
+	        skew_hexa_b.o\
+	        scalar_triple_product_b.o\
+	        adBuffer.o\
+		adStack.o
 
 EXTRAS_LIB =    libspline_extras.a
+
 EXTRAS_OBJ = 	cgns_functions.o\
 		tecplot_functions.o
 

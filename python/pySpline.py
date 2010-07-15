@@ -2076,7 +2076,20 @@ original data for this surface or face is not in range 0->5'
         # end if
         
         return 
-        
+
+    def getCoefQuality(self):
+        ''' Return a list of the quality of the volumes defined by the
+        network of control points'''
+        return pyspline.quality_volume(self.coef)
+
+    def getCoefQualityDeriv(self,offset,localIndex,vals,col_ind):
+        ''' Fill up this volume's contribution of the dQdx matrix'''
+        return pyspline.quality_volume_deriv(self.coef,offset,localIndex,vals,col_ind)
+
+    def verifyQualityDeriv(self):
+        '''Print out FD verification of the derivative calc'''
+        pyspline.verify_quality_volume_deriv(self.coef)
+
 # ----------------------------------------------------------------------
 #                     Misc Helper Functions
 # ----------------------------------------------------------------------

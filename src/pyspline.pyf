@@ -339,7 +339,34 @@
        integer optional,intent(in),check(shape(u,2)==l),depend(u) :: l=shape(u,2)
        double precision dimension(n,m,l,ndim),intent(out),depend(n,m,l,ndim) :: val
      end subroutine eval_volume_t
-        
+     
+     subroutine quality_volume(x,nx,ny,nz,quality) ! in :test:quality.f90
+       double precision dimension(nx,ny,nz,3),intent(in) :: x
+       integer optional,intent(in),check(shape(x,0)==nx),depend(x) :: nx=shape(x,0)
+       integer optional,intent(in),check(shape(x,1)==ny),depend(x) :: ny=shape(x,1)
+       integer optional,intent(in),check(shape(x,2)==nz),depend(x) :: nz=shape(x,2)
+       double precision dimension((nx-1)*(ny-1)*(nz-1)),intent(out),depend(nx,ny,nz) :: quality
+     end subroutine quality_volume
+
+     subroutine quality_volume_deriv(x,nx,ny,nz,offset,localindex,vals,col_ind,nquality) ! in :test:quality.f90
+       double precision dimension(nx,ny,nz,3),intent(in) :: x
+       integer optional,intent(in),check(shape(x,0)==nx),depend(x) :: nx=shape(x,0)
+       integer optional,intent(in),check(shape(x,1)==ny),depend(x) :: ny=shape(x,1)
+       integer optional,intent(in),check(shape(x,2)==nz),depend(x) :: nz=shape(x,2)
+       integer intent(in) :: offset
+       integer dimension(nx,ny,nz),intent(in),depend(nx,ny,nz) :: localindex
+       double precision dimension(24 * nquality),intent(in,out) :: vals
+       integer dimension(24 * nquality),intent(in,out),depend(nquality) :: col_ind
+       integer optional,intent(in),check((len(vals))/(24)>=nquality),depend(vals) :: nquality=(len(vals))/(24)
+     end subroutine quality_volume_deriv
+
+     subroutine verify_quality_volume_deriv(x,nx,ny,nz) ! in :test:quality.f90
+       double precision dimension(nx,ny,nz,3),intent(in) :: x
+       integer optional,intent(in),check(shape(x,0)==nx),depend(x) :: nx=shape(x,0)
+       integer optional,intent(in),check(shape(x,1)==ny),depend(x) :: ny=shape(x,1)
+       integer optional,intent(in),check(shape(x,2)==nz),depend(x) :: nz=shape(x,2)
+     end subroutine verify_quality_volume_deriv
+
      ! ----------------  Projection Functions -----------------------
      subroutine point_curve(x0,t,k,coef,nctl,ndim,n,niter,eps1,eps2,s,diff) ! in :test:projections.f90
        double precision dimension(n,ndim),intent(in) :: x0
