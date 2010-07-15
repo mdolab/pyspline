@@ -1,3 +1,4 @@
+
 #*********************************************************
 # Makefile for pySpline Library
 # G. Kenway Feb 7, 2010
@@ -15,7 +16,7 @@ intel:
 	-rm common.mk
 	cp ./config/config.LINUX_INTEL.mk ./common.mk
 	( cd src && make) || exit 1; 
-	-rm common.mk
+
 gfortran:
 	@echo "Linux - Gfortran"
 	-rm common.mk
