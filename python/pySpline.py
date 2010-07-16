@@ -27,7 +27,8 @@ import os, sys, string, time, copy, pdb
 # External Python modules
 # =============================================================================
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
-    ones,vstack,real,where,arange,append,hstack,mgrid
+    ones,vstack,real,where,arange,append,hstack,mgrid,atleast_1d,atleast_2d,\
+    atleast_3d,rank
 from numpy.linalg import norm
 
 import scipy
@@ -369,7 +370,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             return
         # end if
                 
-        length = pyspline.poly_length(self.X)
+        length = pyspline.poly_length(self.X.T)
         for iter in xrange(niter):
             su = self.s[su_select]
             sc = self.s[sc_select]
@@ -411,7 +412,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             # end if (constr - not constrained
 
             # Run para correction
-            self.s = pyspline.curve_para_corr(self.t,self.k,self.s.copy(),self.coef,length,self.X)
+            self.s = pyspline.curve_para_corr(self.t,self.k,self.s.copy(),self.coef.T,length,self.X.T)
         # end for (iter loop)
         # Check the RMS
         rms = 0.0
@@ -457,9 +458,9 @@ Nctl=<number of control points> must be specified for a LMS fit'
         u = checkInput(u,'u',float,0)
         r = checkInput(r,'r',int,0)
         
-        t_new,coef_new,break_pt = pyspline.insertknot(u,r,self.t,self.k,self.coef)
+        t_new,coef_new,break_pt = pyspline.insertknot(u,r,self.t,self.k,self.coef.T)
         self.t = t_new
-        self.coef = coef_new
+        self.coef = coef_new.T
         self.Nctl = self.Nctl + r
         
         return
@@ -483,7 +484,8 @@ Nctl=<number of control points> must be specified for a LMS fit'
             u = self.t[ileft-1]
         # end if
 
-        r,t_new,coef_new,break_pt = pyspline.insertknot(u,self.k-1,self.t,self.k,self.coef)
+        r,t_new,coef_new,break_pt = pyspline.insertknot(u,self.k-1,self.t,self.k,self.coef.T)
+        coef_new = coef_new.T
         # r is the number of time the knot was actually added
         s = self.k-1-r # Back out the multiplicity of the point
         break_pt = break_pt - s
@@ -560,12 +562,11 @@ Nctl=<number of control points> must be specified for a LMS fit'
            values: An array of shape(len(s),nDim)) if s is an array
                    or array of len(nDim) if nDim == 1
                    '''
-        s = array(s)
-        if len(s.shape) == 0:
-            return pyspline.eval_curve(s,self.t,self.k,self.coef)
-        elif len(s.shape) == 1:
-            return  pyspline.eval_curve_v(s,self.t,self.k,self.coef)
-        # end if
+            
+        vals = pyspline.eval_curve(atleast_1d(s),self.t,self.k,self.coef.T)
+
+        return vals.T.squeeze()
+        
 
     def getDerivative(self,s):
         '''
@@ -576,11 +577,13 @@ Nctl=<number of control points> must be specified for a LMS fit'
            values: An array of shape(len(s),nDim)) if s is an array
                    or array of len(nDim) if nDim == 1
                    '''
-        s = array(s)
-        if len(s.shape) == 0:
-            return pyspline.eval_curve_deriv(s,self.t,self.k,self.coef)
-        elif len(s.shape) == 1:
-            return pyspline.eval_curve_deriv_v(s,self.t,self.k,self.coef)
+        assert rank(s)==0,'s must be a scalar'
+        return pyspline.eval_curve_deriv(s,self.t,self.k,self.coef.T)
+        
+    def getSecondDerivative(self,s):
+
+        return pyspline.eval_curve_deriv2(s,self.t,self.k,self.coef.T)
+
 
     def projectPoint(self,x0,Niter=20,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''Project a point x0 or (points x0) onto the curve and return parametric
@@ -598,26 +601,17 @@ Nctl=<number of control points> must be specified for a LMS fit'
             D: Distance(s) from point to curve
         '''
 
-        x0 = array(x0)
-        if len(x0.shape) == 1: # Just 1 value pased in
-            if 's' in kwargs: 
-                s=kwargs['s']
-            else:
-                s=[-1.0]
-            # end if
-            result = pyspline.point_curve(array([x0]),self.t,self.k,self.coef,
-                                          Niter,eps1,eps2,s)
-            return result[0][0],result[1][0] # s,D
+        x0 = atleast_2d(x0)
+        if 's' in kwargs: 
+            s = kwargs['s']
         else:
-            if 's' in kwargs: 
-                s=kwargs['s']
-            else:
-                s=-1.0*ones(len(x0))
-            # end if
-            result = pyspline.point_curve(x0,self.t,self.k,self.coef,
-                                          Niter,eps1,eps2,s)
-            return result[0],result[1] # s,D
+            s=-1*ones(len(x0))
         # end if
+
+        s,D = pyspline.point_curve(x0.T,self.t,self.k,self.coef.T,
+                                   Niter,eps1,eps2,atleast_1d(s))
+
+        return s.squeeze(),D.T.squeeze()
 
     def projectCurve(self,curve,Niter=250,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
@@ -643,8 +637,8 @@ Nctl=<number of control points> must be specified for a LMS fit'
         Niter = checkInput(Niter,'Niter',int,0)
         eps1  = checkInput(Niter,'eps1',float,0)
         epsw  = checkInput(Niter,'eps2',float,0)
-        return pyspline.curve_curve(self.t,self.k,self.coef,
-                                    curve.t,curve.k, curve.coef,
+        return pyspline.curve_curve(self.t,self.k,self.coef.T,
+                                    curve.t,curve.k, curve.coef.T,
                                     Niter,eps1,eps2,s,t)
 
     def writeTecplot(self,file_name,curve=True,coef=True,orig=True,tecio=USE_TECIO,*args,**kwargs):
@@ -877,7 +871,7 @@ MUST be defined for task lms or interpolate'
              None
              '''
         vals,row_ptr,col_ind = pyspline.surface_jacobian_wrap(\
-            self.U,self.V,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
+            self.U.T,self.V.T,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
                              [self.Nu*self.Nv,self.Nctlu*self.Nctlv])
         if self.interp:
@@ -1055,8 +1049,8 @@ original data for this surface or edge is not in range 0->3'
         # matrix. vals,row_ptr,col_ind is the CSR data and 
         # l_index in the local -> global mapping for this 
         # surface
-        return pyspline.getbasisptsurface(u,v,self.tu,self.tv,self.ku,self.kv,vals,
-                                          col_ind,istart,l_index)
+        return pyspline.getbasisptsurface(u,v,self.tu,self.tv,self.ku,
+                                          self.kv,vals,col_ind,istart,l_index.T)
                                 
     def __call__(self,u,v):
         '''
@@ -1071,15 +1065,14 @@ original data for this surface or edge is not in range 0->3'
         Returns:
            values: An array of size (shape(u), nDim)
            '''
+        
         u = array(u)
         v = array(v)
         assert u.shape == v.shape,'Error, getValue: u and v must have the same shape'
-        if len(u.shape) == 0:
-            return pyspline.eval_surface(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
-        elif len(u.shape) == 1:
-            return pyspline.eval_surface_v(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
-        elif len(u.shape) == 2:
-            return pyspline.eval_surface_m(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        
+        vals = pyspline.eval_surface(atleast_2d(u),atleast_2d(v),self.tu,self.tv,
+                                     self.ku,self.kv,self.coef.T)
+        return vals.T.squeeze()
                                 
     def getDerivative(self,u,v):
         '''Get the derivative at the surface point(s) u,v
@@ -1091,12 +1084,10 @@ original data for this surface or edge is not in range 0->3'
         u = array(u)
         v = array(v)
         assert u.shape == v.shape,'Error, getDerivative: u and v must have the same shape'
-        if len(u.shape) == 0:
-            return pyspline.eval_surface_deriv(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
-        elif len(u.shape) == 1:
-            return pyspline.eval_surface_deriv_v(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
-        elif len(u.shape) == 2:
-            return pyspline.eval_surface_deriv_m(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
+        assert rank(u) == 0,'Error: getDerivative only accepts scalar arguments'
+        deriv = pyspline.eval_surface_deriv(u,v,self.tu,self.tv,self.ku,self.kv,self.coef.T)
+
+        return deriv.T
         
     def getNormal(self,u,v):
         '''Get the normalized normal at the surface point(s) u,v
@@ -1106,17 +1097,8 @@ original data for this surface or edge is not in range 0->3'
         Returns:
            values: An array of size (shape(u), 3)
            '''
-        u = array(u)
-        v = array(v)
-        assert self.nDim == 3,'Error, getNormal is only defined for three spatial dimensions'
-        assert u.shape == v.shape,'Error, getNormal: u and v must have the same shape'
-        if len(u.shape) == 0:
-            return pyspline.eval_surf_normal(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
-        elif len(u.shape) == 1:
-            return pyspline.eval_surf_normal_v(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
-        elif len(u.shape) == 2:
-            return pyspline.eval_surf_normal_m(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
-        # end if
+        print 'Not Implemented Yet'
+        sys.exit(0)
 
     def getSecondDerivative(self,u,v):
         '''Get the second derivative matrix at point(s) u,v
@@ -1130,14 +1112,13 @@ original data for this surface or edge is not in range 0->3'
         u = array(u)
         v = array(v)
         assert u.shape == v.shape,'Error, getSecondDerivative: u and v must have the same shape'
-        if len(u.shape) == 0:
-            return pyspline.eval_surface_deriv2(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
-        elif len(u.shape) == 1:
-            return pyspline.eval_surface_deriv2_v(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
-        elif len(u.shape) == 2:
-            return pyspline.eval_surface_deriv2_m(u,v,self.tu,self.tv,self.ku,self.kv,self.coef)
-        # end if
- 
+        assert rank(u) == 0,'Erorr getSecondDerivative only accepts scalar arguments'
+
+        deriv = pyspline.eval_surface_deriv2(u,v,self.tu,self.tv,self.ku,
+                                             self.kv,self.coef.T)
+        
+        return deriv.T
+
     def getBounds(self):
         '''Determine the extents of the surface
         Required: 
@@ -1173,37 +1154,22 @@ original data for this surface or edge is not in range 0->3'
             D    : Distance(s) between point(s) and surface(u,v)
         '''
         # We will use a starting point u0,v0 if given
-        x0 = array(x0)
+        x0 = atleast_2d(x0)
 
-        if len(x0.shape) == 1: # Just 1 value passed in 
-            if 'u' in kwargs:
-                u = array([kwargs['u']])
-            else:
-                u = array([-1.0])
-            # end if
-            if 'v' in kwargs:
-                v = array([kwargs['v']])
-            else:
-                v = array([-1.0])
-            # end if
-            result = pyspline.point_surface(\
-                array([x0]),self.tu,self.tv,self.ku,self.kv,self.coef,Niter,eps1,eps2,u,v)
-            return result[0][0],result[1][0],result[2][0] #u,v,D
+        if 'u' in kwargs:
+            u = array([kwargs['u']])
         else:
-            if 'u' in kwargs:
-                u = kwargs['u']
-            else:
-                u = -1.0*ones(len(x0))
-            # end if
-            if 'v' in kwargs:
-                v = kwargs['v']
-            else:
-                v = -1.0*ones(len(x0))
-            # end if
-            result = pyspline.point_surface(\
-                array([x0]),self.tu,self.tv,self.ku,self.kv,self.coef,Niter,eps1,eps2,u,v)
-            return result[0],result[1],result[2] #u,v,D
+            u = -1*ones(len(x0))
         # end if
+
+        if 'v' in kwargs:
+            v = array([kwargs['v']])
+        else:
+            v = -1*ones(len(x0))
+        # end if
+        u,v,D = pyspline.point_surface(x0.T,self.tu,self.tv,self.ku,
+                                       self.kv,self.coef.T,Niter,eps1,eps2,u,v)
+        return u.squeeze(),v.squeeze(),D.T.squeeze()
 
     def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
@@ -1233,8 +1199,8 @@ original data for this surface or edge is not in range 0->3'
         eps1  = checkInput(eps1,'eps1',float,0)
         eps2  = checkInput(eps1,'eps2',float,0)
         return pyspline.curve_surface(\
-            curve.t,curve.k,curve.coef,self.tu,self.tv,\
-                self.ku,self.kv,self.coef,Niter,eps1,eps2,u,v,s)
+            curve.t,curve.k,curve.coef.T,self.tu,self.tv,\
+                self.ku,self.kv,self.coef.T,Niter,eps1,eps2,u,v,s)
    
     def _writeTecplotOrigData(self,handle):
         if self.orig_data:
@@ -1868,7 +1834,7 @@ original data for this surface or face is not in range 0->5'
 
         return pyspline.getbasisptvolume(u,v,w,self.tu,self.tv,self.tw,
                                          self.ku,self.kv,self.kw,vals,
-                                         col_ind,istart,l_index)
+                                         col_ind,istart,l_index.T)
     
     def __call__(self,u,v,w):
         '''
@@ -1888,15 +1854,11 @@ original data for this surface or face is not in range 0->5'
         w = array(w)
 
         assert u.shape == v.shape == w.shape,'Error, getValue: u and v must have the same shape'
-        if len(u.shape) == 0:
-            return pyspline.eval_volume(u,v,w,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,self.coef)
-        elif len(u.shape) == 1:
-            return pyspline.eval_volume_v(u,v,w,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,self.coef)
-        elif len(u.shape) == 2:
-            return pyspline.eval_volume_m(u,v,w,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,self.coef)
-        elif len(u.shape) == 3:
-            return pyspline.eval_volume_t(u,v,w,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,self.coef)
-        # end if
+
+        vals = pyspline.eval_volume(atleast_3d(u),atleast_3d(v),atleast_3d(w),
+                                    self.tu,self.tv,self.tw,self.ku,self.kv,
+                                    self.kw,self.coef.T)
+        return vals.T.squeeze()
 
     def getBounds(self):
         '''Determine the extents of the volume
@@ -1942,50 +1904,30 @@ original data for this surface or face is not in range 0->5'
             D    : Distance(s) between point(s) and surface(u,v,w)
         '''
         # We will use a starting point u0,v0 if given
-        x0 = array(x0)
+        x0 = atleast_2d(x0)
 
-        if len(x0.shape) == 1: # Just 1 value passed in 
-            if 'u' in kwargs:
-                u = array([kwargs['u']])
-            else:
-                u = array([.5])
-            # end if
-            if 'v' in kwargs:
-                v = array([kwargs['v']])
-            else:
-                v = array([.5])
-            # end if
-            if 'w' in kwargs:
-                w = array([kwargs['w']])
-            else:
-                w = array([.5])
-            # end if
-            result = pyspline.point_volume(array([x0]),self.tu,self.tv,self.tw,
-                                           self.ku,self.kv,self.kw,
-                                           self.coef,Niter,eps1,eps2,u,v,w)
-            return result[0][0],result[1][0],result[2][0],result[3][0] #u,v,D
+        if 'u' in kwargs:
+            u = array([kwargs['u']])
         else:
-            if 'u' in kwargs:
-                u = array(kwargs['u'])
-            else:
-                u = 0.5*ones(len(x0))
-            # end if
-            if 'v' in kwargs:
-                v = array(kwargs['v'])
-            else:
-                v = 0.5*ones(len(x0))
-            # end if
-            if 'w' in kwargs:
-                w = array(kwargs['w'])
-            else:
-                w = 0.5*ones(len(x0))
-            # end if
-            result = pyspline.point_volume(\
-                x0,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,\
-                    self.coef,Niter,eps1,eps2,u,v,w)
-            return result[0],result[1],result[2],result[3]
+            u = 0.5*ones(len(x0))
         # end if
 
+        if 'v' in kwargs:
+            v = array([kwargs['u']])
+        else:
+            v = 0.5*ones(len(x0))
+        # end if
+
+        if 'w' in kwargs:
+            w = array([kwargs['u']])
+        else:
+            w = 0.5*ones(len(x0))
+        # end if
+
+        u,v,w,D = pyspline.point_volume(x0.T,self.tu,self.tv,self.tw,
+                                        self.ku,self.kv,self.kw,
+                                        self.coef.T,Niter,eps1,eps2,u,v,w)
+        return u.squeeze(),v.squeeze(),w.squeeze(),D.T
 
     def _writeTecplotOrigData(self,handle):
         if self.orig_data:
@@ -2080,15 +2022,15 @@ original data for this surface or face is not in range 0->5'
     def getCoefQuality(self):
         ''' Return a list of the quality of the volumes defined by the
         network of control points'''
-        return pyspline.quality_volume(self.coef)
+        return pyspline.quality_volume(self.coef.T)
 
     def getCoefQualityDeriv(self,offset,localIndex,vals,col_ind):
         ''' Fill up this volume's contribution of the dQdx matrix'''
-        return pyspline.quality_volume_deriv(self.coef,offset,localIndex,vals,col_ind)
+        return pyspline.quality_volume_deriv(self.coef.T,offset,localIndex.T,vals,col_ind)
 
     def verifyQualityDeriv(self):
         '''Print out FD verification of the derivative calc'''
-        pyspline.verify_quality_volume_deriv(self.coef)
+        pyspline.verify_quality_volume_deriv(self.coef.T)
 
 # ----------------------------------------------------------------------
 #                     Misc Helper Functions

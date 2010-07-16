@@ -1,11 +1,11 @@
 #!MC 1200
 # Created by Tecplot 360 build 12.1.0.6714
 $!VarSet |LFDSFN1| = '"curve1.dat"'
-$!VarSet |LFDSVL1| = '"V1" "V2" "V3"'
+$!VarSet |LFDSVL1| = '"X" "Y" "Z"'
 $!VarSet |LFDSFN2| = '"curve2.dat"'
-$!VarSet |LFDSVL2| = '"V1" "V2" "V3"'
+$!VarSet |LFDSVL2| = '"X" "Y" "Z"'
 $!VarSet |LFDSFN3| = '"projections.dat"'
-$!VarSet |LFDSVL3| = '"V1" "V2" "V3"'
+$!VarSet |LFDSVL3| = '"X" "Y" "Z"'
 $!SETSTYLEBASE FACTORY
 $!GLOBALLINKING 
   LINKCOLORMAPS = YES
@@ -1567,7 +1567,7 @@ $!THREEDAXIS
     GRSPACING = 5
     AXISLINE
       {
-      EDGE = 2
+      EDGE = 1
       }
     }
 $!THREEDAXIS 
@@ -1586,10 +1586,10 @@ $!THREEDAXIS
     {
     RANGEMIN = -0.37242050000000004317
     RANGEMAX = 4.208210499999999854
-    GRSPACING = 1
+    GRSPACING = 2
     AXISLINE
       {
-      EDGE = 3
+      EDGE = 4
       }
     }
 $!ISOSURFACEATTRIBUTES  1
@@ -1841,14 +1841,14 @@ $!GLOBALTHREED
     }
   NEARPLANEFRACTION = 0.1
 $!THREEDVIEW 
-  PSIANGLE = 73.3119
-  THETAANGLE = -151.082
-  ALPHAANGLE = -9.42818
+  PSIANGLE = 58.9699
+  THETAANGLE = -47.5786
+  ALPHAANGLE = -7.73063
   VIEWERPOSITION
     {
-    X = 64.26206339512962
-    Y = 111.9719577615385
-    Z = 39.25864871943395
+    X = 87.67980460087166
+    Y = -73.92642542911743
+    Z = 69.23447618666108
     }
   VIEWWIDTH = 18.484
 $!FIELDLAYERS 

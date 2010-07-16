@@ -1,7 +1,7 @@
 #!MC 1200
 # Created by Tecplot 360 build 12.1.0.6714
 $!VarSet |LFDSFN1| = '"naca_data.dat"'
-$!VarSet |LFDSVL1| = '"V1" "V2"'
+$!VarSet |LFDSVL1| = '"X" "Y"'
 $!SETSTYLEBASE FACTORY
 $!GLOBALLINKING 
   LINKCOLORMAPS = YES

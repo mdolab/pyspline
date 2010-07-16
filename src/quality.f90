@@ -5,10 +5,10 @@ subroutine quality_volume(X,nx,ny,nz,quality)
   !     Written by Gaetan Kenway
   !
   !     Abstract quality_volume evaluates the quality of the volumes inside X
-  !              (SCLAR VERSION)
+  !              
   !     Description of Arguments
   !     Input
-  !     X       - Real, Coordinates: nx,ny,nz,3
+  !     X       - Real, Coordinates: 3,nz,ny,nx
   !     nx      - Real, Number of coordinates in x
   !     ny      - Real, Number of coordinates in y
   !     nz      - Real, Number of coordinates in z
@@ -19,13 +19,13 @@ subroutine quality_volume(X,nx,ny,nz,quality)
   implicit none
   ! Input
   integer         , intent(in)          :: nx,ny,nz
-  double precision, intent(in)          :: X(nx,ny,nz,3)
+  double precision, intent(in)          :: X(3,nz,ny,nx)
   ! Output
   double precision, intent(out)         :: quality((nx-1)*(ny-1)*(nz-1))
   
   ! Working
-  integer :: counter ,indices(8,3),i,j,k,ii
-  double precision :: points(8,3)
+  integer :: counter ,indices(3,8),i,j,k,ii
+  double precision :: points(3,8)
   counter = 0
 
   do i=1,nx-1
@@ -36,7 +36,7 @@ subroutine quality_volume(X,nx,ny,nz,quality)
            call hexa_index(i,j,k,indices)
            
            do ii=1,8
-              points(ii,:) = X(indices(ii,1),indices(ii,2),indices(ii,3),:)
+              points(:,ii) = X(:,indices(ii,3),indices(ii,2),indices(ii,1))
            end do
            call skew_hexa(points,quality(counter))
         end do
@@ -54,12 +54,12 @@ subroutine quality_volume_deriv(X,nx,ny,nz,offset,localIndex,vals,col_ind,nQuali
   !              (SCLAR VERSION)
   !     Description of Arguments
   !     Input
-  !     X       - Real, Coordinates: nx,ny,nz,3
+  !     X       - Real, Coordinates: 3,nz,ny,nx
   !     nx      - Real, Number of coordinates in x
   !     ny      - Real, Number of coordinates in y
   !     nz      - Real, Number of coordinates in z
   !     offset  - Integer: The row to start filling up array
-  !     localIndex - Integer the local to global mapping for X, size nx,ny,nz
+  !     localIndex - Integer the local to global mapping for X, size nz,ny,nx
   !     vals    - Real, CSR array of values; size: 24*nQuality
   !     col_ind - integer, CSR array of col indices; size: 24*nQuality
   !     nQuality- Integer, the total number of coef volumes in pyBlock object
@@ -70,15 +70,15 @@ subroutine quality_volume_deriv(X,nx,ny,nz,offset,localIndex,vals,col_ind,nQuali
   implicit none
   ! Input
   integer         , intent(in)          :: nx,ny,nz
-  double precision, intent(in)          :: X(nx,ny,nz,3)
+  double precision, intent(in)          :: X(3,nz,ny,nx)
   integer         , intent(in)          :: offset,nQuality
-  integer         , intent(in)          :: localIndex(nx,ny,nz)
+  integer         , intent(in)          :: localIndex(nz,ny,nx)
   double precision, intent(inout)       :: vals(24*nQuality)
   integer         , intent(inout)       :: col_ind(24*nQuality)
 
   ! Working
-  integer :: counter ,indices(8,3),i,j,k,ii,jj
-  double precision :: points(8,3),pointsb(8,3)
+  integer :: counter ,indices(3,8),i,j,k,ii,jj
+  double precision :: points(3,8),pointsb(3,8)
   double precision :: quality,qualityb
 
   counter = 0
@@ -89,7 +89,7 @@ subroutine quality_volume_deriv(X,nx,ny,nz,offset,localIndex,vals,col_ind,nQuali
 
            call hexa_index(i,j,k,indices)
            do ii=1,8
-              points(ii,:) = X(indices(ii,1),indices(ii,2),indices(ii,3),:)
+              points(:,ii) = X(:,indices(ii,3),indices(ii,2),indices(ii,1))
            end do
            qualityb = 1.0
            call skew_hexa_b(points,pointsb,quality,qualityb)
@@ -98,8 +98,8 @@ subroutine quality_volume_deriv(X,nx,ny,nz,offset,localIndex,vals,col_ind,nQuali
            do ii=1,8
               do jj=1,3
                  counter = counter + 1
-                 vals(offset+counter) = pointsb(ii,jj)
-                 col_ind(offset+counter) = 3*localIndex(indices(ii,1),indices(ii,2),indices(ii,3)) + jj -1
+                 vals(offset+counter) = pointsb(jj,ii)
+                 col_ind(offset+counter) = 3*localIndex(indices(3,ii),indices(2,ii),indices(1,ii)) + jj -1
               end do
            end do
 
@@ -115,10 +115,10 @@ subroutine verify_quality_volume_deriv(X,nx,ny,nz)
   !     Written by Gaetan Kenway
   !
   !     Abstract quality_volume evaluates the quality of the volumes inside X
-  !              (SCLAR VERSION)
+  !
   !     Description of Arguments
   !     Input
-  !     X       - Real, Coordinates: nx,ny,nz,3
+  !     X       - Real, Coordinates: 3,nz,ny,nx
   !     nx      - Real, Number of coordinates in x
   !     ny      - Real, Number of coordinates in y
   !     nz      - Real, Number of coordinates in z
@@ -126,12 +126,12 @@ subroutine verify_quality_volume_deriv(X,nx,ny,nz)
   implicit none
   ! Input
   integer         , intent(in)          :: nx,ny,nz
-  double precision, intent(in)          :: X(nx,ny,nz,3)
+  double precision, intent(in)          :: X(3,nz,ny,nx)
   
   ! Working
-  integer :: counter ,indices(8,3),i,j,k,ii,jj
-  double precision :: points(8,3),pointsb(8,3)
-  double precision :: quality,qualityb,h,qualityd(8,3),quality0
+  integer :: counter ,indices(3,8),i,j,k,ii,jj
+  double precision :: points(3,8),pointsb(3,8)
+  double precision :: quality,qualityb,h,qualityd(3,8),quality0
 
   counter = 0
   h = 1.0e-5
@@ -142,7 +142,7 @@ subroutine verify_quality_volume_deriv(X,nx,ny,nz)
           
            call hexa_index(i,j,k,indices)
            do ii=1,8
-              points(ii,:) = X(indices(ii,1),indices(ii,2),indices(ii,3),:)
+              points(:,ii) = X(:,indices(3,ii),indices(2,ii),indices(1,ii))
            end do
            qualityb = 1.0
            call skew_hexa_b(points,pointsb,quality,qualityb)
@@ -151,17 +151,17 @@ subroutine verify_quality_volume_deriv(X,nx,ny,nz)
            call skew_hexa(points,quality0)
            do ii=1,8
               do jj=1,3
-                 points(ii,jj) = points(ii,jj) + h
+                 points(jj,ii) = points(jj,ii) + h
                  call skew_hexa(points,quality)
-                 qualityd(ii,jj) = (quality-quality0)/h
-                 points(ii,jj) = points(ii,jj) - h
+                 qualityd(jj,ii) = (quality-quality0)/h
+                 points(jj,ii) = points(jj,ii) - h
               end do
            end do
 
            print *,'Derivative for i,j,k:',i,j,k
            do ii=1,8
               do jj=1,3
-                 print *,ii,jj,qualityd(ii,jj),pointsb(ii,jj)
+                 print *,ii,jj,qualityd(jj,ii),pointsb(jj,ii)
               end do
            end  do
 
@@ -173,18 +173,21 @@ end subroutine verify_quality_volume_deriv
 subroutine skew_hexa(points,skew)
 
   implicit none
-  double precision  :: points(8,3),skew
-  double precision  :: scalar_triple_product
+  double precision :: points(3,8),skew
+  double precision :: scalar_triple_product
   skew = 1.0
-  
-  skew = skew*scalar_triple_product(points(2,:)-points(1,:),points(3,:)-points(1,:),points(5,:)-points(1,:))
-  skew = skew*scalar_triple_product(points(4,:)-points(2,:),points(1,:)-points(2,:),points(6,:)-points(2,:))
-  skew = skew*scalar_triple_product(points(1,:)-points(3,:),points(4,:)-points(3,:),points(7,:)-points(3,:))
-  skew = skew*scalar_triple_product(points(3,:)-points(4,:),points(2,:)-points(4,:),points(8,:)-points(4,:))
-  skew = skew*scalar_triple_product(points(7,:)-points(5,:),points(6,:)-points(5,:),points(1,:)-points(5,:))
-  skew = skew*scalar_triple_product(points(5,:)-points(6,:),points(8,:)-points(6,:),points(2,:)-points(6,:))
-  skew = skew*scalar_triple_product(points(8,:)-points(7,:),points(5,:)-points(7,:),points(3,:)-points(7,:))
-  skew = skew*scalar_triple_product(points(6,:)-points(8,:),points(7,:)-points(8,:),points(4,:)-points(8,:))
+  skew = skew*(1.0/scalar_triple_product(points(:,2)-points(:,1),points(:,3)-points(:,1),points(:,5)-points(:,1)))
+  skew = skew*(1.0/scalar_triple_product(points(:,4)-points(:,2),points(:,1)-points(:,2),points(:,6)-points(:,2)))
+  skew = skew*(1.0/scalar_triple_product(points(:,1)-points(:,3),points(:,4)-points(:,3),points(:,7)-points(:,3)))
+  skew = skew*(1.0/scalar_triple_product(points(:,3)-points(:,4),points(:,2)-points(:,4),points(:,8)-points(:,4)))
+
+  skew = skew*(1.0/scalar_triple_product(points(:,7)-points(:,5),points(:,6)-points(:,5),points(:,1)-points(:,5)))
+  skew = skew*(1.0/scalar_triple_product(points(:,5)-points(:,6),points(:,8)-points(:,6),points(:,2)-points(:,6)))
+  skew = skew*(1.0/scalar_triple_product(points(:,8)-points(:,7),points(:,5)-points(:,7),points(:,3)-points(:,7)))
+  skew = skew*(1.0/scalar_triple_product(points(:,6)-points(:,8),points(:,7)-points(:,8),points(:,4)-points(:,8)))
+
+  skew = skew*skew
+
 end subroutine skew_hexa
 
 function scalar_triple_product(a,b,c)
@@ -206,14 +209,14 @@ end function scalar_triple_product
   
 subroutine hexa_index(i,j,k,indices)
 
-  integer :: i,j,k,indices(8,3)
+  integer :: i,j,k,indices(3,8)
 
-  indices(1,:) = (/i,j,k/)
-  indices(2,:) = (/i+1,j,k/)
-  indices(3,:) = (/i,j+1,k/)
-  indices(4,:) = (/i+1,j+1,k/)
-  indices(5,:) = (/i,j,k+1/)
-  indices(6,:) = (/i+1,j,k+1/)
-  indices(7,:) = (/i,j+1,k+1/)
-  indices(8,:) = (/i+1,j+1,k+1/)
+  indices(:,1) = (/i,j,k/)
+  indices(:,2) = (/i+1,j,k/)
+  indices(:,3) = (/i,j+1,k/)
+  indices(:,4) = (/i+1,j+1,k/)
+  indices(:,5) = (/i,j,k+1/)
+  indices(:,6) = (/i+1,j,k+1/)
+  indices(:,7) = (/i,j+1,k+1/)
+  indices(:,8) = (/i+1,j+1,k+1/)
 end subroutine hexa_index

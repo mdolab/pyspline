@@ -2,6 +2,7 @@
 # pySpline curve class
 
 from numpy import *
+from pylab import *
 import sys,time
 sys.path.append('../')
 
@@ -9,13 +10,13 @@ import pySpline
 
 # Get some Helix-like data
 
-n = 50
-theta = linspace(0,2*pi,n)
+n = 100
+theta = linspace(.0000,2*pi,n)
 x = cos(theta)
 y = sin(theta)
 z = linspace(0,1,n)
 print 'Helix Data'
-curve = pySpline.curve(x=x,y=y,z=z,k=4,Nctl=8,niter=100)
+curve = pySpline.curve(x=x,y=y,z=z,k=4,Nctl=16,niter=100)
 curve.writeTecplot('helix.dat')
 
 # Load naca0012 data
@@ -41,13 +42,14 @@ curve2.writeTecplot('curve2.dat',size=.1)
 
 # Get the minimum distance distance between a point and each curve
 x0 = [4,4,3]
-s1,D1 = curve1.projectPoint(x0)
+s1,D1 = curve1.projectPoint(x0,s=.5)
 val1 = curve1(s1) # Closest point on curve
-s2,D2 = curve2.projectPoint(x0)
+s2,D2 = curve2.projectPoint(x0,s=1.0)
 val2 = curve2(s2) # Closest point on curve
 
 # Output the data
 f = open('projections.dat','w')
+f.write ('VARIABLES = "X", "Y","Z"\n')
 f.write('Zone T=curve1_proj I=2 \n')
 f.write('DATAPACKING=POINT\n')
 f.write('%f %f %f\n'%(x0[0],x0[1],x0[2]))

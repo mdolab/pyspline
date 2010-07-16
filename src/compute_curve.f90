@@ -203,7 +203,7 @@ function poly_length(X,n,ndim)
   ! Compute the length of the spatial polygon
   implicit none
   !Input
-  double precision ,intent(in)    :: X(n,ndim)
+  double precision ,intent(in)    :: X(ndim,n)
   integer          ,intent(in)    :: n,ndim
   integer                         :: i,idim
   double precision                :: dist
@@ -212,7 +212,7 @@ function poly_length(X,n,ndim)
   do i=1,n-1
      dist = 0.0
      do idim=1,ndim
-        dist = dist + (X(i,idim)-X(i+1,idim))**2
+        dist = dist + (X(idim,i)-X(idim,i+1))**2
      end do
      poly_length = poly_length + sqrt(dist)
   end do
@@ -227,8 +227,8 @@ subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X)
   integer           ,intent(in)      :: k,nctl,ndim,n
   double precision  ,intent(in)      :: t(nctl+k)
   double precision  ,intent(inout)   :: s(n)
-  double precision  ,intent(in)      :: coef(nctl,ndim)
-  double precision  ,intent(in)      :: X(n,ndim)
+  double precision  ,intent(in)      :: coef(ndim,nctl)
+  double precision  ,intent(in)      :: X(ndim,n)
   double precision  ,intent(in)      :: length
   ! Working
   integer                            :: i,j,max_inner_iter
@@ -238,17 +238,17 @@ subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X)
 
   max_inner_iter = 10
   do i=2,n-1
-     call eval_curve(s(i),t,k,coef,nctl,ndim,val)
+     call eval_curve(s(i),t,k,coef,nctl,ndim,1,val)
      call eval_curve_deriv(s(i),t,k,coef,nctl,ndim,deriv)
           
-     D = X(i,:)-val
+     D = X(:,i)-val
      c = dot_product(D,deriv)/norm(deriv,ndim)
 
      inner_loop: do j=1,max_inner_iter
 
         s_tilde = s(i)+ c*(t(nctl+k)-t(1))/length
-        call eval_curve(s_tilde,t,k,coef,nctl,ndim,val)
-        D2 = X(i,:)-val
+        call eval_curve(s_tilde,t,k,coef,nctl,ndim,1,val)
+        D2 = X(:,i)-val
         if (norm(D,ndim) .ge. norm(D2,ndim)) then
            s(i) = s_tilde
            exit inner_loop
@@ -279,9 +279,9 @@ function compute_rms_curve(t,k,s,coef,nctl,ndim,length,n,X)
   ! Input/Output
   double precision  ,intent(in)      :: t(k+nctl)
   double precision  ,intent(in)      :: s(n)
-  double precision  ,intent(in)      :: coef(nctl,ndim)
+  double precision  ,intent(in)      :: coef(ndim,nctl)
   integer           ,intent(in)      :: k,nctl,ndim,n
-  double precision  ,intent(in)      :: X(n,ndim)
+  double precision  ,intent(in)      :: X(ndim,n)
   double precision  ,intent(in)      :: length
   double precision                   :: compute_rms_curve 
 
@@ -291,8 +291,8 @@ function compute_rms_curve(t,k,s,coef,nctl,ndim,length,n,X)
   
   compute_rms_curve = 0.0
   do i=1,n
-     call eval_curve(s(i),t,k,coef,nctl,ndim,val)
-     D = val-X(i,:)
+     call eval_curve(s(i),t,k,coef,nctl,ndim,1,val)
+     D = val-X(:,i)
      do idim=1,ndim
         compute_rms_curve = compute_rms_curve + D(idim)**2
      end do
