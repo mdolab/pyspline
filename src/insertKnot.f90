@@ -12,26 +12,26 @@ subroutine insertKnot(u,r,t,k,coef,nctl,ndim,t_new,coef_new,ileft)
   !     r       - Insert r times
   !     t       - Real,Knot vector. Length nctl+k
   !     k       - Integer,order of B-spline
-  !     coef    - Real,Array of B-spline coefficients  Size (nctl,ndim)
+  !     coef    - Real,Array of B-spline coefficients  Size (ndim,nctl)
   !     nctl   - Integer,Number of control points
   !
   !     Ouput 
   !     t_new - Real, vector of lenght(nctl+k+r)
-  !     coef_new - Array of new cofficients size(nctl+r,ndim)
+  !     coef_new - Array of new cofficients size(ndim,nctl+r)
   implicit none
   ! Input
   integer         , intent(inout)       :: r
   integer         , intent(in)          :: k,nctl,ndim
   double precision, intent(in)          :: u
   double precision, intent(in)          :: t(nctl+k)
-  double precision, intent(in)          :: coef(nctl,ndim)
+  double precision, intent(in)          :: coef(ndim,nctl)
   ! Output
   double precision, intent(out)         :: t_new(nctl+k+r)
-  double precision, intent(out)         :: coef_new(nctl+r,ndim)
+  double precision, intent(out)         :: coef_new(ndim,nctl+r)
   integer         , intent(out)         :: ileft
   ! Working
   integer                               :: mflag,ilo,s,i,j,L
-  double precision                      :: alpha,temp(k,ndim)
+  double precision                      :: alpha,temp(ndim,k)
 
   ilo = 1
   call intrv(t,nctl+k,u,ilo,ileft,mflag)
@@ -67,32 +67,28 @@ subroutine insertKnot(u,r,t,k,coef,nctl,ndim,t_new,coef_new,ileft)
   ! -------- Save unaltered Control Points
 
   do i=1,ileft-(k-1)
-     coef_new(i,:) = coef(i,:)
+     coef_new(:,i) = coef(:,i)
   end do
   
   do i=ileft,nctl
-     coef_new(i+r,:) = coef(i,:)
+     coef_new(:,i+r) = coef(:,i)
   end do
   
   do i=1,k-s
-     temp(i,:) = coef(ileft-k+i,:)
+     temp(:,i) = coef(:,ileft-k+i)
   end do
-  !print *,'ileft:',ileft
-  !print *,'r is:',r
-  !print *,'temp:',temp
+
   do j=1,r
      L = ileft-k+j+1
-     !print *,'L:',L
      do i=0,k-1-j-s
-        !print *,'i',i
         alpha = (u-t(L+i))/(t(i+ileft+1)-t(L+i))
-        temp(i+1,:) = alpha*temp(i+2,:) + (1.0-alpha)*temp(i+1,:)
+        temp(i+1,:) = alpha*temp(:,i+2) + (1.0-alpha)*temp(:,i+1)
      end do
-     coef_new(L,:) = temp(1,:)
-     coef_new(ileft+r-j,:) = temp(k-j,:)
+     coef_new(:,L) = temp(:,1)
+     coef_new(:,ileft+r-j) = temp(:,k-j)
   end do
   do i=L+1,ileft-1
-     coef_new(i,:) = temp(i-L+1,:)
+     coef_new(:,i) = temp(:,i-L+1)
   end do
 end subroutine insertKnot
  

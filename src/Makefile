@@ -23,8 +23,6 @@ SPLINE_OBJ =    bvalu.o\
 		cb2val.o\
 		cb3val.o\
 		insertKnot.o\
-		updatecoefficients.o\
-		updatecoefficients_c.o\
 		getBasisPt.o\
 		parameterizations.o\
 		machcon/i1mach.o\
@@ -50,6 +48,11 @@ SPLINE_OBJ =    bvalu.o\
 	        scalar_triple_product_b.o\
 	        adBuffer.o\
 		adStack.o
+
+# Old and unused
+#	updatecoefficients.o\
+#	updatecoefficients_c.o\
+
 
 EXTRAS_LIB =    libspline_extras.a
 

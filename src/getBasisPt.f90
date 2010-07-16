@@ -5,7 +5,7 @@ subroutine getBasisPtSurface(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,n
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,nnz,istart
   double precision, intent(in)          :: u,v
   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
-  integer         , intent(in)          :: l_index(Nctlu,Nctlv)
+  integer         , intent(in)          :: l_index(Nctlv,Nctlu)
   double precision, intent(inout)       :: vals(nnz)
   integer         , intent(inout)       :: col_ind(nnz)
   ! Working
@@ -40,7 +40,7 @@ subroutine getBasisPtSurface(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,n
      do jj = 1,kv
         ! Get the local row/col for this surface
         start = istart + counter + 1
-        col_ind(start) = l_index(ileftu-ku+ii,ileftv-kv+jj)
+        col_ind(start) = l_index(ileftv-kv+jj,ileftu-ku+ii)
         vals(start) = basisu(ii)*basisv(jj)
         counter = counter + 1
     end do
@@ -53,8 +53,8 @@ subroutine getBasisPtVolume(u,v,w,tu,tv,tw,ku,kv,kw,vals,col_ind,istart,l_index,
   ! Input
   integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,nnz,istart
   double precision, intent(in)          :: u,v,w
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw,kw)
-  integer         , intent(in)          :: l_index(Nctlu,Nctlv,Nctlw)
+  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
+  integer         , intent(in)          :: l_index(Nctlw,Nctlv,Nctlu)
   double precision, intent(inout)       :: vals(nnz)
   integer         , intent(inout)       :: col_ind(nnz)
   ! Working
@@ -105,7 +105,7 @@ subroutine getBasisPtVolume(u,v,w,tu,tv,tw,ku,kv,kw,vals,col_ind,istart,l_index,
         do kk = 1,kw
            ! Get the local row/col for this surface
            start = istart + counter + 1
-           col_ind(start) = l_index(ileftu-ku+ii,ileftv-kv+jj,ileftw-kw+kk)
+           col_ind(start) = l_index(ileftw-kw+kk,ileftv-kv+jj,ileftu-ku+ii)
 
            vals(start) = basisu(ii)*basisv(jj)*basisw(kk)
            counter = counter + 1

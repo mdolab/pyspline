@@ -1,265 +1,4 @@
-subroutine eval_volume(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,val)
-
-  !***DESCRIPTION
-  !
-  !     Written by Gaetan Kenway
-  !
-  !     Abstract eval_surface evaluates the n-dimensional b-spline surface
-  !              (SCLAR VERSION)
-  !     Description of Arguments
-  !     Input
-  !     u       - Real, u coordinate
-  !     v       - Real, v coordinate
-  !     w       - Real, w coordinate
-  !     tu      - Real,Knot vector in u. Length nctlu+ku
-  !     tv      - Real,Knot vector in v. Length nctlv+kv
-  !     tw      - Real,Knot vector in w. Length nctlv+kw
-  !     ku      - Integer, order of B-spline in u
-  !     kv      - Integer, order of B-spline in v
-  !     kw      - Integer, order of B-spline in w
-  !     coef    - Real,Array of B-spline coefficients  Size (nctlu,nctlv,nctlw,ndim)
-  !     nctlu   - Integer,Number of control points in u
-  !     nctlv   - Integer,Number of control points in v
-  !     nctlw   - Integer,Number of control points in w
-  !     ndim    - Integer, Spatial Dimension
-  !
-  !     Ouput 
-  !     val     - Real, Evaluated point, size ndim
-  
-  implicit none
-  ! Input
-  integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim
-  double precision, intent(in)          :: u,v,w
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
-  double precision, intent(in)          :: coef(nctlu,nctlv,nctlw,ndim)
-
-  ! Output
-  double precision, intent(out)         :: val(ndim)
-
- ! Working
-  integer                               :: idim,istartu,istartv,istartw,i,j,k
-  integer                               :: ileftu,iworku,ilou,mflagu
-  integer                               :: ileftv,iworkv,ilov,mflagv
-  integer                               :: ileftw,iworkw,ilow,mflagw
-  double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-
-  val(:) = 0.0
-  ilou = 1
-  ilov = 1
-  ilow = 1
-  ! U
-  call INTRV(tu,nctlu+ku,u,ilou,ileftu,mflagu)
-  if (mflagu == 1) then
-     ileftu = ileftu-ku
-  end if
-  call basis(tu,nctlu,ku,u,ileftu,basisu)
-  istartu = ileftu-ku
-  ! V
-  call INTRV(tv,nctlv+kv,v,ilov,ileftv,mflagv)
-  if (mflagv == 1) then
-     ileftv = ileftv-kv
-  end if
-  call basis(tv,nctlv,kv,v,ileftv,basisv)
-  istartv = ileftv-kv
-  ! W
-  call INTRV(tw,nctlw+kw,w,ilow,ileftw,mflagw)
-  if (mflagw == 1) then
-     ileftw = ileftw-kw
-  end if
-  call basis(tw,nctlw,kw,w,ileftw,basisw)
-  istartw = ileftw-kw
-
-  do i=1,ku
-     do j=1,kv
-        do k=1,kw
-           do idim=1,ndim
-              val(idim) = val(idim) + basisu(i)*basisv(j)*basisw(k)*coef(istartu+i,istartv+j,istartw+k,idim)
-           end do
-        end do
-     end do
-  end do
-end subroutine eval_volume
-
-subroutine eval_volume_V(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,val)
-
-  !***DESCRIPTION
-  !
-  !     Written by Gaetan Kenway
-  !
-  !     Abstract eval_surface evaluates the n-dimensional b-spline volume
-  !              (VECTOR VERSION)
-  !
-  !     Description of Arguments
-  !     Input
-  !     u       - Real, u coordinate, length(n)
-  !     v       - Real, v coordinate, length(n)
-  !     w       - Real, w coordinate, length(n)
-  !     tu      - Real,Knot vector in u. Length nctlu+ku
-  !     tv      - Real,Knot vector in v. Length nctlv+kv
-  !     tw      - Real,Knot vector in w. Length nctlv+kw
-  !     ku      - Integer, order of B-spline in u
-  !     kv      - Integer, order of B-spline in v
-  !     kw      - Integer, order of B-spline in w
-  !     coef    - Real,Array of B-spline coefficients  Size (nctlu,nctlv,nctlw,ndim)
-  !     nctlu   - Integer,Number of control points in u
-  !     nctlv   - Integer,Number of control points in v
-  !     nctlw   - Integer,Number of control points in w
-  !     ndim    - Integer, Spatial Dimension
-  !
-  !     Ouput 
-  !     val     - Real, Evaluated poinst, size (n,ndim)
-  
-  implicit none
-  ! Input
-  integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim,n
-  double precision, intent(in)          :: u(n),v(n),w(n)
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
-  double precision, intent(in)          :: coef(nctlu,nctlv,nctlw,ndim)
-
-  ! Output
-  double precision, intent(out)         :: val(n,ndim)
-
-! Working
-  integer                               :: idim,istartu,istartv,istartw,i,j,k,ii
-  integer                               :: ileftu,iworku,ilou,mflagu
-  integer                               :: ileftv,iworkv,ilov,mflagv
-  integer                               :: ileftw,iworkw,ilow,mflagw
-  double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-
-  val(:,:) = 0.0
-  ilou = 1
-  ilov = 1
-  ilow = 1
-  
-  do ii=1,n
-     ! U
-     call INTRV(tu,nctlu+ku,u(ii),ilou,ileftu,mflagu)
-     if (mflagu == 1) then
-        ileftu = ileftu-ku
-     end if
-     call basis(tu,nctlu,ku,u(ii),ileftu,basisu)
-     istartu = ileftu-ku
-     
-     ! V
-     call INTRV(tv,nctlv+kv,v(ii),ilov,ileftv,mflagv)
-     if (mflagv == 1) then
-        ileftv = ileftv-kv
-     end if
-     call basis(tv,nctlv,kv,v(ii),ileftv,basisv)
-     istartv = ileftv-kv
-     
-     ! W
-     call INTRV(tw,nctlw+kw,w(ii),ilow,ileftw,mflagw)
-     if (mflagw == 1) then
-        ileftw = ileftw-kw
-     end if
-     call basis(tw,nctlw,kw,w(ii),ileftw,basisw)
-     istartw = ileftw-kw
-
-     do i=1,ku
-        do j=1,kv
-           do k=1,kw
-              do idim=1,ndim
-                 val(ii,idim) = val(ii,idim) + basisu(i)*basisv(j)*basisw(k)*coef(istartu+i,istartv+j,istartw+k,idim)
-              end do
-           end do
-        end do
-     end do
-  end do
-end subroutine eval_volume_V
-
-
-subroutine eval_volume_M(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m,val)
-
-  !***DESCRIPTION
-  !
-  !     Written by Gaetan Kenway
-  !
-  !     Abstract eval_surface_M evaluates the n-dimensional b-spline volume
-  !              (MATRIX VERSION)
-  !
-  !     Description of Arguments
-  !     Input
-  !     u       - Real, u coordinate, size(n,m)
-  !     v       - Real, v coordinate, size(n,m)
-  !     w       - Real, w coordinate, size(n,m)
-  !     tu      - Real,Knot vector in u. Length nctlu+ku
-  !     tv      - Real,Knot vector in v. Length nctlv+kv
-  !     tw      - Real,Knot vector in w. Length nctlv+kw
-  !     ku      - Integer, order of B-spline in u
-  !     kv      - Integer, order of B-spline in v
-  !     kw      - Integer, order of B-spline in w
-  !     coef    - Real,Array of B-spline coefficients  Size (nctlu,nctlv,nctlw,ndim)
-  !     nctlu   - Integer,Number of control points in u
-  !     nctlv   - Integer,Number of control points in v
-  !     nctlw   - Integer,Number of control points in w
-  !     ndim    - Integer, Spatial Dimension
-  !
-  !     Ouput 
-  !     val     - Real, Evaluated points, size (n,m,ndim)
-  
-  implicit none
-  ! Input
-  integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim,n,m
-  double precision, intent(in)          :: u(n,m),v(n,m),w(n,m)
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
-  double precision, intent(in)          :: coef(nctlu,nctlv,nctlw,ndim)
-
-  ! Output
-  double precision, intent(out)         :: val(n,m,ndim)
-
-! Working
-  integer                               :: idim,istartu,istartv,istartw,i,j,k,ii,jj
-  integer                               :: ileftu,iworku,ilou,mflagu
-  integer                               :: ileftv,iworkv,ilov,mflagv
-  integer                               :: ileftw,iworkw,ilow,mflagw
-  double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-
-  val(:,:,:) = 0.0
-  ilou = 1
-  ilov = 1
-  ilow = 1
-  
-  do ii=1,n
-     do jj=1,m
-        ! U
-        call INTRV(tu,nctlu+ku,u(ii,jj),ilou,ileftu,mflagu)
-        if (mflagu == 1) then
-           ileftu = ileftu-ku
-        end if
-        call basis(tu,nctlu,ku,u(ii,jj),ileftu,basisu)
-        istartu = ileftu-ku
-     
-        ! V
-        call INTRV(tv,nctlv+kv,v(ii,jj),ilov,ileftv,mflagv)
-        if (mflagv == 1) then
-           ileftv = ileftv-kv
-        end if
-        call basis(tv,nctlv,kv,v(ii,jj),ileftv,basisv)
-        istartv = ileftv-kv
-        
-        ! W
-        call INTRV(tw,nctlw+kw,w(ii,jj),ilow,ileftw,mflagw)
-        if (mflagw == 1) then
-           ileftw = ileftw-kw
-        end if
-        call basis(tw,nctlw,kw,w(ii,jj),ileftw,basisw)
-        istartw = ileftw-kw
-        
-        do i=1,ku
-           do j=1,kv
-              do k=1,kw
-                 do idim=1,ndim
-                    val(ii,jj,idim) = val(ii,jj,idim) + basisu(i)*basisv(j)*basisw(k)*coef(istartu+i,istartv+j,istartw+k,idim)
-                 end do
-              end do
-           end do
-        end do
-     end do
-  end do
-end subroutine eval_volume_M
-
-subroutine eval_volume_T(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m,l,val)
+ subroutine eval_volume(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m,l,val)
 
   !***DESCRIPTION
   !
@@ -270,33 +9,33 @@ subroutine eval_volume_T(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
   !
   !     Description of Arguments
   !     Input
-  !     u       - Real, u coordinate, size(n,m,l)
-  !     v       - Real, v coordinate, size(n,m,l)
-  !     w       - Real, w coordinate, size(n,m,l)
+  !     u       - Real, u coordinate, size(l,m,n)
+  !     v       - Real, v coordinate, size(l,m,n)
+  !     w       - Real, w coordinate, size(l,m,n)
   !     tu      - Real,Knot vector in u. Length nctlu+ku
   !     tv      - Real,Knot vector in v. Length nctlv+kv
   !     tw      - Real,Knot vector in w. Length nctlv+kw
   !     ku      - Integer, order of B-spline in u
   !     kv      - Integer, order of B-spline in v
   !     kw      - Integer, order of B-spline in w
-  !     coef    - Real,Array of B-spline coefficients  Size (nctlu,nctlv,nctlw,ndim)
+  !     coef    - Real,Array of B-spline coefficients  Size (ndim,nctlw,nctlv,nctlu)
   !     nctlu   - Integer,Number of control points in u
   !     nctlv   - Integer,Number of control points in v
   !     nctlw   - Integer,Number of control points in w
   !     ndim    - Integer, Spatial Dimension
   !
   !     Ouput 
-  !     val     - Real, Evaluated points, size (n,m,l,ndim)
+  !     val     - Real, Evaluated points, size (ndim,l,m,n)
   
   implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim,n,m,l
-  double precision, intent(in)          :: u(n,m,l),v(n,m,l),w(n,m,l)
+  double precision, intent(in)          :: u(l,m,n),v(l,m,n),w(l,m,n)
   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
-  double precision, intent(in)          :: coef(nctlu,nctlv,nctlw,ndim)
+  double precision, intent(in)          :: coef(ndim,nctlw,nctlv,nctlu)
 
   ! Output
-  double precision, intent(out)         :: val(n,m,l,ndim)
+  double precision, intent(out)         :: val(ndim,l,m,n)
 ! Working
   integer                               :: idim,istartu,istartv,istartw,i,j,k,ii,jj,kk
   integer                               :: ileftu,iworku,ilou,mflagu
@@ -312,35 +51,35 @@ subroutine eval_volume_T(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
      do jj=1,m
         do kk=1,l
            ! U
-           call INTRV(tu,nctlu+ku,u(ii,jj,kk),ilou,ileftu,mflagu)
+           call INTRV(tu,nctlu+ku,u(kk,jj,ii),ilou,ileftu,mflagu)
            if (mflagu == 1) then
               ileftu = ileftu-ku
            end if
-           call basis(tu,nctlu,ku,u(ii,jj,kk),ileftu,basisu)
+           call basis(tu,nctlu,ku,u(kk,jj,ii),ileftu,basisu)
            istartu = ileftu-ku
            
            ! V
-           call INTRV(tv,nctlv+kv,v(ii,jj,kk),ilov,ileftv,mflagv)
+           call INTRV(tv,nctlv+kv,v(kk,jj,ii),ilov,ileftv,mflagv)
            if (mflagv == 1) then
               ileftv = ileftv-kv
            end if
-           call basis(tv,nctlv,kv,v(ii,jj,kk),ileftv,basisv)
+           call basis(tv,nctlv,kv,v(kk,jj,ii),ileftv,basisv)
            istartv = ileftv-kv
            
            ! W
-           call INTRV(tw,nctlw+kw,w(ii,jj,kk),ilow,ileftw,mflagw)
+           call INTRV(tw,nctlw+kw,w(kk,jj,ii),ilow,ileftw,mflagw)
            if (mflagw == 1) then
               ileftw = ileftw-kw
            end if
-           call basis(tw,nctlw,kw,w(ii,jj,kk),ileftw,basisw)
+           call basis(tw,nctlw,kw,w(kk,jj,ii),ileftw,basisw)
            istartw = ileftw-kw
            
            do i=1,ku
               do j=1,kv
                  do k=1,kw
                     do idim=1,ndim
-                       val(ii,jj,kk,idim) = val(ii,jj,kk,idim) + &
-                            basisu(i)*basisv(j)*basisw(k)*coef(istartu+i,istartv+j,istartw+k,idim)
+                       val(ii,jj,kk,idim) = val(idim,kk,jj,ii) + &
+                            basisu(i)*basisv(j)*basisw(k)*coef(idim,istartw+k,istartv+j,istartu+i)
                     end do
                  end do
               end do
@@ -348,7 +87,7 @@ subroutine eval_volume_T(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,m
         end do
      end do
   end do
-end subroutine eval_volume_T
+end subroutine eval_volume
 
 subroutine eval_volume_deriv(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,val)
 
@@ -369,7 +108,7 @@ subroutine eval_volume_deriv(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim
   !     ku      - Integer, order of B-spline in u
   !     kv      - Integer, order of B-spline in v
   !     kw      - Integer, order of B-spline in w
-  !     coef    - Real,Array of B-spline coefficients  Size (nctlu,nctlv,nctlw,ndim)
+  !     coef    - Real,Array of B-spline coefficients  Size (ndim,nctlw,nctlv,nctlu)
   !     nctlu   - Integer,Number of control points in u
   !     nctlv   - Integer,Number of control points in v
   !     nctlw   - Integer,Number of control points in w
@@ -383,10 +122,10 @@ subroutine eval_volume_deriv(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim
   integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim
   double precision, intent(in)          :: u,v,w
   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
-  double precision, intent(in)          :: coef(nctlu,nctlv,nctlw,ndim)
+  double precision, intent(in)          :: coef(ndim,nctlw,nctlv,nctlu)
 
   ! Output
-  double precision, intent(out)         :: val(3,ndim)
+  double precision, intent(out)         :: val(ndim,3)
 
   ! Working
   integer                               :: idim
@@ -395,9 +134,9 @@ subroutine eval_volume_deriv(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim
   double precision b3val
 
   do idim=1,ndim
-     val(1,idim) = b3val(u,v,w,1,0,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
-     val(2,idim) = b3val(u,v,w,0,1,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
-     val(3,idim) = b3val(u,v,w,0,0,1,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
+     val(idim,1) = b3val(u,v,w,1,0,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
+     val(idim,2) = b3val(u,v,w,0,1,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
+     val(idim,3) = b3val(u,v,w,0,0,1,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
   end do
   
 end subroutine eval_volume_deriv
@@ -422,7 +161,7 @@ subroutine eval_volume_deriv2(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndi
   !     ku      - Integer, order of B-spline in u
   !     kv      - Integer, order of B-spline in v
   !     kw      - Integer, order of B-spline in w
-  !     coef    - Real,Array of B-spline coefficients  Size (nctlu,nctlv,nctlw,ndim)
+  !     coef    - Real,Array of B-spline coefficients  Size (ndim,nctlw,nctlv,nctlu)
   !     nctlu   - Integer,Number of control points in u
   !     nctlv   - Integer,Number of control points in v
   !     nctlw   - Integer,Number of control points in w
@@ -436,10 +175,10 @@ subroutine eval_volume_deriv2(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndi
   integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim
   double precision, intent(in)          :: u,v,w
   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
-  double precision, intent(in)          :: coef(nctlu,nctlv,nctlw,ndim)
+  double precision, intent(in)          :: coef(ndim,nctlw,nctlv,nctlu)
 
   ! Output
-  double precision, intent(out)         :: val(3,3,ndim)
+  double precision, intent(out)         :: val(ndim,3,3)
 
   ! Working
   integer                               :: idim
@@ -451,30 +190,30 @@ subroutine eval_volume_deriv2(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndi
 
      ! Row 1
      if (ku>=3) then
-        val(1,1,idim) = b3val(u,v,w,2,0,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
+        val(idim,1,1) = b3val(u,v,w,2,0,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
      else
-        val(1,1,idim) = 0.0
+        val(idim,1,1) = 0.0
      end if
      
-     val(1,2,idim) = b3val(u,v,w,1,1,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
-     val(1,3,idim) = b3val(u,v,w,1,0,1,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
+     val(idim,1,2) = b3val(u,v,w,1,1,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
+     val(idim,1,3) = b3val(u,v,w,1,0,1,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
 
      ! Row 2
-     val(2,1,idim) = val(1,2,idim)
+     val(idim,2,1) = val(idim,1,2)
      if (kv>=3) then
-        val(2,2,idim) = b3val(u,v,w,0,2,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
+        val(idim,2,2) = b3val(u,v,w,0,2,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
      else
-        val(2,2,idim) = 0.0
+        val(idim,2,2) = 0.0
      end if
-     val(2,3,idim) = b3val(u,v,w,0,1,1,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
+     val(idim,2,3) = b3val(u,v,w,0,1,1,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
 
      ! Row 3
-     val(3,1,idim) = val(1,3,idim)
-     val(3,2,idim) = val(2,3,idim)
+     val(idim,3,1) = val(idim,1,3)
+     val(idim,3,2) = val(idim,2,3)
      if (kw>=3) then
-        val(3,3,idim) = b3val(u,v,w,0,0,2,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(:,:,:,idim),work)
+        val(idim,3,3) = b3val(u,v,w,0,0,2,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
      else
-        val(3,3,idim) = 0.0
+        val(idm,3,3) = 0.0
      end if
   end do
   

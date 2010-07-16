@@ -165,7 +165,7 @@ subroutine surface_jacobian_wrap(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,vals,row_ptr,
   implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,nu,nv
-  double precision, intent(in)          :: u(nu,nv),v(nu,nv)
+  double precision, intent(in)          :: u(nv,nu),v(nv,nu)
   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
   double precision, intent(out)         :: vals(nu*nv*ku*kv)
   integer         , intent(out)         :: col_ind(nu*nv*ku*kv),row_ptr(nu*nv+1)
@@ -181,12 +181,14 @@ subroutine surface_jacobian_wrap(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,vals,row_ptr,
   counter = 1
   !print *,'uknot:',tu
   !print *,'vknot:',tv
+
+
   do i=1,nu
      do j = 1,nv
         ! Get u interval
-        call intrv(tu,nctlu+ku,u(i,j),ilou,ileftu,mflagu)
+        call intrv(tu,nctlu+ku,u(j,i),ilou,ileftu,mflagu)
         if (mflagu == 0) then
-           call basis(tu,nctlu,ku,u(i,j),ileftu,basisu)
+           call basis(tu,nctlu,ku,u(j,i),ileftu,basisu)
         else if (mflagu == 1) then
            ileftu = nctlu
            basisu(:) = 0.0
@@ -194,9 +196,9 @@ subroutine surface_jacobian_wrap(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,vals,row_ptr,
         end if
         
         ! Get v interval
-        call intrv(tv,nctlv+kv,v(i,j),ilov,ileftv,mflagv)
+        call intrv(tv,nctlv+kv,v(j,i),ilov,ileftv,mflagv)
         if (mflagv == 0) then
-           call basis(tv,nctlv,kv,v(i,j),ileftv,basisv)
+           call basis(tv,nctlv,kv,v(j,i),ileftv,basisv)
         else if (mflagv == 1) then
            ileftv = nctlv
            basisv(:) = 0.0
@@ -224,16 +226,16 @@ subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
   implicit none
   ! Input/Output
   double precision  ,intent(in)      :: tu(ku+nctlu),tv(kv+nctlv)
-  double precision  ,intent(inout)   :: u(nu,nv),v(nu,nv)
-  double precision  ,intent(in)      :: coef(nctlu,nctlv,ndim)
+  double precision  ,intent(inout)   :: u(nv,nu),v(nv,nu)
+  double precision  ,intent(in)      :: coef(ndim,nctlv,nctlu)
   integer           ,intent(in)      :: ku,kv,nctlu,nctlv,ndim,nu,nv
-  double precision  ,intent(in)      :: X(nu,nv,ndim)
+  double precision  ,intent(in)      :: X(ndim,nv,nu)
   double precision  ,intent(out)     :: rms
   ! Working
   integer                            :: i,j,jj,max_inner_iter
   double precision                   :: lengthu,lengthv
   double precision                   :: D(ndim),D2(ndim)
-  double precision                   :: val(ndim),deriv(2,ndim),deriv2(2,2,ndim)
+  double precision                   :: val(ndim),deriv(ndim,2),deriv2(ndim,2,2)
   double precision                   :: delta_c,delta_d,u_tilde,v_tilde
   integer                            :: adj_u,adj_v
   double precision                   :: A(2,2),ki(2),delta(2)
@@ -242,21 +244,23 @@ subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
 
   max_inner_iter = 10
   rms = 0.0
+
+
   do i=2,nu-1
      do j = 2,nv-2
-        call eval_surface(u(i,j),v(i,j),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
-        call eval_surface_deriv(u(i,j),v(i,j),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,deriv)
-        call eval_surface_deriv2(u(i,j),v(i,j),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,deriv2)
+        call eval_surface(u(j,i),v(j,i),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
+        call eval_surface_deriv(u(j,i),v(j,i),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,deriv)
+        call eval_surface_deriv2(u(j,i),v(j,i),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,deriv2)
 
-        D = val-X(i,j,:)
+        D = val-X(:,j,i)
 
-        A(1,1) = norm(deriv(1,:),ndim)**2 + dot_product(D,deriv2(1,1,:))
-        A(1,2) = dot_product(deriv(1,:),deriv(2,:)) + dot_product(D,deriv2(1,2,:))
+        A(1,1) = norm(deriv(:,i),ndim)**2 + dot_product(D,deriv2(:,1,1))
+        A(1,2) = dot_product(deriv(:,1),deriv(:,2)) + dot_product(D,deriv2(:,1,2))
         A(2,1) = A(1,2)
-        A(2,2) = norm(deriv(2,:),ndim)**2 + dot_product(D,deriv2(2,2,:))
+        A(2,2) = norm(deriv(:,2),ndim)**2 + dot_product(D,deriv2(:,2,2))
         
-        ki(1) = -dot_product(D,deriv(1,:))
-        ki(2) = -dot_product(D,deriv(2,:))
+        ki(1) = -dot_product(D,deriv(:,1))
+        ki(2) = -dot_product(D,deriv(:,2))
         
         call solve_2by2(A,ki,delta)
         
@@ -267,14 +271,14 @@ subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
            delta(2) = 0.0
         end if
         inner_loop: do jj=1,max_inner_iter
-           u_tilde = u(i,j) + delta(1)
-           v_tilde = v(i,j) + delta(2)
+           u_tilde = u(j,i) + delta(1)
+           v_tilde = v(j,i) + delta(2)
 
            call eval_surface(u_tilde,v_tilde,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
            D2 = val-X(i,j,:)
            if (norm(D,ndim) .ge. norm(D2,ndim)) then
-              u(i,j) = u_tilde
-              v(i,j) = v_tilde
+              u(j,i) = u_tilde
+              v(j,i) = v_tilde
               exit inner_loop
            else
               delta = delta*0.5
@@ -285,9 +289,11 @@ subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
 
   ! Lets redo the full RMS
   rms = 0.0
+
+
   do i=1,nu
      do j=1,nv
-        call eval_surface(u(i,j),v(i,j),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
+        call eval_surface(u(j,i),v(j,i),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
         D = X(i,j,:)-val
         rms = rms + dot_product(D,D)
      end do
@@ -302,10 +308,10 @@ function compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X)
   implicit none
   ! Input/Output
   double precision  ,intent(in)      :: tu(ku+nctlu),tv(kv+nctlv)
-  double precision  ,intent(inout)   :: u(nu,nv),v(nu,nv)
-  double precision  ,intent(in)      :: coef(nctlu,nctlv,ndim)
+  double precision  ,intent(inout)   :: u(nv,nu),v(nv,nu)
+  double precision  ,intent(in)      :: coef(ndim,nctlv,nctlu)
   integer           ,intent(in)      :: ku,kv,nctlu,nctlv,ndim,nu,nv
-  double precision  ,intent(in)      :: X(nu,nv,ndim)
+  double precision  ,intent(in)      :: X(ndim,nv,nu)
  
   ! Working
   integer                            :: i,j,idim
@@ -314,8 +320,8 @@ function compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X)
   compute_rms_surface = 0.0
   do i=1,nu
      do j=1,nv
-        call eval_surface(u(i,j),v(i,j),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
-        D = val-X(i,j,:)
+        call eval_surface(u(j,i),v(j,i),tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
+        D = val-X(:,j,i)
         do idim=1,ndim
            compute_rms_surface = compute_rms_surface + D(idim)**2
         end do
