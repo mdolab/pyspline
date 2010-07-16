@@ -5,7 +5,8 @@
   C/C++ header file for the pySpline fortran routines.
 */
 
-#include "complexify.h"
+// #include "complexify.h"
+#include "TACSObject.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,19 +25,19 @@ extern "C" {
 			int * KX, int * KY, int * KZ,
 			double * BCOEF, double * WORK );
 
-  extern cplx cb2val_( double * XVAL, double * YVAL, 
-		       int * IDX, int * IDY, 
-		       double * TX, double * TY, 
-		       int * NX, int * NY, 
-		       int * KX, int * KY, 
-		       cplx * BCOEF, cplx * WORK );
-
-  extern cplx cb3val_( double * XVAL, double * YVAL, double * ZVAL,
-		       int * IDX, int * IDY, int * IDZ,
-		       double * TX, double * TY, double * TZ,
-		       int * NX, int * NY, int * NZ, 
-		       int * KX, int * KY, int * KZ,
-		       cplx * BCOEF, cplx * WORK );
+  extern TacsComplex cb2val_( double * XVAL, double * YVAL, 
+			      int * IDX, int * IDY, 
+			      double * TX, double * TY, 
+			      int * NX, int * NY, 
+			      int * KX, int * KY, 
+			      TacsComplex * BCOEF, TacsComplex * WORK );
+  
+  extern TacsComplex cb3val_( double * XVAL, double * YVAL, double * ZVAL,
+			      int * IDX, int * IDY, int * IDZ,
+			      double * TX, double * TY, double * TZ,
+			      int * NX, int * NY, int * NZ, 
+			      int * KX, int * KY, int * KZ,
+			      TacsComplex * BCOEF, TacsComplex * WORK );
 #ifdef __cplusplus
 }
 #endif
