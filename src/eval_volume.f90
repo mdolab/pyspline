@@ -55,6 +55,9 @@
            if (mflagu == 1) then
               ileftu = ileftu-ku
            end if
+           if (mflagu == -1) then
+              ileftu = ku
+           end if
            call basis(tu,nctlu,ku,u(kk,jj,ii),ileftu,basisu)
            istartu = ileftu-ku
            
@@ -62,6 +65,9 @@
            call INTRV(tv,nctlv+kv,v(kk,jj,ii),ilov,ileftv,mflagv)
            if (mflagv == 1) then
               ileftv = ileftv-kv
+           end if
+           if (mflagv == -1) then
+              ileftv = kv
            end if
            call basis(tv,nctlv,kv,v(kk,jj,ii),ileftv,basisv)
            istartv = ileftv-kv
@@ -71,6 +77,9 @@
            if (mflagw == 1) then
               ileftw = ileftw-kw
            end if
+           if (mflagw == -1) then
+              ileftw = kw
+           end if
            call basis(tw,nctlw,kw,w(kk,jj,ii),ileftw,basisw)
            istartw = ileftw-kw
            
@@ -78,7 +87,7 @@
               do j=1,kv
                  do k=1,kw
                     do idim=1,ndim
-                       val(ii,jj,kk,idim) = val(idim,kk,jj,ii) + &
+                       val(idim,kk,jj,ii) = val(idim,kk,jj,ii) + &
                             basisu(i)*basisv(j)*basisw(k)*coef(idim,istartw+k,istartv+j,istartu+i)
                     end do
                  end do
@@ -134,9 +143,9 @@ subroutine eval_volume_deriv(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim
   double precision b3val
 
   do idim=1,ndim
-     val(idim,1) = b3val(u,v,w,1,0,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
-     val(idim,2) = b3val(u,v,w,0,1,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
-     val(idim,3) = b3val(u,v,w,0,0,1,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
+     val(idim,1) = b3val(w,v,u,0,0,1,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
+     val(idim,2) = b3val(w,v,u,0,1,0,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
+     val(idim,3) = b3val(w,v,u,1,0,0,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
   end do
   
 end subroutine eval_volume_deriv
@@ -190,28 +199,27 @@ subroutine eval_volume_deriv2(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndi
 
      ! Row 1
      if (ku>=3) then
-        val(idim,1,1) = b3val(u,v,w,2,0,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
+        val(idim,1,1) = b3val(w,v,u,0,0,2,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
      else
         val(idim,1,1) = 0.0
      end if
-     
-     val(idim,1,2) = b3val(u,v,w,1,1,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
-     val(idim,1,3) = b3val(u,v,w,1,0,1,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
+     val(idim,1,2) = b3val(w,v,u,0,1,1,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
+     val(idim,1,3) = b3val(w,v,u,1,0,1,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
 
      ! Row 2
      val(idim,2,1) = val(idim,1,2)
      if (kv>=3) then
-        val(idim,2,2) = b3val(u,v,w,0,2,0,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
+        val(idim,2,2) = b3val(w,v,u,0,2,0,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
      else
         val(idim,2,2) = 0.0
      end if
-     val(idim,2,3) = b3val(u,v,w,0,1,1,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
+     val(idim,2,3) = b3val(w,v,u,1,1,0,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
 
      ! Row 3
      val(idim,3,1) = val(idim,1,3)
      val(idim,3,2) = val(idim,2,3)
      if (kw>=3) then
-        val(idim,3,3) = b3val(u,v,w,0,0,2,tu,tv,tw,nctlu,nctlv,nctlw,ku,kv,kw,coef(idim,:,:,:),work)
+        val(idim,3,3) = b3val(w,v,u,2,0,0,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
      else
         val(idm,3,3) = 0.0
      end if

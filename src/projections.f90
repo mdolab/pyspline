@@ -50,7 +50,7 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
   double precision                      :: norm
 
   ! Initialization
-  n_sub=10  ! Is 3  Good Here?? Huristic!
+  n_sub=1  ! Is 3  Good Here?? Huristic!
   brute_force = .False.
   max_inner_iter = 20
   ! Determine if any of the guesses are out of range, if so, do the brute force search
@@ -84,17 +84,18 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
      do i=1,nss
         call eval_curve(ss(i),t,k,coef,nctl,ndim,1,curve_vals(:,i))
      end  do
-    
+
      s0(:) = s(:)
      ! Now do the actual searching
      do ipt=1,N
         
         if (s(ipt) < 0 .or. s(ipt) > 1) then ! Still only do it if we have a bad guess
            D0 = norm(x0(:,ipt)-curve_vals(:,1),ndim)
+           s0(ipt) = ss(1)
            do i=1,nss
               D = norm(curve_vals(:,i)-x0(:,ipt),ndim)
               if (D<D0) then
-                 s0(ipt) = ss(ipt)
+                 s0(ipt) = ss(i)
                  D0 = D
               end if
            end do
@@ -108,26 +109,24 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
 
   s = s0
   do ipt=1,N
-
      call eval_curve(s0(ipt),t,k,coef,nctl,ndim,1,val)
-
      call eval_curve_deriv(s0(ipt),t,k,coef,nctl,ndim,deriv)
      call eval_curve_deriv2(s0(ipt),t,k,coef,nctl,ndim,deriv2)
 
      Diff(:,ipt) = val-x0(:,ipt)
-
+    
      iteration_loop: do i=1,Niter
         ! Check the Convergence Criteria
 
         if (norm(Diff(:,ipt),ndim) <= eps1) then
-           exit iteration_loop
+               exit iteration_loop
         end if
 
         if (  norm(dot_product(deriv,Diff(:,ipt)),ndim)/ (norm(deriv,ndim)*norm(Diff(:,ipt),ndim)) <= eps2) then
            exit iteration_loop
         end if
 
-        s0 = s
+        s0(ipt) = s(ipt)
         call eval_curve(s0(ipt),t,k,coef,nctl,ndim,1,val)
         call eval_curve_deriv(s0(ipt),t,k,coef,nctl,ndim,deriv)
         call eval_curve_deriv2(s0(ipt),t,k,coef,nctl,ndim,deriv2)
@@ -444,7 +443,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
   double precision, intent(in)          :: eps1,eps2
   ! Output
   double precision, intent(inout)       :: u(N),v(N),w(N)
-  double precision, intent(out)         :: diff(N,ndim)
+  double precision, intent(out)         :: diff(ndim,N)
 
 
   ! Working
@@ -467,7 +466,6 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
   max_inner_iter = 20
   n_sub = 3
   brute_force = .false.
-  ! First we will evaluate the surface at n points inside each knot span in each direction
 
   !if we are given a bad guess do the brute force
   point_loop: do ipt=1,N
@@ -486,8 +484,19 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
      w0(:) = w(:)
   end if
 
+  u = u0(:)
+  v = v0(:)
+  w = w0(:)
+
   ! Now we have u0,v0,w0 so we can do the newton search
   do ipt=1,N
+
+     call eval_volume(u(ipt),v(ipt),w(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,1,1,1,val)
+     call eval_volume_deriv(u(ipt),v(ipt),w(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,deriv)
+     call eval_volume_deriv2(u(ipt),v(ipt),w(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,deriv2)
+     
+     Diff(:,ipt) = val-x0(:,ipt)
+     
      iteration_loop: do i=1,niter
         ! Check the convergence criteria
         if (norm(Diff(:,ipt),ndim) <= eps1) then
