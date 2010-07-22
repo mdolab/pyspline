@@ -22,7 +22,7 @@
 
      subroutine insertknot(u,r,t,k,coef,nctl,ndim,t_new,coef_new,ileft) ! in :test:insertKnot.f90
        double precision intent(in) :: u
-       integer intent(inout) :: r
+       integer intent(in,out) :: r
        double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
        integer intent(in) :: k
        double precision dimension(ndim,nctl),intent(in) :: coef
@@ -84,7 +84,7 @@
      subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,x) ! in :test:compute_curve.f90
        double precision dimension(nctl+k),intent(in),depend(k,nctl) :: t
        integer intent(in) :: k
-       double precision dimension(n),intent(in,out) :: s
+       double precision dimension(n),intent(inout) :: s
        double precision dimension(ndim,nctl),intent(in) :: coef
        integer optional,intent(in),check(shape(coef,1)==nctl),depend(coef) :: nctl=shape(coef,1)
        integer optional,intent(in),check(shape(coef,0)==ndim),depend(coef) :: ndim=shape(coef,0)
@@ -110,12 +110,12 @@
      end subroutine surface_jacobian_wrap
 
      subroutine para3d(x,n,m,l,ndim,s,u,v,w) ! in :test:parameterizations.f90
-       double precision dimension(n,m,l,ndim),intent(in) :: x
-       integer optional,intent(in),check(shape(x,0)==n),depend(x) :: n=shape(x,0)
-       integer optional,intent(in),check(shape(x,1)==m),depend(x) :: m=shape(x,1)
-       integer optional,intent(in),check(shape(x,2)==l),depend(x) :: l=shape(x,2)
-       integer optional,intent(in),check(shape(x,3)==ndim),depend(x) :: ndim=shape(x,3)
-       double precision dimension(n,m,l,ndim),intent(out),depend(n,m,l,ndim) :: s
+       double precision dimension(ndim,l,m,n),intent(in) :: x
+       integer optional,intent(in),check(shape(x,3)==n),depend(x) :: n=shape(x,3)
+       integer optional,intent(in),check(shape(x,2)==m),depend(x) :: m=shape(x,2)
+       integer optional,intent(in),check(shape(x,1)==l),depend(x) :: l=shape(x,1)
+       integer optional,intent(in),check(shape(x,0)==ndim),depend(x) :: ndim=shape(x,0)
+       double precision dimension(ndim,l,m,n),intent(out),depend(ndim,l,m,n) :: s
        double precision dimension(n),intent(out),depend(n) :: u
        double precision dimension(m),intent(out),depend(m) :: v
        double precision dimension(l),intent(out),depend(l) :: w
@@ -361,7 +361,7 @@
        double precision dimension(n),intent(in,out),depend(n) :: u
        double precision dimension(n),intent(in,out),depend(n) :: v
        double precision dimension(n),intent(in,out),depend(n) :: w
-       double precision dimension(n,ndim),intent(out),depend(n,ndim) :: diff
+       double precision dimension(ndim,n),intent(out),depend(ndim,n) :: diff
      end subroutine point_volume
 
      subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,niter,eps1,eps2,s,t,diff) ! in :test:projections.f90

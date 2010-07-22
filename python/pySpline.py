@@ -28,7 +28,7 @@ import os, sys, string, time, copy, pdb
 # =============================================================================
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
     ones,vstack,real,where,arange,append,hstack,mgrid,atleast_1d,atleast_2d,\
-    atleast_3d,rank
+    atleast_3d,rank,asarray
 from numpy.linalg import norm
 
 import scipy
@@ -237,7 +237,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 self.X = array(kwargs['x']).reshape((len(kwargs['x']),1))
                 self.nDim = 1
             # enf if
-            self.X = self.X.astype('d') # Make sure its real
+            self.X = asarray(self.X.astype('d'),order='c') # Make sure its real
             self.k = checkInput(kwargs['k'],'k',int,0)
             self.N = len(self.X)
             self.t = None
@@ -369,7 +369,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             # end for
             return
         # end if
-                
+        print 'poly'
         length = pyspline.poly_length(self.X.T)
         for iter in xrange(niter):
             su = self.s[su_select]
@@ -378,7 +378,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 sdu = self.s[self.deriv_ptr][sdu_select]
                 sdc = self.s[self.deriv_ptr][sdc_select]
             # end if
-
+                
             pyspline.curve_jacobian_wrap(su,sdu,self.t,self.k,self.Nctl,N_vals,N_row_ptr,N_col_ind)
             NTWN = N.transpose()*W*N # We need this either way
 
@@ -391,6 +391,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 M_vals = zeros((nc+ndc)*self.k)          #|
                 M_row_ptr = zeros(nc+ndc+1,'intc')       #| -> Standard CSR formulation
                 M_col_ind = zeros((nc+ndc)*self.k,'intc')#|
+
                 pyspline.curve_jacobian_wrap(sc,sdc,self.t,self.k,self.Nctl,M_vals,M_row_ptr,M_col_ind)
                 M = sparse.csr_matrix((M_vals,M_col_ind,M_row_ptr),[nc+ndc,self.Nctl])
                 # Now we must assemble the constrained jacobian
@@ -412,7 +413,8 @@ Nctl=<number of control points> must be specified for a LMS fit'
             # end if (constr - not constrained
 
             # Run para correction
-            self.s = pyspline.curve_para_corr(self.t,self.k,self.s.copy(),self.coef.T,length,self.X.T)
+
+            pyspline.curve_para_corr(self.t,self.k,self.s,self.coef.T,length,self.X.T)
         # end for (iter loop)
         # Check the RMS
         rms = 0.0
@@ -562,10 +564,10 @@ Nctl=<number of control points> must be specified for a LMS fit'
            values: An array of shape(len(s),nDim)) if s is an array
                    or array of len(nDim) if nDim == 1
                    '''
-            
+        s = array(s).T
         vals = pyspline.eval_curve(atleast_1d(s),self.t,self.k,self.coef.T)
 
-        return vals.T.squeeze()
+        return vals.squeeze().T
         
 
     def getDerivative(self,s):
@@ -601,17 +603,20 @@ Nctl=<number of control points> must be specified for a LMS fit'
             D: Distance(s) from point to curve
         '''
 
+
         x0 = atleast_2d(x0)
         if 's' in kwargs: 
-            s = kwargs['s']
+            s = atleast_1d(kwargs['s'])
         else:
             s=-1*ones(len(x0))
         # end if
 
+        assert len(x0) == len(s), 'projectPoint: The length of x0 and s must be the same'
+        
         s,D = pyspline.point_curve(x0.T,self.t,self.k,self.coef.T,
-                                   Niter,eps1,eps2,atleast_1d(s))
+                                   Niter,eps1,eps2,s)
 
-        return s.squeeze(),D.T.squeeze()
+        return s.squeeze(),D.squeeze().T
 
     def projectCurve(self,curve,Niter=250,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
@@ -1066,13 +1071,13 @@ original data for this surface or edge is not in range 0->3'
            values: An array of size (shape(u), nDim)
            '''
         
-        u = array(u)
-        v = array(v)
+        u = array(u).T
+        v = array(v).T
         assert u.shape == v.shape,'Error, getValue: u and v must have the same shape'
         
         vals = pyspline.eval_surface(atleast_2d(u),atleast_2d(v),self.tu,self.tv,
                                      self.ku,self.kv,self.coef.T)
-        return vals.T.squeeze()
+        return vals.squeeze().T
                                 
     def getDerivative(self,u,v):
         '''Get the derivative at the surface point(s) u,v
@@ -1169,7 +1174,7 @@ original data for this surface or edge is not in range 0->3'
         # end if
         u,v,D = pyspline.point_surface(x0.T,self.tu,self.tv,self.ku,
                                        self.kv,self.coef.T,Niter,eps1,eps2,u,v)
-        return u.squeeze(),v.squeeze(),D.T.squeeze()
+        return u.squeeze(),v.squeeze(),D.squeeze().T
 
     def projectCurve(self,curve,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
         '''
@@ -1598,7 +1603,7 @@ MUST be defined for task lms or interpolate'
              None
              '''
         self._setCoefSize()
-        
+        print 'jac'
         vals,row_ptr,col_ind = pyspline.volume_jacobian_wrap(\
             self.U,self.V,self.W,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,\
                 self.Nctlu,self.Nctlv,self.Nctlw)
@@ -1628,13 +1633,16 @@ MUST be defined for task lms or interpolate'
         return 
 
     def _calcParameterization(self):
-        S,u,v,w = pyspline.para3d(self.X)
+
+        S,u,v,w = pyspline.para3d(self.X.T)
+        S = S.T
         self.u = u
         self.v = v
         self.w = w
-        self.U = S[:,:,:,0]
-        self.V = S[:,:,:,1]
-        self.W = S[:,:,:,2]
+
+        self.U = asarray(S[:,:,:,0],order='c')
+        self.V = asarray(S[:,:,:,1],order='c')
+        self.W = asarray(S[:,:,:,2],order='c')
 
         return
 
@@ -1849,16 +1857,15 @@ original data for this surface or face is not in range 0->5'
         Returns:
            values: An array of size (shape(u), nDim)
            '''
-        u = array(u)
-        v = array(v)
-        w = array(w)
+        u = atleast_3d(u).T
+        v = atleast_3d(v).T
+        w = atleast_3d(w).T
 
         assert u.shape == v.shape == w.shape,'Error, getValue: u and v must have the same shape'
 
-        vals = pyspline.eval_volume(atleast_3d(u),atleast_3d(v),atleast_3d(w),
-                                    self.tu,self.tv,self.tw,self.ku,self.kv,
-                                    self.kw,self.coef.T)
-        return vals.T.squeeze()
+        vals = pyspline.eval_volume(u,v,w,self.tu,self.tv,self.tw,
+                                    self.ku,self.kv,self.kw,self.coef.T)
+        return vals.squeeze().T
 
     def getBounds(self):
         '''Determine the extents of the volume
@@ -1927,7 +1934,7 @@ original data for this surface or face is not in range 0->5'
         u,v,w,D = pyspline.point_volume(x0.T,self.tu,self.tv,self.tw,
                                         self.ku,self.kv,self.kw,
                                         self.coef.T,Niter,eps1,eps2,u,v,w)
-        return u.squeeze(),v.squeeze(),w.squeeze(),D.T
+        return u.squeeze(),v.squeeze(),w.squeeze(),D.squeeze().T
 
     def _writeTecplotOrigData(self,handle):
         if self.orig_data:
@@ -1937,7 +1944,7 @@ original data for this surface or face is not in range 0->5'
         return
     def _writeTecplotVolume(self,handle):
         '''Output this volume\'s data to a open file handle \'handle\' '''
-        
+
         if self.U ==None:
             # This works really well actually
             Nx = self.Nctlu*self.ku+1
@@ -1955,7 +1962,10 @@ original data for this surface or face is not in range 0->5'
                 [V_plot[i,:,:],U_plot[i,:,:]] = meshgrid(v_plot,u_plot)
                 W_plot[i,:,:] = w_plot[i]
             # end for
+
             values = self.getValue(U_plot,V_plot,W_plot)
+
+
         else:
             values = self.getValue(self.U,self.V,self.W)
 

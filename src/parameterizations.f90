@@ -7,7 +7,7 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
   !
   !     Description of Arguments
   !     Input
-  !     X       - Real,size(n,m,l,ndim): Coordiantes
+  !     X       - Real,size(ndim,l,m,n): Coordiantes
   !     Output
   !     S       - Real,size(n,m,l,3): The u,v,w parametric positions
   !     u       - Real, size(n): The averaged u parameters
@@ -18,11 +18,11 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
 
   ! Input
   integer          , intent(in)   :: n,m,l,ndim
-  double precision , intent(in)   :: X(n,m,l,ndim)
+  double precision , intent(in)   :: X(ndim,l,m,n)
   
 
   ! Output
-  double precision , intent(out)  :: S(n,m,l,ndim)
+  double precision , intent(out)  :: S(ndim,l,m,n)
   double precision , intent(out)  :: u(n),v(m),w(l)
 
   ! Working 
@@ -30,17 +30,17 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
 
   double precision DELI,DELJ,DELK
 
-  DELI(I,J,K) = SQRT ((X(I,J,K,1) - X(I-1,J,K,1)) ** 2 + &
-       (X(I,J,K,2) - X(I-1,J,K,2)) ** 2 + &
-       (X(I,J,K,3) - X(I-1,J,K,3)) ** 2)
+  DELI(K,J,I) = SQRT ((X(1,K,J,I) - X(1,K,J,I-1)) ** 2 + &
+                      (X(2,K,J,I) - X(2,K,J,I-1)) ** 2 + &
+                      (X(3,K,J,I) - X(3,K,J,I-1)) ** 2)
 
-  DELJ(I,J,K) = SQRT ((X(I,J,K,1) - X(I,J-1,K,1)) ** 2 + &
-       (X(I,J,K,2) - X(I,J-1,K,2)) ** 2 + &
-       (X(I,J,K,3) - X(I,J-1,K,3)) ** 2)
+  DELJ(K,J,I) = SQRT ((X(1,K,J,I) - X(1,K,J-1,I)) ** 2 + &
+                      (X(2,K,J,I) - X(2,K,J-1,I)) ** 2 + &
+                      (X(3,K,J,I) - X(3,K,J-1,I)) ** 2)
 
-  DELK(I,J,K) = SQRT ((X(I,J,K,1) - X(I,J,K-1,1)) ** 2 + &
-       (X(I,J,K,2) - X(I,J,K-1,2)) ** 2 + &
-       (X(I,J,K,3) - X(I,J,K-1,3)) ** 2)
+  DELK(K,J,I) = SQRT ((X(1,K,J,I) - X(1,K-1,J,I)) ** 2 + &
+                      (X(2,K,J,I) - X(2,K-1,J,I)) ** 2 + &
+                      (X(3,K,J,I) - X(3,K-1,J,I)) ** 2)
 
 
   u(:) = 0.0
@@ -49,19 +49,20 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
 
   !     Zero the three low-end faces (or edges if one plane is specified).
   
-  DO K = 1, l
-     DO J = 1, m
-        S(1,J,K,1) = 0.0
+  DO J = 1, m
+     DO K = 1, l
+        S(1,K,J,1) = 0.0
      END DO
      
      DO I = 1, n
-        S(I,1,K,2) = 0.0
+        S(2,K,1,I) = 0.0
      END DO
   END DO
   
-  DO J = 1, m
-     DO I = 1, n
-        S(I,J,1,3) = 0.0
+
+  DO I = 1, n
+     DO J = 1, m
+        S(3,1,J,I) = 0.0
      END DO
   END DO
   
@@ -69,15 +70,15 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
   !     following loops over most of the low-end faces:
 
   DO I = 2, n
-     S(I,1,1,1) = S(I-1,1,1,1) + DELI(I,1,1)
+     S(1,1,1,I) = S(1,1,1,I-1) + DELI(1,1,I)
   END DO
 
   DO J = 2, m
-     S(1,J,1,2) = S(1,J-1,1,2) + DELJ(1,J,1)
+     S(2,1,J,1) = S(2,1,J-1,1) + DELJ(1,J,1)
   END DO
 
   DO K = 2, l
-     S(1,1,K,3) = S(1,1,K-1,3) + DELK(1,1,K)
+     S(3,K,1,1) = S(3,k-1,1,1) + DELK(K,1,1)
   END DO
 
   !     Set up the rest of the low-end face lines because they are
@@ -85,32 +86,36 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
 
   DO K = 2, l
      DO J = 2, m
-        S(1,J,K,2) = S(1,J-1,K,2) + DELJ(1,J,K)
-        S(1,J,K,3) = S(1,J,K-1,3) + DELK(1,J,K)
+        S(2,K,J,1) = S(2,K,J-1,1) + DELJ(K,J,1)
+        S(3,K,J,1) = S(3,K-1,J,1) + DELK(K,J,1)
      END DO
-     DO I = 2, n
-        S(I,1,K,1) = S(I-1,1,K,1) + DELI(I,1,K)
-        S(I,1,K,3) = S(I,1,K-1,3) + DELK(I,1,K)
+  end DO
+
+  DO I = 2, n
+     DO K = 2, l
+        S(1,K,1,I) = S(1,K,1,I-1) + DELI(K,1,I)
+        S(3,K,1,I) = S(3,K-1,1,I) + DELK(K,1,I)
      END DO
 
   END DO
 
-  DO J = 2, m
-     DO I = 2, n
-        S(I,J,1,1) = S(I-1,J,1,1) + DELI(I,J,1)
-        S(I,J,1,2) = S(I,J-1,1,2) + DELJ(I,J,1)
+  DO I = 2, n
+     DO J = 2, m
+        S(1,1,J,I) = S(1,1,J,I-1) + DELI(1,J,I)
+        S(2,1,J,I) = S(2,1,J-1,I) + DELJ(1,J,I)
      END DO
   END DO
 
   !     Traverse the block just once for all lines except those within
   !     the low-end faces.
 
-  DO K = 2, l
+  
+  DO I = 2, n
      DO J = 2, m
-        DO I = 2, n
-           S(I,J,K,1) = S(I-1,J,K,1) + DELI(I,J,K)
-           S(I,J,K,2) = S(I,J-1,K,2) + DELJ(I,J,K)
-           S(I,J,K,3) = S(I,J,K-1,3) + DELK(I,J,K)
+        DO K = 2, l
+           S(1,K,J,I) = S(1,K,J,I-1) + DELI(K,J,I)
+           S(2,K,J,I) = S(2,K,J-1,I) + DELJ(K,J,I)
+           S(3,K,J,I) = S(3,K-1,J,I) + DELK(K,J,I)
         END DO
      END DO
   END DO
@@ -120,36 +125,36 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
   !     distributions.  Then the standard normalization can be
   !     applied safely everywhere.
 
-  DO K = 1, l
-
+  DO J = 1, m
      !        Zero-length lines in the I direction?
 
-     DO J = 1, m
-        IF (S(n,J,K,1) == 0.0) THEN
+     DO K = 1, l
+        IF (S(1,K,J,n) == 0.0) THEN
            DO I = 2, n
-              S(I,J,K,1) = I - 1
+              S(1,K,J,I) = I - 1
            END DO
         END IF
      END DO
+  end DO
+!      !        Zero-length lines in the J direction?
 
-     !        Zero-length lines in the J direction?
-
-     DO I = 1, n
-        IF (S(I,m,K,2) == 0.0) THEN
+  DO I = 1, n
+     DO K = 1, l
+        IF (S(2,K,m,I) == 0.0) THEN
            DO J = 2, m
-              S(I,J,K,2) = J - 1
+              S(2,K,J,I) = J - 1
            END DO
         END IF
      END DO
   END DO
 
-  !     Zero-length lines in the K direction?
+!   !     Zero-length lines in the K direction?
 
-  DO J = 1, m
-     DO I = 1, n
-        IF (S(I,J,l,3) == 0.0) THEN
+  DO I = 1, n
+     DO J = 1, m
+        IF (S(3,l,J,I) == 0.0) THEN
            DO K = 2, l
-              S(I,J,K,3) = K - 1
+              S(3,K,J,I) = K - 1
            END DO
         END IF
      END DO
@@ -157,40 +162,43 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
 
   !     Normalize:
 
-  DO K = 1, l
+  DO I = 1, n
      DO J = 1, m
-        DO I = 1, n
-           S(I,J,K,1) = S(I,J,K,1) / S(n,J,K,1)
-           S(I,J,K,2) = S(I,J,K,2) / S(I,m,K,2)
-           S(I,J,K,3) = S(I,J,K,3) / S(I,J,l,3)
+        DO K = 1, l
+           S(1,K,J,I) = S(1,K,J,I) / S(1,K,J,N)
+           S(2,K,J,I) = S(2,K,J,I) / S(2,K,M,I)
+           S(3,K,J,I) = S(3,K,J,I) / S(3,L,J,I)
         END DO
      END DO
   END DO
 
   !     Finally, precise 1s for the three high-end faces:
 
-  DO K = 1, l
-     DO J = 1, m
-        S(n,J,K,1) = 1.0
+  DO J = 1, m
+     DO K = 1, l
+        S(1,K,J,n) = 1.0
      END DO
-     
-     DO I = 1, n
-        S(I,m,K,2) = 1.0
+  end DO
+
+  DO I = 1, n
+     DO K = 1, l
+        S(2,K,M,I) = 1.0
      END DO
   END DO
   
-  DO J = 1, m
-     DO I = 1, n
-        S(I,J,l,3) = 1.0
+  DO I = 1, n
+     DO J = 1, m
+        S(3,L,J,I) = 1.0
      END DO
   END DO
 
   ! Now get an average u,v,w
 
   ! Average u
+
   do j=1,m
      do k=1,l
-        u = u + S(:,j,k,1)
+        u = u + S(1,k,j,:)
      end do
   end do
   u = u/(l*m)
@@ -198,7 +206,7 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
   ! Average v
   do i=1,n
      do k=1,l
-        v = v + S(i,:,k,2)
+        v = v + S(2,k,:,i)
      end do
   end do
   v = v/(n*l)
@@ -206,7 +214,7 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
   ! Average w
   do i=1,n
      do j=1,m
-        w = w + S(i,j,:,3)
+        w = w + S(3,:,j,i)
      end do
   end do
   w = w/(n*m)

@@ -73,7 +73,9 @@ libspline_extras: $(EXTRAS_OBJ)
 libspline: $(SPLINE_OBJ) 
 	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(SPLINE_OBJ)
 	$(FC)  -shared $(SPLINE_OBJ) -o $(SPLINE_LIB_SHARED) 
-	f2py  --fcompiler=${COMPILER_NAME} --f90flags='${FFLAGS}' -c -m pyspline pyspline.pyf libspline.a libspline_extras.a ${USER_LIBS}
+	f2py   --fcompiler=${COMPILER_NAME} --f90flags='${FFLAGS}' -c -m pyspline pyspline.pyf libspline.a libspline_extras.a ${USER_LIBS}
 	python importTest.py
 	mv pyspline.so ../python	
 
+
+#	-DF2PY_REPORT_ON_ARRAY_COPY=1
