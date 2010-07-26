@@ -82,7 +82,7 @@ subroutine insertKnot(u,r,t,k,coef,nctl,ndim,t_new,coef_new,ileft)
      L = ileft-k+j+1
      do i=0,k-1-j-s
         alpha = (u-t(L+i))/(t(i+ileft+1)-t(L+i))
-        temp(i+1,:) = alpha*temp(:,i+2) + (1.0-alpha)*temp(:,i+1)
+        temp(:,i+1) = alpha*temp(:,i+2) + (1.0-alpha)*temp(:,i+1)
      end do
      coef_new(:,L) = temp(:,1)
      coef_new(:,ileft+r-j) = temp(:,k-j)
