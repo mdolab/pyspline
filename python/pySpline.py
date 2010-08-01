@@ -1659,6 +1659,33 @@ MUST be defined for task lms or interpolate'
             
         return
 
+    def getValueCorner(self,corner):
+        '''Get the value of the spline on corner 
+        Requred:
+            corner: corner index=0,1,2 or 3 
+        Returns:
+            value: Surface value on corner
+            '''
+        assert corner in range(0,8),'Error, getValueCorner: Corner must be in range 0->8'
+        if corner == 0:
+            return self.getValue(self.umin,self.vmin,self.wmin)
+        elif corner == 1:
+            return self.getValue(self.umax,self.vmin,self.wmin)
+        elif corner == 2:
+            return self.getValue(self.umin,self.vmax,self.wmin)
+        elif corner ==3:
+            return self.getValue(self.umax,self.vmax,self.wmin)
+        elif corner == 4:
+            return self.getValue(self.umin,self.vmin,self.wmax)
+        elif corner == 5:
+            return self.getValue(self.umax,self.vmin,self.wmax)
+        elif corner == 6:
+            return self.getValue(self.umin,self.vmax,self.wmax)
+        elif corner ==7:
+            return self.getValue(self.umax,self.vmax,self.wmax)
+
+
+
     def getOrigValueCorner(self,corner):
         '''Return the original value on corner corner'''
         assert corner in [0,1,2,3,4,5,6,7],'Error: corner must be 0 to 7'
@@ -1678,6 +1705,7 @@ MUST be defined for task lms or interpolate'
             return self.X[0,-1,-1]
         elif corner == 7:
             return self.X[-1,-1,-1]
+
 
     def getOrigValuesFace(self,face):
         '''Return an array of length 8*ndim which cooresponds to the
@@ -1746,6 +1774,54 @@ MUST be defined for task lms or interpolate'
                       0.5*(self.X[-1,-1,midw[0]] + self.X[-1,-1,midw[1]])]
         # end if
         return array(values)
+
+
+    def getMidPointEdge(self,edge):
+
+        if mod(self.Nu,2) == 1:
+            midu = [(self.Nu-1)/2,(self.Nu-1)/2]
+        else:
+            midu = [self.Nu/2,self.Nu/2-1]
+        # end if
+
+        if mod(self.Nv,2) == 1:
+            midv = [(self.Nv-1)/2,(self.Nv-1)/2]
+        else:
+            midv = [self.Nv/2,self.Nv/2-1]
+        # end if
+
+        if mod(self.Nw,2) == 1:
+            midw = [(self.Nw-1)/2,(self.Nw-1)/2]
+        else:
+            midw = [self.Nw/2,self.Nw/2-1]
+        # end if
+
+        if   edge == 0:
+            val = (self.X[midu[0],0,0] + self.X[midu[1],0,0])
+        elif edge == 1:
+            val = (self.X[midu[0],-1,0] + self.X[midu[1],-1,0])
+        elif edge == 2:
+            val = (self.X[0,midv[0],0] + self.X[0,midu[1],0])
+        elif edge == 3:
+            val = (self.X[-1,midv[0],0] + self.X[-1,midu[1],0])
+        elif edge == 4:
+            val = (self.X[midu[0],0,-1] + self.X[midu[1],0,-1])
+        elif edge == 5:
+            val = (self.X[midu[0],-1,-1] + self.X[midu[1],-1,-1])
+        elif edge == 6:
+            val = (self.X[0,midv[0],-1] + self.X[0,midu[1],-1])
+        elif edge == 7:
+            val = (self.X[-1,midv[0],-1] + self.X[-1,midu[1],-1])
+        elif edge == 8:
+            val = (self.X[0,0,midw[0]] + self.X[0,0,midw[1]])
+        elif edge == 9:
+            val = (self.X[-1,0,midw[0]] + self.X[-1,0,midw[1]])
+        elif edge == 10:
+            val = (self.X[0,-1,midw[0]] + self.X[0,-1,midw[1]])
+        elif edge == 11:
+            val = (self.X[-1,-1,midw[0]] + self.X[-1,-1,midw[1]])
+
+        return val
 
 
     def getMidPointFace(self,face):
@@ -1819,18 +1895,18 @@ original data for this surface or face is not in range 0->5'
     def _setEdgeCurves(self):
         '''Create edge spline objects for each edge'''
         self.edge_curves = [None,None,None,None,None,None,None,None,None,None,None,None]
-        self.edge_curves[0] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,0,0,:])
-        self.edge_curves[1] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,-1,0,:])
-        self.edge_curves[2] = curve('create',k=self.kv,t=self.tv,coef=self.coef[0,:,0,:])
-        self.edge_curves[3] = curve('create',k=self.kv,t=self.tv,coef=self.coef[-1,:,0,:])
-        self.edge_curves[4] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,0,-1,:])
-        self.edge_curves[5] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,-1,-1,:])
-        self.edge_curves[6] = curve('create',k=self.kv,t=self.tv,coef=self.coef[0,:,-1,:])
-        self.edge_curves[7] = curve('create',k=self.kv,t=self.tv,coef=self.coef[-1,:,-1,:])
-        self.edge_curves[8] = curve('create',k=self.kw,t=self.tw,coef=self.coef[0,0,:,:])
-        self.edge_curves[9] = curve('create',k=self.kw,t=self.tw,coef=self.coef[-1,0,:,:])
-        self.edge_curves[10] = curve('create',k=self.kw,t=self.tw,coef=self.coef[0,-1,:,:])
-        self.edge_curves[11] = curve('create',k=self.kw,t=self.tw,coef=self.coef[-1,-1,:,:])
+        self.edge_curves[0] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,0,0])
+        self.edge_curves[1] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,-1,0])
+        self.edge_curves[2] = curve('create',k=self.kv,t=self.tv,coef=self.coef[0,:,0])
+        self.edge_curves[3] = curve('create',k=self.kv,t=self.tv,coef=self.coef[-1,:,0])
+        self.edge_curves[4] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,0,-1])
+        self.edge_curves[5] = curve('create',k=self.ku,t=self.tu,coef=self.coef[:,-1,-1])
+        self.edge_curves[6] = curve('create',k=self.kv,t=self.tv,coef=self.coef[0,:,-1])
+        self.edge_curves[7] = curve('create',k=self.kv,t=self.tv,coef=self.coef[-1,:,-1])
+        self.edge_curves[8] = curve('create',k=self.kw,t=self.tw,coef=self.coef[0,0,:])
+        self.edge_curves[9] = curve('create',k=self.kw,t=self.tw,coef=self.coef[-1,0,:])
+        self.edge_curves[10] = curve('create',k=self.kw,t=self.tw,coef=self.coef[0,-1,:])
+        self.edge_curves[11] = curve('create',k=self.kw,t=self.tw,coef=self.coef[-1,-1,:])
         return 
 
     def _getBasisPt(self,u,v,w,vals,istart,col_ind,l_index):
@@ -1866,6 +1942,51 @@ original data for this surface or face is not in range 0->5'
         vals = pyspline.eval_volume(u,v,w,self.tu,self.tv,self.tw,
                                     self.ku,self.kv,self.kw,self.coef.T)
         return vals.squeeze().T
+
+    def getValueEdge(self,edge,s):
+        '''Get the value at the volume points(s) u,v,w
+        Required Arguments:
+            u,v,w: u,w and w can be a scalar,vector or matrix of values
+        Returns:
+           values: An array of size (shape(u), nDim)
+           '''
+        if edge == 0:
+            u = s; v=0; w=0
+        elif edge == 1:
+            u = s; v=1; w=0
+        elif edge == 2:
+            u = 0; v=s; w=0
+        elif edge == 3:
+            u = 1; v=s; w=0
+        elif edge == 4:
+            u = s; v=0; w=1
+        elif edge == 5:
+            u = s; v=1; w=1
+        elif edge == 6:
+            u = 0; v=s; w=1
+        elif edge == 7:
+            u = 1; v=s; w=1
+        elif edge == 8:
+            u = 0; v=0; w=s
+        elif edge == 9:
+            u = 1; v=0; w=s
+        elif edge == 10:
+            u = 0; v=1; w=s
+        elif edge == 11:
+            u = 1; v=1; w=s
+
+            
+
+        u = atleast_3d(u).T
+        v = atleast_3d(v).T
+        w = atleast_3d(w).T
+
+        assert u.shape == v.shape == w.shape,'Error, getValue: u and v must have the same shape'
+
+        vals = pyspline.eval_volume(u,v,w,self.tu,self.tv,self.tw,
+                                    self.ku,self.kv,self.kw,self.coef.T)
+        return vals.squeeze().T
+
 
     def getBounds(self):
         '''Determine the extents of the volume
