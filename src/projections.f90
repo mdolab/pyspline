@@ -1124,6 +1124,8 @@ end subroutine solve_3by3
 
 subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
 
+  ! Check a line against multiple planes
+
   implicit none 
   ! Input
   integer, intent(in) :: n
@@ -1160,6 +1162,53 @@ subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
      end if
   end do
 end subroutine line_plane
+
+
+subroutine plane_line(ia,vc,p0,v1,v2,n,sol,n_sol)
+
+  ! Check a plane against multiple lines
+
+  implicit none 
+  ! Input
+  integer, intent(in) :: n
+  double precision , intent(in) :: ia(3,n),vc(3,n),p0(3),v1(3),v2(3)
+
+  ! Output
+  integer, intent(out) :: n_sol
+  double precision, intent(out) :: sol(6,n)
+
+  ! Worling 
+  integer :: i,ind(n)
+  double precision :: A(3,3),rhs(3),x(3),norm
+
+  n_sol = 0
+  sol(:,:) = 0.0
+  A(:,2) = v1(:)
+  A(:,3) = v2(:)
+  
+  do i=1,n
+  
+     A(:,1) = -vc(:,i)
+     rhs = ia(:,i)-p0(:)
+     
+     call solve_3by3(A,rhs,x)
+     
+     if (x(1) .ge. 0.00 .and. x(1) .le. 1.00 .and. &
+         x(2) .ge. 0.00 .and. x(2) .le. 1.00 .and. &
+         x(3) .ge. 0.00 .and. x(3) .le. 1.00 .and. &
+         x(2)+x(3) .le. 1.00) then
+
+        n_sol = n_sol + 1
+        sol(1:3,n_sol) = x  ! t,u,v parametric locations
+        sol(4:6,n_sol) = ia(:,i) + x(1)*vc(:,i) ! Actual point value
+        ind(n_sol) = i
+
+     end if
+  end do
+end subroutine plane_line
+
+
+
   
 subroutine point_plane(pt,p0,v1,v2,n,sol,n_sol,best_sol)
 
