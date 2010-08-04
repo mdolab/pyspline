@@ -1801,17 +1801,17 @@ MUST be defined for task lms or interpolate'
         elif edge == 1:
             val = (self.X[midu[0],-1,0] + self.X[midu[1],-1,0])
         elif edge == 2:
-            val = (self.X[0,midv[0],0] + self.X[0,midu[1],0])
+            val = (self.X[0,midv[0],0] + self.X[0,midv[1],0])
         elif edge == 3:
-            val = (self.X[-1,midv[0],0] + self.X[-1,midu[1],0])
+            val = (self.X[-1,midv[0],0] + self.X[-1,midv[1],0])
         elif edge == 4:
             val = (self.X[midu[0],0,-1] + self.X[midu[1],0,-1])
         elif edge == 5:
             val = (self.X[midu[0],-1,-1] + self.X[midu[1],-1,-1])
         elif edge == 6:
-            val = (self.X[0,midv[0],-1] + self.X[0,midu[1],-1])
+            val = (self.X[0,midv[0],-1] + self.X[0,midv[1],-1])
         elif edge == 7:
-            val = (self.X[-1,midv[0],-1] + self.X[-1,midu[1],-1])
+            val = (self.X[-1,midv[0],-1] + self.X[-1,midv[1],-1])
         elif edge == 8:
             val = (self.X[0,0,midw[0]] + self.X[0,0,midw[1]])
         elif edge == 9:
@@ -2253,8 +2253,8 @@ def bilinear_surface(*args,**kwargs):
         # Assume 4 arguments
         coef = zeros([2,2,3])
         coef[0,0] = args[0]
-        coef[0,1] = args[1]
-        coef[1,0] = args[3]
+        coef[1,0] = args[1]
+        coef[0,1] = args[3]
         coef[1,1] = args[2]
         return surface(coef=coef,tu=[0,0,1,1],tv=[0,0,1,1],ku=2,kv=2)
     # end if
