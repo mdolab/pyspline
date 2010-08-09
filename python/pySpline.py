@@ -369,7 +369,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             # end for
             return
         # end if
-        print 'poly'
+
         length = pyspline.poly_length(self.X.T)
         for iter in xrange(niter):
             su = self.s[su_select]
