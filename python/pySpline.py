@@ -26,17 +26,25 @@ import os, sys, string, time, copy, pdb
 # =============================================================================
 # External Python modules
 # =============================================================================
+import numpy
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
     ones,vstack,real,where,arange,append,hstack,mgrid,atleast_1d,atleast_2d,\
     atleast_3d,rank,asarray
 from numpy.linalg import norm
 
 import scipy
-from scipy import sparse,io
-try:
-    from scipy.sparse.linalg.dsolve import factorized # Version 0.8 of scipy
+from scipy import sparse
+# Code to eliminate the use of SCIPY factorized
+try: 
+    if scipy.version.version[2] >= 7: # verion is string of type '#.#.#'
+        from scipy.sparse.linalg.dsolve import factorized # Version 0.8 of scipy
+    else:
+        from scipy.linsolve import factorized
+    # end if
+    USE_SPARSE_SOLVE = True
 except:
-    from scipy.linsolve import factorized
+    USE_SPARSE_SOLVE = False
+# end try
 
 # =============================================================================
 # Custom Python modules
@@ -363,10 +371,17 @@ Nctl=<number of control points> must be specified for a LMS fit'
         pyspline.curve_jacobian_wrap(su,sdu,self.t,self.k,self.Nctl,N_vals,N_row_ptr,N_col_ind)
         N = sparse.csr_matrix((N_vals,N_col_ind,N_row_ptr),[nu+ndu,self.Nctl])
         if self.interp:
-            solve = factorized( N ) # Factorize once for efficiency
-            for idim in xrange(self.nDim):
-                self.coef[:,idim] = solve(S[:,idim])
-            # end for
+            if USE_SPARSE_SOLVE:
+                solve = factorized( N ) # Factorize once for efficiency
+                for idim in xrange(self.nDim):
+                    self.coef[:,idim] = solve(S[:,idim])
+                # end for
+            else:
+                Ndense = N.todense()
+                for idim in xrange(self.nDim):
+                    self.coef[:,idim] = numpy.linalg.solve(Ndense,S[:,idim])
+                # end for
+            # end if
             return
         # end if
 
@@ -383,10 +398,19 @@ Nctl=<number of control points> must be specified for a LMS fit'
             NTWN = N.transpose()*W*N # We need this either way
 
             if nc + ndc == 0: # We are doing LMS but no constraints...just a straight weighted LMS
-                solve = factorized( NTWN ) # Factorize once for efficiency
-                for idim in xrange(self.nDim):
-                    self.coef[:,idim] = solve(N.transpose()*W*S[:,idim])
-                # end for
+
+                if USE_SPARSE_SOLVE:
+                    solve = factorized( NTWN ) # Factorize once for efficiency
+                    for idim in xrange(self.nDim):
+                        self.coef[:,idim] = solve(N.transpose()*W*S[:,idim])
+                    # end for
+                else:
+                    NTWNdense = NTWN.todense()
+                    for idim in xrange(self.nDim):
+                        self.coef[:,dim] = numpy.linalg.solve(NTWNdense,N.transpose()*W*S[:,idim])
+                    # end for
+                # end if
+
             else:  # Now its more complicated since we have constraints
                 M_vals = zeros((nc+ndc)*self.k)          #|
                 M_row_ptr = zeros(nc+ndc+1,'intc')       #| -> Standard CSR formulation
@@ -405,11 +429,21 @@ Nctl=<number of control points> must be specified for a LMS fit'
                     M.data,M.indptr,M.indices,self.Nctl)
                 # Create sparse csr matrix and factorize
                 J = sparse.csr_matrix((j_val,j_col_ind,j_row_ptr),[self.Nctl+nc+ndc,self.Nctl+nc+ndc])
-                solve = factorized( J )
-                for idim in xrange(self.nDim):
-                    rhs = hstack((N.transpose()*W*S[:,idim],T[:,idim]))
-                    self.coef[:,idim] = solve(rhs)[0:self.Nctl]
-                # end for
+
+                if USE_SPARSE_SOLVE:
+                    solve = factorized( J ) # Factorize once for efficiency
+                    for idim in xrange(self.nDim):
+                        rhs = hstack((N.transpose()*W*S[:,idim],T[:,idim]))
+                        self.coef[:,idim] = solve(rhs)[0:self.Nctl]
+                    # end for
+                else:
+                    Jdense = J.todense()
+                    for idim in xrange(self.nDim):
+                        rhs = hstack((N.transpose()*W*S[:,idim],T[:,idim]))
+                        self.coef[:,dim] = numpy.linalg.solve(Jdense,rhs)[0:self.Nctl]
+                    # end for
+                # end if
+                
             # end if (constr - not constrained
 
             # Run para correction
@@ -880,16 +914,31 @@ MUST be defined for task lms or interpolate'
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
                              [self.Nu*self.Nv,self.Nctlu*self.Nctlv])
         if self.interp:
-            solve = factorized( N )
-            for idim in xrange(self.nDim):
-                self.coef[:,:,idim] =  solve(self.X[:,:,idim].flatten()).reshape([self.Nctlu,self.Nctlv])
-            # end for
+            if USE_SPARSE_SOLVE:
+                solve = factorized( N ) # Factorize once for efficiency
+                for idim in xrange(self.nDim):
+                    self.coef[:,:,idim] =  solve(self.X[:,:,idim].flatten()).reshape([self.Nctlu,self.Nctlv])
+                # end for
+            else:
+                Ndense = N.todense()
+                for idim in xrange(self.nDim):
+                    self.coef[:,:,dim] = numpy.linalg.solve(Ndense,self.X[:,:,idim].flatten()).reshape([self.Nctlu,self.Nctlv])
+                # end for
+            # end if
         else:
-            solve = factorized (N.transpose()*N)
-            for idim in xrange(self.nDim):
-                rhs  = N.transpose()*self.X[:,:,idim].flatten()
-                self.coef[:,:,idim] = solve(rhs).reshape([self.Nctlu,self.Nctlv])
-            # end for
+            if USE_SPARSE_SOLVE:
+                solve = factorized (N.transpose()*N)
+                for idim in xrange(self.nDim):
+                    rhs  = N.transpose()*self.X[:,:,idim].flatten()
+                    self.coef[:,:,idim] = solve(rhs).reshape([self.Nctlu,self.Nctlv])
+                # end for
+            else:
+                NTNdense = (N.transpose()*N).todense()
+                for idim in xrange(self.nDim):
+                    rhs = N.transpose()*self.X[:,:,idim].flatten()
+                    self.ceof[:,:,idim] = numpy.linalg.solve(NTNdense,rhs).reshape([self.Nctlu,self.Nctlv])
+                # end for
+            # end if
         # end if
         self._setEdgeCurves()
 
@@ -1603,27 +1652,42 @@ MUST be defined for task lms or interpolate'
              None
              '''
         self._setCoefSize()
-        print 'jac'
+
         vals,row_ptr,col_ind = pyspline.volume_jacobian_wrap(\
             self.U,self.V,self.W,self.tu,self.tv,self.tw,self.ku,self.kv,self.kw,\
                 self.Nctlu,self.Nctlv,self.Nctlw)
         
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
                               [self.Nu*self.Nv*self.Nw,self.Nctlu*self.Nctlv*self.Nctlw])
-     
+
         if self.interp:
-            solve = factorized( N )
-            for idim in xrange(self.nDim):
-                self.coef[:,:,:,idim] =  solve(self.X[:,:,:,idim].flatten()).reshape([self.Nctlu,self.Nctlv,self.Nctlw])
-            # end for
-            
+            if USE_SPARSE_SOLVE:
+                solve = factorized( N ) # Factorize once for efficiency
+                for idim in xrange(self.nDim):
+                    self.coef[:,:,:,idim] =  solve(self.X[:,:,:,idim].flatten()).reshape([self.Nctlu,self.Nctlv,self.Nctlw])
+                # end for
+            else:
+                Ndense = N.todense()
+                for idim in xrange(self.nDim):
+                    self.coef[:,:,:,dim] = numpy.linalg.solve(Ndense,self.X[:,:,:,idim].flatten()).reshape([self.Nctlu,self.Nctlv,self.Nctlw])
+                # end for
+            # end if
         else:
-            solve = factorized (N.transpose()*N)
-            for idim in xrange(self.nDim):
-                rhs  = N.transpose()*self.X[:,:,:,idim].flatten()
-                self.coef[:,:,:,idim] = solve(rhs).reshape([self.Nctlu,self.Nctlv,self.Nctlw])
-            # end for
+            if USE_SPARSE_SOLVE:
+                solve = factorized (N.transpose()*N)
+                for idim in xrange(self.nDim):
+                    rhs  = N.transpose()*self.X[:,:,:,idim].flatten()
+                    self.coef[:,:,:,idim] = solve(rhs).reshape([self.Nctlu,self.Nctlv,self.Nctlw])
+                # end for
+            else:
+                NTNdense = (N.transpose()*N).todense()
+                for idim in xrange(self.nDim):
+                    rhs = N.transpose()*self.X[:,:,idim].flatten()
+                    self.ceof[:,:,:,idim] = numpy.linalg.solve(NTNdense,rhs).reshape([self.Nctlu,self.Nctlv.self.Nctlw])
+                # end for
+            # end if
         # end if
+     
         self._setFaceSurfaces()
         self._setEdgeCurves()
         return
