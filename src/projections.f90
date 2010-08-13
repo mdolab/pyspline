@@ -553,7 +553,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
         
         ! -- W Bounds Checking --
         if (w0(ipt)+delta(3) < tw(1)) then
-           delta(d) = tw(1)-w0(ipt)
+           delta(3) = tw(1)-w0(ipt)
         end if
 
         if (w0(ipt)+delta(3) > tw(nctlw+kw)) then
