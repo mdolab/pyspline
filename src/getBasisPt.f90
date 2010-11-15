@@ -105,6 +105,7 @@ subroutine getBasisPtVolume(u,v,w,tu,tv,tw,ku,kv,kw,vals,col_ind,istart,l_index,
         do kk = 1,kw
            ! Get the local row/col for this surface
            start = istart + counter + 1
+           
            col_ind(start) = l_index(ileftw-kw+kk,ileftv-kv+jj,ileftu-ku+ii)
 
            vals(start) = basisu(ii)*basisv(jj)*basisw(kk)

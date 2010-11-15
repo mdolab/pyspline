@@ -29,7 +29,7 @@ import os, sys, string, time, copy, pdb
 import numpy
 from numpy import linspace,cos,pi,zeros,sqrt,array,reshape,meshgrid,mod,floor,\
     ones,vstack,real,where,arange,append,hstack,mgrid,atleast_1d,atleast_2d,\
-    atleast_3d,rank,asarray
+    atleast_3d,rank,asarray,dtype
 from numpy.linalg import norm
 
 import scipy
@@ -598,8 +598,13 @@ Nctl=<number of control points> must be specified for a LMS fit'
            values: An array of shape(len(s),nDim)) if s is an array
                    or array of len(nDim) if nDim == 1
                    '''
+     
         s = array(s).T
-        vals = pyspline.eval_curve(atleast_1d(s),self.t,self.k,self.coef.T)
+        if self.coef.dtype == dtype('d'):
+            vals = pyspline.eval_curve(atleast_1d(s),self.t,self.k,self.coef.T)
+        else:
+            vals = pyspline.eval_curve_c(atleast_1d(s),self.t,self.k,self.coef.T)
+        # end if
 
         return vals.squeeze().T
         
@@ -1584,7 +1589,7 @@ MUST be defined for task lms or interpolate'
             self.kv = checkInput(kwargs['kv'],'kv',int,0)
             self.kw = checkInput(kwargs['kw'],'kw',int,0)
 
-            if 'Nctlu' in kwargs and 'Nctlv' in kwargs:
+            if 'Nctlu' in kwargs and 'Nctlv' in kwargs and 'Nctlw' in kwargs:
                 self.Nctlu = checkInput(kwargs['Nctlu'],'Nctlu',int,0)
                 self.Nctlv = checkInput(kwargs['Nctlv'],'Nctlv',int,0)
                 self.Nctlw = checkInput(kwargs['Nctlw'],'Nctlw',int,0)
@@ -1598,6 +1603,7 @@ MUST be defined for task lms or interpolate'
                 
             self.orig_data = True
 
+
             # Sanity Check on Inputs
             if self.Nctlu >= self.Nu:  self.Nctlu = self.Nu
             if self.Nctlv >= self.Nv:  self.Nctlv = self.Nv
@@ -1610,6 +1616,8 @@ MUST be defined for task lms or interpolate'
             if self.Nctlu < self.ku: self.ku = self.Nctlu
             if self.Nctlv < self.kv: self.kv = self.Nctlv
             if self.Nctlw < self.kv: self.kv = self.Nctlw
+
+          
 
             if 'niter' in kwargs:
                 self.niter = kwargs['niter']

@@ -143,7 +143,7 @@ subroutine eval_curve_deriv2(s,t,k,coef,nctl,ndim,val)
 end subroutine eval_curve_deriv2
 
 
-subroutine eval_curve_c(s,t,k,coef,nctl,ndim,val)
+subroutine eval_curve_c(s,t,k,coef,nctl,ndim,n,val)
 
   !***DESCRIPTION
   !
@@ -166,45 +166,42 @@ subroutine eval_curve_c(s,t,k,coef,nctl,ndim,val)
   !     val     - Real, Evaluated point, size ndim
   implicit none
   ! Input
-  integer         , intent(in)          :: k,nctl,ndim
-  double precision, intent(in)          :: s
+  integer         , intent(in)          :: k,nctl,ndim,n
+  double precision, intent(in)          :: s(n)
   double precision, intent(in)          :: t(nctl+k)
   complex*16      , intent(in)          :: coef(ndim,nctl)
 
   ! Output
-  complex*16      , intent(out)         :: val(ndim)
+  complex*16      , intent(out)         :: val(ndim,n)
 
   ! Working
-  integer                               :: idim,ilow,ileft,mflag,iwork,i,ilo
-  double precision                      :: work(3*k),temp_val,temp_deriv
+  integer                               :: ii,l,istart,ileft,idim,ilo,mflag
+  double precision                      :: work(3*k)
   double precision                      :: basisu(k)
 
   ! Functions
   double precision bvalu
 
   
+ 
+  val(:,:) = 0.0
   ilo = 1
-
-  do idim=1,ndim
-     call intrv(t,nctl+k,s,ilo,ileft,mflag)
-     if (mflag == 0) then
-        call basis(t,nctl,k,s,ileft,basisu)
-     else if (mflag == 1) then
-        ileft = nctl
-        basisu(:) = 0.0
-        basisu(k) = 1.0
+  do ii=1,n
+     call intrv(t,nctl+k,s(ii),ilo,ileft,mflag)
+     if (mflag == 1) then
+        ileft = ileft-k
      end if
 
-     ! Get the value...we can use the ileft computed above
-     temp_val = bvalu(t,real(coef(idim,:)),nctl,k,0,s,ileft,work)
-     ! Now get the derivative
-     temp_deriv = 0.0
-     do i=1,k
-        temp_deriv = temp_deriv + basisu(i)*aimag(coef(idim,ileft-k+i))
+     call basis(t,nctl,k,s(ii),ileft,basisu)
+
+     istart = ileft - k
+     do l=1,k
+        do idim=1,ndim
+           val(idim,ii) = val(idim,ii) + &
+                cmplx(basisu(l)*real(coef(idim,istart+l)),&
+                      basisu(l)*aimag(coef(idim,istart+l)))
+
+        end do
      end do
-
-     val(idim) = cmplx(temp_val,temp_deriv)
-
   end do
-  
 end subroutine eval_curve_c

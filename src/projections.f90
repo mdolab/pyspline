@@ -500,6 +500,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
      iteration_loop: do i=1,niter
         ! Check the convergence criteria
         if (norm(Diff(:,ipt),ndim) <= eps1) then
+           
            exit iteration_loop
         end if
 
@@ -588,6 +589,8 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
   if (brute_force .eqv. .true.) then
      deallocate(volume_vals)
   end if
+
+ 
 end subroutine point_volume
 
 subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Diff)
