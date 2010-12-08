@@ -263,9 +263,12 @@ end subroutine curve_para_corr
 function norm(X,n)
   ! Compute the L2 nomr of X
   implicit none
-  double precision       :: X(n)
-  double precision       :: norm
-  integer                :: i,n
+  integer, intent(in) :: n
+  double precision,intent(in) :: X(n)
+
+  double precision :: norm
+
+  integer            :: i
   norm = 0.0
   do i=1,n
      norm = norm + X(i)**2

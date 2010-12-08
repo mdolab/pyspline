@@ -1524,9 +1524,9 @@ class volume(object):
             self.Nctlv = self.coef.shape[1]
             self.Nctlw = self.coef.shape[2]
             self.nDim  = self.coef.shape[3]
-            self.tu = checkInput(kwargs['tu'],float,1,self.Nctlu+self.ku)
-            self.tv = checkInput(kwargs['tv'],float,1,self.Nctlv+self.kv)
-            self.tw = checkInput(kwargs['tw'],float,1,self.Nctlw+self.kw)
+            self.tu = checkInput(kwargs['tu'],'tu',float,1,self.Nctlu+self.ku)
+            self.tv = checkInput(kwargs['tv'],'tv',float,1,self.Nctlv+self.kv)
+            self.tw = checkInput(kwargs['tw'],'tw',float,1,self.Nctlw+self.kw)
 
             self.umin = self.tu[0]
             self.umax = self.tu[-1]
@@ -2258,8 +2258,8 @@ def trilinear_volume(*args,**kwargs):
     if len(args) == 1:
         return volume(coef=args[0],tu=tu,tv=tv,tw=tw,ku=ku,kv=kv,kw=kw)
     elif len(args) == 2:
-        xmin = args[0]
-        xmax = args[1]
+        xmin = array(args[0]).astype('d')
+        xmax = array(args[1]).astype('d')
 
         x_low  = xmin[0]
         x_high = xmax[0]
@@ -2277,6 +2277,7 @@ def trilinear_volume(*args,**kwargs):
         coef[1,0,1,:] = [x_high,y_low,z_high]
         coef[0,1,1,:] = [x_low,y_high,z_high]
         coef[1,1,1,:] = [x_high,y_high,z_high]
+
         return volume(coef=coef,tu=tu,tv=tv,tw=tw,ku=ku,kv=kv,kw=kw)
     else:
         mpiPrint('Error: An unknown number of arguments was passed to trilinear\
