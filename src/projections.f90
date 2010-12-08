@@ -45,9 +45,9 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
   logical                               :: brute_force
   ! Alloctable
   double precision,allocatable          :: curve_vals(:,:),ss(:)
-
+  double precision :: c1
   ! Functions
-  double precision                      :: norm
+  double precision                      :: norm,ndp
 
   ! Initialization
   n_sub=1  ! Is 3  Good Here?? Huristic!
@@ -122,7 +122,8 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
                exit iteration_loop
         end if
 
-        if (  norm(dot_product(deriv,Diff(:,ipt)),ndim)/ (norm(deriv,ndim)*norm(Diff(:,ipt),ndim)) <= eps2) then
+        c1 = ndp(deriv,Diff(:,ipt),ndim)/(norm(deriv,ndim)*norm(Diff(:,ipt),ndim))
+        if (c1 <= eps2) then
            exit iteration_loop
         end if
 
@@ -459,9 +460,9 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
 
   ! Alloctable
   double precision,allocatable          :: volume_vals(:,:)
-
+  double precision :: c1,c2,c3
   ! Functions     
-  double precision                      :: norm
+  double precision                      :: norm,dotproduct,ndp
 
   max_inner_iter = 20
   n_sub = 3
@@ -504,9 +505,11 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
            exit iteration_loop
         end if
 
-        if (norm(dot_product(deriv(:,1),Diff(:,ipt)),ndim)/(norm(deriv(:,1),ndim)*norm(Diff(:,ipt),ndim)) <= eps2 .and. &
-             norm(dot_product(deriv(:,2),Diff(:,ipt)),ndim)/(norm(deriv(:,2),ndim)*norm(Diff(:,ipt),ndim))<= eps2 .and. & 
-             norm(dot_product(deriv(:,3),Diff(:,ipt)),ndim)/(norm(deriv(:,3),ndim)*norm(Diff(:,ipt),ndim))<= eps2) then
+        c1 = ndp(deriv(:,1),diff(:,ipt),ndim)/(norm(deriv(:,1),ndim)*norm(Diff(:,ipt),ndim))
+        c2 = ndp(deriv(:,2),diff(:,ipt),ndim)/(norm(deriv(:,2),ndim)*norm(Diff(:,ipt),ndim))
+        c3 = ndp(deriv(:,3),diff(:,ipt),ndim)/(norm(deriv(:,3),ndim)*norm(Diff(:,ipt),ndim))
+ 
+        if (c1 <= eps2 .and. c2 <= eps2 .and. c3 <=eps2) then
            exit iteration_loop
         end if
         u0(ipt) = u(ipt)
@@ -518,24 +521,24 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
 
         Diff(:,ipt) = val-x0(:,ipt)
 
-        A(1,1) = norm(deriv(:,1),ndim)**2 + dot_product(Diff(:,ipt),deriv2(:,1,1))
-        A(1,2) = dot_product(deriv(:,1),deriv(:,2)) + dot_product(Diff(:,ipt),deriv2(:,1,2))
-        A(1,3) = dot_product(deriv(:,1),deriv(:,3)) + dot_product(Diff(:,ipt),deriv2(:,1,3))
-        A(2,2) = norm(deriv(:,2),ndim)**2 + dot_product(Diff(:,ipt),deriv2(:,2,2))
-        A(2,3) = dot_product(deriv(:,2),deriv(:,3)) + dot_product(Diff(:,ipt),deriv2(:,2,3))
-        A(3,3) = norm(deriv(:,3),ndim)**2 + dot_product(Diff(:,ipt),deriv2(:,3,3))
+        A(1,1) = norm(deriv(:,1),ndim)**2 + dotproduct(Diff(:,ipt),deriv2(:,1,1),3)
+        A(1,2) = dotproduct(deriv(:,1),deriv(:,2),3) + dotproduct(Diff(:,ipt),deriv2(:,1,2),3)
+        A(1,3) = dotproduct(deriv(:,1),deriv(:,3),3) + dotproduct(Diff(:,ipt),deriv2(:,1,3),3)
+        A(2,2) = norm(deriv(:,2),ndim)**2 + dotproduct(Diff(:,ipt),deriv2(:,2,2),3)
+        A(2,3) = dotproduct(deriv(:,2),deriv(:,3),3) + dotproduct(Diff(:,ipt),deriv2(:,2,3),3)
+        A(3,3) = norm(deriv(:,3),ndim)**2 + dotproduct(Diff(:,ipt),deriv2(:,3,3),3)
         A(2,1) = A(1,2)
         A(3,1) = A(1,3)
         A(3,2) = A(2,3)
 
-        ki(1) = -dot_product(Diff(:,ipt),deriv(:,1))
-        ki(2) = -dot_product(Diff(:,ipt),deriv(:,2))
-        ki(3) = -dot_product(Diff(:,ipt),deriv(:,3))
-
+        ki(1) = -dotproduct(Diff(:,ipt),deriv(:,1),3)
+        ki(2) = -dotproduct(Diff(:,ipt),deriv(:,2),3)
+        ki(3) = -dotproduct(Diff(:,ipt),deriv(:,3),3)
+      
         call solve_3by3(A,ki,delta)
 
         ! -- U Bounds Checking --
-        if (u0(ipt)+delta(1) < tu(1)) then
+        if (u0(ipt)+delta(1)  < tu(1)) then
            delta(1) = tu(1)-u0(ipt)
         end if
 
@@ -1097,7 +1100,8 @@ end subroutine curve_surface
 
 subroutine solve_2by2(A,b,x)
   ! Solve a 2 x 2 system  -- With NO checking
-  double precision         :: A(2,2),b(2),x(2)
+  double precision, intent(in) :: A(2,2),b(2)
+  double precision, intent(out) :: x(2)
   double precision         :: idet
 
   idet = 1/(A(1,1)*A(2,2)-A(1,2)*A(2,1))
@@ -1108,7 +1112,8 @@ end subroutine solve_2by2
 
 subroutine solve_3by3(A,b,x)
   ! Solve a 3 x 3 system  -- With NO checking
-  double precision         :: A(3,3),b(3),x(3)
+  double precision,intent(in) :: A(3,3),b(3)
+  double precision,intent(out) :: x(3)
   double precision         :: idet
 
   idet = 1/(A(1,1)*(A(3,3)*A(2,2)-A(3,2)*A(2,3))-A(2,1)*(A(3,3)*A(1,2)-A(3,2)*A(1,3))+A(3,1)*(A(2,3)*A(1,2)-A(2,2)*A(1,3)))
@@ -1266,4 +1271,33 @@ subroutine point_plane(pt,p0,v1,v2,n,sol,n_sol,best_sol)
   end do
 end subroutine point_plane
      
+  
+function dotproduct(x1,x2,n)
+  implicit none
+  double precision,intent(in) :: x1(n),x2(n)
+  integer,intent(in) :: n
+  integer :: i
+
+  double precision ::  dotproduct 
+  dotproduct = 0.0
+  do i=1,n
+     dotproduct = dotproduct + x1(i)*x2(i)
+  end do
+
+end function dotproduct
+  
+function ndp(x1,x2,n)
+  ! Compute norm of the dot_product
+  implicit none
+  double precision,intent(in) :: x1(n),x2(n)
+  integer,intent(in) :: n
+  integer :: i
+
+  double precision ::  ndp
+  ndp = 0.0
+  do i=1,n
+     ndp = ndp + (x1(i)*x2(i))**2
+  end do
+  ndp = sqrt(ndp)
+end function ndp
   

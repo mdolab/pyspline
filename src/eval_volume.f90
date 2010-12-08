@@ -179,7 +179,7 @@ subroutine eval_volume_deriv2(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndi
   !     Ouput 
   !     val     - Real, Evaluated point, size ndim
   
-  
+  implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim
   double precision, intent(in)          :: u,v,w
@@ -221,7 +221,7 @@ subroutine eval_volume_deriv2(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndi
      if (kw>=3) then
         val(idim,3,3) = b3val(w,v,u,2,0,0,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
      else
-        val(idm,3,3) = 0.0
+        val(idim,3,3) = 0.0
      end if
   end do
   
