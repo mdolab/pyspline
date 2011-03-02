@@ -440,7 +440,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                     Jdense = J.todense()
                     for idim in xrange(self.nDim):
                         rhs = hstack((N.transpose()*W*S[:,idim],T[:,idim]))
-                        self.coef[:,dim] = numpy.linalg.solve(Jdense,rhs)[0:self.Nctl]
+                        self.coef[:,idim] = numpy.linalg.solve(Jdense,rhs)[0:self.Nctl]
                     # end for
                 # end if
                 
