@@ -814,6 +814,7 @@ class surface(object):
             self.nDim = self.coef.shape[2]
             self.orig_data = False
             self._setEdgeCurves()
+            self.interp =  False
             return
         else: # We have LMS/Interpolate
             # Do some checking on the number of control points
@@ -2109,19 +2110,19 @@ original data for this surface or face is not in range 0->5'
         if 'u' in kwargs:
             u = array([kwargs['u']])
         else:
-            u = 0.5*ones(len(x0))
+            u = -1*ones(len(x0))
         # end if
 
         if 'v' in kwargs:
             v = array([kwargs['u']])
         else:
-            v = 0.5*ones(len(x0))
+            v = -1*ones(len(x0))
         # end if
 
         if 'w' in kwargs:
             w = array([kwargs['u']])
         else:
-            w = 0.5*ones(len(x0))
+            w = -1*ones(len(x0))
         # end if
 
         u,v,w,D = pyspline.point_volume(x0.T,self.tu,self.tv,self.tw,

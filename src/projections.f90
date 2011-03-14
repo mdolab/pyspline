@@ -217,7 +217,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
   integer                               :: i,j,ii,jj,counter,ipt,max_inner_iter
   double precision                      :: D,D0,u0(N),v0(N),delta(2),D2(ndim)
   double precision                      :: A(2,2),ki(2)
-  integer                               :: n_sub_u,n_sub_v  ! Huristic Value
+  integer                               :: n_sub_u,n_sub_v,n_sub_w  ! Huristic Value
   integer                               :: istart,nuu,nvv
 
   ! Alloctable
@@ -239,7 +239,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
      n_sub_v = 2
   end if
 
-  brute_force = .false.
+  brute_force = .True.
   ! First we will evaluate the surface at n points inside each knot span in each direction
 
   !if we are given a bad guess do the brute force
@@ -254,7 +254,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
      nuu = nctlu-ku+2 + (nctlu-ku+1)*n_sub_u
      nvv = nctlv-kv+2 + (nctlv-kv+1)*n_sub_v
      allocate (uu(nuu),vv(nvv))
-
+ 
      counter = 1
      do i=1,nctlu-ku+1
         if (i==1) then
@@ -295,7 +295,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
 
      do ipt=1,N
         if (u(ipt) < 0 .or. u(ipt) > 1 .or. v(ipt) < 0 .or. v(ipt) > 1) then
-           val0 = surface_vals(1,1,:)
+           val0 = surface_vals(:,1,1)
            D0 = norm(val0-x0(ipt,:),ndim)
            u0(ipt) = uu(1)
            v0(ipt) = vv(1)
@@ -451,22 +451,46 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
   double precision                      :: val(ndim)
   double precision                      :: deriv(ndim,3)
   double precision                      :: deriv2(ndim,3,3)
-  double precision                      :: val0(ndim),uu,vv
+  double precision                      :: val0(ndim)
   logical                               :: brute_force
-  integer                               :: i,j,ii,jj,counter,ipt,max_inner_iter
+  integer                               :: i,j,k,ii,jj,kk,counter,ipt,max_inner_iter
   double precision                      :: D,D0,u0(N),v0(N),w0(N),delta(3),D2(ndim)
   double precision                      :: A(3,3),ki(3)
-  integer                               :: n_sub ! Huristic Value
+  integer                               :: n_sub_u,n_sub_v,n_sub_w ! Huristic Value
+  integer                               :: istart,nuu,nvv,nww
 
   ! Alloctable
-  double precision,allocatable          :: volume_vals(:,:)
+  double precision,allocatable          :: volume_vals(:,:,:,:)
+  double precision,allocatable          :: uu(:),vv(:),ww(:)
   double precision :: c1,c2,c3
   ! Functions     
   double precision                      :: norm,dotproduct,ndp
 
   max_inner_iter = 20
-  n_sub = 3
-  brute_force = .false.
+  if (ku == 2) then
+     n_sub_u = 10
+  else
+     n_sub_u = 3
+  end if
+
+  if (kv == 3) then
+     n_sub_v = 10
+  else
+     n_sub_v = 3
+  end if
+
+  if (kw == 3) then
+     n_sub_w = 10
+  else
+     n_sub_w = 3
+  end if
+
+
+  n_sub_u = 6
+  n_sub_v = 6
+  n_sub_w = 6
+
+  brute_force = .True.
 
   !if we are given a bad guess do the brute force
   point_loop: do ipt=1,N
@@ -477,8 +501,93 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
   end do point_loop
 
   if (brute_force .eqv. .True.) then
-     print *,'Brute Force Not Implemented Yet'
-     stop
+   ! Generate the uu and vv values
+     nuu = nctlu-ku+2 + (nctlu-ku+1)*n_sub_u
+     nvv = nctlv-kv+2 + (nctlv-kv+1)*n_sub_v
+     nww = nctlw-kw+2 + (nctlw-kw+1)*n_sub_w
+     allocate (uu(nuu),vv(nvv),ww(nww))
+
+
+     counter = 1
+     do i=1,nctlu-ku+1
+        if (i==1) then
+           istart = 0
+        else
+           istart = 1
+        end if
+        do j=istart,n_sub_u+1
+           uu(counter) = tu(i+ku-1) + (real(j)/(n_sub_u+1)*(tu(i+ku)-tu(i+ku-1)))
+           counter = counter + 1
+        end do
+     end do
+
+     counter = 1
+     do i=1,nctlv-kv+1
+        if (i==1) then
+           istart = 0
+        else
+           istart = 1
+        end if
+        do j=istart,n_sub_v+1
+           vv(counter) = tv(i+kv-1) + (real(j)/(n_sub_v+1)*(tv(i+kv)-tv(i+kv-1)))
+           counter = counter + 1
+        end do
+     end do
+
+     counter = 1
+     do i=1,nctlw-kw+1
+        if (i==1) then
+           istart = 0
+        else
+           istart = 1
+        end if
+        do j=istart,n_sub_w+1
+           ww(counter) = tw(i+kw-1) + (real(j)/(n_sub_w+1)*(tw(i+kw)-tw(i+kw-1)))
+           counter = counter + 1
+        end do
+     end do
+
+     allocate(volume_vals(ndim,nww,nvv,nuu))
+
+     do i=1,nuu
+        do j=1,nvv
+           do k=1,nww
+              call eval_volume(uu(i),vv(j),ww(k),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,&
+                   1,1,1,volume_vals(:,k,j,i))
+           end do
+        end do
+     end do
+     ! Now do comparison
+     u0(:) = u(:)   
+     v0(:) = v(:)
+     w0(:) = w(:)
+     do ipt=1,N
+        if (u(ipt) < 0 .or. u(ipt) > 1 .or. v(ipt) < 0 .or. v(ipt) > 1 .or. w(ipt) < 0 .or. w(ipt) > 1) then
+           val0 = volume_vals(:,1,1,1)
+           D0 = norm(val0-x0(ipt,:),ndim)
+           u0(ipt) = uu(1)
+           v0(ipt) = vv(1)
+           w0(ipt) = ww(1)
+           do i = 1,nuu
+              do j = 1,nvv
+                 do k = 1,nww
+
+                    D = norm(volume_vals(:,k,j,i)-X0(:,ipt),ndim)
+                    if (D<D0) then
+                       u0(ipt) = uu(i)
+                       v0(ipt) = vv(j)
+                       w0(ipt) = ww(k)
+                       D0 = D
+                    end if
+                 end do
+              end do
+           end do
+        else
+           u0(ipt) = u(ipt)
+           v0(ipt) = v(ipt)
+           w0(ipt) = w(ipt)
+        end if
+     end do
   else
      u0(:) = u(:)   
      v0(:) = v(:)
@@ -491,13 +600,12 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
 
   ! Now we have u0,v0,w0 so we can do the newton search
   do ipt=1,N
-
      call eval_volume(u(ipt),v(ipt),w(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,1,1,1,val)
      call eval_volume_deriv(u(ipt),v(ipt),w(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,deriv)
      call eval_volume_deriv2(u(ipt),v(ipt),w(ipt),tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,deriv2)
-     
+
      Diff(:,ipt) = val-x0(:,ipt)
-     
+
      iteration_loop: do i=1,niter
         ! Check the convergence criteria
         if (norm(Diff(:,ipt),ndim) <= eps1) then
@@ -591,6 +699,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
   end do
   if (brute_force .eqv. .true.) then
      deallocate(volume_vals)
+     deallocate(uu,vv,ww)
   end if
 
  

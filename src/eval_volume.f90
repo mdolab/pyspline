@@ -138,15 +138,15 @@ subroutine eval_volume_deriv(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim
 
   ! Working
   integer                               :: idim
-  double precision                      :: work(kv*kw+3*max(ku,kv,kw)+kw)
-
+  double precision                      :: work(Kv*Ku+3*max(Ku,Kv,Kw)+Ku)
   double precision b3val
 
   do idim=1,ndim
-     val(idim,1) = b3val(w,v,u,0,0,1,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
+     val(idim,1) = b3val(w,v,u,0,0,1,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work) 
      val(idim,2) = b3val(w,v,u,0,1,0,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
      val(idim,3) = b3val(w,v,u,1,0,0,tw,tv,tu,nctlw,nctlv,nctlu,kw,kv,ku,coef(idim,:,:,:),work)
   end do
+
   
 end subroutine eval_volume_deriv
 
@@ -191,7 +191,7 @@ subroutine eval_volume_deriv2(u,v,w,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndi
 
   ! Working
   integer                               :: idim
-  double precision                      :: work(kv*kw+3*max(ku,kv,kw)+kw)
+  double precision                      :: work(Kv*Ku+3*max(Ku,Kv,Kw)+Ku)
 
   double precision b3val
 
