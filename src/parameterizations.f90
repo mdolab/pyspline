@@ -42,29 +42,33 @@ subroutine para3d(X,n,m,l,ndim,S,u,v,w)
                       (X(2,K,J,I) - X(2,K-1,J,I)) ** 2 + &
                       (X(3,K,J,I) - X(3,K-1,J,I)) ** 2)
 
-
+  
   u(:) = 0.0
   v(:) = 0.0
   w(:) = 0.0
 
   !     Zero the three low-end faces (or edges if one plane is specified).
-  
-  DO J = 1, m
-     DO K = 1, l
-        S(1,K,J,1) = 0.0
-     END DO
-     
-     DO I = 1, n
-        S(2,K,1,I) = 0.0
-     END DO
-  END DO
-  
 
-  DO I = 1, n
-     DO J = 1, m
-        S(3,1,J,I) = 0.0
-     END DO
-  END DO
+  S(1,:,:,1) = 0.0
+  S(2,:,1,:) = 0.0
+  S(3,1,:,:) = 0.0
+  !original version..issue with k index
+!!$  DO J = 1, m
+!!$     DO K = 1, l
+!!$        S(1,K,J,1) = 0.0
+!!$     END DO
+!!$     print *,'k',k
+!!$     DO I = 1, n
+!!$        S(2,K,1,I) = 0.0
+!!$     END DO
+!!$  END DO
+!!$  
+!!$
+!!$  DO I = 1, n
+!!$     DO J = 1, m
+!!$        S(3,1,J,I) = 0.0
+!!$     END DO
+!!$  END DO
   
   !     Set up the low-end edge lines because they are missed by the
   !     following loops over most of the low-end faces:
