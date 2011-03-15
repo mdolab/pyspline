@@ -470,19 +470,19 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
   if (ku == 2) then
      n_sub_u = 10
   else
-     n_sub_u = 3
+     n_sub_u = 1
   end if
 
   if (kv == 3) then
      n_sub_v = 10
   else
-     n_sub_v = 3
+     n_sub_v = 1
   end if
 
   if (kw == 3) then
      n_sub_w = 10
   else
-     n_sub_w = 3
+     n_sub_w = 1
   end if
 
 
