@@ -403,7 +403,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
   end if
 end subroutine point_surface
 
-subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter,eps1,eps2,u,v,w,Diff)
+subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter,eps1,eps2,n_sub,u,v,w,Diff)
 
   !***DESCRIPTION
   !
@@ -428,6 +428,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
   !     Niter   - Integer, Maximum number of Netwton iterations
   !     eps1    - Real - Eculdian Distance Convergence Measure
   !     eps2    - Real - Cosine Convergence Measure
+  !     n_sub   - Integer - Overide for projections
   !
   !     Ouput 
   !     u       - Real,vector size(N), u parameters where V(u,v,w) is closest to x0
@@ -456,7 +457,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
   integer                               :: i,j,k,ii,jj,kk,counter,ipt,max_inner_iter
   double precision                      :: D,D0,u0(N),v0(N),w0(N),delta(3),D2(ndim)
   double precision                      :: A(3,3),ki(3)
-  integer                               :: n_sub_u,n_sub_v,n_sub_w ! Huristic Value
+  integer                               :: n_sub_u,n_sub_v,n_sub_w,n_sub ! Huristic Value
   integer                               :: istart,nuu,nvv,nww
 
   ! Alloctable
@@ -467,28 +468,30 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,niter
   double precision                      :: norm,dotproduct,ndp
 
   max_inner_iter = 20
-  if (ku == 2) then
-     n_sub_u = 10
+
+  if (n_sub < 0) then
+     if (ku == 2) then
+        n_sub_u = 10
+     else
+        n_sub_u = 2
+     end if
+
+     if (kv == 2) then
+        n_sub_v = 10
+     else
+        n_sub_v = 2
+     end if
+
+     if (kw == 2) then
+        n_sub_w = 10
+     else
+        n_sub_w = 2
+     end if
   else
-     n_sub_u = 1
+     n_sub_u = n_sub
+     n_sub_v = n_sub
+     n_sub_w = n_sub
   end if
-
-  if (kv == 3) then
-     n_sub_v = 10
-  else
-     n_sub_v = 1
-  end if
-
-  if (kw == 3) then
-     n_sub_w = 10
-  else
-     n_sub_w = 1
-  end if
-
-
-  n_sub_u = 6
-  n_sub_v = 6
-  n_sub_w = 6
 
   brute_force = .True.
 
