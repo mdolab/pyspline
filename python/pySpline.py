@@ -2124,10 +2124,16 @@ original data for this surface or face is not in range 0->5'
         else:
             w = -1*ones(len(x0))
         # end if
-
+            
+        if 'n_sub' in kwargs:
+            n_sub = kwargs['n_sub']
+        else:
+            n_sub = -1
+        # end if
+        print 'n_sub is now:',n_sub
         u,v,w,D = pyspline.point_volume(x0.T,self.tu,self.tv,self.tw,
                                         self.ku,self.kv,self.kw,
-                                        self.coef.T,Niter,eps1,eps2,u,v,w)
+                                        self.coef.T,Niter,eps1,eps2,n_sub,u,v,w)
         return u.squeeze(),v.squeeze(),w.squeeze(),D.squeeze().T
 
     def _writeTecplotOrigData(self,handle):
