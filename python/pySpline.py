@@ -1272,8 +1272,8 @@ original data for this surface or edge is not in range 0->3'
     def _writeTecplotSurface(self,handle):
         '''Output this surface\'s data to a open file handle \'handle\' '''
         
-        Nx = self.Nctlu*(self.ku)*2
-        Ny = self.Nctlv*(self.kv)*2
+        Nx = self.Nctlu*(self.ku)
+        Ny = self.Nctlv*(self.kv)
         u_plot = 0.5*(1-cos(linspace(0,pi,Nx)))
         v_plot = 0.5*(1-cos(linspace(0,pi,Ny)))
         [V_plot,U_plot] = meshgrid(v_plot,u_plot)
@@ -2130,7 +2130,7 @@ original data for this surface or face is not in range 0->5'
         else:
             n_sub = -1
         # end if
-        print 'n_sub is now:',n_sub
+
         u,v,w,D = pyspline.point_volume(x0.T,self.tu,self.tv,self.tw,
                                         self.ku,self.kv,self.kw,
                                         self.coef.T,Niter,eps1,eps2,n_sub,u,v,w)
