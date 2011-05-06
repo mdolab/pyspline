@@ -919,6 +919,7 @@ MUST be defined for task lms or interpolate'
             self.U.T,self.V.T,self.tu,self.tv,self.ku,self.kv,self.Nctlu,self.Nctlv)
         N = sparse.csr_matrix((vals,col_ind,row_ptr),
                              [self.Nu*self.Nv,self.Nctlu*self.Nctlv])
+        self.coef = zeros((self.Nctlu,self.Nctlv,self.nDim))
         if self.interp:
             if USE_SPARSE_SOLVE:
                 solve = factorized( N ) # Factorize once for efficiency
