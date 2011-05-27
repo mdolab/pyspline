@@ -2086,7 +2086,7 @@ original data for this surface or face is not in range 0->5'
 
         return Xmin,Xmax
 
-    def projectPoint(self,x0,Niter=25,eps1=1e-6,eps2=1e-6,*args,**kwargs):
+    def projectPoint(self,x0,Niter=25,eps=1e-6,*args,**kwargs):
         '''
         Project a point x0 onto the volume and return parametric position
 
@@ -2105,36 +2105,13 @@ original data for this surface or face is not in range 0->5'
             w    : Parametric position(s) w on surface
             D    : Distance(s) between point(s) and surface(u,v,w)
         '''
-        # We will use a starting point u0,v0 if given
+      
         x0 = atleast_2d(x0)
-
-        if 'u' in kwargs:
-            u = array([kwargs['u']])
-        else:
-            u = -1*ones(len(x0))
-        # end if
-
-        if 'v' in kwargs:
-            v = array([kwargs['u']])
-        else:
-            v = -1*ones(len(x0))
-        # end if
-
-        if 'w' in kwargs:
-            w = array([kwargs['u']])
-        else:
-            w = -1*ones(len(x0))
-        # end if
-            
-        if 'n_sub' in kwargs:
-            n_sub = kwargs['n_sub']
-        else:
-            n_sub = -1
-        # end if
 
         u,v,w,D = pyspline.point_volume(x0.T,self.tu,self.tv,self.tw,
                                         self.ku,self.kv,self.kw,
-                                        self.coef.T,Niter,eps1,eps2,n_sub,u,v,w)
+                                        self.coef.T,Niter,eps)
+
         return u.squeeze(),v.squeeze(),w.squeeze(),D.squeeze().T
 
     def _writeTecplotOrigData(self,handle):
