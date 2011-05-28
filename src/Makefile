@@ -59,23 +59,3 @@ clean:
 	@echo "        Making clean in src... "
 	rm -f $(MAKE_CLEAN_ARGUMENTS)
 
-
-
-
-
-#EXTRAS_LIB =    libspline_extras.a
-
-###================================================
-###  Default compilers and flags
-
-
-
-# libspline_extras: $(EXTRAS_OBJ)	
-# 	$(AR) $(AR_FLAGS) $(EXTRAS_LIB) $(EXTRAS_OBJ)
-
-# libspline: $(SPLINE_OBJ) 
-# 	$(AR) $(AR_FLAGS) $(SPLINE_LIB) $(SPLINE_OBJ)
-# 	$(FC)  -shared $(SPLINE_OBJ) -o $(SPLINE_LIB_SHARED) 
-# 	f2py   --fcompiler=${COMPILER_NAME} --f90flags='${FFLAGS}' -c -m pyspline pyspline.pyf libspline.a libspline_extras.a ${USER_LIBS}
-# 	python importTest.py
-# 	mv pyspline.so ../python	
