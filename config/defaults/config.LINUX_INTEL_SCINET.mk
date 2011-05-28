@@ -9,7 +9,7 @@ FFLAGS    =  -r8 -O2 -fPIC
 CC       = gcc
 CFLAGS   = -O2 -fPIC
 
-COMPILER_NAME = intele
+COMPILER_NAME = intelem
 EXTRA_LIBS = -limf -lifcore
 
 # Optional Things
