@@ -462,7 +462,6 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   double precision                      :: gnorm,grad_norm,wolfe
   double precision                      :: fval,nfval,c,p_diff
 
-
   double precision                      :: grad(nDim),hessian(nDim,nDim)
   integer                               :: iDim,jDim,ipt,i,j,k,m,nLine
   logical                               :: flag,cflag
@@ -495,7 +494,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   w0(:) = w(:)
   do ipt=1,N
      val0 = volume_vals(:,1,1,1)
-     D0 = norm(val0-x0(ipt,:),ndim)
+     D0 = norm(val0-x0(:,ipt),ndim)
      u0(ipt) = tu(ku)
      v0(ipt) = tv(kv)
      w0(ipt) = tw(kw)
@@ -545,7 +544,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
         R = val - X0(:,ipt)
         nDist = norm(R,nDim)
         fval = 0.5*nDist**2
-        
+
         ! Calculate the Gradient
         do idim=1,nDim
            grad(idim) = dot_product(R,deriv(:,idim))
@@ -594,10 +593,10 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
         !Check that this is a descent direction - 
         !otherwise use the negative gradient    
         if ( pgrad >= 0.0 ) then
-           update = -grad/gnorm
+           update = -grad/norm(grad,nDim)
            pgrad = dot_product(update,grad)
         end if
-
+        
         step = 1.0
         nDist = 0.0
         lineloop: do m=1,nLine
