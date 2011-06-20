@@ -1513,6 +1513,29 @@ end subroutine solve_3by3
 subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
 
   ! Check a line against multiple planes
+  !
+  ! ia:   The initial point
+  ! vc:   The serach vector from the initial point
+  ! p0:   Vectors to the triangle origins
+  ! v1:   Vector along the first triangle direction
+  ! v2:   Vector along the second triangle direction
+  !  n:   Number of triangles to search
+  ! sol:  Solution vector - parametric positions + physical coordiantes
+  ! nsol: Number of solutions
+  !
+  ! Solve for the scalars: alpha, beta, gamma such that:
+  !    ia + alpha*vc = p0 + beta*v1 + gamma*v2
+  !    ia - p0 = [ - vc ; v1 ; v2 ][ alpha ]
+  !                                [ beta  ]
+  !                                [ gamma ]
+  !
+  ! alpha >= 0: The point lies above the initial point
+  ! alpha  < 0: The point lies below the initial point
+  !
+  ! The domain of the triangle is defined by: 
+  !     beta + gamma = 1
+  ! and 
+  !     0 < beta, gamma < 1
 
   implicit none 
   ! Input
@@ -1524,7 +1547,7 @@ subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
   double precision, intent(out) :: sol(6,n)
 
   ! Worling 
-  integer :: i,ind(n)
+  integer :: i
   double precision :: A(3,3),rhs(3),x(3),norm
   
   A(:,1) = -vc
@@ -1537,16 +1560,18 @@ subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
      
      call solve_3by3(A,rhs,x)
      
-     if (x(1) .ge. 0.00 .and. x(1) .le. 1.00 .and. &
-         x(2) .ge. 0.00 .and. x(2) .le. 1.00 .and. &
-         x(3) .ge. 0.00 .and. x(3) .le. 1.00 .and. &
-         x(2)+x(3) .le. 1.00) then
+     ! if (x(1) .ge. 0.00 .and. x(1) .le. 1.00 .and. &
+     !     x(2) .ge. 0.00 .and. x(2) .le. 1.00 .and. &
+     !     x(3) .ge. 0.00 .and. x(3) .le. 1.00 .and. &
+     !     x(2)+x(3) .le. 1.00) then
+
+     if  (x(2) .ge. 0.0 .and. x(2) .le. 1.0 .and. &
+          x(3) .ge. 0.0 .and. x(3) .le. 1.0 .and. &
+          x(2) + x(3) .le. 1.0) then
 
         n_sol = n_sol + 1
         sol(1:3,n_sol) = x  ! t,u,v parametric locations
         sol(4:6,n_sol) = ia + x(1)*vc ! Actual point value
-        ind(n_sol) = i
-
      end if
   end do
 end subroutine line_plane
