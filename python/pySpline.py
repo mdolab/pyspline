@@ -747,7 +747,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
 
         _writeTecplot1D(handle,'interpolated',X)
 
-        return 
+        return         
   
 class surface(object):
 
