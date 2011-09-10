@@ -121,6 +121,16 @@
        double precision dimension(l),intent(out),depend(l) :: w
      end subroutine para3d
 
+     subroutine tfi2d(e0,e1,e2,e3,nu,nv,x) ! in :test:tfi2d.f90
+       double precision dimension(3,nu),intent(in) :: e0
+       double precision dimension(3,nu),intent(in),depend(nu) :: e1
+       double precision dimension(3,nv),intent(in) :: e2
+       double precision dimension(3,nv),intent(in),depend(nv) :: e3
+       integer optional,intent(in),check(shape(e0,1)==nu),depend(e0) :: nu=shape(e0,1)
+       integer optional,intent(in),check(shape(e2,1)==nv),depend(e2) :: nv=shape(e2,1)
+       double precision dimension(3,nv,nu),intent(out),depend(nv,nu) :: x
+     end subroutine tfi2d
+
      subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,nw,vals,row_ptr,col_ind) ! in :test:compute_volume.f90
        double precision dimension(nw,nv,nu),intent(in) :: u
        double precision dimension(nw,nv,nu),intent(in),depend(nw,nv,nu) :: v
