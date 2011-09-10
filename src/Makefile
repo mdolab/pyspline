@@ -50,7 +50,8 @@ OBJS = bvalu.o\
 	adBuffer.o\
 	adStack.o\
 	cgns_functions.o\
-	tecplot_functions.o
+	tecplot_functions.o\
+	tfi2d.o\
 
 default:
 	$(MAKE) $(OBJS)
