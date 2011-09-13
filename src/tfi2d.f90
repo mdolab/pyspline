@@ -19,7 +19,7 @@ subroutine tfi2d(e0,e1,e2,e3,Nu,Nv,X)
   end do
 
   do j=1,Nv
-     V(i) = dble(j-1)/(Nv-1)
+     V(j) = dble(j-1)/(Nv-1)
   end do
 
   do i=1,Nu
