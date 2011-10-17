@@ -511,8 +511,8 @@ Nctl=<number of control points> must be specified for a LMS fit'
                     # [ N^T*W*T      M^T][P] = [ N^T*W*S]
                     # [ M            0  ][R]   [ T      ] 
 
-                    MT   = M.transpose()
-                    
+                    MT   = M.transpose().tocsr()
+
                     j_val, j_col_ind, j_row_ptr = pyspline.constr_jac(
                         NTWN.data, NTWN.indptr, NTWN.indices, MT.data, 
                         MT.indptr, MT.indices, 
