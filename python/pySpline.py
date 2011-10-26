@@ -365,10 +365,10 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 self.interp = False
                 self.Nctl = geo_utils.checkInput(kwargs['Nctl'], 'Nctl', int, 0)
             # end if
-            self.recompute(self.niter)
-        return
+            self.recompute(self.niter, computeKnots=True)
+        return 
 
-    def recompute(self, niter):
+    def recompute(self, niter, computeKnots=True):
         """
         Run iterations of Hoscheks Parameter Correction on the current curve
         Input:
@@ -428,11 +428,14 @@ Nctl=<number of control points> must be specified for a LMS fit'
             self.k = nu+nc+ndu+ndc
         # end if
 
-        # Generate the knot vector, greville points and empty coefficients
-        if self.interp:
-            self.t = pyspline.knots_interp(self.s, self.deriv_ptr, self.k)
-        else:
-            self.t = pyspline.knots_lms(self.s, self.Nctl, self.k)
+        if computeKnots:
+            # Generate the knot vector, if necessary greville points and
+            # empty coefficients
+            if self.interp:
+                self.t = pyspline.knots_interp(self.s, self.deriv_ptr, self.k)
+            else:
+                self.t = pyspline.knots_lms(self.s, self.Nctl, self.k)
+            # end if
         # end if
         self._calcGrevillePoints()
         self.coef = numpy.zeros((self.Nctl, self.nDim), 'd')
