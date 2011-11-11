@@ -14,17 +14,16 @@ subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,
   integer                               :: ilov,ileftv,mflagv,workv(4*kv),iworkv
   integer                               :: ilow,ileftw,mflagw,workw(4*kw),iworkw
 
-
- ilou = 1
- ilov = 1
- ilow = 1
- counter = 1
+  ilou = 1
+  ilov = 1
+  ilow = 1
+  counter = 1
 
   do i=1,nu
      do j = 1,nv
         do k=1,nw
            !  ! U 
-          
+
            call intrv(tu,nctlu+ku,u(k,j,i),ilou,ileftu,mflagu)
            if (mflagu == 0) then
               call basis(tu,nctlu,ku,u(k,j,i),ileftu,basisu)
@@ -33,9 +32,9 @@ subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,
               basisu(:) = 0.0
               basisu(ku) = 1.0
            end if
-           
+
            ! Get v interval
-            call intrv(tv,nctlv+kv,v(k,j,i),ilov,ileftv,mflagv)
+           call intrv(tv,nctlv+kv,v(k,j,i),ilov,ileftv,mflagv)
            if (mflagv == 0) then
               call basis(tv,nctlv,kv,v(k,j,i),ileftv,basisv)
            else if (mflagv == 1) then
@@ -43,9 +42,9 @@ subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,
               basisv(:) = 0.0
               basisv(kv) = 1.0
            end if
-          
+
            ! Get w interval
-            call intrv(tw,nctlw+kw,w(k,j,i),ilow,ileftw,mflagw)
+           call intrv(tw,nctlw+kw,w(k,j,i),ilow,ileftw,mflagw)
            if (mflagw == 0) then
               call basis(tw,nctlw,kw,w(k,j,i),ileftw,basisw)
            else if (mflagw == 1) then
@@ -53,7 +52,7 @@ subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,
               basisw(:) = 0.0
               basisw(kw) = 1.0
            end if
-           
+
 
            row_ptr( (i-1)*nv*nw + (j-1)*nw + k  ) = counter-1
            do ii=1,ku
@@ -67,8 +66,8 @@ subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,
                  end do
               end do
            end do
-            
-         end do
+
+        end do
      end do
   end do
   row_ptr(nu*nv*nw+1) = counter-1

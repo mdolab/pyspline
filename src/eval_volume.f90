@@ -88,7 +88,8 @@
                  do k=1,kw
                     do idim=1,ndim
                        val(idim,kk,jj,ii) = val(idim,kk,jj,ii) + &
-                            basisu(i)*basisv(j)*basisw(k)*coef(idim,istartw+k,istartv+j,istartu+i)
+                            basisu(i)*basisv(j)*basisw(k)*&
+                            coef(idim,istartw+k,istartv+j,istartu+i)
                     end do
                  end do
               end do
