@@ -1041,13 +1041,17 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
      n = 100
   end if
   brute_force = .False.
+
+  nss = n1-k1+2 + (n1-k1+1)*n
+  ntt = n2-k2+2 + (n2-k2+1)*n
+
+  allocate (ss(nss),tt(ntt))
+  allocate(curve1_vals(ndim,nss),curve2_vals(ndim,ntt))
+
   if (s < 0 .or. s > 1 .or. t < 0 .or. t > 1) then
      ! Do a brute force approach to get good starting point
-     brute_force = .True.
-     nss = n1-k1+2 + (n1-k1+1)*n
-     ntt = n2-k2+2 + (n2-k2+1)*n
-     allocate (ss(nss),tt(ntt))
-
+   
+   
      counter1 = 1
      do i=1,n1-k1+1
         if (i==1) then
@@ -1074,7 +1078,7 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
         end do
      end do
 
-     allocate(curve1_vals(ndim,nss),curve2_vals(ndim,ntt))
+
      do i=1,nss
         call eval_curve(ss(i),t1,k1,coef1,n1,ndim,1,curve1_vals(:,i))
      end do
@@ -1188,9 +1192,7 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
 
   end do iteration_loop
 
-  if (brute_force) then
-     deallocate(curve1_vals,curve2_vals,ss,tt)
-  end if
+  deallocate(curve1_vals,curve2_vals,ss,tt)
 
 end subroutine curve_curve
 
