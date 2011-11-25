@@ -465,10 +465,11 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   double precision                      :: grad(nDim),hessian(nDim,nDim)
   integer                               :: iDim,jDim,ipt,i,j,k,m,nLine
   logical                               :: flag,cflag
+  integer                               :: counter1
 
   ! Alloctable
-  double precision,allocatable          :: volume_vals(:,:,:,:)
-
+  double precision, allocatable         :: volume_vals(:,:,:,:)
+  double precision, allocatable         :: uu(:),vv(:),ww(:)
   ! Functions     
   double precision                      :: norm
 
@@ -477,12 +478,62 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   nvv = nctlv-kv+2 
   nww = nctlw-kw+2 
 
+  n_sub_u = 1
+  n_sub_v = 1
+  n_sub_w = 1
+  nuu = nctlu-ku+2 + (nctlu-ku+1)*n_sub_u
+  nvv = nctlv-kv+2 + (nctlv-kv+1)*n_sub_v
+  nww = nctlw-kw+2 + (nctlw-kw+1)*n_sub_w
+
   allocate(volume_vals(ndim,nww,nvv,nuu))
+  allocate (uu(nuu),vv(nvv),ww(nww))
+
+  ! uu values
+  counter1 = 1
+  do i=1,nctlu-ku+1
+     if (i==1) then
+        istart = 0
+     else
+        istart = 1
+     end if
+     do j=istart,n_sub_u+1
+        uu(counter1) = tu(i+ku-1) + (real(j)/(n_sub_u+1)*(tu(i+ku)-tu(i+ku-1)))
+        counter1 = counter1 + 1
+     end do
+  end do
+  
+  ! vv values
+  counter1 = 1
+  do i=1,nctlv-kv+1
+     if (i==1) then
+        istart = 0
+     else
+        istart = 1
+     end if
+     do j=istart,n_sub_v+1
+        vv(counter1) = tv(i+kv-1) + (real(j)/(n_sub_v+1)*(tv(i+kv)-tv(i+kv-1)))
+        counter1 = counter1 + 1
+     end do
+  end do
+  
+ ! ww values
+  counter1 = 1
+  do i=1,nctlw-kw+1
+     if (i==1) then
+        istart = 0
+     else
+        istart = 1
+     end if
+     do j=istart,n_sub_w+1
+        ww(counter1) = tw(i+kw-1) + (real(j)/(n_sub_w+1)*(tw(i+kw)-tw(i+kw-1)))
+        counter1 = counter1 + 1
+     end do
+  end do
 
   do i=1,nuu
      do j=1,nvv
         do k=1,nww
-           call eval_volume(tu(ku-1+i),tv(kv-1+j),tw(kw-1+k),&
+           call eval_volume(uu(i),vv(j),ww(k),&
                 tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,&
                 1,1,1,volume_vals(:,k,j,i))
         end do
@@ -504,9 +555,9 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
               
               D = norm(volume_vals(:,k,j,i)-X0(:,ipt),ndim)
               if (D<D0) then
-                 u0(ipt) = tu(ku-1+i)
-                 v0(ipt) = tv(kv-1+j)
-                 w0(ipt) = tw(kw-1+k)
+                 u0(ipt) = uu(i)
+                 v0(ipt) = vv(j)
+                 w0(ipt) = ww(k)
                  D0 = D
               end if
            end do
@@ -665,9 +716,10 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
      v(ipt) = pt(2)
      w(ipt) = pt(3)
      diff(:,ipt) = R
-  end do
 
-  deallocate(volume_vals)
+  end do
+  
+  deallocate(volume_vals,uu,vv,ww)
 
 end subroutine point_volume
 
