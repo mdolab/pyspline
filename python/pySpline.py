@@ -2307,7 +2307,7 @@ MUST be defined for task lms or interpolate'
 
         return Xmin, Xmax
 
-    def projectPoint(self, x0, Niter=25, eps=1e-6):
+    def projectPoint(self, x0, Niter=25, eps=1e-6, n_sub=1):
         """
         Project a point x0 onto the volume and return parametric position
 
@@ -2331,7 +2331,7 @@ MUST be defined for task lms or interpolate'
 
         u, v, w, D = pyspline.point_volume(x0.T, self.tu, self.tv, self.tw, 
                                         self.ku, self.kv, self.kw, 
-                                        self.coef.T, Niter, eps)
+                                        self.coef.T, Niter, eps, n_sub)
 
         return u.squeeze(), v.squeeze(), w.squeeze(), D.squeeze().T
 

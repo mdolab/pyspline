@@ -404,7 +404,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
 end subroutine point_surface
 
 subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
-     niter,eps,u,v,w,Diff)
+     niter,eps,u,v,w,Diff,n_sub)
 
   !***DESCRIPTION
   !
@@ -428,7 +428,8 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   !     ndim    - Integer, Spatial Dimension
   !     Niter   - Integer, Maximum number of Netwton iterations
   !     eps     - Real - Eculdian Distance Convergence Measure
-  !
+  !     n_sub   - A "try harder" parameter. Integer. Increases will increase
+  !               the chances of finding a solution
   !     Ouput 
   !     u       - Real,vector size(N), u parameters where V(u,v,w) is closest to x0
   !     v       - Real,vector size(N), v parameters where V(u,v,w) is closest to x0
@@ -442,6 +443,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
   double precision, intent(in)          :: coef(ndim,nctlw,nctlv,nctlu)
   double precision, intent(in)          :: eps
+  integer         , intent(in)          :: n_sub
   ! Output
   double precision, intent(out)         :: u(N),v(N),w(N)
   double precision, intent(out)         :: diff(ndim,N)
@@ -478,9 +480,10 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   nvv = nctlv-kv+2 
   nww = nctlw-kw+2 
 
-  n_sub_u = 1
-  n_sub_v = 1
-  n_sub_w = 1
+  n_sub_u = n_sub
+  n_sub_v = n_sub
+  n_sub_w = n_sub
+
   nuu = nctlu-ku+2 + (nctlu-ku+1)*n_sub_u
   nvv = nctlv-kv+2 + (nctlv-kv+1)*n_sub_v
   nww = nctlw-kw+2 + (nctlw-kw+1)*n_sub_w

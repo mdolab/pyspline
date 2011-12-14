@@ -352,7 +352,7 @@
        double precision dimension(ndim,n),intent(out),depend(ndim,n) :: diff
      end subroutine point_surface
 
-     subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,niter,eps,u,v,w,diff) ! in :test:projections.f90
+     subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,n,niter,eps,u,v,w,diff,n_sub) ! in :test:projections.f90
        double precision dimension(ndim,n),intent(in) :: x0
        double precision dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
        double precision dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
@@ -372,6 +372,7 @@
        double precision dimension(n),intent(out),depend(n) :: v
        double precision dimension(n),intent(out),depend(n) :: w
        double precision dimension(ndim,n),intent(out),depend(ndim,n) :: diff
+       integer intent(in) :: n_sub
      end subroutine point_volume
 
      subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,niter,eps1,eps2,s,t,diff) ! in :test:projections.f90
