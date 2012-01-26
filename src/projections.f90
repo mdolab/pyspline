@@ -566,6 +566,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
            end do
         end do
      end do
+
   end do
 
   ! Set lower and upper bounds for u,v,w based on knot vector
@@ -577,7 +578,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   high(3) = tw(Nctlw+kw)
 
   ! Number of line search iterations
-  nLine = 20
+  nLine = 40
   ! Tolerance for the strong wolfe line-search conditions
   wolfe = 0.001
   do ipt=1,N
@@ -612,26 +613,25 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
            end do
         end do
 
-      !   ! Bounds Checking
-        
-!         do iDim=1,nDim
-!            flag = .False.
-!            if (pt(iDim) < low(iDim)+eps .and. grad(iDim) >= 0.0) then
-!               flag = .True.
-!               pt(iDim) = low(iDim)
-!            end if
+        ! Bounds Checking
+        do iDim=1,nDim
+           flag = .False.
+           if (pt(iDim) < low(iDim)+eps .and. grad(iDim) >= 0.0) then
+              flag = .True.
+              pt(iDim) = low(iDim)
+           end if
 
-!            if (pt(iDim) > high(iDim)-eps .and. grad(iDim) <= 0.0) then
-!               flag = .True.
-!               pt(iDim) = high(iDim)
-!            end if
-!            if ( flag ) then
-!               grad(iDim) = 0.0
-!               hessian(:,iDim) = 0.0
-!               hessian(iDim,:) = 0.0
-!               hessian(iDim,iDim) = 1.0
-!            end if
-!         end do
+           if (pt(iDim) > high(iDim)-eps .and. grad(iDim) <= 0.0) then
+              flag = .True.
+              pt(iDim) = high(iDim)
+           end if
+           if ( flag ) then
+              grad(iDim) = 0.0
+              hessian(:,iDim) = 0.0
+              hessian(iDim,:) = 0.0
+              hessian(iDim,iDim) = 1.0
+           end if
+        end do
 
         ! Check the norm of the gradient
         grad_norm = norm(grad,nDim)

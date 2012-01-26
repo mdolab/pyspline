@@ -1651,7 +1651,8 @@ class volume(object):
             self.U = None
             self.V = None
             self.W = None
-          
+            self.interp = False
+
             self.ku = geo_utils.checkInput(kwargs['ku'], 'ku', int, 0)
             self.kv = geo_utils.checkInput(kwargs['kv'], 'kv', int, 0)
             self.kw = geo_utils.checkInput(kwargs['kw'], 'kw', int, 0)
@@ -2338,11 +2339,13 @@ MUST be defined for task lms or interpolate'
     def _writeTecplotVolume(self, handle):
         """Output this volume\'s data to a open file handle \'handle\' """
 
+        self.U = None
         if self.U is None:
             # This works really well actually
             Nx = self.Nctlu*self.ku+1
             Ny = self.Nctlv*self.kv+1
             Nz = self.Nctlw*self.kw+1
+
             u_plot = 0.5*(1-numpy.cos(numpy.linspace(0, numpy.pi, Nx)))
             v_plot = 0.5*(1-numpy.cos(numpy.linspace(0, numpy.pi, Ny)))
             w_plot = 0.5*(1-numpy.cos(numpy.linspace(0, numpy.pi, Nz)))
@@ -2351,15 +2354,18 @@ MUST be defined for task lms or interpolate'
             W_plot = numpy.zeros((Nx, Ny, Nz))
             V_plot = numpy.zeros((Nx, Ny, Nz))
             U_plot = numpy.zeros((Nx, Ny, Nz))
+
             for i in xrange(Nx):
-                [V_plot[i, :, :], U_plot[i, :, :]] = numpy.meshgrid(
-                    v_plot, u_plot)
-                W_plot[i, :, :] = w_plot[i]
+                for j in xrange(Ny):
+                    for k in xrange(Nz):
+                        U_plot[i,j,k] = u_plot[i]
+                        V_plot[i,j,k] = v_plot[j]
+                        W_plot[i,j,k] = w_plot[k]
+                    # end for
+                # end for
             # end for
 
             values = self.getValue(U_plot, V_plot, W_plot)
-
-
         else:
             values = self.getValue(self.U, self.V, self.W)
 
