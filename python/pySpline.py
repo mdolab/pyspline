@@ -716,9 +716,13 @@ scipy is used.')
             derivative: The first derivative [ndim] vector
 
             """
-        s = geo_utils.checkInput(s, 's', float, 0)
-        derivative = pyspline.eval_curve_deriv(
-            s, self.t, self.k, self.coef.T).squeeze()
+        if self.coef.dtype == numpy.dtype('d'):
+            derivative = pyspline.eval_curve_deriv(
+                s, self.t, self.k, self.coef.T).squeeze()
+        else:
+            derivative = pyspline.eval_curve_deriv_c(
+                s, self.t, self.k, self.coef.T).squeeze()
+        # end if
 
         return derivative
         
@@ -731,8 +735,13 @@ scipy is used.')
             derivative: The first derivative [ndim] vector
 
             """
-        derivative = pyspline.eval_curve_deriv2(
-            s, self.t, self.k, self.coef.T).squeeze()
+        if self.coef.dtype == numpy.dtype('d'):
+            derivative = pyspline.eval_curve_deriv2(
+                s, self.t, self.k, self.coef.T).squeeze()
+        else
+            derivative = pyspline.eval_curve_deriv2_c(
+                s, self.t, self.k, self.coef.T).squeeze()
+        # end if
 
         return derivative
 
@@ -801,7 +810,7 @@ scipy is used.')
                                     eps1, eps2, s, t)
 
     def writeTecplot(self, file_name, curve=True, coef=True, orig=True, 
-                     tecio=USE_TECIO):
+                     tecio=USE_TECIO, size=0.1):
         """
         Write the cuve to a tecplot dat file
         Required Arguments:
@@ -818,7 +827,7 @@ scipy is used.')
 
         f = openTecplot(file_name, self.nDim, tecio)
         if curve:
-            self._writeTecplotCurve(f, size=0.1)
+            self._writeTecplotCurve(f, size=size)
         if coef:
             writeTecplot1D(f, 'control_pts', self.coef)        
         if orig and self.orig_data:
