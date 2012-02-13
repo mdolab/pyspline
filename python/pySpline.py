@@ -738,7 +738,7 @@ scipy is used.')
         if self.coef.dtype == numpy.dtype('d'):
             derivative = pyspline.eval_curve_deriv2(
                 s, self.t, self.k, self.coef.T).squeeze()
-        else
+        else:
             derivative = pyspline.eval_curve_deriv2_c(
                 s, self.t, self.k, self.coef.T).squeeze()
         # end if
