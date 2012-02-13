@@ -193,7 +193,27 @@
        integer optional,intent(in),check(len(s)>=n),depend(s) :: n=len(s)
        complex*16 dimension(ndim,n),intent(out),depend(ndim,n) :: val
      end subroutine eval_curve_c
-     
+
+     subroutine eval_curve_deriv_c(s,t,k,coef,nctl,ndim,val) ! in :test:eval_curve.f90
+       complex*16 intent(in) :: s
+       complex*16 dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       complex*16 dimension(ndim,nctl),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,1)==nctl),depend(coef) :: nctl=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,0)==ndim),depend(coef) :: ndim=shape(coef,0)
+       complex*16 dimension(ndim),intent(out),depend(ndim) :: val
+     end subroutine eval_curve_deriv_c
+
+     subroutine eval_curve_deriv2_c(s,t,k,coef,nctl,ndim,val) ! in :test:eval_curve.f90
+       complex*16 intent(in) :: s
+       complex*16 dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: k
+       complex*16 dimension(ndim,nctl),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,1)==nctl),depend(coef) :: nctl=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,0)==ndim),depend(coef) :: ndim=shape(coef,0)
+       complex*16 dimension(ndim),intent(out),depend(ndim) :: val
+     end subroutine eval_curve_deriv2_c
+
      subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val) ! in :test:eval_surface.f90
        double precision dimension(m,n),intent(in) :: u
        double precision dimension(m,n),intent(in),depend(m,n) :: v
