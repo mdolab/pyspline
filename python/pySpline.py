@@ -1492,18 +1492,18 @@ MUST be defined for task lms or interpolate'
         Write the IGES parameter information for this surface
         """
 
-        handle.write('%12d, %12d, %12d, %12d, %12d, %7dP%7d\n'\
+        handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'\
                          %(128, self.Nctlu-1, self.Nctlv-1, \
                                self.ku-1, self.kv-1, Pcount, counter))
         counter += 1
-        handle.write('%12d, %12d, %12d, %12d, %12d, %7dP%7d\n'\
+        handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'\
                          %(0, 0, 1, 0, 0, Pcount, counter))
         counter += 1
         pos_counter = 0
 
         for i in xrange(len(self.tu)):
             pos_counter += 1
-            handle.write('%20.12g, '%(numpy.real(self.tu[i])))
+            handle.write('%20.12g,'%(numpy.real(self.tu[i])))
             if numpy.mod(pos_counter, 3) == 0:
                 handle.write('  %7dP%7d\n'%(Pcount, counter))
                 counter += 1
@@ -1513,7 +1513,7 @@ MUST be defined for task lms or interpolate'
 
         for i in xrange(len(self.tv)):
             pos_counter += 1
-            handle.write('%20.12g, '%(numpy.real(self.tv[i])))
+            handle.write('%20.12g,'%(numpy.real(self.tv[i])))
             if numpy.mod(pos_counter, 3) == 0:
                 handle.write('  %7dP%7d\n'%(Pcount, counter))
                 counter += 1
@@ -1523,7 +1523,7 @@ MUST be defined for task lms or interpolate'
 
         for i in xrange(self.Nctlu*self.Nctlv):
             pos_counter += 1
-            handle.write('%20.12g, '%(1.0))
+            handle.write('%20.12g,'%(1.0))
             if numpy.mod(pos_counter, 3) == 0:
                 handle.write('  %7dP%7d\n'%(Pcount, counter))
                 counter += 1
@@ -1535,7 +1535,7 @@ MUST be defined for task lms or interpolate'
             for i in xrange(self.Nctlu):
                 for idim in xrange(3):
                     pos_counter += 1
-                    handle.write('%20.12g, '%(numpy.real(
+                    handle.write('%20.12g,'%(numpy.real(
                                 self.coef[i, j, idim])))
                     if numpy.mod(pos_counter, 3) == 0:
                         handle.write('  %7dP%7d\n'%(Pcount, counter))
@@ -1550,11 +1550,11 @@ MUST be defined for task lms or interpolate'
         for  i in xrange(4):
             pos_counter += 1
             if i == 0:
-                handle.write('%20.12g, '%(numpy.real(self.umin)))
+                handle.write('%20.12g,'%(numpy.real(self.umin)))
             if i == 1:
-                handle.write('%20.12g, '%(numpy.real(self.umax)))
+                handle.write('%20.12g,'%(numpy.real(self.umax)))
             if i == 2:
-                handle.write('%20.12g, '%(numpy.real(self.vmin)))
+                handle.write('%20.12g,'%(numpy.real(self.vmin)))
             if i == 3:
                 # semi-colon for the last entity
                 handle.write('%20.12g;'%(numpy.real(self.vmax)))
