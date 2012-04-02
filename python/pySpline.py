@@ -298,16 +298,19 @@ Nctl=<number of control points> must be specified for a LMS fit'
             self.orig_data = True
             if 'X' in kwargs:
                 self.X = numpy.atleast_2d(kwargs['X'])
+                if numpy.rank(kwargs['X']) == 1:
+                    self.X = numpy.transpose(self.X)
             elif 'x' in kwargs and 'y' in kwargs and 'z'in kwargs:
                 self.X = numpy.vstack([kwargs['x'], kwargs['y'], kwargs['z']]).T
             elif 'x' in kwargs and 'y' in kwargs:
                 self.X = numpy.vstack([kwargs['x'], kwargs['y']]).T
             elif 'x' in kwargs:
-                self.X = numpy.atleast_2d(kwargs['x'])
+                self.X = numpy.transpose(numpy.atleast_2d(kwargs['x']))
             # enf if
 
             self.nDim = self.X.shape[1]
             self.N = self.X.shape[0]
+
             self.k = geo_utils.checkInput(kwargs['k'], 'k', int, 0)
             self.t = None
             if 'niter' in kwargs: 
