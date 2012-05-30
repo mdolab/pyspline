@@ -246,7 +246,7 @@ subroutine eval_curve_deriv_c(s,t,k,coef,nctl,ndim,val)
   inbv = 1
   
   do idim=1,ndim
-     val(idim) = bvalu(t,coef(idim,:),nctl,k,1,s,inbv,work)
+     val(idim) = bvalu_c(t,coef(idim,:),nctl,k,1,s,inbv,work)
   end do
     
 end subroutine eval_curve_deriv_c
