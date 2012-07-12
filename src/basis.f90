@@ -1,8 +1,15 @@
 SUBROUTINE basis(t,nctl,k,x,ileft,B)
 
   implicit none
-  integer nctl,k,ileft,l,j,ipj,jp1ml,jp1
-  double precision :: t(nctl+k),B(k),vm,vmprev,x,diff1(k),diff2(k)
+
+  
+  double precision, intent(in) :: t(nctl+k)
+  integer, intent(in) :: nctl, k, ileft
+  double precision, intent(out) :: B(k)
+
+  double precision vm,vmprev,x,diff1(k),diff2(k)
+  integer l,j,ipj,jp1ml,jp1
+
     
   B(:) = 0.0
   B(1) = 1.0

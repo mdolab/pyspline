@@ -241,7 +241,7 @@ subroutine eval_curve_deriv_c(s,t,k,coef,nctl,ndim,val)
   complex*16                      :: work(3*k)
 
   ! Functions
-  complex*16                      :: bvalu
+  complex*16                      :: bvalu_c
 
   inbv = 1
   

@@ -504,7 +504,14 @@
        integer optional,intent(in),check(shape(l_index,0)==nctlw),depend(l_index) :: nctlw=shape(l_index,0)
        integer optional,intent(in),check(len(vals)>=nnz),depend(vals) :: nnz=len(vals)
      end subroutine getbasisptvolume
-     
+     subroutine basis(t,nctl,k,x,ileft,b) ! in :test:basis.f90
+            double precision dimension(nctl+k),intent(in),depend(nctl,k) :: t
+            integer intent(in) :: nctl
+            integer intent(in) :: k
+            double precision :: x
+            integer intent(in) :: ileft
+            double precision dimension(k),intent(out),depend(k) :: b
+        end subroutine basis
      ! ----------------- Tecplot Binary Functions -----------------------------
 
      subroutine i_ordered(name,data,n,ndim) ! in :test:tecplot_functions.F90
