@@ -798,15 +798,15 @@ scipy is used.')
             t    : Parametric position on curve2 (curve passed in)
             D    : Distance between curve1(s) and curve2(t)
             """
-        s = -1.0
-        t = -1.0
+        s = -1
+        t = -1
         if 's' in kwargs:
             s = geo_utils.checkInput(kwargs['s'], 's', float, 0)
         if 't' in kwargs:
             t = geo_utils.checkInput(kwargs['t'], 't', float, 0)
         Niter = geo_utils.checkInput(Niter, 'Niter', int, 0)
-        eps1  = geo_utils.checkInput(Niter, 'eps1', float, 0)
-        eps2  = geo_utils.checkInput(Niter, 'eps2', float, 0)
+        eps1  = geo_utils.checkInput(eps1, 'eps1', float, 0)
+        eps2  = geo_utils.checkInput(eps2, 'eps2', float, 0)
         return pyspline.curve_curve(self.t, self.k, self.coef.T, 
                                     in_curve.t, in_curve.k, 
                                     in_curve.coef.T, Niter, 
@@ -1582,6 +1582,33 @@ MUST be defined for task lms or interpolate'
         return Pcount, counter
 
 
+    def writeTin(self, handle):
+        '''Write the pySpline surface to an open handle in .tin format'''
+        handle.write('bspline\n')
+
+        # Sizes and Order
+        handle.write('%d,%d,%d,%d,0\n'%(self.Nctlu,self.Nctlv,self.ku,self.kv))
+
+        # U - Knot Vector
+        for i in xrange(len(self.tu)):
+            handle.write('%16.12g,\n'%(self.tu[i]))
+        # end for
+
+        # V - Knot Vector
+        for j in xrange(len(self.tv)):
+            handle.write('%16.12g,\n'%(self.tv[j]))
+        # end for
+
+        # Control points:
+        for j in xrange(self.Nctlv):
+            for i in xrange(self.Nctlu):
+                handle.write('%16.12g,%16.12g,%16.12g\n'%(self.coef[i, j, 0], 
+                                                          self.coef[i, j, 1], 
+                                                          self.coef[i, j, 2]))
+            # end for
+        # end for
+
+        return 
 class volume(object):
 
     def __init__(self, recompute=True, **kwargs):
