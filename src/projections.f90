@@ -228,15 +228,15 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
 
   max_inner_iter = 20
   if (ku == 2) then
-     n_sub_u = 2
+     n_sub_u = 50
   else
-     n_sub_u = 2
+     n_sub_u = 50
   end if
 
   if (kv == 2) then
-     n_sub_v = 2
+     n_sub_v = 50
   else
-     n_sub_v = 2
+     n_sub_v = 50
   end if
 
   brute_force = .True.
@@ -1567,7 +1567,7 @@ subroutine solve_3by3(A,b,x)
 
 end subroutine solve_3by3
 
-subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
+subroutine line_plane(ia,vc,p0,v1,v2,n,sol,pid,n_sol)
 
   ! Check a line against multiple planes
   !
@@ -1602,6 +1602,7 @@ subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
   ! Output
   integer, intent(out) :: n_sol
   double precision, intent(out) :: sol(6,n)
+  integer, intent(out) :: pid(n)
 
   ! Worling 
   integer :: i
@@ -1629,6 +1630,7 @@ subroutine line_plane(ia,vc,p0,v1,v2,n,sol,n_sol)
         n_sol = n_sol + 1
         sol(1:3,n_sol) = x  ! t,u,v parametric locations
         sol(4:6,n_sol) = ia + x(1)*vc ! Actual point value
+        pid(n_sol) = i
      end if
   end do
 end subroutine line_plane
