@@ -1343,7 +1343,7 @@ MUST be defined for task lms or interpolate'
 
         return Xmin, Xmax
     
-    def projectPoint(self, x0, Niter=25, eps1=1e-6, eps2=1e-6, **kwargs):
+    def projectPoint(self, x0, Niter=250, eps1=1e-6, eps2=1e-6, **kwargs):
         """
         Project a point x0 onto the surface and return parametric position
         curve: 
