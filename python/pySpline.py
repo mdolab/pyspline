@@ -93,7 +93,7 @@ def writeTecplot2D(handle, name, data):
         for j in xrange(ny):
             for i in xrange(nx):
                 for idim in xrange(ndim):
-                    handle.write('%f '%(data[i, j, idim]))
+                    handle.write('%20.16g '%(data[i, j, idim]))
                 # end for
                 handle.write('\n')
             # end for
