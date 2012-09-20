@@ -1,3 +1,4 @@
+
 subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
 
   !***DESCRIPTION
@@ -1031,6 +1032,237 @@ end subroutine point_volume
  
 ! end subroutine point_volume_old
 
+! subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Diff)
+
+!   !*** DESCRIPTION
+!   !
+!   !     Written by Gaetan Kenway
+!   ! 
+!   !     The function takes the spline defination of a bivariate spline
+!   !     surface as defined by coef,kx,ky,nx,ny,tx,ty and a point x0 and
+!   !     determines the u,v positions that minimizes the distance between
+!   !     the point and the surface. 
+
+!   !     Description of Arguments:
+!   !     Input:
+!   !     t1      - Knot Vector for Curve 1
+!   !     k1      - Order for Curve 1
+!   !     coef1   - Coefficients for Curve 1
+!   !     t2      - Knot Vector for Curve 2
+!   !     k2      - Order for Curve 2
+!   !     coef2   - Coefficients for Curve 2
+!   !     n1      - Number of coefficients on curve 1
+!   !     n2      - Number of coefficients on curve 2
+!   !     Niter   - Integer: Maximum number of iterations
+!   !     tol     - Real: Tolerance for newton iteration
+!   !     s       - Real: Initial guess for parameter on Curve 1
+!   !     t       - Real: Initial guess for parameter on Curve 2
+
+!   !     Output:
+!   !     s       - Real: parameter on Curve 1
+!   !     t       - Real: parameter on Curve 2
+!   !     D       - Real: Distance between curve 
+!   !
+!   implicit none
+
+!   ! Input/Output
+!   integer         , intent(in)     :: n1,n2,k1,k2,ndim
+!   double precision, intent(in)     :: t1(n1+k1),t2(n2+k2)
+!   double precision, intent(in)     :: coef1(ndim,n1),coef2(ndim,n2)
+!   double precision, intent(inout)  :: s,t 
+!   integer         , intent(in)     :: Niter
+!   double precision, intent(in)     :: eps1,eps2
+
+!   double precision, intent(out)    :: Diff(ndim)
+
+!   ! Working
+!   double precision                 :: val0(ndim),val1(ndim),val2(ndim)
+!   double precision                 :: deriv_c1(ndim),deriv2_c1(ndim)
+!   double precision                 :: deriv_c2(ndim),deriv2_c2(ndim)
+!   integer                          :: i,j,ii,jj,max_inner_iter,counter1,istart
+!   double precision                 :: D,D0,s0,t0,delta(2),D2(3)
+!   double precision                 :: ki(2),A(2,2),val0_1(3),val0_2(3)
+!   integer                          :: n,nss,ntt ! Huristic Value
+!   double precision,allocatable     :: curve1_vals(:,:),curve2_vals(:,:)
+!   double precision,allocatable     :: ss(:),tt(:)
+!   logical                          :: brute_force
+!   ! Functions 
+!   double precision                 :: norm
+  
+!   max_inner_iter = 20
+!   ! Is 3 Good Here?? Huristic
+!   if (k1 == 2 .or. k2 == 2) then
+!      n = 100
+!   else
+!      n = 100
+!   end if
+!   brute_force = .False.
+
+!   nss = n1-k1+2 + (n1-k1+1)*n
+!   ntt = n2-k2+2 + (n2-k2+1)*n
+
+!   allocate (ss(nss),tt(ntt))
+!   allocate(curve1_vals(ndim,nss),curve2_vals(ndim,ntt))
+
+!   if (s < 0 .or. s > 1 .or. t < 0 .or. t > 1) then
+!      ! Do a brute force approach to get good starting point
+   
+   
+!      counter1 = 1
+!      do i=1,n1-k1+1
+!         if (i==1) then
+!            istart = 0
+!         else
+!            istart = 1
+!         end if
+!         do j=istart,n+1
+!            ss(counter1) = t1(i+k1-1) + (real(j)/(n+1)*(t1(i+k1)-t1(i+k1-1)))
+!            counter1 = counter1 + 1
+!         end do
+!      end do
+
+!      counter1 = 1
+!      do i=1,n2-k2+1
+!         if (i==1) then
+!            istart = 0
+!         else
+!            istart = 1
+!         end if
+!         do j=istart,n+1
+!            tt(counter1) = t2(i+k2-1) + (real(j)/(n+1)*(t2(i+k2)-t2(i+k2-1)))
+!            counter1 = counter1 + 1
+!         end do
+!      end do
+
+
+!      do i=1,nss
+!         call eval_curve(ss(i),t1,k1,coef1,n1,ndim,1,curve1_vals(:,i))
+!      end do
+
+!      do i=1,ntt
+!         call eval_curve(tt(i),t2,k2,coef2,n2,ndim,1,curve2_vals(:,i))
+!      end do
+     
+!      val0_1 = curve1_vals(:,1)
+!      val0_2 = curve2_vals(:,1)
+!      D0 = norm(val0_1-val0_2,ndim)
+!      s0 = ss(1)
+!      t0 = tt(1)
+!      do i = 1,nss
+!         do j = 1,ntt
+!            D = norm(curve1_vals(:,i)-curve2_vals(:,j),ndim)
+!            if (D<D0) then
+!               s0 = ss(i)
+!               t0 = tt(j)
+!               D0 = D
+!            end if
+!         end do
+!      end do
+!   else
+!      s0 = s
+!      t0 = t
+!      call eval_curve(s,t1,k1,coef1,n1,ndim,1,val1)
+!      call eval_curve(t,t2,k2,coef2,n2,ndim,1,val2)
+!      D0 = norm(val1-val2,ndim)
+!   end if
+
+!   ! Now we have s0 and t0 so we can do the newton iteration
+!   call eval_curve(s0,t1,k1,coef1,n1,ndim,1,val1)
+!   call eval_curve_deriv(s0,t1,k2,coef1,n1,ndim,deriv_c1)
+!   call eval_curve_deriv2(s0,t1,k2,coef1,n1,ndim,deriv2_c1)
+
+!   call eval_curve(t0,t2,k2,coef2,n2,ndim,1,val2)
+!   call eval_curve_deriv(t0,t2,k2,coef2,n2,ndim,deriv_c2)
+!   call eval_curve_deriv2(t0,t2,k2,coef2,n2,ndim,deriv2_c2)
+!   Diff = val1-val2
+!   s = s0
+!   t = t0
+
+!   iteration_loop: do i=1,niter
+!      ! Check the converge criteria -> coincidence
+!      if (norm(Diff,ndim) <= eps1) then
+!         print *,'exit1'
+!         exit iteration_loop
+!      end if
+
+!      ! Cosine convergence check
+
+!      if ( norm(dot_product(deriv_c1,Diff),ndim)/(norm(deriv_c1,ndim)*norm(Diff,ndim)) < eps2 .and. &
+!           norm(dot_product(deriv_c2,Diff),ndim)/(norm(deriv_c2,ndim)*norm(Diff,ndim)) < eps2) then
+!         print *,'exit2'
+!         exit iteration_loop
+!      end if
+!      s0 = s
+!      t0 = t
+
+!      if (i > 50) then
+!         print *,'i,s,t:',i,s,t
+!         print *,'delta:',delta
+!         print *,'diff:',diff
+!      end if
+!      call eval_curve(s,t1,k1,coef1,n1,ndim,1,val1)
+!      call eval_curve_deriv(s,t1,k2,coef1,n1,ndim,deriv_c1)
+!      call eval_curve_deriv2(s,t1,k2,coef1,n1,ndim,deriv2_c1)
+
+!      call eval_curve(t,t2,k2,coef2,n2,ndim,1,val2)
+!      call eval_curve_deriv(t,t2,k2,coef2,n2,ndim,deriv_c2)
+!      call eval_curve_deriv2(t,t2,k2,coef2,n2,ndim,deriv2_c2)
+
+!      Diff = val1-val2
+
+!      A(1,1) = norm(deriv_c1,ndim)**2 + dot_product(Diff,deriv2_c1)
+!      A(2,2) = -dot_product(deriv_c1,deriv_c2)
+!      A(2,1) = dot_product(deriv_c1,deriv_c2)
+!      A(2,2) = -norm(deriv_c2,ndim)**2 + dot_product(Diff,deriv2_c2)
+
+!      ki(1) = -dot_product(Diff,deriv_c1)
+!      ki(2) = -dot_product(Diff,deriv_c2)
+
+!      call solve_2by2(A,ki,delta)
+
+!      ! Bounds checking
+!      if (s+delta(1) < t1(1)) then
+!         delta(1) = t1(1)-s
+!      end if
+!      if (s+delta(1) > t1(n1+k1)) then
+!         delta(1) = t1(n1+k1) - s
+!      end if
+
+!      if (t+delta(2) < t2(1)) then
+!         delta(2) = t2(1)-t
+!      end if
+!      if (t+delta(2) > t2(n2+k2)) then
+!         delta(2) = t2(n2+k2) - t
+!      end if
+
+!      inner_loop: do j=1,max_inner_iter
+!         s = s0 + delta(1)
+!         t = t0 + delta(2)
+!         call eval_curve(s,t1,k1,coef1,n1,ndim,1,val1)
+!         call eval_curve(t,t2,k2,coef2,n2,ndim,1,val2)
+!         D2 = val1-val2
+!         if ((norm(D2,ndim)-norm(Diff,ndim)) .ge. eps1) then
+!            delta = 0.25*delta 
+!         else
+!            exit inner_loop
+!         end if
+!      end do inner_loop
+
+!      ! No change convergence Test
+!      if (norm( (s-s0)*deriv_c1 + (t-t0)*deriv_c2,ndim) <= eps1) then
+!         print *,'exit2'
+!         exit iteration_loop
+!      end if
+
+!   end do iteration_loop
+  
+!   print *, 'CD:',diff
+!   print *,'its:',i
+!   deallocate(curve1_vals,curve2_vals,ss,tt)
+
+! end subroutine curve_curve
+
+
 subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Diff)
 
   !*** DESCRIPTION
@@ -1075,12 +1307,17 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   double precision, intent(out)    :: Diff(ndim)
 
   ! Working
-  double precision                 :: val0(ndim),val1(ndim),val2(ndim)
-  double precision                 :: deriv_c1(ndim),deriv2_c1(ndim)
-  double precision                 :: deriv_c2(ndim),deriv2_c2(ndim)
-  integer                          :: i,j,ii,jj,max_inner_iter,counter1,istart
-  double precision                 :: D,D0,s0,t0,delta(2),D2(3)
-  double precision                 :: ki(2),A(2,2),val0_1(3),val0_2(3)
+  double precision :: val0(ndim),val1(ndim),val2(ndim)
+  double precision :: deriv_c1(ndim),deriv2_c1(ndim)
+  double precision :: deriv_c2(ndim),deriv2_c2(ndim)
+  integer          :: i,j,ii,jj,max_inner_iter,counter1,istart
+  double precision :: D,D0,s0,t0,delta(2),D2(3)
+  double precision :: ki(2),A(2,2),val0_1(3),val0_2(3)
+  double precision :: low(2), high(2), pt(2), R(2), ndist, fval, nfval, dist
+  double precision :: hessian(2,2), grad(2), wolfe, newpt(2), c, grad_norm
+  double precision :: pgrad, update(2), step, p_diff
+  logical :: flag, cflag
+  integer                          :: nline, m, idim
   integer                          :: n,nss,ntt ! Huristic Value
   double precision,allocatable     :: curve1_vals(:,:),curve2_vals(:,:)
   double precision,allocatable     :: ss(:),tt(:)
@@ -1089,12 +1326,7 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   double precision                 :: norm
   
   max_inner_iter = 20
-  ! Is 3 Good Here?? Huristic
-  if (k1 == 2 .or. k2 == 2) then
-     n = 100
-  else
-     n = 100
-  end if
+  n = 10 ! Extra precision on brute force search
   brute_force = .False.
 
   nss = n1-k1+2 + (n1-k1+1)*n
@@ -1105,8 +1337,6 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
 
   if (s < 0 .or. s > 1 .or. t < 0 .or. t > 1) then
      ! Do a brute force approach to get good starting point
-   
-   
      counter1 = 1
      do i=1,n1-k1+1
         if (i==1) then
@@ -1133,7 +1363,7 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
         end do
      end do
 
-
+     ! Evaluate the curve points to check:
      do i=1,nss
         call eval_curve(ss(i),t1,k1,coef1,n1,ndim,1,curve1_vals(:,i))
      end do
@@ -1165,89 +1395,152 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
      D0 = norm(val1-val2,ndim)
   end if
 
-  ! Now we have s0 and t0 so we can do the newton iteration
-  call eval_curve(s0,t1,k1,coef1,n1,ndim,1,val1)
-  call eval_curve_deriv(s0,t1,k2,coef1,n1,ndim,deriv_c1)
-  call eval_curve_deriv2(s0,t1,k2,coef1,n1,ndim,deriv2_c1)
+  low(1) = t1(1)
+  low(2) = t2(1)
+  high(1) = t1(n1+k1)
+  high(2) = t2(n2+k2)
 
-  call eval_curve(t0,t2,k2,coef2,n2,ndim,1,val2)
-  call eval_curve_deriv(t0,t2,k2,coef2,n2,ndim,deriv_c2)
-  call eval_curve_deriv2(t0,t2,k2,coef2,n2,ndim,deriv2_c2)
-  Diff = val1-val2
-  s = s0
-  t = t0
+  pt(1) = s0
+  pt(2) = t0
+
+  ! Number of line search iterations
+  nLine = 40
+  ! Tolerance for the strong wolfe line-search conditions
+  wolfe = 0.001
 
   iteration_loop: do i=1,niter
-     ! Check the converge criteria -> coincidence
-     if (norm(Diff,ndim) <= eps1) then
+
+     call eval_curve(pt(1),t1,k1,coef1,n1,ndim,1,val1)
+     call eval_curve_deriv(pt(1),t1,k2,coef1,n1,ndim,deriv_c1)
+     call eval_curve_deriv2(pt(1),t1,k2,coef1,n1,ndim,deriv2_c1)
+     
+     call eval_curve(pt(2),t2,k2,coef2,n2,ndim,1,val2)
+     call eval_curve_deriv(pt(2),t2,k2,coef2,n2,ndim,deriv_c2)
+     call eval_curve_deriv2(pt(2),t2,k2,coef2,n2,ndim,deriv2_c2)
+
+     ! Distance is R, "function value" fval is what we minimize
+     R = val1-val2
+     nDist = norm(R,2)
+     fval = 0.5*nDist**2
+
+    ! Calculate the Gradient
+     grad(1) = dot_product(R,deriv_c1)
+     grad(2) = dot_product(R,-deriv_c2)
+
+     ! Calculate the Hessian
+
+     hessian(1,1) = dot_product(deriv_c1,deriv_c1) + dot_product(R, deriv2_c1)
+     hessian(1,2) = dot_product(deriv_c1,-deriv_c2)
+     hessian(2,1) = hessian(1,2)
+     hessian(2,2) = dot_product(-deriv_c2,-deriv_c2) + dot_product(R, -deriv2_c2)
+
+     ! Bounds Checking
+     if (i > 1) then
+        do iDim=1,2
+           flag = .False.
+           if (pt(iDim) < low(iDim)+eps1 .and. grad(iDim) >= 0.0) then
+              flag = .True.
+              pt(iDim) = low(iDim)
+           end if
+           
+           if (pt(iDim) > high(iDim)-eps1 .and. grad(iDim) <= 0.0) then
+              flag = .True.
+              pt(iDim) = high(iDim)
+           end if
+           
+           if ( flag ) then
+              grad(iDim) = 0.0
+              hessian(:,iDim) = 0.0
+              hessian(iDim,:) = 0.0
+              hessian(iDim,iDim) = 1.0
+           end if
+        end do
+     end if
+
+     ! Check the norm of the gradient
+     grad_norm = norm(grad,2)
+     if (grad_norm < eps1) then
         exit iteration_loop
      end if
 
-     ! Cosine convergence check
+     ! Invert the hessian, compute the update and the projected gradient
+     call solve_2by2(hessian,grad,update)
+     update = -update
+     pgrad = dot_product(update,grad)
 
-     if ( norm(dot_product(deriv_c1,Diff),ndim)/(norm(deriv_c1,ndim)*norm(Diff,ndim)) < eps2 .and. &
-          norm(dot_product(deriv_c2,Diff),ndim)/(norm(deriv_c2,ndim)*norm(Diff,ndim)) < eps2) then
-        exit iteration_loop
+     !Check that this is a descent direction - 
+     !otherwise use the negative gradient    
+     if ( pgrad >= 0.0 ) then
+        update = -grad/norm(grad,2)
+        pgrad = dot_product(update,grad)
      end if
-     s0 = s
-     t0 = t
+     
+     step = 1.0
+     nDist = 0.0
+   
+     lineloop: do m=1,nLine
+        newpt = pt + step * update
+        cflag = .False. ! Check if the constraints are applied
+        ! Check if the new point exceeds the bounds
+        do iDim=1,2
+           if (newpt(iDim) > high(iDim)) then
+              cflag = .True.
+              newpt(iDim) = high(iDim)
+           else if (newpt(iDim) < low(iDim)) then
+              cflag = .True.
+              newpt(iDim) = low(iDim)
+           end if
+        end do
+           
+        ! Re-evaluate new position
+        call eval_curve(newPt(1),t1,k1,coef1,n1,ndim,1,val1)
+        call eval_curve(newPt(2),t2,k2,coef2,n2,ndim,1,val2)
 
-     call eval_curve(s,t1,k1,coef1,n1,ndim,1,val1)
-     call eval_curve_deriv(s,t1,k2,coef1,n1,ndim,deriv_c1)
-     call eval_curve_deriv2(s,t1,k2,coef1,n1,ndim,deriv2_c1)
-
-     call eval_curve(t,t2,k2,coef2,n2,ndim,1,val2)
-     call eval_curve_deriv(t,t2,k2,coef2,n2,ndim,deriv_c2)
-     call eval_curve_deriv2(t,t2,k2,coef2,n2,ndim,deriv2_c2)
-
-     Diff = val1-val2
-
-     A(1,1) = norm(deriv_c1,ndim)**2 + dot_product(Diff,deriv2_c1)
-     A(2,2) = -dot_product(deriv_c1,deriv_c2)
-     A(2,1) = dot_product(deriv_c1,deriv_c2)
-     A(2,2) = -norm(deriv_c2,ndim)**2 + dot_product(Diff,deriv2_c2)
-
-     ki(1) = -dot_product(Diff,deriv_c1)
-     ki(2) = -dot_product(Diff,deriv_c2)
-
-     call solve_2by2(A,ki,delta)
-
-     ! Bounds checking
-     if (s+delta(1) < t1(1)) then
-        delta(1) = t1(1)-s
-     end if
-     if (s+delta(1) > t1(n1+k1)) then
-        delta(1) = t1(n1+k1) - s
-     end if
-
-     if (t+delta(2) < t2(1)) then
-        delta(2) = t2(1)-t
-     end if
-     if (t+delta(2) > t2(n2+k2)) then
-        delta(2) = t2(n2+k2) - t
-     end if
-
-     inner_loop: do j=1,max_inner_iter
-        s = s0 + delta(1)
-        t = t0 + delta(2)
-        call eval_curve(s,t1,k1,coef1,n1,ndim,1,val1)
-        call eval_curve(t,t2,k2,coef2,n2,ndim,1,val2)
-        D2 = val1-val2
-        if ((norm(D2,ndim)-norm(Diff,ndim)) .ge. eps1) then
-           delta = 0.5*delta 
-        else
-           exit inner_loop
+        ! Check if the new function value is lower, 
+        ! otherwise adjust the step size
+        R = val1 - val2
+        ndist = norm(R,2)
+        nfval = 0.5*ndist**2
+     
+        ! Check if the new point satisfies the wolfe condition
+        if ( nfval < fval + pgrad * wolfe * step ) then
+           dist = ndist
+           exit lineloop
         end if
-     end do inner_loop
 
-     ! No change convergence Test
-     if (norm( (s-s0)*deriv_c1 + (t-t0)*deriv_c2,ndim) <= eps1) then
-        exit iteration_loop
+        ! Calculate the new step length
+        if ( cflag ) then
+           ! If the constraints are applied - and the new point
+           ! doesn't satisfy the Wolfe conditions, it doesn't make
+           ! sense to apply a quadratic approximation
+           step = 0.25 * step
+        else
+           ! c = nfval - fval - pgrad * step is always positive since
+           ! nfval - fval > pgrad * wolfe * step > pgrad * step
+           c = ( ( nfval - fval ) - pgrad * step )
+           step = - step * step * pgrad/( 2.0 * c ) 
+           ! This update is always less than the original step length
+        end if
+     end do lineloop
+     
+     if ( m == nline ) then
+        dist = ndist
+     else
+        ! Check if there has been no change in the coordinates
+        p_diff = norm(pt-newpt,2)
+        if (p_diff < eps1) then
+           exit Iteration_loop
+        end if
      end if
-
+     
+     pt = newpt
   end do iteration_loop
 
+  s = pt(1)
+  t = pt(2)
+  diff = R
   deallocate(curve1_vals,curve2_vals,ss,tt)
+
 
 end subroutine curve_curve
 
@@ -1819,7 +2112,7 @@ function dotproduct(x1,x2,n)
   end do
 
 end function dotproduct
-  
+
 function ndp(x1,x2,n)
   ! Compute norm of the dot_product
   implicit none
