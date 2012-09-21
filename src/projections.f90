@@ -1313,9 +1313,9 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   integer          :: i,j,ii,jj,max_inner_iter,counter1,istart
   double precision :: D,D0,s0,t0,delta(2),D2(3)
   double precision :: ki(2),A(2,2),val0_1(3),val0_2(3)
-  double precision :: low(2), high(2), pt(2), R(2), ndist, fval, nfval, dist
+  double precision :: low(2), high(2), pt(2), R(ndim), ndist, fval, nfval, dist
   double precision :: hessian(2,2), grad(2), wolfe, newpt(2), c, grad_norm
-  double precision :: pgrad, update(2), step, p_diff
+  double precision :: pgrad, update(2), step, p_diff, idet
   logical :: flag, cflag
   integer                          :: nline, m, idim
   integer                          :: n,nss,ntt ! Huristic Value
@@ -1326,7 +1326,7 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   double precision                 :: norm
   
   max_inner_iter = 20
-  n = 10 ! Extra precision on brute force search
+  n = 25 ! Extra precision on brute force search
   brute_force = .False.
 
   nss = n1-k1+2 + (n1-k1+1)*n
@@ -1420,7 +1420,7 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
 
      ! Distance is R, "function value" fval is what we minimize
      R = val1-val2
-     nDist = norm(R,2)
+     nDist = norm(R,nDim)
      fval = 0.5*nDist**2
 
     ! Calculate the Gradient
@@ -1435,39 +1435,40 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
      hessian(2,2) = dot_product(-deriv_c2,-deriv_c2) + dot_product(R, -deriv2_c2)
 
      ! Bounds Checking
-     if (i > 1) then
-        do iDim=1,2
-           flag = .False.
-           if (pt(iDim) < low(iDim)+eps1 .and. grad(iDim) >= 0.0) then
-              flag = .True.
-              pt(iDim) = low(iDim)
-           end if
-           
-           if (pt(iDim) > high(iDim)-eps1 .and. grad(iDim) <= 0.0) then
-              flag = .True.
-              pt(iDim) = high(iDim)
-           end if
-           
-           if ( flag ) then
-              grad(iDim) = 0.0
-              hessian(:,iDim) = 0.0
-              hessian(iDim,:) = 0.0
-              hessian(iDim,iDim) = 1.0
-           end if
-        end do
-     end if
+     do iDim=1,2
+        flag = .False.
+        if (pt(iDim) < low(iDim)+eps1 .and. grad(iDim) >= 0.0) then
+           flag = .True.
+           pt(iDim) = low(iDim)
+        end if
+        
+        if (pt(iDim) > high(iDim)-eps1 .and. grad(iDim) <= 0.0) then
+           flag = .True.
+           pt(iDim) = high(iDim)
+        end if
+        
+        if ( flag ) then
+           grad(iDim) = 0.0
+           hessian(:,iDim) = 0.0
+           hessian(iDim,:) = 0.0
+           hessian(iDim,iDim) = 1.0
+        end if
+     end do
 
      ! Check the norm of the gradient
      grad_norm = norm(grad,2)
+
      if (grad_norm < eps1) then
         exit iteration_loop
      end if
 
+
      ! Invert the hessian, compute the update and the projected gradient
      call solve_2by2(hessian,grad,update)
+
      update = -update
      pgrad = dot_product(update,grad)
-
+ 
      !Check that this is a descent direction - 
      !otherwise use the negative gradient    
      if ( pgrad >= 0.0 ) then
@@ -1499,7 +1500,7 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
         ! Check if the new function value is lower, 
         ! otherwise adjust the step size
         R = val1 - val2
-        ndist = norm(R,2)
+        ndist = norm(R,ndim)
         nfval = 0.5*ndist**2
      
         ! Check if the new point satisfies the wolfe condition
@@ -1540,7 +1541,6 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   t = pt(2)
   diff = R
   deallocate(curve1_vals,curve2_vals,ss,tt)
-
 
 end subroutine curve_curve
 
@@ -1832,11 +1832,11 @@ subroutine solve_2by2(A,b,x)
   ! Solve a 2 x 2 system  -- With NO checking
   double precision, intent(in) :: A(2,2),b(2)
   double precision, intent(out) :: x(2)
-  double precision         :: idet
+  double precision         :: IPIV(2)
+  integer :: info
 
-  idet = 1/(A(1,1)*A(2,2)-A(1,2)*A(2,1))
-  x(1) = idet*(A(2,2)*b(1) - A(1,2)*b(2))
-  x(2) = idet*(-A(2,1)*b(1) + A(1,1)*b(2))
+  call DGESV(2, 1, A, 2, IPIV, B, 2, INFO )
+  X = B
 
 end subroutine solve_2by2
 
