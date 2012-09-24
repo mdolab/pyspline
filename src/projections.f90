@@ -1832,11 +1832,18 @@ subroutine solve_2by2(A,b,x)
   ! Solve a 2 x 2 system  -- With NO checking
   double precision, intent(in) :: A(2,2),b(2)
   double precision, intent(out) :: x(2)
-  double precision         :: IPIV(2)
+  double precision         :: IPIV(2), idet, det
   integer :: info
 
-  call DGESV(2, 1, A, 2, IPIV, B, 2, INFO )
-  X = B
+
+  det = A(1,1)*A(2,2)-A(1,2)*A(2,1)
+  if (det == 0) then
+     X = B
+  else
+     idet = 1.0/det
+     X(1) = idet*(B(1)*A(2,2) - B(2)*A(1,2))
+     X(2) = idet*(A(1,1)*B(2) - B(1)*A(2,1))
+  end if
 
 end subroutine solve_2by2
 
