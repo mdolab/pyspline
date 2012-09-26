@@ -28,25 +28,6 @@ extern "C" {
 			int * NX, int * NY, int * NZ, 
 			int * KX, int * KY, int * KZ,
 			double * BCOEF, double * WORK );
-
-  extern TacsComplex cbvalu_( double * TX, TacsComplex * BCOEF, 
-			      int * NX, int * KX, 
-			      int * IDX, double * XVAL, int * INBV,
-			      TacsComplex * WORK );  
-
-  extern TacsComplex cb2val_( double * XVAL, double * YVAL, 
-			      int * IDX, int * IDY, 
-			      double * TX, double * TY, 
-			      int * NX, int * NY, 
-			      int * KX, int * KY, 
-			      TacsComplex * BCOEF, TacsComplex * WORK );
-  
-  extern TacsComplex cb3val_( double * XVAL, double * YVAL, double * ZVAL,
-			      int * IDX, int * IDY, int * IDZ,
-			      double * TX, double * TY, double * TZ,
-			      int * NX, int * NY, int * NZ, 
-			      int * KX, int * KY, int * KZ,
-			      TacsComplex * BCOEF, TacsComplex * WORK );
 #ifdef __cplusplus
 }
 #endif

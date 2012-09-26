@@ -43,9 +43,6 @@ except:
 import pyspline
 from mdo_import_helper import mpiPrint, import_modules
 exec(import_modules('geo_utils'))
-sys.path.append('/nfs/mica/home/kenway/hg/pyGeo')
-import geo_utils
-USE_TECIO = pyspline.tecplot_test()
 
 # ===========================================================================
 def writeTecplot1D(handle, name, data):
@@ -58,20 +55,17 @@ def writeTecplot1D(handle, name, data):
         None
 
     """
-    if handle is not None:
-        nx = data.shape[0]
-        ndim = data.shape[1]
-        handle.write('Zone T=\"%s\" I=%d\n'%(name, nx))
-        handle.write('DATAPACKING=POINT\n')
-        for i in xrange(nx):
-            for idim in xrange(ndim):
-                handle.write('%f '%(data[i, idim]))
-            # end for
-            handle.write('\n')
+    nx = data.shape[0]
+    ndim = data.shape[1]
+    handle.write('Zone T=\"%s\" I=%d\n'%(name, nx))
+    handle.write('DATAPACKING=POINT\n')
+    for i in xrange(nx):
+        for idim in xrange(ndim):
+            handle.write('%f '%(data[i, idim]))
         # end for
-    else:
-        pyspline.i_ordered(name, data)
-    # end if
+        handle.write('\n')
+    # end for
+
     return
 
 def writeTecplot2D(handle, name, data):
@@ -84,23 +78,19 @@ def writeTecplot2D(handle, name, data):
         None
 
     """
-    if handle != None:
-        nx = data.shape[0]
-        ny = data.shape[1]
-        ndim = data.shape[2]
-        handle.write('Zone T=\"%s\" I=%d J=%d\n'%(name, nx, ny))
-        handle.write('DATAPACKING=POINT\n')
-        for j in xrange(ny):
-            for i in xrange(nx):
-                for idim in xrange(ndim):
-                    handle.write('%20.16g '%(data[i, j, idim]))
-                # end for
-                handle.write('\n')
+    nx = data.shape[0]
+    ny = data.shape[1]
+    ndim = data.shape[2]
+    handle.write('Zone T=\"%s\" I=%d J=%d\n'%(name, nx, ny))
+    handle.write('DATAPACKING=POINT\n')
+    for j in xrange(ny):
+        for i in xrange(nx):
+            for idim in xrange(ndim):
+                handle.write('%20.16g '%(data[i, j, idim]))
             # end for
+            handle.write('\n')
         # end for
-    else:
-        pyspline.ij_ordered(name, data)
-    # end if
+    # end for
 
     return
 
@@ -114,26 +104,24 @@ def writeTecplot3D(handle, name, data):
         None
 
     """
-    if handle != None:
-        nx = data.shape[0]
-        ny = data.shape[1]
-        nz = data.shape[2]
-        ndim = data.shape[3]
-        handle.write('Zone T=\"%s\" I=%d J=%d K=%d\n'%(name, nx, ny, nz))
-        handle.write('DATAPACKING=POINT\n')
-        for k in xrange(nz):
-            for j in xrange(ny):
-                for i in xrange(nx):
-                    for idim in xrange(ndim):
-                        handle.write('%f '%(data[i, j, k, idim]))
-                    # end for
-                    handle.write('\n')
-                # end for 
-            # end for
+
+    nx = data.shape[0]
+    ny = data.shape[1]
+    nz = data.shape[2]
+    ndim = data.shape[3]
+    handle.write('Zone T=\"%s\" I=%d J=%d K=%d\n'%(name, nx, ny, nz))
+    handle.write('DATAPACKING=POINT\n')
+    for k in xrange(nz):
+        for j in xrange(ny):
+            for i in xrange(nx):
+                for idim in xrange(ndim):
+                    handle.write('%f '%(data[i, j, k, idim]))
+                # end for
+                handle.write('\n')
+            # end for 
         # end for
-    else:
-        pyspline.ijk_ordered(name, data)
-    # end if
+    # end for
+
     return
 
 def _writeHeader(f, ndim):
@@ -146,7 +134,7 @@ def _writeHeader(f, ndim):
         f.write ('VARIABLES = "X", "Y","Z"\n')
     # end if
 
-def openTecplot(file_name, ndim, tecio=USE_TECIO):
+def openTecplot(file_name, ndim):
     """A Generic function to open a Tecplot file to write spatial data.
     Input:
         file_name, str: file name to open
@@ -159,26 +147,15 @@ def openTecplot(file_name, ndim, tecio=USE_TECIO):
         f: file handle to file. This can be then used with
         writeTecplot{1,2,3}D. If TECIO is ueed, it is None
     """
-    if tecio:
-        mpiPrint('Opening binary Tecplot File: %s'%(file_name))
-        pyspline.open_tecplot(file_name, ndim)
-        f = None
-    else:
-        mpiPrint('Opening ascii Tecplot File: %s'%(file_name))
-        f = open(file_name, 'w')
-        _writeHeader(f, ndim)
-    # end if
+    mpiPrint('Opening ascii Tecplot File: %s'%(file_name))
+    f = open(file_name, 'w')
+    _writeHeader(f, ndim)
 
     return f
 
 def closeTecplot(f):
     """ Close Tecplot file opened with openTecplot"""
-
-    if f == None:
-        pyspline.close_tecplot()
-    else:
-        f.close()
-    #end if
+    f.close()
     
     return 
 
@@ -276,7 +253,7 @@ class curve(object):
         self.length = None
         self.gpts = None
 
-        # We have a create class:
+        # We have provided information to create curve directly
         if 'k' in kwargs and 't' in kwargs and 'coef' in kwargs: 
             self.s = None
             self.X = None
@@ -594,7 +571,7 @@ scipy is used.')
         u = geo_utils.checkInput(u, 'u', float, 0)
         r = geo_utils.checkInput(r, 'r', int, 0)
         
-        t_new, coef_new, break_pt = pyspline.insertknot(
+        r, t_new, coef_new, break_pt = pyspline.insertknot(
             u, r, self.t, self.k, self.coef.T)
         self.t = t_new
         self.coef = coef_new.T
@@ -621,11 +598,11 @@ scipy is used.')
         r, t_new, coef_new, break_pt = pyspline.insertknot(
             u, self.k-1, self.t, self.k, self.coef.T)
         coef_new = coef_new.T
-
+            
         # r is the number of time the knot was actually added
         s = self.k-1-r # Back out the multiplicity of the point
         break_pt = break_pt - s
-
+        
         # -------- Process the Knot Vectors--------
         t1 = numpy.zeros(break_pt + self.k)
         t2 = numpy.zeros(self.Nctl+2*self.k-break_pt-s)
@@ -813,7 +790,7 @@ scipy is used.')
                                     eps1, eps2, s, t)
 
     def writeTecplot(self, file_name, curve=True, coef=True, orig=True, 
-                     tecio=USE_TECIO, size=0.1):
+                     size=0.1):
         """
         Write the cuve to a tecplot dat file
         Required Arguments:
@@ -1269,6 +1246,175 @@ MUST be defined for task lms or interpolate'
         """
         return self.getValue(u, v)
 
+    def insertUKnot(self, u, r):
+        """
+        Insert at knot in tu at u
+        Required:
+            u : Parametric position to split at
+            r : The number of times to insert the knot
+        Returns: r, the number of times the knot was actually added
+        """
+
+        u = geo_utils.checkInput(u, 'u', float, 0)
+        r = geo_utils.checkInput(r, 'r', int, 0)
+        if u == 0.0:
+            return 
+        if u == 1.0:
+            return
+        
+        # This is relatively inefficient, but we'll do it for
+        # simplicity just call insertknot for each slice in the
+        # v-direction:
+
+        # Insert once to know how many times it was actually inserted
+        # so we know how big to make the new coef:
+        r, t_new, coef_new, break_pt = pyspline.insertknot(
+            u, r, self.tu, self.ku, self.coef[:,0].T)
+        new_coef = numpy.zeros((self.Nctlu + r, self.Nctlv, self.nDim))
+
+        for j in xrange(self.Nctlv):
+            r, t_new, coef_slice, break_pt = pyspline.insertknot(
+                u, r, self.tu, self.ku, self.coef[:,j].T)
+            new_coef[:,j] = coef_slice.T
+        self.tu = t_new
+        self.Nctlu = self.Nctlu + r
+        self.coef = new_coef
+
+        return r, break_pt
+
+    def insertVKnot(self, v, r):
+        """
+        Insert at knot in tu at u
+        Required:
+            v : Parametric position to split at
+            r : The number of times to insert the knot
+        Returns: r, the number of times the knot was actually added
+            """
+        v = geo_utils.checkInput(v, 'v', float, 0)
+        r = geo_utils.checkInput(r, 'r', int, 0)
+        
+        # This is relatively inefficient, but we'll do it for
+        # simplicity just call insertknot for each slice in the
+        # u-direction:
+
+        # Insert once to know how many times it was actually inserted
+        # so we know how big to make the new coef:
+        r, t_new, coef_new, break_pt = pyspline.insertknot(
+            v, r, self.tv, self.kv, self.coef[0,:].T)
+        new_coef = numpy.zeros((self.Nctlu, self.Nctlv+r, self.nDim))
+
+        for i in xrange(self.Nctlu):
+            r, t_new, coef_slice, break_pt = pyspline.insertknot(
+                v, r, self.tv, self.kv, self.coef[i,:].T)
+            new_coef[i,:] = coef_slice.T
+        self.tv = t_new
+        self.Nctlv = self.Nctlv + r
+        self.coef = new_coef
+
+        return r, break_pt
+
+    def splitSurfaceU(self, u):
+        """
+        Split surface into two surfaces at parametric location u
+        Required: 
+            u : Parametric position to split at
+
+        Returns: surf1 and surf2, two pyspline surfaces. surf1
+        is the lower part and surf2 is the upper part. 
+        """
+
+        # Special case the start and end
+        if u == 0.0:
+            return None, surface(tu=self.tu.copy(), tv=self.tv.copy(),
+                                 ku=self.ku, kv=self.kv, coef=self.coef.copy())
+        if u == 1.0:
+            return surface(tu=self.tu.copy(), tv=self.tv.copy(),
+                           ku=self.ku, kv=self.kv, coef=self.coef.copy()), None
+        
+        r, break_pt = self.insertUKnot(u, self.ku-1)
+
+        # r is the number of time the knot was actually added
+        s = self.ku-1-r # Back out the multiplicity of the point
+        break_pt = break_pt - s
+
+        # -------- Process the Knot Vectors--------
+        t1 = numpy.hstack((self.tu[0:break_pt+self.ku-1-s].copy(),u))/u
+        t2 = (numpy.hstack((u,self.tu[break_pt:].copy()))-u)/(1.0-u)
+
+        # ------- Proces the Coefficient Arrays
+        coef1 = self.coef[:break_pt,:,:].copy()
+        coef2 = self.coef[break_pt-1:,:,:].copy()
+
+        return surface(tu=t1, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef1),\
+            surface(tu=t2, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef2)
+
+
+    def splitSurfaceV(self, v):
+        """
+        Split surface into two surfaces at parametric location v
+        Required: 
+            v : Parametric position to split at
+
+        Returns: surf1 and surf2, two pyspline surfaces. surf1
+        is the lower part and surf2 is the upper part. 
+        """
+
+        # Special case the start and end
+        if v == 0.0:
+            return None, surface(tu=self.tu.copy(), tv=self.tv.copy(),
+                                 ku=self.ku, kv=self.kv, coef=self.coef.copy())
+        if v == 1.0:
+            return surface(tu=self.tu.copy(), tv=self.tv.copy(),
+                           ku=self.ku, kv=self.kv, coef=self.coef.copy()), None
+        
+
+        r, break_pt = self.insertVKnot(v, self.kv-1)
+        
+        # r is the number of time the knot was actually added
+        s = self.kv-1-r # Back out the multiplicity of the point
+        break_pt = break_pt - s
+
+        # -------- Process the Knot Vectors--------
+        t1 = numpy.hstack((self.tv[0:break_pt+self.kv-1-s].copy(),v))/v
+        t2 = (numpy.hstack((v,self.tv[break_pt:].copy()))-v)/(1.0-v)
+
+        # ------- Proces the Coefficient Arrays
+        coef1 = self.coef[:,:break_pt,:].copy()
+        coef2 = self.coef[:,break_pt-1:,:].copy()
+        
+        return surface(tu=self.tu, tv=t1, ku=self.ku, kv=self.kv, coef=coef1),\
+            surface(tu=self.tu, tv=t2, ku=self.ku, kv=self.kv, coef=coef2)
+
+
+    def windowSurface(self, uvLow, uvHigh):
+        """Create a surface that is windowed by the rectangular
+        parametric range defined by uvLow and uvHigh. 
+        Required: 
+
+            uvLow: array or list of length two defining u-v coordintes
+            of bottom left corner of parametric box
+
+            uvHihg: array of list of length two definign u-v coordines
+            of top right corner of parametric box
+
+        Returns: pySpline surface defined on box interior
+
+        """
+
+        # Do u-low split:
+        dummy, surf = self.splitSurfaceU(uvLow[0])
+
+        # Do u-high split (and re-normalize the split coordinate)
+        surf, dummy = surf.splitSurfaceU((uvHigh[0]-uvLow[0])/(1.0-uvLow[0]))
+
+        # Do v-low split:
+        dummy, surf = surf.splitSurfaceV(uvLow[1])
+
+        # Do v-high split (and re-normalize the split coordinate)
+        surf, dummy = surf.splitSurfaceV((uvHigh[1]-uvLow[1])/(1.0-uvLow[1]))
+
+        return surf
+        
     def getValue(self, u, v):
         """Get the value at the surface point(s) u, v
         Required Arguments:
@@ -1587,7 +1733,7 @@ MUST be defined for task lms or interpolate'
         handle.write('bspline\n')
 
         # Sizes and Order
-        handle.write('%d,%d,%d,%d,0\n'%(self.Nctlu,self.Nctlv,self.ku,self.kv))
+        handle.write('%d,%d,%d,%d,0\n'%(self.Nctlu, self.Nctlv, self.ku, self.kv))
 
         # U - Knot Vector
         for i in xrange(len(self.tu)):
@@ -1609,6 +1755,7 @@ MUST be defined for task lms or interpolate'
         # end for
 
         return 
+
 class volume(object):
 
     def __init__(self, recompute=True, **kwargs):
@@ -1896,6 +2043,7 @@ MUST be defined for task lms or interpolate'
      
         self._setFaceSurfaces()
         self._setEdgeCurves()
+    
         return
     
     def _setCoefSize(self):
@@ -2262,53 +2410,54 @@ MUST be defined for task lms or interpolate'
         Returns:
            values: An array of size (shape(u), nDim)
            """
+
         if edge == 0:
             u = s
-            v = 0
-            w = 0
+            v = self.vmin
+            w = self.wmin
         elif edge == 1:
             u = s
-            v = 1
-            w = 0
+            v = self.vmax
+            w = self.wmin
         elif edge == 2:
-            u = 0
+            u = self.umin
             v = s
-            w = 0
+            w = self.wmax
         elif edge == 3:
-            u = 1
+            u = self.umax
             v = s
-            w = 0
+            w = self.umin
         elif edge == 4:
             u = s
-            v = 0
-            w = 1
+            v = self.vmin
+            w = self.wmax
         elif edge == 5:
             u = s
-            v = 1
-            w = 1
+            v = self.vmax
+            w = self.wmax
         elif edge == 6:
-            u = 0
+            u = self.umin
             v = s
-            w = 1
+            w = self.wmax
         elif edge == 7:
-            u = 1
+            u = self.umax
             v = s
-            w = 1
+            w = self.wmax
         elif edge == 8:
-            u = 0
-            v = 0
+            u = self.umin
+            v = self.vmin
             w = s
         elif edge == 9:
-            u = 1
-            v = 0
+            u = self.umax
+            v = self.vmin
             w = s
         elif edge == 10:
-            u = 0
-            v = 1
+            u = self.umin
+            v = self.vmax
             w = s
         elif edge == 11:
-            u = 1
-            v = 1
+            u = self.umax
+            v = self.vamx
             w = s
 
         u = numpy.atleast_3d(u).T
@@ -2443,15 +2592,18 @@ MUST be defined for task lms or interpolate'
                              self.ku, self.kv, self.kw])
         if binary:
             init_values.tofile(handle, sep="")
+
             # Knot Vectors
             self.tu.tofile(handle, sep="")
             self.tv.tofile(handle, sep="")
             self.tw.tofile(handle, sep="")
+
             # Control Points
             self.coef.flatten().tofile(handle)
         else:
             init_values.tofile(handle, sep="\n", format="%d")
             handle.write('\n')
+
             # Knot Vectors
             self.tu.tofile(handle, sep="\n", format="%f")
             handle.write('\n')
@@ -2459,6 +2611,7 @@ MUST be defined for task lms or interpolate'
             handle.write('\n')
             self.tw.tofile(handle, sep="\n", format="%f")
             handle.write('\n')
+
             # Control Points
             self.coef.flatten().tofile(handle, sep="\n", format="%f")
             handle.write('\n')
@@ -2529,7 +2682,8 @@ def trilinear_volume(*args):
  trilinear  volume')
         sys.exit(1)
     # end if
-
+    
+    return
 
 def bilinear_surface(*args):
     """This is short-cut function to create a bilinear surface

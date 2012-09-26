@@ -197,8 +197,6 @@ subroutine constr_jac(A_val,A_row_ptr,A_col_ind,B_val,B_row_ptr,B_col_ind,C_val,
   end do
 end subroutine constr_jac
 
-
-
 function poly_length(X,n,ndim)
   ! Compute the length of the spatial polygon
   implicit none

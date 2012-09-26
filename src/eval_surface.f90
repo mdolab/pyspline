@@ -1,42 +1,44 @@
-subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
+subroutine eval_surface(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, &
+     n, m, val)
 
   !***DESCRIPTION
   !
   !     Written by Gaetan Kenway
   !
-  !     Abstract eval_surface_M is a matrix version of eval_surface
+  !     Abstract eval_surface evaluates (possibly) many points on the surface
   !
   !     Description of Arguments
   !     Input
   !     u       - Real, u coordinate, size(m,n)
   !     v       - Real, v coordinate, size(m,n)
-  !     tu      - Real,Knot vector in u. Length nctlu+ku
-  !     tv      - Real,Knot vector in v. Length nctlv+kv
+  !     tu      - Real, Knot vector in u. size(nctlu+ku)
+  !     tv      - Real, Knot vector in v. size(nctlv+kv)
   !     ku      - Integer, order of B-spline in u
   !     kv      - Integer, order of B-spline in v
-  !     coef    - Real,Array of B-spline coefficients  Size (idim,nctlv,nctlu)
-  !     nctlu   - Integer,Number of control points in u
-  !     nctlv   - Integer,Number of control points in v
+  !     coef    - Real, Array of B-spline coefficients  Size (ndim,nctlv,nctlu)
+  !     nctlu   - Integer, Number of control points in u
+  !     nctlv   - Integer, Number of control points in v
   !     ndim    - Integer, Spatial Dimension
   !
   !     Ouput 
-  !     val     - Real, Evaluated point, size (ndim,m,n)
+  !     val     - Real, Evaluated point(s), size (ndim,m,n)
 
   implicit none
+
   ! Input
-  integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,n,m
-  double precision, intent(in)          :: u(m,n),v(m,n)
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
-  double precision, intent(in)          :: coef(ndim,nctlv,nctlu)
+  integer         , intent(in)    :: ku,kv,nctlu,nctlv,ndim,n,m
+  double precision, intent(in)    :: u(m,n),v(m,n)
+  double precision, intent(in)    :: tu(nctlu+ku),tv(nctlv+kv)
+  double precision, intent(in)    :: coef(ndim,nctlv,nctlu)
 
   ! Output
-  double precision, intent(out)         :: val(ndim,m,n)
+  double precision, intent(out)   :: val(ndim,m,n)
 
   ! Working
-  integer                               :: idim,istartu,istartv,i,j,ii,jj
-  integer                               :: ileftu,ilou,mflagu
-  integer                               :: ileftv,ilov,mflagv
-  double precision                      :: basisu(ku),basisv(kv)
+  integer                         :: idim,istartu,istartv,i,j,ii,jj
+  integer                         :: ileftu,ilou,mflagu
+  integer                         :: ileftv,ilov,mflagv
+  double precision                :: basisu(ku),basisv(kv)
 
   ilou = 1
   ilov = 1
@@ -71,30 +73,31 @@ subroutine eval_surface(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,n,m,val)
 
 end subroutine eval_surface
 
-subroutine eval_surface_deriv(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
+subroutine eval_surface_deriv(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, &
+     ndim, val)
 
   !***DESCRIPTION
   !
   !     Written by Gaetan Kenway
   !
-  !     Abstract eval_surface_deriv evaluates the directional
-  !     derivatives on surface (scalar version)
+  !     Abstract eval_surface_deriv evaluates the derivative of a
+  !     point on the surface
   !
   !     Description of Arguments
   !     Input
   !     u       - Real, u coordinate
   !     v       - Real, v coordinate
-  !     tu      - Real,Knot vector in u. Length nctlu+ku
-  !     tv      - Real,Knot vector in v. Length nctlv+kv
+  !     tu      - Real, Knot vector in u. size(nctlu+ku)
+  !     tv      - Real, Knot vector in v. size(nctlv+kv)
   !     ku      - Integer, order of B-spline in u
   !     kv      - Integer, order of B-spline in v
-  !     coef    - Real,Array of B-spline coefficients  Size (ndim,nctlv,nctlu)
-  !     nctlu   - Integer,Number of control points in u
-  !     nctlv   - Integer,Number of control points in v
+  !     coef    - Real, Array of B-spline coefficients  Size (ndim,nctlv,nctlu)
+  !     nctlu   - Integer, Number of control points in u
+  !     nctlv   - Integer, Number of control points in v
   !     ndim    - Integer, Spatial Dimension
   !
   !     Ouput 
-  !     val     - Real, Evaluated derivatives (du,dv), size (ndim,2)
+  !     val     - Real, Evaluated derivatives, size (ndim,2)
 
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim
@@ -119,28 +122,29 @@ end subroutine eval_surface_deriv
 
 subroutine eval_surface_deriv2(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
 
+
   !***DESCRIPTION
   !
   !     Written by Gaetan Kenway
   !
-  !     Abstract eval_surface_deriv2 evaluates the 2nd directional
-  !     derivatives on surface (scalar version)
+  !     Abstract eval_surface_deriv2 evaluates the second derivative
+  !     of a point on the surface
   !
   !     Description of Arguments
   !     Input
   !     u       - Real, u coordinate
   !     v       - Real, v coordinate
-  !     tu      - Real,Knot vector in u. Length nctlu+ku
-  !     tv      - Real,Knot vector in v. Length nctlv+kv
+  !     tu      - Real, Knot vector in u. size(nctlu+ku)
+  !     tv      - Real, Knot vector in v. size(nctlv+kv)
   !     ku      - Integer, order of B-spline in u
   !     kv      - Integer, order of B-spline in v
-  !     coef    - Real,Array of B-spline coefficients  Size (ndim,nctlv,nctlu)
-  !     nctlu   - Integer,Number of control points in u
-  !     nctlv   - Integer,Number of control points in v
+  !     coef    - Real, Array of B-spline coefficients  Size (ndim,nctlv,nctlu)
+  !     nctlu   - Integer, Number of control points in u
+  !     nctlv   - Integer, Number of control points in v
   !     ndim    - Integer, Spatial Dimension
   !
   !     Ouput 
-  !     val     - Real, Evaluated derivatives (d2u2,dudv,d2v2), size (ndim,2,2)
+  !     val     - Real, Evaluated second derivatives, size (ndim,2,2)
 
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim
@@ -159,7 +163,6 @@ subroutine eval_surface_deriv2(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
 
   do idim=1,ndim
      if (ku>=3) then
-        !val(idim,1,1) = b2val(u,v,2,0,tu,tv,nctlu,nctlv,ku,kv,coef(idim,:,:),work)
         val(idim,1,1) = b2val(v,u,0,2,tv,tu,nctlv,nctlu,kv,ku,coef(idim,:,:),work)
      else
         val(idim,1,1) = 0.0
