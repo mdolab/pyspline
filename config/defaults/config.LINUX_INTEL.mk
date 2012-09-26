@@ -12,18 +12,6 @@ CFLAGS   = -O2 -fPIC
 COMPILER_NAME = intel
 EXTRA_LIBS = -limf -lifcore
 
-# Optional Things
-
-# CGNS Functionality
-#USE_CGNS = -DUSE_CGNS
-#CGNS_LIB = -lcgns
-#CGNS_INCLUDE = -I/usr/local/include/
-
-# Tecplot Binary IO
-# USE_TECIO = -DUSE_TECIO 
-# TEC_LIB   = ../tecio/tecio.a
-# LIBSTDCpp = -lstdc++
-
 # Combine Flags
 # ------------------------------------
 
