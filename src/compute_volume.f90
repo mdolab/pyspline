@@ -2,17 +2,17 @@ subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,
 
   implicit none
   ! Input
-  integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,nw
-  double precision, intent(in)          :: u(nw,nv,nu),v(nw,nv,nu),w(nw,nv,nu)
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
-  double precision, intent(out)         :: vals(nu*nv*nw*ku*kv*kw)
-  integer         , intent(out)         :: col_ind(nu*nv*nw*ku*kv*kw),row_ptr(nu*nv*nw+1)
+  integer         , intent(in)      :: ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,nw
+  double precision, intent(in)      :: u(nw,nv,nu),v(nw,nv,nu),w(nw,nv,nu)
+  double precision, intent(in)      :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
+  double precision, intent(out)     :: vals(nu*nv*nw*ku*kv*kw)
+  integer         , intent(out)     :: col_ind(nu*nv*nw*ku*kv*kw),row_ptr(nu*nv*nw+1)
   ! Working
-  double precision                      :: basisu(ku),basisv(kv),basisw(kw)
-  integer                               :: i,j,k,ii,jj,kk,counter,c1,c2
-  integer                               :: ilou,ileftu,mflagu,worku(4*ku),iworku
-  integer                               :: ilov,ileftv,mflagv,workv(4*kv),iworkv
-  integer                               :: ilow,ileftw,mflagw,workw(4*kw),iworkw
+  double precision                  :: basisu(ku),basisv(kv),basisw(kw)
+  integer                           :: i,j,k,ii,jj,kk,counter,c1,c2
+  integer                           :: ilou,ileftu,mflagu,worku(4*ku),iworku
+  integer                           :: ilov,ileftv,mflagv,workv(4*kv),iworkv
+  integer                           :: ilow,ileftw,mflagw,workw(4*kw),iworkw
 
   ilou = 1
   ilov = 1

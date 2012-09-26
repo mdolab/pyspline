@@ -11,18 +11,15 @@ include ${RULES_FILE}
 vpath %.o $(OBJDIR)
 
 # Name of files to be compiled:
-OBJS = bvalu.o\
-	cbvalu.o\
+OBJS =  bvalu.o\
 	intrv.o\
 	bspvn.o\
 	bspvd.o\
 	basis.o\
-	knots_lms.o\
-	knots_interp.o\
+	knots.o\
 	b2val.o\
 	b3val.o\
-	cb2val.o\
-	cb3val.o\
+	cbvalu.o\
 	insertKnot.o\
 	getBasisPt.o\
 	parameterizations.o\
@@ -49,8 +46,6 @@ OBJS = bvalu.o\
 	scalar_triple_product_b.o\
 	adBuffer.o\
 	adStack.o\
-	cgns_functions.o\
-	tecplot_functions.o\
 	tfi2d.o\
 
 default:
