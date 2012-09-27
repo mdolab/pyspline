@@ -162,19 +162,19 @@ subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val)
   use precision
   implicit none
   ! Input
-  integer            , intent(in)       :: k, nctl, ndim, n
-  real(kind=realType), intent(in)       :: s(n)
-  real(kind=realType), intent(in)       :: t(nctl+k)
-  complex*16         , intent(in)       :: coef(ndim, nctl)
+  integer                , intent(in)   :: k, nctl, ndim, n
+  real(kind=realType)    , intent(in)   :: s(n)
+  real(kind=realType)    , intent(in)   :: t(nctl+k)
+  complex(kind=realType) , intent(in)   :: coef(ndim, nctl)
 
   ! Output
-  complex*16      , intent(out)         :: val(ndim, n)
+  complex(kind=realType) , intent(out)  :: val(ndim, n)
 
   ! Working
   integer                               :: i, l, istart, ileft, idim
   real(kind=realType)                   :: basisu(k)
 
-  val(:, :) = 0.0
+  val(:, :) = cmplx(0.0, 0.0)
   do i=1, n
      call findSpan(s(i), k, t, nctl, ileft)
      call basis(t, nctl, k, s(i), ileft, basisu)
@@ -182,10 +182,7 @@ subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val)
      istart = ileft - k
      do l=1, k
         do idim=1, ndim
-           val(idim, i) = val(idim, i) + &
-                cmplx(basisu(l)*real(coef(idim, istart+l)), &
-                basisu(l)*aimag(coef(idim, istart+l)))
-
+           val(idim, i) = val(idim, i) + basisu(l)*coef(idim, istart+l)
         end do
      end do
   end do
@@ -205,35 +202,32 @@ subroutine eval_curve_deriv_c(s, t, k, coef, nctl, ndim, val)
   !     s       - Real, s coordinate
   !     t       - Real, Knot vector. Length nctl+k
   !     k       - Integer, order of B-spline
-  !     coef    - Real, Array of B-spline coefficients. Size (ndim, nctl)
-  !     nctl   - Integer, Number of control points
+  !     coef    - Complex, Array of B-spline coefficients. Size (ndim, nctl)
+  !     nctl    - Integer, Number of control points
   !
   !     Ouput 
-  !     val     - Real, Evaluated point, size ndim
+  !     val     - Complex, Evaluated derivative, size ndim
 
   use precision
   implicit none
   ! Input
-  integer   , intent(in)          :: k, nctl, ndim
-  complex*16, intent(in)          :: s
-  complex*16, intent(in)          :: t(nctl+k)
-  complex*16, intent(in)          :: coef(ndim, nctl)
+  integer               , intent(in)          :: k, nctl, ndim
+  real(kind=realType)   , intent(in)          :: s
+  real(kind=realType)   , intent(in)          :: t(nctl+k)
+  complex(kind=realType), intent(in)          :: coef(ndim, nctl)
 
   ! Output
-  complex*16, intent(out)         :: val(ndim)
+  complex(kind=realType), intent(out)         :: val(ndim)
 
   ! Working
-  integer                         :: idim, inbv
-  complex*16                      :: work(3*k)
+  integer                                     :: idim, inbv
 
   ! Functions
-  complex*16                      :: bvalu_c
+  complex(kind=realType)                      :: cbvalu
 
-  inbv = 1
-
-!   do idim=1, ndim
-!      val(idim) = bvalu_c(t, coef(idim, :), nctl, k, 1, s, inbv, work)
-!   end do
+  do idim=1, ndim
+     val(idim) = cbvalu(t, coef(idim, :), nctl, k, 1, s)
+  end do
 
 end subroutine eval_curve_deriv_c
 
@@ -251,7 +245,7 @@ subroutine eval_curve_deriv2_c(s, t, k, coef, nctl, ndim, val)
   !     s       - Real, s coordinate
   !     t       - Real, Knot vector. Length nctl+k
   !     k       - Integer, order of B-spline
-  !     coef    - Real, Array of B-spline coefficients Size (ndim, nctl)
+  !     coef    - Complex, Array of B-spline coefficients Size (ndim, nctl)
   !     nctl    - Integer, Number of control points
   !
   !     Ouput 
@@ -260,29 +254,22 @@ subroutine eval_curve_deriv2_c(s, t, k, coef, nctl, ndim, val)
   use precision
   implicit none
   ! Input
-  integer   , intent(in)          :: k, nctl, ndim
-  complex*16, intent(in)          :: s
-  complex*16, intent(in)          :: t(nctl+k)
-  complex*16, intent(in)          :: coef(ndim, nctl)
+  integer               , intent(in)          :: k, nctl, ndim
+  real(kind=realType)   , intent(in)          :: s
+  real(kind=realType)   , intent(in)          :: t(nctl+k)
+  complex(kind=realType), intent(in)          :: coef(ndim, nctl)
 
   ! Output
-  complex*16, intent(out)         :: val(ndim)
+  complex(kind=realType), intent(out)         :: val(ndim)
 
   ! Working
-  integer                         :: idim, inbv
-  complex*16                      :: work(3*k)
+  integer                                     :: idim
 
   ! Functions
-  complex*16                      :: bvalu
+  complex(kind=realType)                      :: cbvalu
 
-  inbv = 1
-
-  if (k == 2) then
-     val(:) = 0.0
-  else
-     do idim=1, ndim
-        val(idim) = bvalu(t, coef(idim, :), nctl, k, 2, s)
-     end do
-  end if
+  do idim=1, ndim
+     val(idim) = cbvalu(t, coef(idim, :), nctl, k, 2, s)
+  end do
 
 end subroutine eval_curve_deriv2_c

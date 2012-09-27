@@ -4,7 +4,6 @@
   python module pyspline ! in 
   interface  ! in :pyspline
      subroutine knots_interp(x, deriv_ptr, n, nd, k, t) ! in :test:knots_interp.f90
-       !use precision
        real(kind=realtype) dimension(n), intent(in) :: x
        integer dimension(nd), intent(in) :: deriv_ptr
        integer optional, intent(in), check(len(x)>=n), depend(x) :: n=len(x)
@@ -14,7 +13,6 @@
      end subroutine knots_interp
 
      subroutine knots_lms(x, n, nctl, k, t) ! in :test:knots_lms.f90
-       !use precision
        real(kind=realtype) dimension(n), intent(in) :: x
        integer optional, intent(in), check(len(x)>=n), depend(x) :: n=len(x)
        integer intent(in) :: nctl
@@ -23,7 +21,6 @@
      end subroutine knots_lms
 
      subroutine insertknot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft) ! in :test:insertKnot.f90
-       !use precision
        real(kind=realtype) intent(in) :: u
        integer intent(in, out) :: r
        real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
@@ -37,7 +34,6 @@
      end subroutine insertknot
 
      subroutine findspan(u,k,t, nctl,ind) ! in :test:findSpan.f90
-       !use precision
        real(kind=realtype) intent(in) :: u
        integer intent(in) :: k
        real(kind=realtype) dimension(nctl+k),intent(in),depend(k,nctl) :: t
@@ -45,18 +41,7 @@
        integer intent(out) :: ind
      end subroutine findspan
 
-!      subroutine intrv(xt, lxt, x, ilo, ileft, mflag) ! in :test:intrv.f
-!        !use precision
-!        real(kind=realtype) dimension(lxt), intent(in) :: xt
-!        integer optional, check(len(xt)>=lxt), depend(xt) :: lxt=len(xt)
-!        real(kind=realtype), intent(in)  :: x
-!        integer, intent(in) :: ilo
-!        integer, intent(out) :: ileft
-!        integer, intent(out) :: mflag
-!      end subroutine intrv
-
      subroutine curve_jacobian_wrap(s, sd, t, k, nctl, n, nd, vals, row_ptr, col_ind) ! in :test:compute_curve.f90
-       !use precision
        real(kind=realtype) dimension(n), intent(in) :: s
        real(kind=realtype) dimension(nd), intent(in) :: sd
        real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
@@ -70,7 +55,6 @@
      end subroutine curve_jacobian_wrap
 
      subroutine constr_jac(a_val, a_row_ptr, a_col_ind, b_val, b_row_ptr, b_col_ind, c_val, c_row_ptr, c_col_ind, am, an, cm, annz, bnnz, cnnz, j_val, j_col_ind, j_row_ptr) ! in :test:compute_curve.f90
-       !use precision
        real(kind=realtype) dimension(annz), intent(in) :: a_val
        integer dimension(am + 1), intent(in) :: a_row_ptr
        integer dimension(annz), intent(in), depend(annz) :: a_col_ind
@@ -92,7 +76,6 @@
      end subroutine constr_jac
 
      subroutine poly_length(x, n, ndim, length) ! in :test:compute_curve.f90
-       !use precision
        real(kind=realtype) dimension(ndim, n), intent(in) :: x
        integer optional, intent(in), check(shape(x, 1)==n), depend(x) :: n=shape(x, 1)
        integer optional, intent(in), check(shape(x, 0)==ndim), depend(x) :: ndim=shape(x, 0)
@@ -100,7 +83,6 @@
      end function poly_length
 
      subroutine curve_para_corr(t, k, s, coef, nctl, ndim, length, n, x) ! in :test:compute_curve.f90
-       !use precision
        real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
        integer intent(in) :: k
        real(kind=realtype) dimension(n), intent(inout) :: s
@@ -113,7 +95,6 @@
      end subroutine curve_para_corr
 
      subroutine surface_jacobian_wrap(u, v, tu, tv, ku, kv, nctlu, nctlv, nu, nv, vals, row_ptr, col_ind) ! in :test:compute_surface.f90
-       !use precision
        real(kind=realtype) dimension(nv, nu), intent(in) :: u
        real(kind=realtype) dimension(nv, nu), intent(in), depend(nv, nu) :: v
        real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
@@ -130,7 +111,6 @@
      end subroutine surface_jacobian_wrap
 
      subroutine para3d(x, n, m, l, ndim, s, u, v, w) ! in :test:parameterizations.f90
-       !use precision
        real(kind=realtype) dimension(ndim, l, m, n), intent(in) :: x
        integer optional, intent(in), check(shape(x, 3)==n), depend(x) :: n=shape(x, 3)
        integer optional, intent(in), check(shape(x, 2)==m), depend(x) :: m=shape(x, 2)
@@ -143,7 +123,6 @@
      end subroutine para3d
 
      subroutine tfi2d(e0, e1, e2, e3, nu, nv, x) ! in :test:tfi2d.f90
-       !use precision
        real(kind=realtype) dimension(3, nu), intent(in) :: e0
        real(kind=realtype) dimension(3, nu), intent(in), depend(nu) :: e1
        real(kind=realtype) dimension(3, nv), intent(in) :: e2
@@ -154,7 +133,6 @@
      end subroutine tfi2d
 
      subroutine volume_jacobian_wrap(u, v, w, tu, tv, tw, ku, kv, kw, nctlu, nctlv, nctlw, nu, nv, nw, vals, row_ptr, col_ind) ! in :test:compute_volume.f90
-       !use precision
        real(kind=realtype) dimension(nw, nv, nu), intent(in) :: u
        real(kind=realtype) dimension(nw, nv, nu), intent(in), depend(nw, nv, nu) :: v
        real(kind=realtype) dimension(nw, nv, nu), intent(in), depend(nw, nv, nu) :: w
@@ -176,7 +154,6 @@
      end subroutine volume_jacobian_wrap
 
      subroutine eval_curve(s, t, k, coef, nctl, ndim, n, val) ! in :test:eval_curve.f90
-       !use precision
        real(kind=realtype) dimension(n), intent(in) :: s
        real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
        integer intent(in) :: k
@@ -188,7 +165,6 @@
      end subroutine eval_curve
 
      subroutine eval_curve_deriv(s, t, k, coef, nctl, ndim, val) ! in :test:eval_curve.f90
-       !use precision
        real(kind=realtype) intent(in) :: s
        real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
        integer intent(in) :: k
@@ -199,7 +175,6 @@
      end subroutine eval_curve_deriv
 
      subroutine eval_curve_deriv2(s, t, k, coef, nctl, ndim, val) ! in :test:eval_curve.f90
-       !use precision
        real(kind=realtype) intent(in) :: s
        real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
        integer intent(in) :: k
@@ -210,7 +185,6 @@
      end subroutine eval_curve_deriv2
 
      subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val) ! in :test:eval_curve.f90
-       !use precision
        real(kind=realtype) dimension(n), intent(in) :: s
        real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
        integer intent(in) :: k
@@ -222,9 +196,8 @@
      end subroutine eval_curve_c
 
      subroutine eval_curve_deriv_c(s, t, k, coef, nctl, ndim, val) ! in :test:eval_curve.f90
-       !use precision
-       complex*16 intent(in) :: s
-       complex*16 dimension(nctl+k), intent(in), depend(k, nctl) :: t
+       real(kind=realtype) intent(in) :: s
+       real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
        integer intent(in) :: k
        complex*16 dimension(ndim, nctl), intent(in) :: coef
        integer optional, intent(in), check(shape(coef, 1)==nctl), depend(coef) :: nctl=shape(coef, 1)
@@ -233,9 +206,8 @@
      end subroutine eval_curve_deriv_c
 
      subroutine eval_curve_deriv2_c(s, t, k, coef, nctl, ndim, val) ! in :test:eval_curve.f90
-       !use precision
-       complex*16 intent(in) :: s
-       complex*16 dimension(nctl+k), intent(in), depend(k, nctl) :: t
+       real(kind=realtype) intent(in) :: s
+       real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
        integer intent(in) :: k
        complex*16 dimension(ndim, nctl), intent(in) :: coef
        integer optional, intent(in), check(shape(coef, 1)==nctl), depend(coef) :: nctl=shape(coef, 1)
@@ -244,7 +216,6 @@
      end subroutine eval_curve_deriv2_c
 
      subroutine eval_surface(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, n, m, val) ! in :test:eval_surface.f90
-       !use precision
        real(kind=realtype) dimension(m, n), intent(in) :: u
        real(kind=realtype) dimension(m, n), intent(in), depend(m, n) :: v
        real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
@@ -261,7 +232,6 @@
      end subroutine eval_surface
      
      subroutine eval_surface_deriv(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, val) ! in :test:eval_surface.f90
-       !use precision
        real(kind=realtype) intent(in) :: u
        real(kind=realtype) intent(in) :: v
        real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
@@ -275,7 +245,7 @@
        real(kind=realtype) dimension(ndim, 2), intent(out), depend(ndim) :: val
      end subroutine eval_surface_deriv
      subroutine eval_surface_deriv2(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, val) ! in :test:eval_surface.f90
-       !use precision
+       
        real(kind=realtype) intent(in) :: u
        real(kind=realtype) intent(in) :: v
        real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
@@ -289,7 +259,6 @@
        real(kind=realtype) dimension(ndim, 2, 2), intent(out), depend(ndim) :: val
      end subroutine eval_surface_deriv2
      subroutine eval_volume(u, v, w, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, n, m, l, val) ! in :test:eval_volume.f90
-       !use precision
        real(kind=realtype) dimension(l, m, n), intent(in) :: u
        real(kind=realtype) dimension(l, m, n), intent(in), depend(l, m, n) :: v
        real(kind=realtype) dimension(l, m, n), intent(in), depend(l, m, n) :: w
@@ -310,7 +279,6 @@
        real(kind=realtype) dimension(ndim, l, m, n), intent(out), depend(ndim, l, m, n) :: val
      end subroutine eval_volume
      subroutine eval_volume_deriv(u, v, w, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, val) ! in :test:eval_volume.f90
-       !use precision
        real(kind=realtype) intent(in) :: u
        real(kind=realtype) intent(in) :: v
        real(kind=realtype) intent(in) :: w
@@ -328,7 +296,6 @@
        real(kind=realtype) dimension(ndim, 3), intent(out), depend(ndim) :: val
      end subroutine eval_volume_deriv
      subroutine eval_volume_deriv2(u, v, w, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, val) ! in :test:eval_volume.f90
-       !use precision
        real(kind=realtype) intent(in) :: u
        real(kind=realtype) intent(in) :: v
        real(kind=realtype) intent(in) :: w
@@ -347,7 +314,6 @@
      end subroutine eval_volume_deriv2
 
      subroutine point_curve(x0, t, k, coef, nctl, ndim, n, niter, eps1, eps2, s, diff) ! in :test:projections.f90
-       !use precision
        real(kind=realtype) dimension(ndim, n), intent(in) :: x0
        real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
        integer intent(in) :: k
@@ -363,7 +329,6 @@
      end subroutine point_curve
 
      subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, n, niter, eps1, eps2, u, v, diff) ! in :test:projections.f90
-       !use precision
        real(kind=realtype) dimension(ndim, n), intent(in) :: x0
        real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
        real(kind=realtype) dimension(nctlv+kv), intent(in), depend(kv, nctlv) :: tv
@@ -383,7 +348,6 @@
      end subroutine point_surface
 
      subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, n, niter, eps, u, v, w, diff, n_sub) ! in :test:projections.f90
-       !use precision
        real(kind=realtype) dimension(ndim, n), intent(in) :: x0
        real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
        real(kind=realtype) dimension(nctlv+kv), intent(in), depend(kv, nctlv) :: tv
@@ -407,7 +371,6 @@
      end subroutine point_volume
 
      subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, niter, eps1, eps2, s, t, diff) ! in :test:projections.f90
-       !use precision
        real(kind=realtype) dimension(n1+k1), intent(in), depend(k1, n1) :: t1
        integer intent(in) :: k1
        real(kind=realtype) dimension(ndim, n1), intent(in) :: coef1
@@ -426,7 +389,6 @@
      end subroutine curve_curve
 
      subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, nctlc, nctlu, nctlv, ndim, niter, eps1, eps2, u, v, s, diff) ! in :test:projections.f90
-       !use precision
        real(kind=realtype) dimension(nctlc+kc), intent(in), depend(kc, nctlc) :: tc
        integer intent(in) :: kc
        real(kind=realtype) dimension(ndim, nctlc), intent(in) :: coefc
@@ -449,7 +411,6 @@
      end subroutine curve_surface
 
      subroutine line_plane(ia, vc, p0, v1, v2, n, sol, pid, n_sol) ! in :test:projections.f90
-       !use precision
        real(kind=realtype) dimension(3), intent(in) :: ia
        real(kind=realtype) dimension(3), intent(in) :: vc
        real(kind=realtype) dimension(3, n), intent(in) :: p0
@@ -462,7 +423,6 @@
      end subroutine line_plane
      
      subroutine plane_line(ia, vc, p0, v1, v2, n, sol, n_sol) ! in :test:projections.f90
-       !use precision
        real(kind=realtype) dimension(3, n), intent(in) :: ia
        real(kind=realtype) dimension(3, n), intent(in), depend(n) :: vc
        real(kind=realtype) dimension(3), intent(in) :: p0
@@ -474,7 +434,6 @@
      end subroutine line_plane
 
      subroutine point_plane(pt, p0, v1, v2, n, sol, n_sol, best_sol) ! in :test:projections.f90
-       !use precision
        real(kind=realtype) dimension(3), intent(in) :: pt
        real(kind=realtype) dimension(3, n), intent(in) :: p0
        real(kind=realtype) dimension(3, n), intent(in), depend(n) :: v1
@@ -486,7 +445,6 @@
      end subroutine point_plane
 
      subroutine getbasisptsurface(u, v, tu, tv, ku, kv, vals, col_ind, istart, l_index, nctlu, nctlv, nnz) ! in :test:getBasisPt.f90
-       !use precision
        real(kind=realtype) intent(in) :: u
        real(kind=realtype) intent(in) :: v
        real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
@@ -503,7 +461,6 @@
      end subroutine getbasisptsurface
 
      subroutine getbasisptvolume(u, v, w, tu, tv, tw, ku, kv, kw, vals, col_ind, istart, l_index, nctlu, nctlv, nctlw, nnz) ! in :test:getBasisPt.f90
-       !use precision
        real(kind=realtype) intent(in) :: u
        real(kind=realtype) intent(in) :: v
        real(kind=realtype) intent(in) :: w
@@ -522,25 +479,6 @@
        integer optional, intent(in), check(shape(l_index, 0)==nctlw), depend(l_index) :: nctlw=shape(l_index, 0)
        integer optional, intent(in), check(len(vals)>=nnz), depend(vals) :: nnz=len(vals)
      end subroutine getbasisptvolume
-     subroutine basis(t, nctl, k, x, ileft, b) ! in :test:basis.f90
-       !use precision
-       real(kind=realtype) dimension(nctl+k), intent(in), depend(nctl, k) :: t
-       integer intent(in) :: nctl
-       integer intent(in) :: k
-       real(kind=realtype) :: x
-       integer intent(in) :: ileft
-       real(kind=realtype) dimension(k), intent(out),depend(k) :: b
-     end subroutine basis
-     subroutine derivbasis(t,nctl,ku,u,ind,n,bd) ! in :test:basis.f90
-       real(kind=realtype) dimension(nctl+ku),intent(in),depend(ku,nctl) :: t
-       integer intent(in) :: nctl
-       integer intent(in) :: ku
-       real(kind=realtype) intent(in) :: u
-       integer intent(in) :: ind
-       integer intent(in) :: n
-       real(kind=realtype) dimension(ku,ku),intent(out),depend(ku,ku) :: bd
-     end subroutine derivbasis
-
   end interface
 end program
 

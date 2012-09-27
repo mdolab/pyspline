@@ -29,25 +29,6 @@ OBJS =  evaluations.o\
 	projections.o\
 	tfi2d.o\
 
-#  bvalu.o\
-# 	intrv.o\
-# 	bspvn.o\
-# 	bspvd.o\
-# 	b2val.o\
-# 	b3val.o\
-# 	cbvalu.o\
-# 	i1mach.o\
-# 	r1mach.o\
-# 	fdump.o\
-# 	j4save.o\
-# 	xerabt.o\
-# 	xerctl.o\
-# 	xerprt.o\
-# 	xerror.o\
-# 	xerrwv.o\
-# 	xersav.o\
-# 	xgetua.o\
-
 default:
 	$(MAKE) $(MODS)
 	cp -f *.mod ../mod
