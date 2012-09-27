@@ -24,12 +24,12 @@ z = (linspace(0,1,n) + 2)
 curve = pySpline.curve(x=x,y=y,z=z,k=4,Nctl=16,niter=100)
 curve.writeTecplot('helix.dat',size=.1)
 
-u,v,s,D = surf.projectCurve(curve,Niter=100,eps1=1e-10,eps2=1e-10,
-                            u=1,v=1,s=1)
+# u,v,s,D = surf.projectCurve(curve,Niter=100,eps1=1e-10,eps2=1e-10,
+#                             u=1,v=1,s=1)
 
-print u,v,s,D
-print curve(s)
-print surf(u,v)
+# print u,v,s,D
+# print curve(s)
+# print surf(u,v)
 
 
 
