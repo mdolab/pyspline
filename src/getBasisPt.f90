@@ -13,7 +13,7 @@ subroutine getBasisPtSurface(u, v, tu, tv, ku, kv, vals, col_ind, istart, l_inde
   ! Working
   real(kind=realType)                      :: basisu(ku), basisv(kv)
   integer                                  :: ileftu, ileftv
-  integer                                  :: i, j, ii, jj, counter, start
+  integer                                  :: ii, jj, counter, start
 
   ! Get u interval
   call findSpan(u, ku, tu, nctlu, ileftu)
@@ -52,7 +52,7 @@ subroutine getBasisPtVolume(u, v, w, tu, tv, tw, ku, kv, kw, vals, col_ind, ista
   ! Working
   real(kind=realType)                      :: basisu(ku), basisv(kv), basisw(kw)
   integer                                  :: ileftu, ileftv, ileftw
-  integer                                  :: i, j, ii, jj, kk, counter, start
+  integer                                  :: ii, jj, kk, counter, start
 
   ! Get u interval
   call findSpan(u, ku, tu, nctlu, ileftu)

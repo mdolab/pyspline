@@ -42,14 +42,14 @@ subroutine knots_lms(X, N, Nctl, k, t)
   end do
 
   if (mod(N, 2) == 1) then ! Odd
-     d = dble(N/(Nctl-k+1.0))
+     d = real(N/(Nctl-k+1.0))
      do j=1, Nctl-k
         i = floor(j*d)
         alpha = j*d-i
         t(k+j) = (1-alpha)*X(i) + alpha*X(i+2)
      end do
   else ! even
-     d = dble(N/(Nctl-k+1.0))
+     d = real(N/(Nctl-k+1.0))
      do j=1, Nctl-k
         i = floor(j*d)
         alpha = j*d-i+0.5
@@ -83,16 +83,15 @@ subroutine knots_interp(X, deriv_ptr, n, nd , k, t)
   implicit none
 
   ! Input
-  integer, intent(in)     :: n, nd, k
-  integer, intent(in)     :: deriv_ptr(nd)
+  integer, intent(in)              :: n, nd, k
+  integer, intent(in)              :: deriv_ptr(nd)
   real(kind=realType), intent(in)  :: X(n)
 
   ! Output
   real(kind=realType), intent(out) :: t(n+nd+k)
 
   ! Working
-  real(kind=realType) d, alpha, temp(n-2)
-  integer  I, J, Nctl, d_count
+  integer                          :: i, j, Nctl
 
   ! ----------------------------
   !  PUT K KNOTS AT EACH ENDPOINT -- Knot a knot conditions

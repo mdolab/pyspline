@@ -1,7 +1,8 @@
 '''
 pySpline
 
-Contains an class functions for working with B-spline curves and surfaces
+Contains classes for working with B-spline curves, surfaces and
+volumes
 
 Copyright (c) 2009 by G. Kenway
 All rights reserved. Not to be used for commercial purposes.
@@ -2738,7 +2739,7 @@ def line(*args, **kwargs):
 #==============================================================================
 if __name__ == '__main__':
     print 'There are two examples in the example directory.'
-    print 'Look at test_curve.py and test_surf.py for more informatin'
+    print 'Look at test_curve.py and test_surf.py for more information'
 
 
 def test_pySpline():

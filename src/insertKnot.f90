@@ -85,6 +85,7 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
      temp(:,i) = coef(:,ileft-k+i)
   end do
 
+  L = 0
   do j=1,r
      L = ileft-k+j+1
      do i=0,k-1-j-s
@@ -94,9 +95,11 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
      coef_new(:,L) = temp(:,1)
      coef_new(:,ileft+r-j) = temp(:,k-j)
   end do
-  do i=L+1,ileft-1
-     coef_new(:,i) = temp(:,i-L+1)
-  end do
+  if (L > 0) then
+     do i=L+1,ileft-1
+        coef_new(:,i) = temp(:,i-L+1)
+     end do
+  end if
 
 end subroutine insertKnot
  

@@ -29,7 +29,7 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
   implicit none
   ! Input
   real(kind=realType), intent(in)          :: x0(ndim,N)
-  integer         , intent(in)          :: k,nctl,ndim,N,niter
+  integer            , intent(in)          :: k,nctl,ndim,N,niter
   real(kind=realType), intent(in)          :: t(nctl+k)
   real(kind=realType), intent(in)          :: coef(ndim,nctl)
   real(kind=realType), intent(in)          :: eps1,eps2
@@ -39,12 +39,11 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
 
   ! Working
   real(kind=realType)                      :: val(ndim),deriv(ndim),deriv2(ndim)
-  real(kind=realType)                      :: val0(ndim),s0(N)
-  integer                               :: i,j,ipt,counter,max_inner_iter
-  integer                               :: istart,nss
-  real(kind=realType)                      :: D,D0,delta,D2(ndim)
-  integer                               :: n_sub ! Huristic Value
-  logical                               :: brute_force
+  integer                                  :: i,j,ipt,counter,max_inner_iter
+  integer                                  :: istart,nss
+  real(kind=realType)                      :: D,D0,delta,D2(ndim),s0(N)
+  integer                                  :: n_sub ! Huristic Value
+  logical                                  :: brute_force
   ! Alloctable
   real(kind=realType),allocatable          :: curve_vals(:,:),ss(:)
   real(kind=realType) :: c1
@@ -204,7 +203,7 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
   implicit none
   ! Input
   real(kind=realType), intent(in)          :: x0(ndim,N)
-  integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,niter,N
+  integer            , intent(in)          :: ku,kv,nctlu,nctlv,ndim,niter,N
   real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
   real(kind=realType), intent(in)          :: coef(ndim,nctlv,nctlu)
   real(kind=realType), intent(in)          :: eps1,eps2
@@ -216,12 +215,12 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
   ! Working
   real(kind=realType)                      :: val(ndim),deriv(ndim,2),deriv2(ndim,2,2)
   real(kind=realType)                      :: val0(ndim)
-  logical                               :: brute_force
-  integer                               :: i,j,ii,jj,counter,ipt,max_inner_iter
+  logical                                  :: brute_force
+  integer                                  :: i,j,counter,ipt,max_inner_iter
   real(kind=realType)                      :: D,D0,u0(N),v0(N),delta(2),D2(ndim)
   real(kind=realType)                      :: A(2,2),ki(2)
-  integer                               :: n_sub_u,n_sub_v,n_sub_w  ! Huristic Value
-  integer                               :: istart,nuu,nvv
+  integer                                  :: n_sub_u,n_sub_v  ! Huristic Value
+  integer                                  :: istart,nuu,nvv
 
   ! Alloctable
   real(kind=realType),allocatable          :: surface_vals(:,:,:),uu(:),vv(:)
@@ -443,20 +442,19 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   implicit none
   ! Input
   real(kind=realType), intent(in)          :: x0(ndim,N)
-  integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim,niter,N
+  integer            , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim,niter,N
   real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
   real(kind=realType), intent(in)          :: coef(ndim,nctlw,nctlv,nctlu)
   real(kind=realType), intent(in)          :: eps
-  integer         , intent(in)          :: n_sub
+  integer            , intent(in)          :: n_sub
   ! Output
   real(kind=realType), intent(out)         :: u(N),v(N),w(N)
   real(kind=realType), intent(out)         :: diff(ndim,N)
 
   ! Working
-  real(kind=realType)                      :: D,D0,u0(N),v0(N),w0(N),delta(3),D2(ndim)
-  integer                               :: n_sub_u,n_sub_v,n_sub_w,nuu,nvv,nww
-  integer                               :: istart,counter
-  logical                               :: brute_force
+  real(kind=realType)                      :: D,D0,u0(N),v0(N),w0(N)
+  integer                                  :: n_sub_u,n_sub_v,n_sub_w,nuu,nvv,nww
+  integer                                  :: istart
   real(kind=realType)                      :: val0(ndim)
 
   real(kind=realType)                      :: val(ndim)
@@ -465,7 +463,7 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   real(kind=realType)                      :: R(nDim),low(nDim),high(nDim)
   real(kind=realType)                      :: pt(nDim),newpt(nDim),update(nDim)
   real(kind=realType)                      :: step,dist,nDist,pgrad
-  real(kind=realType)                      :: gnorm,grad_norm,wolfe
+  real(kind=realType)                      :: grad_norm,wolfe
   real(kind=realType)                      :: fval,nfval,c,p_diff
 
   real(kind=realType)                      :: grad(nDim),hessian(nDim,nDim)
@@ -1314,15 +1312,15 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   real(kind=realType), intent(out)    :: Diff(ndim)
 
   ! Working
-  real(kind=realType) :: val0(ndim),val1(ndim),val2(ndim)
+  real(kind=realType) :: val1(ndim),val2(ndim)
   real(kind=realType) :: deriv_c1(ndim),deriv2_c1(ndim)
   real(kind=realType) :: deriv_c2(ndim),deriv2_c2(ndim)
-  integer          :: i,j,ii,jj,max_inner_iter,counter1,istart
-  real(kind=realType) :: D,D0,s0,t0,delta(2),D2(3)
-  real(kind=realType) :: ki(2),A(2,2),val0_1(3),val0_2(3)
+  integer             :: i,j,max_inner_iter,counter1,istart
+  real(kind=realType) :: D,D0,s0,t0
+  real(kind=realType) :: val0_1(3),val0_2(3)
   real(kind=realType) :: low(2), high(2), pt(2), R(ndim), ndist, fval, nfval, dist
   real(kind=realType) :: hessian(2,2), grad(2), wolfe, newpt(2), c, grad_norm
-  real(kind=realType) :: pgrad, update(2), step, p_diff, idet
+  real(kind=realType) :: pgrad, update(2), step, p_diff
   logical :: flag, cflag
   integer                          :: nline, m, idim
   integer                          :: n,nss,ntt ! Huristic Value
@@ -1586,8 +1584,8 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
   use precision
   implicit none
 
-  ! Input
-  integer         , intent(in)          :: kc,ku,kv,nctlu,nctlv,nctlc,ndim,niter
+  ! Input 
+  integer            , intent(in)          :: kc,ku,kv,nctlu,nctlv,nctlc,ndim,niter
   real(kind=realType), intent(in)          :: tc(nctlc+kc),tu(nctlu+ku),tv(nctlv+kv)
   real(kind=realType), intent(in)          :: coefc(ndim,nctlc),coefs(ndim,nctlv,nctlu)
   real(kind=realType), intent(in)          :: eps1,eps2
@@ -1599,12 +1597,12 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
   real(kind=realType)                      :: val_s(ndim),deriv_s(ndim,2),deriv2_s(ndim,2,2)
   real(kind=realType)                      :: val_c(ndim),deriv_c(ndim),deriv2_C(ndim)
   real(kind=realType)                      :: val0_s(ndim),val0_c(ndim)
-  integer                               :: i,j,ii,jj,l,ll,counter1,counter2
+  integer                                  :: i,j,l,counter1
   real(kind=realType)                      :: D,D0,u0,v0,s0,delta(3),D2(3)
   real(kind=realType)                      :: A(3,3),ki(3)
-  integer                               :: n_sub_u,n_sub_v,nc ! Huristic Value
-  integer                               :: istart,nss,nuu,nvv,max_inner_iter
-  logical                               :: brute_force
+  integer                                  :: n_sub_u,n_sub_v,nc ! Huristic Value
+  integer                                  :: istart,nss,nuu,nvv,max_inner_iter
+  logical                                  :: brute_force
   ! Allocatable 
   real(kind=realType),allocatable          :: curve_vals(:,:),uu(:),vv(:),ss(:)
   real(kind=realType),allocatable          :: surface_vals(:,:,:)
@@ -1845,9 +1843,7 @@ subroutine solve_2by2(A,b,x)
   ! Solve a 2 x 2 system  -- With NO checking
   real(kind=realType), intent(in) :: A(2,2),b(2)
   real(kind=realType), intent(out) :: x(2)
-  real(kind=realType)         :: IPIV(2), idet, det
-  integer :: info
-
+  real(kind=realType)         :: idet, det
 
   det = A(1,1)*A(2,2)-A(1,2)*A(2,1)
   if (det == 0) then
@@ -1925,7 +1921,7 @@ subroutine line_plane(ia,vc,p0,v1,v2,n,sol,pid,n_sol)
 
   ! Worling 
   integer :: i
-  real(kind=realType) :: A(3,3),rhs(3),x(3),norm
+  real(kind=realType) :: A(3,3),rhs(3),x(3)
   
   A(:,1) = -vc
   n_sol = 0
@@ -1972,7 +1968,7 @@ subroutine plane_line(ia,vc,p0,v1,v2,n,sol,n_sol)
 
   ! Worling 
   integer :: i,ind(n)
-  real(kind=realType) :: A(3,3),rhs(3),x(3),norm
+  real(kind=realType) :: A(3,3),rhs(3),x(3)
 
   n_sol = 0
   sol(:,:) = 0.0
