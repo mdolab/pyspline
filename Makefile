@@ -58,28 +58,28 @@ LINUX_INTEL:
 	if [ ! -f "config/config.LINUX_INTEL.mk" ]; then cp "config/defaults/config.LINUX_INTEL.mk" ./config; fi
 	ln -sf config/config.LINUX_INTEL.mk config.mk
 	make module
-	(cd src/f2py && make f2py)
+	(cd src/f2py && make)
 
 LINUX_GFORTRAN:
 	mkdir -p obj
 	if [ ! -f "config/config.LINUX_GFORTRAN.mk" ]; then cp "config/defaults/config.LINUX_GFORTRAN.mk" ./config; fi
 	ln -sf config/config.LINUX_GFORTRAN.mk config.mk
 	make module
-	(cd src/f2py && make f2py)
+	(cd src/f2py && make)
 
 LINUX_INTEL_SCINET:
 	mkdir -p obj
 	if [ ! -f "config/config.LINUX_INTEL_SCINET.mk" ]; then cp "config/defaults/config.LINUX_INTEL_SCINET.mk" ./config; fi
 	ln -sf config/config.LINUX_INTEL_SCINET.mk config.mk
 	make module
-	(cd src/f2py && make f2py)
+	(cd src/f2py && make)
 
 BASALT:
 	mkdir -p obj
 	if [ ! -f "config/config.BASALT.mk" ]; then cp "config/defaults/config.BASALT.mk" ./config; fi
 	ln -sf config/config.BASALT.mk config.mk
 	make module
-	(cd src/f2py && make f2py)
+	(cd src/f2py && make)
 
 
 

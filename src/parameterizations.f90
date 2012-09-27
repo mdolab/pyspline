@@ -16,21 +16,22 @@ subroutine para3d(X, n, m, l, ndim, S, u, v, w)
   !     v       - Real, size(m): The averaged v parameters
   !     w       - Real, size(l): The averaged w parameters
 
+  use precision
   implicit none
 
   ! Input
   integer          , intent(in)   :: n, m, l, ndim
-  double precision , intent(in)   :: X(ndim, l, m, n)
+  real(kind=realType) , intent(in)   :: X(ndim, l, m, n)
   
 
   ! Output
-  double precision , intent(out)  :: S(ndim, l, m, n)
-  double precision , intent(out)  :: u(n), v(m), w(l)
+  real(kind=realType) , intent(out)  :: S(ndim, l, m, n)
+  real(kind=realType) , intent(out)  :: u(n), v(m), w(l)
 
   ! Working 
   integer                         :: i, j, k
 
-  double precision DELI, DELJ, DELK
+  real(kind=realType) DELI, DELJ, DELK
 
   DELI(K, J, I) = SQRT ((X(1, K, J, I) - X(1, K, J, I-1)) ** 2 + &
                       (X(2, K, J, I) - X(2, K, J, I-1)) ** 2 + &

@@ -1,5 +1,5 @@
- subroutine eval_volume(u, v, w, tu, tv, tw, ku, kv, kw, coef, &
-      nctlu, nctlv, nctlw, ndim, n, m, l, val)
+subroutine eval_volume(u, v, w, tu, tv, tw, ku, kv, kw, coef, &
+     nctlu, nctlv, nctlw, ndim, n, m, l, val)
 
   !***DESCRIPTION
   !
@@ -28,18 +28,19 @@
   !
   !     Ouput 
   !     val     - Real, Evaluated points, size (ndim,l,m,n)
-  
+
+  use precision
   implicit none
 
   ! Input
   integer         , intent(in)   :: ku, kv, kw, nctlu, nctlv, nctlw
   integer         , intent(in)   :: ndim,n,m,l
-  double precision, intent(in)   :: u(l,m,n) ,v(l,m,n), w(l,m,n)
-  double precision, intent(in)   :: tu(nctlu+ku), tv(nctlv+kv), tw(nctlw+kw)
-  double precision, intent(in)   :: coef(ndim, nctlw, nctlv, nctlu)
+  real(kind=realType), intent(in)   :: u(l,m,n) ,v(l,m,n), w(l,m,n)
+  real(kind=realType), intent(in)   :: tu(nctlu+ku), tv(nctlv+kv), tw(nctlw+kw)
+  real(kind=realType), intent(in)   :: coef(ndim, nctlw, nctlv, nctlu)
 
   ! Output
-  double precision, intent(out)  :: val(ndim, l, m, n)
+  real(kind=realType), intent(out)  :: val(ndim, l, m, n)
 
   ! Working
   integer                        :: idim, istartu, istartv, istartw
@@ -47,7 +48,7 @@
   integer                        :: ileftu, iworku, ilou, mflagu
   integer                        :: ileftv, iworkv, ilov, mflagv
   integer                        :: ileftw, iworkw, ilow, mflagw
-  double precision               :: basisu(ku), basisv(kv), basisw(kw)
+  real(kind=realType)               :: basisu(ku), basisv(kv), basisw(kw)
 
   val(:,:,:,:) = 0.0
   ilou = 1
@@ -66,7 +67,7 @@
            end if
            call basis(tu, nctlu, ku, u(kk,jj,ii), ileftu, basisu)
            istartu = ileftu-ku
-           
+
            ! V
            call INTRV(tv, nctlv+kv, v(kk,jj,ii), ilov, ileftv, mflagv)
            if (mflagv == 1) then
@@ -77,7 +78,7 @@
            end if
            call basis(tv, nctlv, kv, v(kk,jj,ii), ileftv, basisv)
            istartv = ileftv-kv
-           
+
            ! W
            call INTRV(tw, nctlw+kw, w(kk,jj,ii), ilow, ileftw, mflagw)
            if (mflagw == 1) then
@@ -88,7 +89,7 @@
            end if
            call basis(tw, nctlw, kw, w(kk,jj,ii), ileftw, basisw)
            istartw = ileftw-kw
-           
+
            do i=1,ku
               do j=1,kv
                  do k=1,kw
@@ -107,7 +108,7 @@ end subroutine eval_volume
 
 subroutine eval_volume_deriv(u, v, w, tu, tv, tw, ku, kv, kw, coef, &
      nctlu, nctlv, nctlw, ndim, val)
-  
+
   !***DESCRIPTION
   !
   !     Written by Gaetan Kenway
@@ -136,19 +137,22 @@ subroutine eval_volume_deriv(u, v, w, tu, tv, tw, ku, kv, kw, coef, &
   !     Ouput 
   !     val     - Real, Evaluated derivatvie, size(ndim, 3)
 
+  use precision
+  implicit none
+
   ! Input
   integer         , intent(in)   :: ku, kv, kw, nctlu, nctlv, nctlw, ndim
-  double precision, intent(in)   :: u ,v, w
-  double precision, intent(in)   :: tu(nctlu+ku), tv(nctlv+kv), tw(nctlw+kw)
-  double precision, intent(in)   :: coef(ndim, nctlw, nctlv, nctlu)
+  real(kind=realType), intent(in)   :: u ,v, w
+  real(kind=realType), intent(in)   :: tu(nctlu+ku), tv(nctlv+kv), tw(nctlw+kw)
+  real(kind=realType), intent(in)   :: coef(ndim, nctlw, nctlv, nctlu)
 
   ! Output
-  double precision, intent(out)  :: val(ndim, 3)
+  real(kind=realType), intent(out)  :: val(ndim, 3)
 
   ! Working
   integer                        :: idim
-  double precision               :: work(kv*ku+3*max(Ku,Kv,Kw)+Ku)
-  double precision b3val
+  real(kind=realType)               :: work(kv*ku+3*max(Ku,Kv,Kw)+Ku)
+  real(kind=realType) b3val
 
   do idim=1,ndim
      val(idim,1) = b3val(w, v, u, 0, 0, 1, tw, tv, tu, nctlw, nctlv, nctlu, &
@@ -161,7 +165,7 @@ subroutine eval_volume_deriv(u, v, w, tu, tv, tw, ku, kv, kw, coef, &
           kw, kv, ku, coef(idim,:,:,:),work)
   end do
 
-  
+
 end subroutine eval_volume_deriv
 
 
@@ -196,21 +200,22 @@ subroutine eval_volume_deriv2(u, v, w, tu, tv, tw, ku, kv, kw, coef, &
   !     Ouput 
   !     val     - Real, Evaluated derivatvie, size(ndim, 3, 3)
 
+  use precision
   implicit none
   ! Input
   integer         , intent(in)  :: ku, kv, kw, nctlu, nctlv, nctlw, ndim
-  double precision, intent(in)  :: u, v, w
-  double precision, intent(in)  :: tu(nctlu+ku), tv(nctlv+kv), tw(nctlw+kw)
-  double precision, intent(in)  :: coef(ndim, nctlw, nctlv, nctlu)
+  real(kind=realType), intent(in)  :: u, v, w
+  real(kind=realType), intent(in)  :: tu(nctlu+ku), tv(nctlv+kv), tw(nctlw+kw)
+  real(kind=realType), intent(in)  :: coef(ndim, nctlw, nctlv, nctlu)
 
   ! Output
-  double precision, intent(out) :: val(ndim, 3, 3)
+  real(kind=realType), intent(out) :: val(ndim, 3, 3)
 
   ! Working
   integer                       :: idim
-  double precision              :: work(kv*ku+3*max(ku,kv,kw)+ku)
+  real(kind=realType)              :: work(kv*ku+3*max(ku,kv,kw)+ku)
 
-  double precision b3val
+  real(kind=realType) b3val
 
   do idim=1,ndim
 
@@ -247,5 +252,5 @@ subroutine eval_volume_deriv2(u, v, w, tu, tv, tw, ku, kv, kw, coef, &
         val(idim,3,3) = 0.0
      end if
   end do
-  
+
 end subroutine eval_volume_deriv2

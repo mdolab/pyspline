@@ -23,22 +23,23 @@ subroutine eval_surface(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, &
   !     Ouput 
   !     val     - Real, Evaluated point(s), size (ndim,m,n)
 
+  use precision
   implicit none
 
   ! Input
   integer         , intent(in)    :: ku,kv,nctlu,nctlv,ndim,n,m
-  double precision, intent(in)    :: u(m,n),v(m,n)
-  double precision, intent(in)    :: tu(nctlu+ku),tv(nctlv+kv)
-  double precision, intent(in)    :: coef(ndim,nctlv,nctlu)
+  real(kind=realType), intent(in)    :: u(m,n),v(m,n)
+  real(kind=realType), intent(in)    :: tu(nctlu+ku),tv(nctlv+kv)
+  real(kind=realType), intent(in)    :: coef(ndim,nctlv,nctlu)
 
   ! Output
-  double precision, intent(out)   :: val(ndim,m,n)
+  real(kind=realType), intent(out)   :: val(ndim,m,n)
 
   ! Working
   integer                         :: idim,istartu,istartv,i,j,ii,jj
   integer                         :: ileftu,ilou,mflagu
   integer                         :: ileftv,ilov,mflagv
-  double precision                :: basisu(ku),basisv(kv)
+  real(kind=realType)                :: basisu(ku),basisv(kv)
 
   ilou = 1
   ilov = 1
@@ -98,20 +99,23 @@ subroutine eval_surface_deriv(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, &
   !
   !     Ouput 
   !     val     - Real, Evaluated derivatives, size (ndim,2)
-
+  
+  use precision
+  implicit none
+  
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim
-  double precision, intent(in)          :: u,v
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
-  double precision, intent(in)          :: coef(ndim,nctlv,nctlu)
+  real(kind=realType), intent(in)          :: u,v
+  real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+  real(kind=realType), intent(in)          :: coef(ndim,nctlv,nctlu)
 
   ! Output
-  double precision, intent(out)         :: val(ndim,2)
+  real(kind=realType), intent(out)         :: val(ndim,2)
 
   ! Working
   integer                               :: idim
-  double precision                      :: work(3*max(ku,kv) + kv)
-  double precision b2val
+  real(kind=realType)                      :: work(3*max(ku,kv) + kv)
+  real(kind=realType) b2val
 
   do idim=1,ndim
      val(idim,1) = b2val(v,u,0,1,tv,tu,nctlv,nctlu,kv,ku,coef(idim,:,:),work)
@@ -146,20 +150,23 @@ subroutine eval_surface_deriv2(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val)
   !     Ouput 
   !     val     - Real, Evaluated second derivatives, size (ndim,2,2)
 
+  use precision
+  implicit none
+
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim
-  double precision, intent(in)          :: u,v
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
-  double precision, intent(in)          :: coef(ndim,nctlv,nctlv)
+  real(kind=realType), intent(in)          :: u,v
+  real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+  real(kind=realType), intent(in)          :: coef(ndim,nctlv,nctlv)
 
   ! Output
-  double precision, intent(out)         :: val(ndim,2,2)
+  real(kind=realType), intent(out)         :: val(ndim,2,2)
 
   ! Working
   integer                               :: idim
-  double precision                      :: work(3*max(ku,kv) + kv)
+  real(kind=realType)                      :: work(3*max(ku,kv) + kv)
 
-  double precision b2val
+  real(kind=realType) b2val
 
   do idim=1,ndim
      if (ku>=3) then

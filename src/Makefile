@@ -11,8 +11,11 @@ include ${RULES_FILE}
 vpath %.o $(OBJDIR)
 
 # Name of files to be compiled:
+MODS = precision.o\
+
 OBJS =  bvalu.o\
 	intrv.o\
+	findSpan.o\
 	bspvn.o\
 	bspvd.o\
 	basis.o\
@@ -41,14 +44,11 @@ OBJS =  bvalu.o\
 	eval_surface.o\
 	eval_volume.o\
 	projections.o\
-	quality.o\
-	skew_hexa_b.o\
-	scalar_triple_product_b.o\
-	adBuffer.o\
-	adStack.o\
 	tfi2d.o\
 
 default:
+	$(MAKE) $(MODS)
+	cp -f *.mod ../mod
 	$(MAKE) $(OBJS)
 
 clean:

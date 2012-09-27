@@ -1,15 +1,16 @@
 subroutine getBasisPtSurface(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,nctlv,nnz)
-
+  use precision
   implicit none
+
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,nnz,istart
-  double precision, intent(in)          :: u,v
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+  real(kind=realType), intent(in)          :: u,v
+  real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
   integer         , intent(in)          :: l_index(Nctlv,Nctlu)
-  double precision, intent(inout)       :: vals(nnz)
+  real(kind=realType), intent(inout)       :: vals(nnz)
   integer         , intent(inout)       :: col_ind(nnz)
   ! Working
-  double precision                      :: basisu(ku),basisv(kv)
+  real(kind=realType)                      :: basisu(ku),basisv(kv)
   integer                               :: ileftu,mflagu,ilou
   integer                               :: ileftv,mflagv,ilov
   integer                               :: i,j,ii,jj,counter,start
@@ -48,17 +49,17 @@ subroutine getBasisPtSurface(u,v,tu,tv,ku,kv,vals,col_ind,istart,l_index,nctlu,n
 end subroutine getBasisPtSurface
 
 subroutine getBasisPtVolume(u,v,w,tu,tv,tw,ku,kv,kw,vals,col_ind,istart,l_index,nctlu,nctlv,nctlw,nnz)
-
+  use precision
   implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,nnz,istart
-  double precision, intent(in)          :: u,v,w
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
+  real(kind=realType), intent(in)          :: u,v,w
+  real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
   integer         , intent(in)          :: l_index(Nctlw,Nctlv,Nctlu)
-  double precision, intent(inout)       :: vals(nnz)
+  real(kind=realType), intent(inout)       :: vals(nnz)
   integer         , intent(inout)       :: col_ind(nnz)
   ! Working
-  double precision                      :: basisu(ku),basisv(kv),basisw(kw)
+  real(kind=realType)                      :: basisu(ku),basisv(kv),basisw(kw)
   integer                               :: ileftu,mflagu,ilou
   integer                               :: ileftv,mflagv,ilov
   integer                               :: ileftw,mflagw,ilow

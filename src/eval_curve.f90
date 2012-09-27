@@ -16,20 +16,22 @@ subroutine eval_curve(s, t, k, coef, nctl, ndim, n, val)
   !
   !     Ouput 
   !     val     - Real, Evaluated points, size ndim by n
+
+  use precision
   implicit none
   ! Input
   integer         , intent(in)     :: k, nctl, ndim, n
-  double precision, intent(in)     :: s(n)
-  double precision, intent(in)     :: t(nctl+k)
-  double precision, intent(in)     :: coef(ndim, nctl)
+  real(kind=realType), intent(in)     :: s(n)
+  real(kind=realType), intent(in)     :: t(nctl+k)
+  real(kind=realType), intent(in)     :: coef(ndim, nctl)
 
   ! Output
-  double precision, intent(out)    :: val(ndim, n)
+  real(kind=realType), intent(out)    :: val(ndim, n)
 
   ! Working
   integer                          :: i, l, idim, istart
   integer                          :: ILEFT, IWORK, ILO, mflag
-  double precision                 :: basisu(k)
+  real(kind=realType)                 :: basisu(k)
 
   val(:, :) = 0.0
   ILO = 1
@@ -68,23 +70,24 @@ subroutine eval_curve_deriv(s, t, k, coef, nctl, ndim, val)
   !     Ouput 
   !     val     - Real, Evaluated point, size ndim
 
+  use precision
   implicit none
  
   ! Input
   integer         , intent(in)          :: k, nctl, ndim
-  double precision, intent(in)          :: s
-  double precision, intent(in)          :: t(nctl+k)
-  double precision, intent(in)          :: coef(ndim, nctl)
+  real(kind=realType), intent(in)          :: s
+  real(kind=realType), intent(in)          :: t(nctl+k)
+  real(kind=realType), intent(in)          :: coef(ndim, nctl)
 
   ! Output
-  double precision, intent(out)         :: val(ndim)
+  real(kind=realType), intent(out)         :: val(ndim)
 
   ! Working
   integer                               :: idim, inbv
-  double precision                      :: work(3*k)
+  real(kind=realType)                      :: work(3*k)
 
   ! Functions
-  double precision                      :: bvalu
+  real(kind=realType)                      :: bvalu
 
   inbv = 1
 
@@ -114,22 +117,23 @@ subroutine eval_curve_deriv2(s, t, k, coef, nctl, ndim, val)
   !     Ouput 
   !     val     - Real, Evaluated point, size ndim
 
+  use precision
   implicit none
   ! Input
   integer         , intent(in)          :: k, nctl, ndim
-  double precision, intent(in)          :: s
-  double precision, intent(in)          :: t(nctl+k)
-  double precision, intent(in)          :: coef(ndim, nctl)
+  real(kind=realType), intent(in)          :: s
+  real(kind=realType), intent(in)          :: t(nctl+k)
+  real(kind=realType), intent(in)          :: coef(ndim, nctl)
 
   ! Output
-  double precision, intent(out)         :: val(ndim)
+  real(kind=realType), intent(out)         :: val(ndim)
 
   ! Working
   integer                               :: idim, inbv
-  double precision                      :: work(3*k)
+  real(kind=realType)                      :: work(3*k)
 
   ! Functions
-  double precision                      :: bvalu
+  real(kind=realType)                      :: bvalu
 
   inbv = 1
 
@@ -165,11 +169,13 @@ subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val)
   !
   !     Ouput 
   !     val     - Real, Evaluated point, size ndim
+
+  use precision
   implicit none
   ! Input
   integer         , intent(in)          :: k, nctl, ndim, n
-  double precision, intent(in)          :: s(n)
-  double precision, intent(in)          :: t(nctl+k)
+  real(kind=realType), intent(in)          :: s(n)
+  real(kind=realType), intent(in)          :: t(nctl+k)
   complex*16      , intent(in)          :: coef(ndim, nctl)
 
   ! Output
@@ -177,13 +183,11 @@ subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val)
 
   ! Working
   integer                               :: ii, l, istart, ileft, idim, ilo, mflag
-  double precision                      :: work(3*k)
-  double precision                      :: basisu(k)
+  real(kind=realType)                      :: work(3*k)
+  real(kind=realType)                      :: basisu(k)
 
   ! Functions
-  double precision bvalu
-
-
+  real(kind=realType) bvalu
 
   val(:, :) = 0.0
   ilo = 1
@@ -227,6 +231,7 @@ subroutine eval_curve_deriv_c(s, t, k, coef, nctl, ndim, val)
   !     Ouput 
   !     val     - Real, Evaluated point, size ndim
 
+  use precision
   implicit none
   ! Input
   integer   , intent(in)          :: k, nctl, ndim
@@ -272,6 +277,7 @@ subroutine eval_curve_deriv2_c(s, t, k, coef, nctl, ndim, val)
   !     Ouput 
   !     val     - Real, Evaluated point, size ndim
 
+  use precision
   implicit none
   ! Input
   integer   , intent(in)          :: k, nctl, ndim
