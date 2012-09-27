@@ -128,23 +128,19 @@ subroutine eval_volume_deriv(u, v, w, tu, tv, tw, ku, kv, kw, coef, &
 
   ! Working
   integer                           :: idim
-  real(kind=realType)               :: work(kv*ku+3*max(Ku, Kv, Kw)+Ku)
-  real(kind=realType) b3val
+  real(kind=realType)               :: b3val
 
   do idim=1, ndim
      val(idim, 1) = b3val(w, v, u, 0, 0, 1, tw, tv, tu, nctlw, nctlv, nctlu, &
-          kw, kv, ku, coef(idim, :, :, :), work) 
+          kw, kv, ku, coef(idim, :, :, :))
 
      val(idim, 2) = b3val(w, v, u, 0, 1, 0, tw, tv, tu, nctlw, nctlv, nctlu, &
-          kw, kv, ku, coef(idim, :, :, :), work)
+          kw, kv, ku, coef(idim, :, :, :))
 
      val(idim, 3) = b3val(w, v, u, 1, 0, 0, tw, tv, tu, nctlw, nctlv, nctlu, &
-          kw, kv, ku, coef(idim, :, :, :), work)
+          kw, kv, ku, coef(idim, :, :, :))
   end do
-
-
 end subroutine eval_volume_deriv
-
 
 subroutine eval_volume_deriv2(u, v, w, tu, tv, tw, ku, kv, kw, coef, & 
      nctlu, nctlv, nctlw, ndim, val)

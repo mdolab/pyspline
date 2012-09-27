@@ -45,15 +45,15 @@
        integer intent(out) :: ind
      end subroutine findspan
 
-     subroutine intrv(xt, lxt, x, ilo, ileft, mflag) ! in :test:intrv.f
-       !use precision
-       real(kind=realtype) dimension(lxt), intent(in) :: xt
-       integer optional, check(len(xt)>=lxt), depend(xt) :: lxt=len(xt)
-       real(kind=realtype), intent(in)  :: x
-       integer, intent(in) :: ilo
-       integer, intent(out) :: ileft
-       integer, intent(out) :: mflag
-     end subroutine intrv
+!      subroutine intrv(xt, lxt, x, ilo, ileft, mflag) ! in :test:intrv.f
+!        !use precision
+!        real(kind=realtype) dimension(lxt), intent(in) :: xt
+!        integer optional, check(len(xt)>=lxt), depend(xt) :: lxt=len(xt)
+!        real(kind=realtype), intent(in)  :: x
+!        integer, intent(in) :: ilo
+!        integer, intent(out) :: ileft
+!        integer, intent(out) :: mflag
+!      end subroutine intrv
 
      subroutine curve_jacobian_wrap(s, sd, t, k, nctl, n, nd, vals, row_ptr, col_ind) ! in :test:compute_curve.f90
        !use precision
@@ -531,13 +531,13 @@
        integer intent(in) :: ileft
        real(kind=realtype) dimension(k), intent(out),depend(k) :: b
      end subroutine basis
-     subroutine derivbasis(ind,u,ku,n,nctl,t,bd) ! in :test:basis.f90
-       integer intent(in) :: ind
-       real(kind=realtype) intent(in) :: u
-       integer intent(in) :: ku
-       integer intent(in) :: n
-       integer intent(in) :: nctl
+     subroutine derivbasis(t,nctl,ku,u,ind,n,bd) ! in :test:basis.f90
        real(kind=realtype) dimension(nctl+ku),intent(in),depend(ku,nctl) :: t
+       integer intent(in) :: nctl
+       integer intent(in) :: ku
+       real(kind=realtype) intent(in) :: u
+       integer intent(in) :: ind
+       integer intent(in) :: n
        real(kind=realtype) dimension(ku,ku),intent(out),depend(ku,ku) :: bd
      end subroutine derivbasis
 
