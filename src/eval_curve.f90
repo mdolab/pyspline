@@ -180,9 +180,6 @@ subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val)
   integer                               :: i, l, istart, ileft, idim
   real(kind=realType)                   :: basisu(k)
 
-  ! Functions
-  real(kind=realType) bvalu
-
   val(:, :) = 0.0
   do i=1, n
      call findSpan(s(i), k, t, nctl, ileft)

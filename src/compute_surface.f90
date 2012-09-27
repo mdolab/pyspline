@@ -16,7 +16,7 @@ subroutine surface_jacobian_wrap(u, v, tu, tv, ku, kv, nctlu, nctlv, nu, nv, val
   ! Working
   real(kind=realType)                  :: basisu(ku), basisv(kv)
   integer                              :: ileftu, ileftv
-  integer                              :: i, j, ii, jj, iwork, counter
+  integer                              :: i, j, ii, jj, counter
 
   counter = 1
   do i=1, nu
@@ -60,11 +60,9 @@ subroutine surface_para_corr(tu, tv, ku, kv, u, v, coef, nctlu, nctlv, ndim, nu,
 
   ! Working
   integer                               :: i, j, jj, max_inner_iter
-  real(kind=realType)                   :: lengthu, lengthv
   real(kind=realType)                   :: D(ndim), D2(ndim)
   real(kind=realType)                   :: val(ndim), deriv(ndim, 2), deriv2(ndim, 2, 2)
-  real(kind=realType)                   :: delta_c, delta_d, u_tilde, v_tilde
-  integer                               :: adj_u, adj_v
+  real(kind=realType)                   :: u_tilde, v_tilde
   real(kind=realType)                   :: A(2, 2), ki(2), delta(2)
 
   !Functions

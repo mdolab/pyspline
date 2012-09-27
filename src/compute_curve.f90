@@ -171,7 +171,7 @@ function norm(X, n)
   norm = sqrt(norm)
 end function norm
 
-function compute_rms_curve(t, k, s, coef, nctl, ndim, length, n, X)
+function compute_rms_curve(t, k, s, coef, nctl, ndim, n, X)
   ! Compute the rms
   use precision
   implicit none
@@ -181,7 +181,6 @@ function compute_rms_curve(t, k, s, coef, nctl, ndim, length, n, X)
   real(kind=realType)  , intent(in)      :: coef(ndim, nctl)
   integer           , intent(in)      :: k, nctl, ndim, n
   real(kind=realType)  , intent(in)      :: X(ndim, n)
-  real(kind=realType)  , intent(in)      :: length
   real(kind=realType)                   :: compute_rms_curve 
 
   ! Working

@@ -15,17 +15,11 @@ MODS = precision.o\
 
 OBJS =  bvalu.o\
 	intrv.o\
-	findSpan.o\
 	bspvn.o\
 	bspvd.o\
-	basis.o\
-	knots.o\
 	b2val.o\
 	b3val.o\
 	cbvalu.o\
-	insertKnot.o\
-	getBasisPt.o\
-	parameterizations.o\
 	i1mach.o\
 	r1mach.o\
 	fdump.o\
@@ -37,6 +31,12 @@ OBJS =  bvalu.o\
 	xerrwv.o\
 	xersav.o\
 	xgetua.o\
+	basis.o\
+	knots.o\
+	insertKnot.o\
+	getBasisPt.o\
+	parameterizations.o\
+	findSpan.o\
 	compute_curve.o\
 	compute_surface.o\
 	compute_volume.o\
