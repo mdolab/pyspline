@@ -25,30 +25,30 @@ subroutine point_curve(x0,t,k,coef,nctl,ndim,N,Niter,eps1,eps2,s,Diff)
   !     s       - Real, vector, length(N) parameter where C(s) is closest to x0
   !     diff    - Real,array, size(ndim,N)- Distance between x0 and curve(s)
 
+  use precision
   implicit none
   ! Input
-  double precision, intent(in)          :: x0(ndim,N)
-  integer         , intent(in)          :: k,nctl,ndim,N,niter
-  double precision, intent(in)          :: t(nctl+k)
-  double precision, intent(in)          :: coef(ndim,nctl)
-  double precision, intent(in)          :: eps1,eps2
+  real(kind=realType), intent(in)          :: x0(ndim,N)
+  integer            , intent(in)          :: k,nctl,ndim,N,niter
+  real(kind=realType), intent(in)          :: t(nctl+k)
+  real(kind=realType), intent(in)          :: coef(ndim,nctl)
+  real(kind=realType), intent(in)          :: eps1,eps2
 
   ! Output
-  double precision, intent(out)         :: s(N),Diff(ndim,N)
+  real(kind=realType), intent(out)         :: s(N),Diff(ndim,N)
 
   ! Working
-  double precision                      :: val(ndim),deriv(ndim),deriv2(ndim)
-  double precision                      :: val0(ndim),s0(N)
-  integer                               :: i,j,ipt,counter,max_inner_iter
-  integer                               :: istart,nss
-  double precision                      :: D,D0,delta,D2(ndim)
-  integer                               :: n_sub ! Huristic Value
-  logical                               :: brute_force
+  real(kind=realType)                      :: val(ndim),deriv(ndim),deriv2(ndim)
+  integer                                  :: i,j,ipt,counter,max_inner_iter
+  integer                                  :: istart,nss
+  real(kind=realType)                      :: D,D0,delta,D2(ndim),s0(N)
+  integer                                  :: n_sub ! Huristic Value
+  logical                                  :: brute_force
   ! Alloctable
-  double precision,allocatable          :: curve_vals(:,:),ss(:)
-  double precision :: c1
+  real(kind=realType),allocatable          :: curve_vals(:,:),ss(:)
+  real(kind=realType) :: c1
   ! Functions
-  double precision                      :: norm,ndp
+  real(kind=realType)                      :: norm,ndp
 
   ! Initialization
   n_sub=1  ! Is 3  Good Here?? Huristic!
@@ -199,33 +199,34 @@ subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,N,niter,eps1,eps2,
   !     v       - Real,vector size(N), v parameters where S(u,v) is closest to x0
   !     diff    - Real Array size(ndim,N) - Distance between x0 and S(u,v)
 
+  use precision
   implicit none
   ! Input
-  double precision, intent(in)          :: x0(ndim,N)
-  integer         , intent(in)          :: ku,kv,nctlu,nctlv,ndim,niter,N
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
-  double precision, intent(in)          :: coef(ndim,nctlv,nctlu)
-  double precision, intent(in)          :: eps1,eps2
+  real(kind=realType), intent(in)          :: x0(ndim,N)
+  integer            , intent(in)          :: ku,kv,nctlu,nctlv,ndim,niter,N
+  real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+  real(kind=realType), intent(in)          :: coef(ndim,nctlv,nctlu)
+  real(kind=realType), intent(in)          :: eps1,eps2
   ! Output
-  double precision, intent(inout)       :: u(N),v(N)
-  double precision, intent(out)         :: diff(ndim,N)
+  real(kind=realType), intent(inout)       :: u(N),v(N)
+  real(kind=realType), intent(out)         :: diff(ndim,N)
 
 
   ! Working
-  double precision                      :: val(ndim),deriv(ndim,2),deriv2(ndim,2,2)
-  double precision                      :: val0(ndim)
-  logical                               :: brute_force
-  integer                               :: i,j,ii,jj,counter,ipt,max_inner_iter
-  double precision                      :: D,D0,u0(N),v0(N),delta(2),D2(ndim)
-  double precision                      :: A(2,2),ki(2)
-  integer                               :: n_sub_u,n_sub_v,n_sub_w  ! Huristic Value
-  integer                               :: istart,nuu,nvv
+  real(kind=realType)                      :: val(ndim),deriv(ndim,2),deriv2(ndim,2,2)
+  real(kind=realType)                      :: val0(ndim)
+  logical                                  :: brute_force
+  integer                                  :: i,j,counter,ipt,max_inner_iter
+  real(kind=realType)                      :: D,D0,u0(N),v0(N),delta(2),D2(ndim)
+  real(kind=realType)                      :: A(2,2),ki(2)
+  integer                                  :: n_sub_u,n_sub_v  ! Huristic Value
+  integer                                  :: istart,nuu,nvv
 
   ! Alloctable
-  double precision,allocatable          :: surface_vals(:,:,:),uu(:),vv(:)
+  real(kind=realType),allocatable          :: surface_vals(:,:,:),uu(:),vv(:)
 
   ! Functions     
-  double precision                      :: norm
+  real(kind=realType)                      :: norm
 
   max_inner_iter = 20
   if (ku == 2) then
@@ -437,44 +438,44 @@ subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,N,&
   !     w       - Real,vector size(N), w parameters where V(u,v,w) is closest to x0
   !     diff    - Real Array size(N,ndim) - Distance between x0 and V(u,v,w)
 
+  use precision
   implicit none
   ! Input
-  double precision, intent(in)          :: x0(ndim,N)
-  integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim,niter,N
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
-  double precision, intent(in)          :: coef(ndim,nctlw,nctlv,nctlu)
-  double precision, intent(in)          :: eps
-  integer         , intent(in)          :: n_sub
+  real(kind=realType), intent(in)          :: x0(ndim,N)
+  integer            , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim,niter,N
+  real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
+  real(kind=realType), intent(in)          :: coef(ndim,nctlw,nctlv,nctlu)
+  real(kind=realType), intent(in)          :: eps
+  integer            , intent(in)          :: n_sub
   ! Output
-  double precision, intent(out)         :: u(N),v(N),w(N)
-  double precision, intent(out)         :: diff(ndim,N)
+  real(kind=realType), intent(out)         :: u(N),v(N),w(N)
+  real(kind=realType), intent(out)         :: diff(ndim,N)
 
   ! Working
-  double precision                      :: D,D0,u0(N),v0(N),w0(N),delta(3),D2(ndim)
-  integer                               :: n_sub_u,n_sub_v,n_sub_w,nuu,nvv,nww
-  integer                               :: istart,counter
-  logical                               :: brute_force
-  double precision                      :: val0(ndim)
+  real(kind=realType)                      :: D,D0,u0(N),v0(N),w0(N)
+  integer                                  :: n_sub_u,n_sub_v,n_sub_w,nuu,nvv,nww
+  integer                                  :: istart
+  real(kind=realType)                      :: val0(ndim)
 
-  double precision                      :: val(ndim)
-  double precision                      :: deriv(ndim,3)
-  double precision                      :: deriv2(ndim,3,3)
-  double precision                      :: R(nDim),low(nDim),high(nDim)
-  double precision                      :: pt(nDim),newpt(nDim),update(nDim)
-  double precision                      :: step,dist,nDist,pgrad
-  double precision                      :: gnorm,grad_norm,wolfe
-  double precision                      :: fval,nfval,c,p_diff
+  real(kind=realType)                      :: val(ndim)
+  real(kind=realType)                      :: deriv(ndim,3)
+  real(kind=realType)                      :: deriv2(ndim,3,3)
+  real(kind=realType)                      :: R(nDim),low(nDim),high(nDim)
+  real(kind=realType)                      :: pt(nDim),newpt(nDim),update(nDim)
+  real(kind=realType)                      :: step,dist,nDist,pgrad
+  real(kind=realType)                      :: grad_norm,wolfe
+  real(kind=realType)                      :: fval,nfval,c,p_diff
 
-  double precision                      :: grad(nDim),hessian(nDim,nDim)
+  real(kind=realType)                      :: grad(nDim),hessian(nDim,nDim)
   integer                               :: iDim,jDim,ipt,i,j,k,m,nLine
   logical                               :: flag,cflag
   integer                               :: counter1
 
   ! Alloctable
-  double precision, allocatable         :: volume_vals(:,:,:,:)
-  double precision, allocatable         :: uu(:),vv(:),ww(:)
+  real(kind=realType), allocatable         :: volume_vals(:,:,:,:)
+  real(kind=realType), allocatable         :: uu(:),vv(:),ww(:)
   ! Functions     
-  double precision                      :: norm
+  real(kind=realType)                      :: norm
 
    ! Generate the uu and vv values
   nuu = nctlu-ku+2
@@ -760,36 +761,37 @@ end subroutine point_volume
 !   !     w       - Real,vector size(N), w parameters where V(u,v,w) is closest to x0
 !   !     diff    - Real Array size(N,ndim) - Distance between x0 and V(u,v,w)
 
+!   use precision
 !   implicit none
 !   ! Input
-!   double precision, intent(in)          :: x0(ndim,N)
+!   real(kind=realType), intent(in)          :: x0(ndim,N)
 !   integer         , intent(in)          :: ku,kv,kw,nctlu,nctlv,nctlw,ndim,niter,N
-!   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
-!   double precision, intent(in)          :: coef(ndim,nctlw,nctlv,nctlu)
-!   double precision, intent(in)          :: eps1,eps2
+!   real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
+!   real(kind=realType), intent(in)          :: coef(ndim,nctlw,nctlv,nctlu)
+!   real(kind=realType), intent(in)          :: eps1,eps2
 !   ! Output
-!   double precision, intent(inout)       :: u(N),v(N),w(N)
-!   double precision, intent(out)         :: diff(ndim,N)
+!   real(kind=realType), intent(inout)       :: u(N),v(N),w(N)
+!   real(kind=realType), intent(out)         :: diff(ndim,N)
 
 
 !   ! Working
-!   double precision                      :: val(ndim)
-!   double precision                      :: deriv(ndim,3)
-!   double precision                      :: deriv2(ndim,3,3)
-!   double precision                      :: val0(ndim)
+!   real(kind=realType)                      :: val(ndim)
+!   real(kind=realType)                      :: deriv(ndim,3)
+!   real(kind=realType)                      :: deriv2(ndim,3,3)
+!   real(kind=realType)                      :: val0(ndim)
 !   logical                               :: brute_force
 !   integer                               :: i,j,k,ii,jj,kk,counter,ipt,max_inner_iter
-!   double precision                      :: D,D0,u0(N),v0(N),w0(N),delta(3),D2(ndim)
-!   double precision                      :: A(3,3),ki(3)
+!   real(kind=realType)                      :: D,D0,u0(N),v0(N),w0(N),delta(3),D2(ndim)
+!   real(kind=realType)                      :: A(3,3),ki(3)
 !   integer                               :: n_sub_u,n_sub_v,n_sub_w,n_sub ! Huristic Value
 !   integer                               :: istart,nuu,nvv,nww
 
 !   ! Alloctable
-!   double precision,allocatable          :: volume_vals(:,:,:,:)
-!   double precision,allocatable          :: uu(:),vv(:),ww(:)
-!   double precision :: c1,c2,c3
+!   real(kind=realType),allocatable          :: volume_vals(:,:,:,:)
+!   real(kind=realType),allocatable          :: uu(:),vv(:),ww(:)
+!   real(kind=realType) :: c1,c2,c3
 !   ! Functions     
-!   double precision                      :: norm,dotproduct,ndp
+!   real(kind=realType)                      :: norm,dotproduct,ndp
 
 !   max_inner_iter = 20
 
@@ -1063,31 +1065,32 @@ end subroutine point_volume
 !   !     t       - Real: parameter on Curve 2
 !   !     D       - Real: Distance between curve 
 !   !
+!   use precision
 !   implicit none
 
 !   ! Input/Output
 !   integer         , intent(in)     :: n1,n2,k1,k2,ndim
-!   double precision, intent(in)     :: t1(n1+k1),t2(n2+k2)
-!   double precision, intent(in)     :: coef1(ndim,n1),coef2(ndim,n2)
-!   double precision, intent(inout)  :: s,t 
+!   real(kind=realType), intent(in)     :: t1(n1+k1),t2(n2+k2)
+!   real(kind=realType), intent(in)     :: coef1(ndim,n1),coef2(ndim,n2)
+!   real(kind=realType), intent(inout)  :: s,t 
 !   integer         , intent(in)     :: Niter
-!   double precision, intent(in)     :: eps1,eps2
+!   real(kind=realType), intent(in)     :: eps1,eps2
 
-!   double precision, intent(out)    :: Diff(ndim)
+!   real(kind=realType), intent(out)    :: Diff(ndim)
 
 !   ! Working
-!   double precision                 :: val0(ndim),val1(ndim),val2(ndim)
-!   double precision                 :: deriv_c1(ndim),deriv2_c1(ndim)
-!   double precision                 :: deriv_c2(ndim),deriv2_c2(ndim)
+!   real(kind=realType)                 :: val0(ndim),val1(ndim),val2(ndim)
+!   real(kind=realType)                 :: deriv_c1(ndim),deriv2_c1(ndim)
+!   real(kind=realType)                 :: deriv_c2(ndim),deriv2_c2(ndim)
 !   integer                          :: i,j,ii,jj,max_inner_iter,counter1,istart
-!   double precision                 :: D,D0,s0,t0,delta(2),D2(3)
-!   double precision                 :: ki(2),A(2,2),val0_1(3),val0_2(3)
+!   real(kind=realType)                 :: D,D0,s0,t0,delta(2),D2(3)
+!   real(kind=realType)                 :: ki(2),A(2,2),val0_1(3),val0_2(3)
 !   integer                          :: n,nss,ntt ! Huristic Value
-!   double precision,allocatable     :: curve1_vals(:,:),curve2_vals(:,:)
-!   double precision,allocatable     :: ss(:),tt(:)
+!   real(kind=realType),allocatable     :: curve1_vals(:,:),curve2_vals(:,:)
+!   real(kind=realType),allocatable     :: ss(:),tt(:)
 !   logical                          :: brute_force
 !   ! Functions 
-!   double precision                 :: norm
+!   real(kind=realType)                 :: norm
   
 !   max_inner_iter = 20
 !   ! Is 3 Good Here?? Huristic
@@ -1294,36 +1297,38 @@ subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,Niter,eps1,eps2,s,t,Di
   !     t       - Real: parameter on Curve 2
   !     D       - Real: Distance between curve 
   !
+
+  use precision
   implicit none
 
   ! Input/Output
   integer         , intent(in)     :: n1,n2,k1,k2,ndim
-  double precision, intent(in)     :: t1(n1+k1),t2(n2+k2)
-  double precision, intent(in)     :: coef1(ndim,n1),coef2(ndim,n2)
-  double precision, intent(inout)  :: s,t 
+  real(kind=realType), intent(in)     :: t1(n1+k1),t2(n2+k2)
+  real(kind=realType), intent(in)     :: coef1(ndim,n1),coef2(ndim,n2)
+  real(kind=realType), intent(inout)  :: s,t 
   integer         , intent(in)     :: Niter
-  double precision, intent(in)     :: eps1,eps2
+  real(kind=realType), intent(in)     :: eps1,eps2
 
-  double precision, intent(out)    :: Diff(ndim)
+  real(kind=realType), intent(out)    :: Diff(ndim)
 
   ! Working
-  double precision :: val0(ndim),val1(ndim),val2(ndim)
-  double precision :: deriv_c1(ndim),deriv2_c1(ndim)
-  double precision :: deriv_c2(ndim),deriv2_c2(ndim)
-  integer          :: i,j,ii,jj,max_inner_iter,counter1,istart
-  double precision :: D,D0,s0,t0,delta(2),D2(3)
-  double precision :: ki(2),A(2,2),val0_1(3),val0_2(3)
-  double precision :: low(2), high(2), pt(2), R(ndim), ndist, fval, nfval, dist
-  double precision :: hessian(2,2), grad(2), wolfe, newpt(2), c, grad_norm
-  double precision :: pgrad, update(2), step, p_diff, idet
+  real(kind=realType) :: val1(ndim),val2(ndim)
+  real(kind=realType) :: deriv_c1(ndim),deriv2_c1(ndim)
+  real(kind=realType) :: deriv_c2(ndim),deriv2_c2(ndim)
+  integer             :: i,j,max_inner_iter,counter1,istart
+  real(kind=realType) :: D,D0,s0,t0
+  real(kind=realType) :: val0_1(3),val0_2(3)
+  real(kind=realType) :: low(2), high(2), pt(2), R(ndim), ndist, fval, nfval, dist
+  real(kind=realType) :: hessian(2,2), grad(2), wolfe, newpt(2), c, grad_norm
+  real(kind=realType) :: pgrad, update(2), step, p_diff
   logical :: flag, cflag
   integer                          :: nline, m, idim
   integer                          :: n,nss,ntt ! Huristic Value
-  double precision,allocatable     :: curve1_vals(:,:),curve2_vals(:,:)
-  double precision,allocatable     :: ss(:),tt(:)
+  real(kind=realType),allocatable     :: curve1_vals(:,:),curve2_vals(:,:)
+  real(kind=realType),allocatable     :: ss(:),tt(:)
   logical                          :: brute_force
   ! Functions 
-  double precision                 :: norm
+  real(kind=realType)                 :: norm
   
   max_inner_iter = 20
   n = 25 ! Extra precision on brute force search
@@ -1576,32 +1581,34 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
   !     s       - Real, s parameter where S(u,v) is closest to C(s)
   !     diff    - Real Array size(ndim) - Distance between C(s)and S(u,v)
 
+  use precision
   implicit none
-  ! Input
-  integer         , intent(in)          :: kc,ku,kv,nctlu,nctlv,nctlc,ndim,niter
-  double precision, intent(in)          :: tc(nctlc+kc),tu(nctlu+ku),tv(nctlv+kv)
-  double precision, intent(in)          :: coefc(ndim,nctlc),coefs(ndim,nctlv,nctlu)
-  double precision, intent(in)          :: eps1,eps2
+
+  ! Input 
+  integer            , intent(in)          :: kc,ku,kv,nctlu,nctlv,nctlc,ndim,niter
+  real(kind=realType), intent(in)          :: tc(nctlc+kc),tu(nctlu+ku),tv(nctlv+kv)
+  real(kind=realType), intent(in)          :: coefc(ndim,nctlc),coefs(ndim,nctlv,nctlu)
+  real(kind=realType), intent(in)          :: eps1,eps2
   ! Output
-  double precision, intent(inout)       :: u,v,s
-  double precision, intent(out)         :: diff(ndim)
+  real(kind=realType), intent(inout)       :: u,v,s
+  real(kind=realType), intent(out)         :: diff(ndim)
 
   ! Working
-  double precision                      :: val_s(ndim),deriv_s(ndim,2),deriv2_s(ndim,2,2)
-  double precision                      :: val_c(ndim),deriv_c(ndim),deriv2_C(ndim)
-  double precision                      :: val0_s(ndim),val0_c(ndim)
-  integer                               :: i,j,ii,jj,l,ll,counter1,counter2
-  double precision                      :: D,D0,u0,v0,s0,delta(3),D2(3)
-  double precision                      :: A(3,3),ki(3)
-  integer                               :: n_sub_u,n_sub_v,nc ! Huristic Value
-  integer                               :: istart,nss,nuu,nvv,max_inner_iter
-  logical                               :: brute_force
+  real(kind=realType)                      :: val_s(ndim),deriv_s(ndim,2),deriv2_s(ndim,2,2)
+  real(kind=realType)                      :: val_c(ndim),deriv_c(ndim),deriv2_C(ndim)
+  real(kind=realType)                      :: val0_s(ndim),val0_c(ndim)
+  integer                                  :: i,j,l,counter1
+  real(kind=realType)                      :: D,D0,u0,v0,s0,delta(3),D2(3)
+  real(kind=realType)                      :: A(3,3),ki(3)
+  integer                                  :: n_sub_u,n_sub_v,nc ! Huristic Value
+  integer                                  :: istart,nss,nuu,nvv,max_inner_iter
+  logical                                  :: brute_force
   ! Allocatable 
-  double precision,allocatable          :: curve_vals(:,:),uu(:),vv(:),ss(:)
-  double precision,allocatable          :: surface_vals(:,:,:)
+  real(kind=realType),allocatable          :: curve_vals(:,:),uu(:),vv(:),ss(:)
+  real(kind=realType),allocatable          :: surface_vals(:,:,:)
 
   ! Functions     
-  double precision                      :: norm
+  real(kind=realType)                      :: norm
 
  max_inner_iter = 20
 
@@ -1829,12 +1836,14 @@ subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,ni
 end subroutine curve_surface
 
 subroutine solve_2by2(A,b,x)
-  ! Solve a 2 x 2 system  -- With NO checking
-  double precision, intent(in) :: A(2,2),b(2)
-  double precision, intent(out) :: x(2)
-  double precision         :: IPIV(2), idet, det
-  integer :: info
+  
+  use precision
+  implicit none
 
+  ! Solve a 2 x 2 system  -- With NO checking
+  real(kind=realType), intent(in) :: A(2,2),b(2)
+  real(kind=realType), intent(out) :: x(2)
+  real(kind=realType)         :: idet, det
 
   det = A(1,1)*A(2,2)-A(1,2)*A(2,1)
   if (det == 0) then
@@ -1848,10 +1857,14 @@ subroutine solve_2by2(A,b,x)
 end subroutine solve_2by2
 
 subroutine solve_3by3(A,b,x)
+
+  use precision
+  implicit none
+
   ! Solve a 3 x 3 system  -- With NO checking
-  double precision,intent(in) :: A(3,3),b(3)
-  double precision,intent(out) :: x(3)
-  double precision         :: idet
+  real(kind=realType),intent(in) :: A(3,3),b(3)
+  real(kind=realType),intent(out) :: x(3)
+  real(kind=realType)         :: idet
 
   idet = 1/(A(1,1)*(A(3,3)*A(2,2)-A(3,2)*A(2,3))-A(2,1)*(A(3,3)*A(1,2)-A(3,2)*A(1,3))+A(3,1)*(A(2,3)*A(1,2)-A(2,2)*A(1,3)))
   x(1) = idet*( b(1)*(A(3,3)*A(2,2)-A(3,2)*A(2,3)) - b(2)*(A(3,3)*A(1,2)-A(3,2)*A(1,3)) + b(3)*(A(2,3)*A(1,2)-A(2,2)*A(1,3)))
@@ -1894,19 +1907,21 @@ subroutine line_plane(ia,vc,p0,v1,v2,n,sol,pid,n_sol)
   ! and 
   !     0 < beta, gamma < 1
 
+  use precision
   implicit none 
+
   ! Input
   integer, intent(in) :: n
-  double precision , intent(in) :: ia(3),vc(3),p0(3,n),v1(3,n),v2(3,n)
+  real(kind=realType) , intent(in) :: ia(3),vc(3),p0(3,n),v1(3,n),v2(3,n)
 
   ! Output
   integer, intent(out) :: n_sol
-  double precision, intent(out) :: sol(6,n)
+  real(kind=realType), intent(out) :: sol(6,n)
   integer, intent(out) :: pid(n)
 
   ! Worling 
   integer :: i
-  double precision :: A(3,3),rhs(3),x(3),norm
+  real(kind=realType) :: A(3,3),rhs(3),x(3)
   
   A(:,1) = -vc
   n_sol = 0
@@ -1940,18 +1955,20 @@ subroutine plane_line(ia,vc,p0,v1,v2,n,sol,n_sol)
 
   ! Check a plane against multiple lines
 
+  use precision 
   implicit none 
+
   ! Input
   integer, intent(in) :: n
-  double precision , intent(in) :: ia(3,n),vc(3,n),p0(3),v1(3),v2(3)
+  real(kind=realType) , intent(in) :: ia(3,n),vc(3,n),p0(3),v1(3),v2(3)
 
   ! Output
   integer, intent(out) :: n_sol
-  double precision, intent(out) :: sol(6,n)
+  real(kind=realType), intent(out) :: sol(6,n)
 
   ! Worling 
   integer :: i,ind(n)
-  double precision :: A(3,3),rhs(3),x(3),norm
+  real(kind=realType) :: A(3,3),rhs(3),x(3)
 
   n_sol = 0
   sol(:,:) = 0.0
@@ -1983,21 +2000,22 @@ end subroutine plane_line
 !   ! Determine what volume defined by 12 triangular faces in p0,v1,v2
 !   ! the points x0 coorespond to
 
+!   use precision
 !   implicit none 
 !   ! Input
 !   integer, intent(in) :: n,nVol
-!   double precision , intent(in) :: p0(3,12*nVol),v1(3,12*nVol),v2(3,12*nVol)
-!   double precision , intent(in) :: x0(3,n)
-!   double precision , intent(in) :: lines(3,6)
+!   real(kind=realType) , intent(in) :: p0(3,12*nVol),v1(3,12*nVol),v2(3,12*nVol)
+!   real(kind=realType) , intent(in) :: x0(3,n)
+!   real(kind=realType) , intent(in) :: lines(3,6)
 
 !   ! Output
 !   integer, intent(out) :: ids(n)
 
 !   ! Working 
 !   integer :: i,ind(n)
-!   double precision :: A(3,3),rhs(3),x(3),norm
-!   double precision :: sol(12)
-!   double precision :: D(n)
+!   real(kind=realType) :: A(3,3),rhs(3),x(3),norm
+!   real(kind=realType) :: sol(12)
+!   real(kind=realType) :: D(n)
 
 !   ! Loop over each point:
 !   do i=1,n
@@ -2054,18 +2072,20 @@ end subroutine plane_line
   
 subroutine point_plane(pt,p0,v1,v2,n,sol,n_sol,best_sol)
 
-  implicit none 
+  use precision
+  implicit none
+ 
   ! Input
   integer, intent(in) :: n
-  double precision , intent(in) :: pt(3),p0(3,n),v1(3,n),v2(3,n)
+  real(kind=realType) , intent(in) :: pt(3),p0(3,n),v1(3,n),v2(3,n)
 
   ! Output
   integer, intent(out) :: n_sol,best_sol
-  double precision, intent(out) :: sol(6,n)
+  real(kind=realType), intent(out) :: sol(6,n)
 
   ! Worling 
   integer :: i,ind(n)
-  double precision :: A(2,2),rhs(2),x(2),norm,r(3),D,D0
+  real(kind=realType) :: A(2,2),rhs(2),x(2),norm,r(3),D,D0
   
 
   n_sol = 0
@@ -2107,12 +2127,14 @@ end subroutine point_plane
      
   
 function dotproduct(x1,x2,n)
+  use precision 
   implicit none
-  double precision,intent(in) :: x1(n),x2(n)
+
+  real(kind=realType),intent(in) :: x1(n),x2(n)
   integer,intent(in) :: n
   integer :: i
 
-  double precision ::  dotproduct 
+  real(kind=realType) ::  dotproduct 
   dotproduct = 0.0
   do i=1,n
      dotproduct = dotproduct + x1(i)*x2(i)
@@ -2122,12 +2144,14 @@ end function dotproduct
 
 function ndp(x1,x2,n)
   ! Compute norm of the dot_product
+  use precision
   implicit none
-  double precision,intent(in) :: x1(n),x2(n)
+
+  real(kind=realType),intent(in) :: x1(n),x2(n)
   integer,intent(in) :: n
   integer :: i
 
-  double precision ::  ndp
+  real(kind=realType) ::  ndp
   ndp = 0.0
   do i=1,n
      ndp = ndp + (x1(i)*x2(i))**2
