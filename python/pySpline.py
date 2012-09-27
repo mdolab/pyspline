@@ -104,7 +104,6 @@ def writeTecplot3D(handle, name, data):
         None
 
     """
-
     nx = data.shape[0]
     ny = data.shape[1]
     nz = data.shape[2]
