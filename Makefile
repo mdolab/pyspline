@@ -73,13 +73,3 @@ LINUX_INTEL_SCINET:
 	ln -sf config/config.LINUX_INTEL_SCINET.mk config.mk
 	make module
 	(cd src/f2py && make)
-
-BASALT:
-	mkdir -p obj
-	if [ ! -f "config/config.BASALT.mk" ]; then cp "config/defaults/config.BASALT.mk" ./config; fi
-	ln -sf config/config.BASALT.mk config.mk
-	make module
-	(cd src/f2py && make)
-
-
-
