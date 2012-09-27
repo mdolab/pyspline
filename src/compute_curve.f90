@@ -1,134 +1,20 @@
-! subroutine compute_curve(s,X,t,k,n,nctl,ndim,coef,niter,tol,rms)
-
-!   !***DESCRIPTION
-!   !
-!   !     Written by Gaetan Kenway
-!   !
-!   !     Abstract: compute_curve is the main function for the
-!   !               generation fo B-spline curves It does both
-!   !               interpolating and LMS fits, as well as Hoschek's 
-!   !               Parameter Correction.
-!   !
-!   !     Description of Arguments
-!   !     Input
-!   !     s       - Real, Vector of s coordinates, length n
-!   !     X       - Real, Array of X values to fit, Size (n,ndim)
-!   !     t       - Real,Knot vector. Length nctl+k
-!   !     k       - Integer,order of spline
-!   !     nctl    - Integer,Number of control points
-!   !     ndim    - Integer, spatial dimension of curve
-!   !     niter   - Integer, number of hoscek para-correction iterations
-!   !     tol     - Integer, relative tolerance for convergence
-!   !
-!   !     Ouput coef - Real,Array of B-spline coefficients. Size (nctl,ndim)
-
-!   use lms_jacobian
-!   use  lsqrModule,        only : LSQR
-!   use  lsqrCheckModule,   only : Acheck, xcheck
-
-!   use precision
-!   implicit none
-  
-!   ! Input
-!   integer         , intent(in)          :: k,nctl,ndim,n
-!   real(kind=realType), intent(in)          :: X(n,ndim)
-!   real(kind=realType), intent(inout)       :: s(n)
-!   real(kind=realType), intent(in)          :: t(nctl+k)
-!   integer         , intent(in)          :: niter
-!   real(kind=realType), intent(in)          :: tol
-
-!   ! Output
-!   real(kind=realType), intent(inout)       :: coef(nctl,ndim)
-!   real(kind=realType), intent(out)         :: rms
-!   ! Working
-!   integer                               :: i,idim,iter
-!   real(kind=realType)                      :: weight
-!   real(kind=realType)                      :: length,res,norm,tot,val(ndim)
-!   integer                               :: istop,itn
-!   real(kind=realType)                      :: Anorm,Acond,rnorm, Arnorm,xnorm
-!   ! Functions called
-!   real(kind=realType)                      :: poly_length,floor,compute_rms_curve
-
-!   !Initialization
-!   length = poly_length(X,n,ndim)  
-!   call setup_jacobian(n,nctl,k)
-!   call curve_jacobian_linear(t,k,s,n,nctl)
-
-!   do iter=1,niter
-!      ! Solve
-!      idim = 1
-!      do idim=1,ndim
-!         call LSQR( n, Nctl, Aprod1, Aprod2,X(:,idim),0.0, .False., &
-!              coef(:,idim), vals, 1e-12, 1e-12, 1e8, Nctl*4,0,&
-!              istop, itn, Anorm, Acond, rnorm, Arnorm, xnorm )
-!      end do
-!      call curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X)
-!      rms = compute_rms_curve(t,k,s,coef,nctl,ndim,length,n,X)
-!      call curve_jacobian_linear(t,k,s,n,nctl)
-!      ! Do convergence Check to break early
-!   end do
- 
-!   call kill_jacobian()
-
-! end subroutine compute_curve
-
-! subroutine curve_jacobian_linear(t,k,s,n,nctl)
-!   use lms_jacobian
-
-!   use precision
-!   implicit none
-!   ! Input
-!   real(kind=realType)     ,intent(in)      :: t(nctl+k)
-!   real(kind=realType)     ,intent(in)      :: s(n)
-!   integer              ,intent(in)      :: k,nctl,n
-!   ! Output -> in lms_jacobian module
-
-!   real(kind=realType)                      :: vnikx(k),work(2*k)
-!   integer                               :: i,j,counter
-!   integer                               :: ilo,ileft,mflag,iwork
-  
-!   ilo = 1
-!   counter = 1
-!   do i=1,n
-!      call intrv(t,nctl+k,s(i),ilo,ileft,mflag)
-!      if (mflag == 0) then
-!         call bspvn(t,k,k,1,s(i),ileft,vnikx,work,iwork)
-!      else if (mflag == 1) then
-!         ileft = nctl
-!         vnikx(:) = 0.0
-!         vnikx(k) = 1.0
-!      end if
-
-!      row_ptr(i) = counter
-!      do j=1,k
-!         col_ind(counter) = ileft-k+j
-!         vals(counter) =vnikx(j)
-!         counter = counter + 1
-!      end do
-!   end do
-!   row_ptr(n+1) = counter
-! end subroutine curve_jacobian_linear
 
 subroutine curve_jacobian_wrap(s,sd,t,k,nctl,n,nd,vals,row_ptr,col_ind)
   use precision
   implicit none
   ! Input
-  real(kind=realType)     ,intent(in)      :: t(nctl+k),s(n),sd(nd)
+  real(kind=realType)  ,intent(in)      :: t(nctl+k),s(n),sd(nd)
   integer              ,intent(in)      :: k,nctl,n,nd
   ! Output
-  real(kind=realType)     ,intent(inout)   :: vals((n+nd)*k)
+  real(kind=realType)  ,intent(inout)   :: vals((n+nd)*k)
   integer              ,intent(inout)   :: row_ptr(n+nd+1)
   integer              ,intent(inout)   :: col_ind((n+nd)*k)
-  real(kind=realType)                      :: basisu(k),work((k+1)*(k+2)/2),vdikx(k,2)
-  integer                               :: i,j,counter
-  integer                               :: ilo,ileft,mflag,iwork
-  ilo = 1
+  real(kind=realType)                   :: basisu(k),work((k+1)*(k+2)/2),vdikx(k,2)
+  integer                               :: i, j, counter, ileft
+
   counter = 1
   do i=1,n ! Do the values first 
-     call intrv(t,nctl+k,s(i),ilo,ileft,mflag)
-     if (mflag == 1) then
-        ileft = ileft - k
-     end if
+     call findSpan(s(i), k, t, nctl, ileft)
      call basis(t,nctl,k,s(i),ileft,basisu)
 
      row_ptr(i) = counter-1
@@ -139,11 +25,9 @@ subroutine curve_jacobian_wrap(s,sd,t,k,nctl,n,nd,vals,row_ptr,col_ind)
      end do
   end do
   do i=1,nd ! Do the derivatives next
-     call intrv(t,nctl+k,sd(i),ilo,ileft,mflag)
-     if (mflag == 1) then
-        ileft = ileft - k
-     end if
+     call findSpan(sd(i), k, t, nctl, ileft)
      call bspvd(t,k,2,sd(i),ileft,k,vdikx,work)
+
      row_ptr(i+n) = counter-1
      do j=1,k
         col_ind(counter) = ileft-k+j-1
@@ -201,26 +85,32 @@ subroutine constr_jac(A_val,A_row_ptr,A_col_ind,B_val,B_row_ptr,B_col_ind,C_val,
   end do
 end subroutine constr_jac
 
-function poly_length(X,n,ndim)
+subroutine poly_length(X,n,ndim, length)
   ! Compute the length of the spatial polygon
   use precision
   implicit none
+
   !Input
   real(kind=realType) ,intent(in)    :: X(ndim,n)
-  integer          ,intent(in)    :: n,ndim
+  integer             ,intent(in)    :: n,ndim
+  
+  ! Ouput
+  real(kind=realType), intent(out)   :: length
+
+  ! Working
   integer                         :: i,idim
-  real(kind=realType)                :: dist
-  real(kind=realType) poly_length
-  poly_length = 0.0
+  real(kind=realType)             :: dist
+
+  length = 0.0
   do i=1,n-1
      dist = 0.0
      do idim=1,ndim
         dist = dist + (X(idim,i)-X(idim,i+1))**2
      end do
-     poly_length = poly_length + sqrt(dist)
+     length = length + sqrt(dist)
   end do
   
-end function poly_length
+end subroutine poly_length
 
 subroutine curve_para_corr(t,k,s,coef,nctl,ndim,length,n,X)
 

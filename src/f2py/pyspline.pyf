@@ -91,13 +91,14 @@
        integer dimension(am+cm+1), intent(out), depend(am, cm) :: j_row_ptr
      end subroutine constr_jac
 
-     ! function poly_length(x, n, ndim) ! in :test:compute_curve.f90
-     !   !use precision
-     !   real(kind=realtype) dimension(ndim, n), intent(in) :: x
-     !   integer optional, intent(in), check(shape(x, 1)==n), depend(x) :: n=shape(x, 1)
-     !   integer optional, intent(in), check(shape(x, 0)==ndim), depend(x) :: ndim=shape(x, 0)
-     !   real(kind=realtype) :: poly_length
-     ! end function poly_length
+     subroutine poly_length(x, n, ndim, length) ! in :test:compute_curve.f90
+       !use precision
+       real(kind=realtype) dimension(ndim, n), intent(in) :: x
+       integer optional, intent(in), check(shape(x, 1)==n), depend(x) :: n=shape(x, 1)
+       integer optional, intent(in), check(shape(x, 0)==ndim), depend(x) :: ndim=shape(x, 0)
+       real(kind=realtype), intent(out) :: length
+     end function poly_length
+
      subroutine curve_para_corr(t, k, s, coef, nctl, ndim, length, n, x) ! in :test:compute_curve.f90
        !use precision
        real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
