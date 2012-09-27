@@ -531,6 +531,16 @@
        integer intent(in) :: ileft
        real(kind=realtype) dimension(k), intent(out),depend(k) :: b
      end subroutine basis
+     subroutine derivbasis(ind,u,ku,n,nctl,t,bd) ! in :test:basis.f90
+       integer intent(in) :: ind
+       real(kind=realtype) intent(in) :: u
+       integer intent(in) :: ku
+       integer intent(in) :: n
+       integer intent(in) :: nctl
+       real(kind=realtype) dimension(nctl+ku),intent(in),depend(ku,nctl) :: t
+       real(kind=realtype) dimension(ku,ku),intent(out),depend(ku,ku) :: bd
+     end subroutine derivbasis
+
   end interface
 end program
 
