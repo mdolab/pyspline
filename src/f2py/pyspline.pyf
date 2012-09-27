@@ -244,19 +244,18 @@
        integer optional, intent(in), check(shape(coef, 0)==ndim), depend(coef) :: ndim=shape(coef, 0)
        real(kind=realtype) dimension(ndim, 2), intent(out), depend(ndim) :: val
      end subroutine eval_surface_deriv
-     subroutine eval_surface_deriv2(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, val) ! in :test:eval_surface.f90
-       
+     subroutine eval_surface_deriv2(u,v,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,val) ! in :test:eval_surface.f90
        real(kind=realtype) intent(in) :: u
        real(kind=realtype) intent(in) :: v
-       real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
-       real(kind=realtype) dimension(nctlv+kv), intent(in), depend(kv, nctlv) :: tv
+       real(kind=realtype) dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       real(kind=realtype) dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
        integer intent(in) :: ku
        integer intent(in) :: kv
-       real(kind=realtype) dimension(ndim, nctlv, nctlv), intent(in) :: coef
-       integer intent(in) :: nctlu
-       integer optional, intent(in), check(shape(coef, 1)==nctlv), depend(coef) :: nctlv=shape(coef, 1)
-       integer optional, intent(in), check(shape(coef, 0)==ndim), depend(coef) :: ndim=shape(coef, 0)
-       real(kind=realtype) dimension(ndim, 2, 2), intent(out), depend(ndim) :: val
+       real(kind=realtype) dimension(ndim,nctlv,nctlu),intent(in) :: coef
+       integer optional,intent(in),check(shape(coef,2)==nctlu),depend(coef) :: nctlu=shape(coef,2)
+       integer optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer optional,intent(in),check(shape(coef,0)==ndim),depend(coef) :: ndim=shape(coef,0)
+       real(kind=realtype) dimension(ndim,2,2),intent(out),depend(ndim) :: val
      end subroutine eval_surface_deriv2
      subroutine eval_volume(u, v, w, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, n, m, l, val) ! in :test:eval_volume.f90
        real(kind=realtype) dimension(l, m, n), intent(in) :: u

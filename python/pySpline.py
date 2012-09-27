@@ -709,7 +709,7 @@ scipy is used.')
             s, scalar: A real scalar
         Returns:
             derivative: The first derivative [ndim] vector
-
+            
             """
         if self.coef.dtype == numpy.dtype('d'):
             derivative = pyspline.eval_curve_deriv2(
@@ -1492,7 +1492,7 @@ MUST be defined for task lms or interpolate'
                                          eps1, eps2, u, v)
         return u.squeeze(), v.squeeze(), D.squeeze().T
 
-    def projectCurve(self, in_curve, Niter=25, eps1=1e-6, eps2=1e-6, **kwargs):
+    def projectCurve(self, in_curve, Niter=25, eps1=1e-12, eps2=1e-12, **kwargs):
         """
         Find the minimum distance between this surface and a curve
         Required Arguments:

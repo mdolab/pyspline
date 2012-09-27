@@ -186,41 +186,40 @@ subroutine eval_volume_deriv2(u, v, w, tu, tv, tw, ku, kv, kw, coef, &
 
   ! Working
   integer                          :: idim
-  real(kind=realType)              :: work(kv*ku+3*max(ku, kv, kw)+ku)
 
-  real(kind=realType) b3val
+  real(kind=realType)              :: b3val
 
   do idim=1, ndim
 
      ! Row 1
      if (ku>=3) then
         val(idim, 1, 1) = b3val(w, v, u, 0, 0, 2, tw, tv, tu, nctlw, nctlv, &
-             nctlu, kw, kv, ku, coef(idim, :, :, :), work)
+             nctlu, kw, kv, ku, coef(idim, :, :, :))
      else
         val(idim, 1, 1) = 0.0
      end if
      val(idim, 1, 2) = b3val(w, v, u, 0, 1, 1, tw, tv, tu, nctlw, nctlv, nctlu, &
-          kw, kv, ku, coef(idim, :, :, :), work)
+          kw, kv, ku, coef(idim, :, :, :))
      val(idim, 1, 3) = b3val(w, v, u, 1, 0, 1, tw, tv, tu, nctlw, nctlv, nctlu, &
-          kw, kv, ku, coef(idim, :, :, :), work)
+          kw, kv, ku, coef(idim, :, :, :))
 
      ! Row 2
      val(idim, 2, 1) = val(idim, 1, 2)
      if (kv>=3) then
         val(idim, 2, 2) = b3val(w, v, u, 0, 2, 0, tw, tv, tu, nctlw, nctlv, &
-             nctlu, kw, kv, ku, coef(idim, :, :, :), work)
+             nctlu, kw, kv, ku, coef(idim, :, :, :))
      else
         val(idim, 2, 2) = 0.0
      end if
      val(idim, 2, 3) = b3val(w , v , u, 1, 1, 0, tw, tv, tu, nctlw, nctlv, nctlu, &
-          kw, kv, ku, coef(idim, :, :, :), work)
+          kw, kv, ku, coef(idim, :, :, :))
 
      ! Row 3
      val(idim, 3, 1) = val(idim, 1, 3)
      val(idim, 3, 2) = val(idim, 2, 3)
      if (kw>=3) then
         val(idim, 3, 3) = b3val(w, v, u, 2, 0, 0, tw, tv, tu, nctlw, nctlv, &
-             nctlu, kw, kv, ku, coef(idim, :, :, :), work)
+             nctlu, kw, kv, ku, coef(idim, :, :, :))
      else
         val(idim, 3, 3) = 0.0
      end if
