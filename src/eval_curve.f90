@@ -220,7 +220,7 @@ subroutine eval_curve_deriv_c(s, t, k, coef, nctl, ndim, val)
   complex(kind=realType), intent(out)         :: val(ndim)
 
   ! Working
-  integer                                     :: idim, inbv
+  integer                                     :: idim
 
   ! Functions
   complex(kind=realType)                      :: cbvalu

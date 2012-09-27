@@ -32,7 +32,7 @@ function bvalu(t, coef, nctl, K, ideriv, s)
   real(kind=realType)              :: bvalu
 
   ! Working
-  integer                          :: i, l, idim, istart, ileft
+  integer                          :: l, istart, ileft
   real(kind=realType)              :: B(k), Bd(k,k)
 
   bvalu = 0.0
@@ -120,8 +120,8 @@ function b2val(u, v, idu, idv, tu, tv, nctlu, nctlv, ku, kv, coef)
      end do
   else
      ! We need derivative basis functions
-     call derivBasis(tu, nctlu, ku, u, ileftu, idu, Bu)
-     call derivBasis(tv, nctlv, kv, v, ileftv, idv, BV)
+     call derivBasis(tu, nctlu, ku, u, ileftu, idu, Bud)
+     call derivBasis(tv, nctlv, kv, v, ileftv, idv, Bvd)
 
      do i=1, ku
         do j=1, kv
@@ -213,9 +213,9 @@ function b3val(u, v, w, idu, idv, idw, tu, tv, tw, nctlu, nctlv, nctlw, &
      end do
   else
      ! We need derivative basis functions
-     call derivBasis(tu, nctlu, ku, u, ileftu, idu, Bu)
-     call derivBasis(tv, nctlv, kv, v, ileftv, idv, Bv)
-     call derivBasis(tw, nctlw, kw, w, ileftw, idw, Bw)
+     call derivBasis(tu, nctlu, ku, u, ileftu, idu, Bud)
+     call derivBasis(tv, nctlv, kv, v, ileftv, idv, Bvd)
+     call derivBasis(tw, nctlw, kw, w, ileftw, idw, Bwd)
 
      do i=1, ku
         do j=1, kv
@@ -266,7 +266,7 @@ function cbvalu(t, coef, nctl, K, ideriv, s)
   complex(kind=realType)              :: cbvalu
 
   ! Working
-  integer                          :: i, l, idim, istart, ileft
+  integer                          :: l, istart, ileft
   real(kind=realType)              :: B(k), Bd(k,k)
 
   cbvalu = cmplx(0.0, 0.0)
@@ -447,9 +447,9 @@ function cb3val(u, v, w, idu, idv, idw, tu, tv, tw, nctlu, nctlv, nctlw, &
      end do
   else
      ! We need derivative basis functions
-     call derivBasis(tu, nctlu, ku, u, ileftu, idu, Bu)
-     call derivBasis(tv, nctlv, kv, v, ileftv, idv, Bv)
-     call derivBasis(tw, nctlw, kw, w, ileftw, idw, Bw)
+     call derivBasis(tu, nctlu, ku, u, ileftu, idu, Bud)
+     call derivBasis(tv, nctlv, kv, v, ileftv, idv, Bvd)
+     call derivBasis(tw, nctlw, kw, w, ileftw, idw, Bwd)
 
      do i=1, ku
         do j=1, kv
