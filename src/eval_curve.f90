@@ -168,10 +168,10 @@ subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val)
   use precision
   implicit none
   ! Input
-  integer         , intent(in)          :: k, nctl, ndim, n
+  integer            , intent(in)       :: k, nctl, ndim, n
   real(kind=realType), intent(in)       :: s(n)
   real(kind=realType), intent(in)       :: t(nctl+k)
-  complex*16      , intent(in)          :: coef(ndim, nctl)
+  complex*16         , intent(in)       :: coef(ndim, nctl)
 
   ! Output
   complex*16      , intent(out)         :: val(ndim, n)

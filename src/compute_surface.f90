@@ -8,15 +8,17 @@ subroutine surface_jacobian_wrap(u, v, tu, tv, ku, kv, nctlu, nctlv, nu, nv, val
   integer            , intent(in)      :: ku, kv, nctlu, nctlv, nu, nv
   real(kind=realType), intent(in)      :: u(nv, nu), v(nv, nu)
   real(kind=realType), intent(in)      :: tu(nctlu+ku), tv(nctlv+kv)
+
+  ! Output
   real(kind=realType), intent(out)     :: vals(nu*nv*ku*kv)
   integer            , intent(out)     :: col_ind(nu*nv*ku*kv), row_ptr(nu*nv+1)
+
   ! Working
   real(kind=realType)                  :: basisu(ku), basisv(kv)
   integer                              :: ileftu, ileftv
   integer                              :: i, j, ii, jj, iwork, counter
 
   counter = 1
-
   do i=1, nu
      do j = 1, nv
         ! Get u interval
@@ -70,7 +72,6 @@ subroutine surface_para_corr(tu, tv, ku, kv, u, v, coef, nctlu, nctlv, ndim, nu,
 
   max_inner_iter = 10
   rms = 0.0
-
 
   do i=2, nu-1
      do j = 2, nv-2
