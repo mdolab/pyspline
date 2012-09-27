@@ -3,18 +3,18 @@ AR       = ar
 AR_FLAGS = -rvs
 RM       = /bin/rm -rf
 
-FF90 = gfortran
-FFLAGS    = -fdefault-real-8 -O2 -fPIC
+# Fortran compiler and flags
+FF90        = gfortran
+FF90_FLAGS  = -fdefault-real-8 -O2 -fPIC
 
+# C compiler and flags
 CC       = gcc
-CFLAGS   = -O2 -fPIC
+CC_FLAGS   = -O2 -fPIC
 
-COMPILER_NAME = gfortran
-EXTRA_LIBS = -lgfortran
+# Define potentially different python, python-config and f2py executables:
+PYTHON = python
+PYTHON-CONFIG = python-config
+F2PY = f2py
 
-# Combine Flags
-# ------------------------------------
-
-FF90_FLAGS = $(FFLAGS) $(USE_CGNS) $(USE_TECIO) $(CGNS_INCLUDE) 
-CC_FLAGS   = $(CFLAGS)
-USER_LIBS = $(CGNS_LIB) $(TEC_LIB) $(LIBSTDCpp) $(EXTRA_LIBS)
+# Define additional flags for linking
+LINKER_FLAGS = 

@@ -33,24 +33,25 @@
 !   use lsqrModule,        only : LSQR
 !   use lsqrCheckModule,   only : Acheck, xcheck
 
+!   use precision
 !   implicit none
   
 !   ! Input/Output
-!   double precision, intent(in)          :: X(nu,nv,ndim)
+!   real(kind=realType), intent(in)          :: X(nu,nv,ndim)
 !   integer         , intent(in)          :: ku,kv,nctlu,nctlv,nu,nv,ndim
-!   double precision, intent(inout)       :: u(nu,nv),v(nu,nv)
-!   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
-!   double precision, intent(inout)       :: coef(nctlu,nctlv,ndim)
+!   real(kind=realType), intent(inout)       :: u(nu,nv),v(nu,nv)
+!   real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+!   real(kind=realType), intent(inout)       :: coef(nctlu,nctlv,ndim)
 !   integer         , intent(in)          :: niter
-!   double precision, intent(in)          :: tol
-!   double precision, intent(out)         :: rms
+!   real(kind=realType), intent(in)          :: tol
+!   real(kind=realType), intent(out)         :: rms
 
 !   ! Working
 !   integer                               :: i,idim,iter
 !   integer                               :: istop,itn
-!   double precision                      :: Anorm,Acond,rnorm, Arnorm,xnorm
+!   real(kind=realType)                      :: Anorm,Acond,rnorm, Arnorm,xnorm
 !   ! Functions called
-!   double precision                      :: poly_length,floor,compute_rms_surface
+!   real(kind=realType)                      :: poly_length,floor,compute_rms_surface
 
 !   !Initialization
 !   call setup_jacobian(nu*nv,nctlu*nctlv,ku*kv)
@@ -104,17 +105,18 @@
 
 !   use lms_jacobian
 
+!   use precision
 !   implicit none
 !   ! Input
 !   integer         , intent(in)          :: ku,kv,nctlu,nctlv,nu,nv
-!   double precision, intent(in)          :: u(nu,nv),v(nu,nv)
-!   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+!   real(kind=realType), intent(in)          :: u(nu,nv),v(nu,nv)
+!   real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
 
 !   ! Working
-!   double precision                      :: vniku(ku),worku(2*ku)
+!   real(kind=realType)                      :: vniku(ku),worku(2*ku)
 !   integer                               :: ilou,ileftu,mflagu
 
-!   double precision                      :: vnikv(kv),workv(2*kv)
+!   real(kind=realType)                      :: vnikv(kv),workv(2*kv)
 !   integer                               :: ilov,ileftv,mflagv
 
 !   integer                               :: i,j,ii,jj,counter,iwork
@@ -162,15 +164,16 @@
 
 subroutine surface_jacobian_wrap(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,vals,row_ptr,col_ind)
 
+  use precision
   implicit none
   ! Input
   integer         , intent(in)          :: ku,kv,nctlu,nctlv,nu,nv
-  double precision, intent(in)          :: u(nv,nu),v(nv,nu)
-  double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
-  double precision, intent(out)         :: vals(nu*nv*ku*kv)
+  real(kind=realType), intent(in)          :: u(nv,nu),v(nv,nu)
+  real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+  real(kind=realType), intent(out)         :: vals(nu*nv*ku*kv)
   integer         , intent(out)         :: col_ind(nu*nv*ku*kv),row_ptr(nu*nv+1)
   ! Working
-  double precision                      :: basisu(ku),basisv(kv)
+  real(kind=realType)                      :: basisu(ku),basisv(kv)
   integer                               :: ilou,ileftu,mflagu
   integer                               :: ilov,ileftv,mflagv
 
@@ -223,24 +226,25 @@ end subroutine surface_jacobian_wrap
 subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
 
   ! Do Hoschek parameter correction
+  use precision
   implicit none
   ! Input/Output
-  double precision  ,intent(in)      :: tu(ku+nctlu),tv(kv+nctlv)
-  double precision  ,intent(inout)   :: u(nv,nu),v(nv,nu)
-  double precision  ,intent(in)      :: coef(ndim,nctlv,nctlu)
+  real(kind=realType)  ,intent(in)      :: tu(ku+nctlu),tv(kv+nctlv)
+  real(kind=realType)  ,intent(inout)   :: u(nv,nu),v(nv,nu)
+  real(kind=realType)  ,intent(in)      :: coef(ndim,nctlv,nctlu)
   integer           ,intent(in)      :: ku,kv,nctlu,nctlv,ndim,nu,nv
-  double precision  ,intent(in)      :: X(ndim,nv,nu)
-  double precision  ,intent(out)     :: rms
+  real(kind=realType)  ,intent(in)      :: X(ndim,nv,nu)
+  real(kind=realType)  ,intent(out)     :: rms
   ! Working
   integer                            :: i,j,jj,max_inner_iter
-  double precision                   :: lengthu,lengthv
-  double precision                   :: D(ndim),D2(ndim)
-  double precision                   :: val(ndim),deriv(ndim,2),deriv2(ndim,2,2)
-  double precision                   :: delta_c,delta_d,u_tilde,v_tilde
+  real(kind=realType)                   :: lengthu,lengthv
+  real(kind=realType)                   :: D(ndim),D2(ndim)
+  real(kind=realType)                   :: val(ndim),deriv(ndim,2),deriv2(ndim,2,2)
+  real(kind=realType)                   :: delta_c,delta_d,u_tilde,v_tilde
   integer                            :: adj_u,adj_v
-  double precision                   :: A(2,2),ki(2),delta(2)
+  real(kind=realType)                   :: A(2,2),ki(2),delta(2)
   !Functions
-  double precision                   :: norm,poly_length
+  real(kind=realType)                   :: norm,poly_length
 
   max_inner_iter = 10
   rms = 0.0
@@ -305,18 +309,19 @@ end subroutine surface_para_corr
 
 function compute_rms_surface(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X)
  ! Do Hoschek parameter correction
+  use precision
   implicit none
   ! Input/Output
-  double precision  ,intent(in)      :: tu(ku+nctlu),tv(kv+nctlv)
-  double precision  ,intent(inout)   :: u(nv,nu),v(nv,nu)
-  double precision  ,intent(in)      :: coef(ndim,nctlv,nctlu)
+  real(kind=realType)  ,intent(in)      :: tu(ku+nctlu),tv(kv+nctlv)
+  real(kind=realType)  ,intent(inout)   :: u(nv,nu),v(nv,nu)
+  real(kind=realType)  ,intent(in)      :: coef(ndim,nctlv,nctlu)
   integer           ,intent(in)      :: ku,kv,nctlu,nctlv,ndim,nu,nv
-  double precision  ,intent(in)      :: X(ndim,nv,nu)
+  real(kind=realType)  ,intent(in)      :: X(ndim,nv,nu)
  
   ! Working
   integer                            :: i,j,idim
-  double precision                   :: val(ndim),D(ndim)
-  double precision                   :: compute_rms_surface
+  real(kind=realType)                   :: val(ndim),D(ndim)
+  real(kind=realType)                   :: compute_rms_surface
   compute_rms_surface = 0.0
   do i=1,nu
      do j=1,nv
@@ -334,17 +339,18 @@ end function compute_rms_surface
 
 ! subroutine surface_jacobian_wrap2(u,v,tu,tv,ku,kv,nctlu,nctlv,nu,nv,Jac)
 
+!   use precision
 !   implicit none
 !   ! Input
 !   integer         , intent(in)          :: ku,kv,nctlu,nctlv,nu,nv
-!   double precision, intent(in)          :: u(nu,nv),v(nu,nv)
-!   double precision, intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
-!   double precision, intent(out)         :: Jac(nu*nv,nctlu*nctlv)
+!   real(kind=realType), intent(in)          :: u(nu,nv),v(nu,nv)
+!   real(kind=realType), intent(in)          :: tu(nctlu+ku),tv(nctlv+kv)
+!   real(kind=realType), intent(out)         :: Jac(nu*nv,nctlu*nctlv)
 !   ! Working
-!   double precision                      :: vniku(ku),worku(2*ku)
+!   real(kind=realType)                      :: vniku(ku),worku(2*ku)
 !   integer                               :: ilou,ileftu,mflagu
 
-!   double precision                      :: vnikv(kv),workv(2*kv)
+!   real(kind=realType)                      :: vnikv(kv),workv(2*kv)
 !   integer                               :: ilov,ileftv,mflagv
 
 !   integer                               :: i,j,ii,jj,iwork
@@ -389,23 +395,24 @@ end function compute_rms_surface
 ! subroutine surface_para_corr(tu,tv,ku,kv,u,v,coef,nctlu,nctlv,ndim,nu,nv,X,rms)
 
 !   ! Do Hoschek parameter correction
+!   use precsion
 !   implicit none
 !   ! Input/Output
-!   double precision  ,intent(in)      :: tu(ku+nctlu),tv(kv+nctlv)
-!   double precision  ,intent(inout)   :: u(nu,nv),v(nu,nv)
-!   double precision  ,intent(in)      :: coef(nctlu,nctlv,ndim)
+!   real(kind=realType)  ,intent(in)      :: tu(ku+nctlu),tv(kv+nctlv)
+!   real(kind=realType)  ,intent(inout)   :: u(nu,nv),v(nu,nv)
+!   real(kind=realType)  ,intent(in)      :: coef(nctlu,nctlv,ndim)
 !   integer           ,intent(in)      :: ku,kv,nctlu,nctlv,ndim,nu,nv
-!   double precision  ,intent(in)      :: X(nu,nv,ndim)
-!   double precision  ,intent(out)     :: rms
+!   real(kind=realType)  ,intent(in)      :: X(nu,nv,ndim)
+!   real(kind=realType)  ,intent(out)     :: rms
 !   ! Working
 !   integer                            :: i,j,jj,max_inner_iter
-!   double precision                   :: lengthu,lengthv
-!   double precision                   :: D(ndim),D2(ndim),Dnorm,D2norm
-!   double precision                   :: val(ndim),deriv(2,ndim)
-!   double precision                   :: delta_c,delta_d,u_tilde,v_tilde
+!   real(kind=realType)                   :: lengthu,lengthv
+!   real(kind=realType)                   :: D(ndim),D2(ndim),Dnorm,D2norm
+!   real(kind=realType)                   :: val(ndim),deriv(2,ndim)
+!   real(kind=realType)                   :: delta_c,delta_d,u_tilde,v_tilde
 !   integer                            :: adj_u,adj_v
 !   !Functions
-!   double precision                   :: norm,poly_length
+!   real(kind=realType)                   :: norm,poly_length
 
 !   max_inner_iter = 10
 !   rms = 0.0

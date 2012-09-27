@@ -1,14 +1,14 @@
 subroutine volume_jacobian_wrap(u,v,w,tu,tv,tw,ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,nw,vals,row_ptr,col_ind)
-
+  use precision
   implicit none
   ! Input
   integer         , intent(in)      :: ku,kv,kw,nctlu,nctlv,nctlw,nu,nv,nw
-  double precision, intent(in)      :: u(nw,nv,nu),v(nw,nv,nu),w(nw,nv,nu)
-  double precision, intent(in)      :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
-  double precision, intent(out)     :: vals(nu*nv*nw*ku*kv*kw)
+  real(kind=realType), intent(in)      :: u(nw,nv,nu),v(nw,nv,nu),w(nw,nv,nu)
+  real(kind=realType), intent(in)      :: tu(nctlu+ku),tv(nctlv+kv),tw(nctlw+kw)
+  real(kind=realType), intent(out)     :: vals(nu*nv*nw*ku*kv*kw)
   integer         , intent(out)     :: col_ind(nu*nv*nw*ku*kv*kw),row_ptr(nu*nv*nw+1)
   ! Working
-  double precision                  :: basisu(ku),basisv(kv),basisw(kw)
+  real(kind=realType)                  :: basisu(ku),basisv(kv),basisw(kw)
   integer                           :: i,j,k,ii,jj,kk,counter,c1,c2
   integer                           :: ilou,ileftu,mflagu,worku(4*ku),iworku
   integer                           :: ilov,ileftv,mflagv,workv(4*kv),iworkv

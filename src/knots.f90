@@ -16,19 +16,20 @@ subroutine knots_lms(X, N, Nctl, k, t)
   !     Ouput 
   !     t       - Real, size(Nctl+k) the resulting knots
 
+  use precision
   implicit none
 
   ! Input
   integer, intent(in)     :: N
   integer, intent(in)     :: Nctl
   integer, intent(in)     :: K
-  double precision, intent(in)  :: X(N)
+  real(kind=realType), intent(in)  :: X(N)
 
   ! Output
-  double precision, intent(out) :: T(Nctl+K)
+  real(kind=realType), intent(out) :: T(Nctl+K)
 
   ! Working  
-  double precision d, alpha
+  real(kind=realType) d, alpha
   integer  I, J
 
   ! ----------------------------
@@ -78,19 +79,19 @@ subroutine knots_interp(X, deriv_ptr, n, nd , k, t)
   !     Ouput 
   !     t       - Real, size(nNctl+k) the resulting knots
 
-
+  use precision
   implicit none
 
   ! Input
   integer, intent(in)     :: n, nd, k
   integer, intent(in)     :: deriv_ptr(nd)
-  double precision, intent(in)  :: X(n)
+  real(kind=realType), intent(in)  :: X(n)
 
   ! Output
-  double precision, intent(out) :: t(n+nd+k)
+  real(kind=realType), intent(out) :: t(n+nd+k)
 
   ! Working
-  double precision d, alpha, temp(n-2)
+  real(kind=realType) d, alpha, temp(n-2)
   integer  I, J, Nctl, d_count
 
   ! ----------------------------

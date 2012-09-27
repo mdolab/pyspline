@@ -18,19 +18,20 @@ subroutine tfi2d(e0, e1, e2, e3, Nu, Nv, X)
   !     Ouput 
   !     X       - Real, Evaluated points, size 3 x Nu x Nv
   ! 
-  
+
+  use precision
   implicit none
 
   integer, intent(in) :: Nu,Nv
-  double precision, intent(in) :: e0(3,Nu)
-  double precision, intent(in) :: e1(3,Nu)
+  real(kind=realType), intent(in) :: e0(3,Nu)
+  real(kind=realType), intent(in) :: e1(3,Nu)
 
-  double precision, intent(in) :: e2(3,Nv)
-  double precision, intent(in) :: e3(3,Nv)
+  real(kind=realType), intent(in) :: e2(3,Nv)
+  real(kind=realType), intent(in) :: e3(3,Nv)
 
-  double precision, intent(out) :: X(3,Nv,Nu)
+  real(kind=realType), intent(out) :: X(3,Nv,Nu)
 
-  double precision :: U(Nu),V(Nv)
+  real(kind=realType) :: U(Nu),V(Nv)
   integer :: i,j
 
   do i=1,Nu

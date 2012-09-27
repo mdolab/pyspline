@@ -17,13 +17,14 @@ subroutine basis(t, nctl, k, x, ileft, B)
   !
   !     Ouput 
   !     B       - Real, Vector, The k basis vector values
+  use precision
   implicit none
   
-  double precision, intent(in) :: t(nctl+k)
+  real(kind=realType), intent(in) :: t(nctl+k)
   integer, intent(in) :: nctl, k, ileft
-  double precision, intent(out) :: B(k)
+  real(kind=realType), intent(out) :: B(k)
 
-  double precision vm, vmprev, x, diff1(k), diff2(k)
+  real(kind=realType) vm, vmprev, x, diff1(k), diff2(k)
   integer l, j, ipj, jp1ml, jp1
     
   B(:) = 0.0

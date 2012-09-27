@@ -21,23 +21,24 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
   !     coef_new - Real, Array of new cofficients size(ndim,nctl+r)
   !     ileft    - Integer of position of knot insertion
 
+  use precision
   implicit none
 
   ! Input
   integer         , intent(inout)  :: r
   integer         , intent(in)     :: k, nctl, ndim
-  double precision, intent(in)     :: u
-  double precision, intent(in)     :: t(nctl+k)
-  double precision, intent(in)     :: coef(ndim, nctl)
+  real(kind=realType), intent(in)     :: u
+  real(kind=realType), intent(in)     :: t(nctl+k)
+  real(kind=realType), intent(in)     :: coef(ndim, nctl)
 
   ! Output
-  double precision, intent(out)    :: t_new(nctl+k+r)
-  double precision, intent(out)    :: coef_new(ndim, nctl+r)
+  real(kind=realType), intent(out)    :: t_new(nctl+k+r)
+  real(kind=realType), intent(out)    :: coef_new(ndim, nctl+r)
   integer         , intent(out)    :: ileft
 
   ! Working
   integer                          :: mflag, ilo, s, i, j, L
-  double precision                 :: alpha, temp(ndim, k)
+  real(kind=realType)                 :: alpha, temp(ndim, k)
 
   ilo = 1
   call intrv(t,nctl+k,u,ilo,ileft,mflag)

@@ -4,7 +4,51 @@ RULES_FILE  = $(MAIN_DIR)/Rules.mk
 include ${COMMON_FILE}
 include ${RULES_FILE}
 
-f2py: 
-	f2py --verbose --fcompiler=${COMPILER_NAME} --f90flags='${FF90_ALL_FLAGS}' -c -m pyspline pyspline.pyf $(LIBDIR)/libspline.a ${USER_LIBS}
+LINKER_ALL_FLAGS = $(FF90_FLAGS) -L$(LIBDIR) -lspline $(LINKER_FLAGS) 
+
+PYTHON_OBJECTS = fortranobject.o \
+		 pysplinemodule.o \
+
+default: all
+
+all:
+
+# Generate Python inlude directory
+	 $(eval PYTHON_INCLUDES = $(shell python-config --includes))
+	 @echo "#------------------------------------------------------#"
+	 @echo Python Inclue Flags $(PYTHON_INCLUDES)
+	 @echo "#------------------------------------------------------#"
+
+# Generate Numpy inlude directory
+	$(eval NUMPY_INCLUDES = $(shell python -c 'import numpy; print numpy.get_include()'))
+	 @echo "#------------------------------------------------------#"
+	 @echo Numpy Include Directory: $(NUMPY_INCLUDES)
+	 @echo "#------------------------------------------------------#"
+# Generate f2py root directory
+	$(eval F2PY_ROOT = $(shell python get_f2py.py))
+	 @echo "#------------------------------------------------------#"
+	 @echo f2py root directory: $(F2PY_ROOT)
+	 @echo "#------------------------------------------------------#"
+
+#       need to have f2py_f2cmap in this folder....
+	cp f2py_f2cmap.ref .f2py_f2cmap
+
+	f2py pyspline.pyf
+	@echo " "
+	$(CC) $(CC_FLAGS) $(PYTHON_INCLUDES) -I$(NUMPY_INCLUDES) \
+	-I$(F2PY_ROOT)/src -c pysplinemodule.c
+
+	$(CC) $(CC_FLAGS) $(PYTHON_INCLUDES) -I$(NUMPY_INCLUDES) -c \
+	$(F2PY_ROOT)/src/fortranobject.c -o fortranobject.o
+
+	$(FF90) -shared $(PYTHON_OBJECTS) $(LINKER_ALL_FLAGS) -o pyspline.so
 	python importTest.py
 	mv pyspline.so ../../python
+
+# Clean up temporary files
+	-rm *.o
+	-rm *.c
+	-rm .f2py_f2cmap
+clean:
+	@echo "        Making clean in f2py... "
+	rm -f $(MAKE_CLEAN_ARGUMENTS)
