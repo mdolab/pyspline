@@ -9,7 +9,7 @@ subroutine curve_jacobian_wrap(s, sd, t, k, nctl, n, nd, vals, row_ptr, col_ind)
   real(kind=realType)  , intent(inout)   :: vals((n+nd)*k)
   integer              , intent(inout)   :: row_ptr(n+nd+1)
   integer              , intent(inout)   :: col_ind((n+nd)*k)
-  real(kind=realType)                   :: basisu(k), work((k+1)*(k+2)/2), vdikx(k, 2)
+  real(kind=realType)                   :: basisu(k), basisud(k,k)
   integer                               :: i, j, counter, ileft
 
   counter = 1
@@ -26,12 +26,12 @@ subroutine curve_jacobian_wrap(s, sd, t, k, nctl, n, nd, vals, row_ptr, col_ind)
   end do
   do i=1, nd ! Do the derivatives next
      call findSpan(sd(i), k, t, nctl, ileft)
-     call bspvd(t, k, 2, sd(i), ileft, k, vdikx, work)
+     call derivBasis(t, nctl, k, sd(i), ileft, 1, basisud)
 
      row_ptr(i+n) = counter-1
      do j=1, k
         col_ind(counter) = ileft-k+j-1
-        vals(counter) =vdikx(j, 2)
+        vals(counter) = basisud(2, j)
         counter = counter + 1
      end do
   end do

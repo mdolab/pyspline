@@ -13,24 +13,7 @@ vpath %.o $(OBJDIR)
 # Name of files to be compiled:
 MODS = precision.o\
 
-OBJS =  bvalu.o\
-	intrv.o\
-	bspvn.o\
-	bspvd.o\
-	b2val.o\
-	b3val.o\
-	cbvalu.o\
-	i1mach.o\
-	r1mach.o\
-	fdump.o\
-	j4save.o\
-	xerabt.o\
-	xerctl.o\
-	xerprt.o\
-	xerror.o\
-	xerrwv.o\
-	xersav.o\
-	xgetua.o\
+OBJS =  evaluations.o\
 	basis.o\
 	knots.o\
 	insertKnot.o\
@@ -45,6 +28,25 @@ OBJS =  bvalu.o\
 	eval_volume.o\
 	projections.o\
 	tfi2d.o\
+
+#  bvalu.o\
+# 	intrv.o\
+# 	bspvn.o\
+# 	bspvd.o\
+# 	b2val.o\
+# 	b3val.o\
+# 	cbvalu.o\
+# 	i1mach.o\
+# 	r1mach.o\
+# 	fdump.o\
+# 	j4save.o\
+# 	xerabt.o\
+# 	xerctl.o\
+# 	xerprt.o\
+# 	xerror.o\
+# 	xerrwv.o\
+# 	xersav.o\
+# 	xgetua.o\
 
 default:
 	$(MAKE) $(MODS)

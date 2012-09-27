@@ -1,19 +1,20 @@
-subroutine basis(t, nctl, k, x, ileft, B)
+subroutine basis(t, nctl, k, u, ind, B)
 
   !***DESCRIPTION
   !
   !     Written by Gaetan Kenway
   !
-  !     Abstract: basis evaluates the standard b-spline basis functions at 
-  !               a location x for knot vector t
+  !     Abstract: basis evaluates the standard b-spline basis
+  !               functions at a location x for knot vector t. Adapted
+  !               from The NURBS Book, algoritm A2.2
 
   !     Description of Arguments
   !     Input
   !     t       - Real, Vector of knots. Size (nctl + k)
   !     nctl    - Integer, number of knots
   !     k       - Integer, order of B-spline 
-  !     x       - Real, location for evaluation of basis 
-  !     ileft   - Integer, position in knot vector such that t(ileft) <= x
+  !     u       - Real, location for evaluation of basis 
+  !     ind     - Integer, position in knot vector such that t(ind) <= x
   !
   !     Ouput 
   !     B       - Real, Vector, The k basis vector values
@@ -21,37 +22,38 @@ subroutine basis(t, nctl, k, x, ileft, B)
   implicit none
 
   ! Input
-  real(kind=realType), intent(in)  :: t(nctl+k)
-  integer,             intent(in)  :: nctl, k, ileft
+  real(kind=realType), intent(in)  :: t(nctl+k), u
+  integer,             intent(in)  :: nctl, k, ind
 
   ! Output
-  real(kind=realType), intent(out) :: B(k)
+  real(kind=realType), intent(out) :: B(0:k-1)
 
   ! Working
-  real(kind=realType)              :: vm, vmprev, x, diff1(k), diff2(k)
-  integer                          ::  l, j, ipj, jp1ml, jp1
-    
-  B(:) = 0.0
-  B(1) = 1.0
+  real(kind=realType)              :: left(0:k-1), right(0:k-1), temp, saved
+  integer                          :: j, r, p
 
-  do j=1, k-1
-     ipj = ileft + j
-     diff1(j) = t(ipj)-x
-     diff2(j) = x-t(ileft-j+1)
-     vmprev = 0.0
-     jp1 = j+1
-     do l=1, j
-        jp1ml = jp1-l
-        vm = B(l)/(diff1(l)+diff2(jp1ml))
-        B(l) = vm*diff1(l) + vmprev
-        vmprev = vm*diff2(jp1ml)
+  ! To be consistent with algorithm in The NURBS Book we will use
+  ! zero-based ordering here
+  B(0) = 1.0
+  p = k-1
+
+  do j=1,p
+     left(j)  = u - t(ind+1-j)
+     right(j) = t(ind+j) - u
+     saved = 0.0
+
+     do r=0,j-1
+        temp = B(r)/(right(r+1)+left(j-r))
+        B(r) = saved+right(r+1)*temp
+        saved = left(j-r)*temp
      end do
-     B(jp1) = vmprev
+     
+     B(j) = saved
   end do
 
 end subroutine basis
 
-subroutine derivBasis(ind, u, ku, n, nctl, t, Bd)
+subroutine derivBasis(t, nctl, ku, u, ind, n, Bd)
  
   !***DESCRIPTION
   !
@@ -63,12 +65,12 @@ subroutine derivBasis(ind, u, ku, n, nctl, t, Bd)
 
   !     Description of Arguments
   !     Input
-  !     ind     - Integer, result fro findSpan
-  !     u       - Real, location for basis function evaluations
-  !     k       - Integer, order of B-spline 
-  !     n       - Integer, order of derivates to evaluate
-  !     nctl    - Integer, number of control points
   !     t       - Real, size(nctl + k) B-spline knot vector
+  !     nctl    - Integer, number of control points
+  !     ku      - Integer, order of B-spline 
+  !     u       - Real, location for basis function evaluations
+  !     ind     - Integer, result fro findSpan
+  !     n       - Integer, order of derivates to evaluate
   !
   !     Ouput 
   !     Bd      - Real, size(k,k) Basis functions and their derivatives
@@ -84,10 +86,12 @@ subroutine derivBasis(ind, u, ku, n, nctl, t, Bd)
   real(kind=realType), intent(out) :: Bd(0:ku-1,0:ku-1)
 
   ! Working
-  real(kind=realType)              :: ndu(0:ku-1,0:ku-1), left(0:ku-1), right(0:ku-1), saved
-  real(kind=realType)              :: a(0:1,0:ku-1), d, temp
+  real(kind=realType)              :: left(0:ku-1), right(0:ku-1), saved
+  real(kind=realType)              :: a(0:1,0:ku-1), d, temp, ndu(0:ku-1,0:ku-1)
   integer                          :: j, k, r, rk, pk, s1, s2, j1, j2, p
 
+  ! To be consistent with algorithm in The NURBS Book we will use
+  ! zero-based ordering here
   ndu(0,0) = 1.0
   
   ! Define degree as k-1...easier 
@@ -113,15 +117,13 @@ subroutine derivBasis(ind, u, ku, n, nctl, t, Bd)
      Bd(0,j) = ndu(j,p)
   end do
 
-  ! This section computes the derivates (Eq. [2.9])
-
+  ! This section computes the derivatives (Eq. [2.9])
   do r=0,p
      s1 = 0  ! Alternate rows in array a
      s2 = 1
      a(0,0) = 1.0
      
      ! Loop to compute kth derivative
-
      do k=1,n
         d = 0.0
         rk = r-k

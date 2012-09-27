@@ -78,16 +78,13 @@ subroutine eval_curve_deriv(s, t, k, coef, nctl, ndim, val)
   real(kind=realType), intent(out)      :: val(ndim)
 
   ! Working
-  integer                               :: idim, inbv
-  real(kind=realType)                   :: work(3*k)
+  integer                               :: idim
 
   ! Functions
   real(kind=realType)                   :: bvalu
 
-  inbv = 1
-
   do idim=1, ndim
-     val(idim) = bvalu(t, coef(idim, :), nctl, k, 1, s, inbv, work)
+     val(idim) = bvalu(t, coef(idim, :), nctl, k, 1, s)
   end do
 
 end subroutine eval_curve_deriv
@@ -115,7 +112,7 @@ subroutine eval_curve_deriv2(s, t, k, coef, nctl, ndim, val)
   use precision
   implicit none
   ! Input
-  integer         , intent(in)          :: k, nctl, ndim
+  integer         , intent(in)             :: k, nctl, ndim
   real(kind=realType), intent(in)          :: s
   real(kind=realType), intent(in)          :: t(nctl+k)
   real(kind=realType), intent(in)          :: coef(ndim, nctl)
@@ -124,19 +121,16 @@ subroutine eval_curve_deriv2(s, t, k, coef, nctl, ndim, val)
   real(kind=realType), intent(out)         :: val(ndim)
 
   ! Working
-  integer                               :: idim, inbv
-  real(kind=realType)                      :: work(3*k)
+  integer                                  :: idim
 
   ! Functions
   real(kind=realType)                      :: bvalu
-
-  inbv = 1
 
   if (k == 2) then
      val(:) = 0.0
   else
      do idim=1, ndim
-        val(idim) = bvalu(t, coef(idim, :), nctl, k, 2, s, inbv, work)
+        val(idim) = bvalu(t, coef(idim, :), nctl, k, 2, s)
      end do
   end if
 
@@ -237,9 +231,9 @@ subroutine eval_curve_deriv_c(s, t, k, coef, nctl, ndim, val)
 
   inbv = 1
 
-  do idim=1, ndim
-     val(idim) = bvalu_c(t, coef(idim, :), nctl, k, 1, s, inbv, work)
-  end do
+!   do idim=1, ndim
+!      val(idim) = bvalu_c(t, coef(idim, :), nctl, k, 1, s, inbv, work)
+!   end do
 
 end subroutine eval_curve_deriv_c
 
@@ -287,7 +281,7 @@ subroutine eval_curve_deriv2_c(s, t, k, coef, nctl, ndim, val)
      val(:) = 0.0
   else
      do idim=1, ndim
-        val(idim) = bvalu(t, coef(idim, :), nctl, k, 2, s, inbv, work)
+        val(idim) = bvalu(t, coef(idim, :), nctl, k, 2, s)
      end do
   end if
 
