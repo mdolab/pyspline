@@ -1,40 +1,47 @@
-subroutine insertKnot(u,r,t,k,coef,nctl,ndim,t_new,coef_new,ileft)
+subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
 
   !***DESCRIPTION
   !
   !     Written by Gaetan Kenway
   !
-  !     Abstract insertKnot inserts a knot u into the curve, s times
+  !     Abstract insertKnot inserts a knot u into the curve, r times
   !
   !     Description of Arguments
   !     Input
-  !     u       - knot to insert
-  !     r       - Insert r times
+  !     u       - Real, location of knot to insert
+  !     r       - Integer, Insert r times
   !     t       - Real,Knot vector. Length nctl+k
   !     k       - Integer,order of B-spline
   !     coef    - Real,Array of B-spline coefficients  Size (ndim,nctl)
-  !     nctl   - Integer,Number of control points
-  !
-  !     Ouput 
-  !     t_new - Real, vector of lenght(nctl+k+r)
-  !     coef_new - Array of new cofficients size(ndim,nctl+r)
-  implicit none
-  ! Input
-  integer         , intent(inout)       :: r
-  integer         , intent(in)          :: k,nctl,ndim
-  double precision, intent(in)          :: u
-  double precision, intent(in)          :: t(nctl+k)
-  double precision, intent(in)          :: coef(ndim,nctl)
-  ! Output
-  double precision, intent(out)         :: t_new(nctl+k+r)
-  double precision, intent(out)         :: coef_new(ndim,nctl+r)
-  integer         , intent(out)         :: ileft
-  ! Working
-  integer                               :: mflag,ilo,s,i,j,L
-  double precision                      :: alpha,temp(ndim,k)
+  !     nctl    - Integer,Number of control points
+  !     ndim    - Integer, dimension of curve
 
-  ilo = 1
-  call intrv(t,nctl+k,u,ilo,ileft,mflag)
+  !     Ouput 
+  !     t_new    - Real, vector of lenght(nctl+k+r)
+  !     coef_new - Real, Array of new cofficients size(ndim,nctl+r)
+  !     ileft    - Integer of position of knot insertion
+
+  use precision
+  implicit none
+
+  ! Input
+  integer            , intent(inout)  :: r
+  integer            , intent(in)     :: k, nctl, ndim
+  real(kind=realType), intent(in)     :: u
+  real(kind=realType), intent(in)     :: t(nctl+k)
+  real(kind=realType), intent(in)     :: coef(ndim, nctl)
+
+  ! Output
+  real(kind=realType), intent(out)    :: t_new(nctl+k+r)
+  real(kind=realType), intent(out)    :: coef_new(ndim, nctl+r)
+  integer            , intent(out)    :: ileft
+
+  ! Working
+  integer                             :: s, i, j, L
+  real(kind=realType)                 :: alpha, temp(ndim, k)
+
+  call findSpan(u, k, t, nctl, ileft)
+
   ! Compute its multiplicity
   s = 0 ! Knot multiplicity
   mult: do i=0,k-1
@@ -78,6 +85,7 @@ subroutine insertKnot(u,r,t,k,coef,nctl,ndim,t_new,coef_new,ileft)
      temp(:,i) = coef(:,ileft-k+i)
   end do
 
+  L = 0
   do j=1,r
      L = ileft-k+j+1
      do i=0,k-1-j-s
@@ -87,8 +95,11 @@ subroutine insertKnot(u,r,t,k,coef,nctl,ndim,t_new,coef_new,ileft)
      coef_new(:,L) = temp(:,1)
      coef_new(:,ileft+r-j) = temp(:,k-j)
   end do
-  do i=L+1,ileft-1
-     coef_new(:,i) = temp(:,i-L+1)
-  end do
+  if (L > 0) then
+     do i=L+1,ileft-1
+        coef_new(:,i) = temp(:,i-L+1)
+     end do
+  end if
+
 end subroutine insertKnot
  

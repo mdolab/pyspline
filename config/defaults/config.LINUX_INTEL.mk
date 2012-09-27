@@ -3,30 +3,18 @@ AR       = ar
 AR_FLAGS = -rvs
 RM       = /bin/rm -rf
 
-FF90     = ifort
-FFLAGS    =  -r8 -O2 -fPIC
+# Fortran compiler and flags
+FF90        = ifort
+FF90_FLAGS  = -r8 -O2 -fPIC
 
+# C compiler and flags
 CC       = gcc
-CFLAGS   = -O2 -fPIC
+CC_FLAGS   = -O2 -fPIC
 
-COMPILER_NAME = intel
-EXTRA_LIBS = -limf -lifcore
+# Define potentially different python, python-config and f2py executables:
+PYTHON = python
+PYTHON-CONFIG = python-config
+F2PY = f2py
 
-# Optional Things
-
-# CGNS Functionality
-#USE_CGNS = -DUSE_CGNS
-#CGNS_LIB = -lcgns
-#CGNS_INCLUDE = -I/usr/local/include/
-
-# Tecplot Binary IO
-# USE_TECIO = -DUSE_TECIO 
-# TEC_LIB   = ../tecio/tecio.a
-# LIBSTDCpp = -lstdc++
-
-# Combine Flags
-# ------------------------------------
-
-FF90_FLAGS = $(FFLAGS) $(USE_CGNS) $(USE_TECIO) $(CGNS_INCLUDE) 
-CC_FLAGS   = $(CFLAGS)
-USER_LIBS = $(CGNS_LIB) $(TEC_LIB) $(LIBSTDCpp) $(EXTRA_LIBS)
+# Define additional flags for linking
+LINKER_FLAGS = 

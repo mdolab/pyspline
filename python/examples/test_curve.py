@@ -31,6 +31,7 @@ x = [0,2,3,5]
 y = [-2,5,3,0]
 z = [0,0,0,0]
 curve1 = pySpline.curve(x=x,y=y,z=z,k=4)
+sys.exit(0)
 curve1.writeTecplot('curve1.dat',size=.1)
 
 x = [-2,5,2,1]

@@ -1,65 +1,20 @@
-# Config File for LINUX and INTEL Compiler
+# Config File for LINUX and GFORTRAN Compiler
 AR       = ar
 AR_FLAGS = -rvs
 RM       = /bin/rm -rf
 
-FF90 = gfortran
-FFLAGS    = -fdefault-real-8 -O2 -fPIC
+# Fortran compiler and flags
+FF90        = gfortran
+FF90_FLAGS  = -fdefault-real-8 -O2 -fPIC
 
+# C compiler and flags
 CC       = gcc
-CFLAGS   = -O2 -fPIC
+CC_FLAGS   = -O2 -fPIC
 
-COMPILER_NAME = gfortran
-EXTRA_LIBS = -lgfortran
+# Define potentially different python, python-config and f2py executables:
+PYTHON = python
+PYTHON-CONFIG = python-config
+F2PY = f2py
 
-# Optional Things
-
-# CGNS Functionality
-#USE_CGNS = -DUSE_CGNS
-#CGNS_LIB = -lcgns
-#CGNS_INCLUDE = -I/usr/local/include/
-
-# Tecplot Binary IO
-# USE_TECIO = -DUSE_TECIO 
-# TEC_LIB   = ../tecio/tecio.a
-# LIBSTDCpp = -lstdc++
-
-# Combine Flags
-# ------------------------------------
-
-FF90_FLAGS = $(FFLAGS) $(USE_CGNS) $(USE_TECIO) $(CGNS_INCLUDE) 
-CC_FLAGS   = $(CFLAGS)
-USER_LIBS = $(CGNS_LIB) $(TEC_LIB) $(LIBSTDCpp) $(EXTRA_LIBS)
-
-
-
-
-# Config File for GFORTRAN
-AR       = ar
-AR_FLAGS = -rvs
-RM       = /bin/rm -rf
-FC       = gfortran
-FLAGS   =  -fdefault-real-8 -O2 -fPIC
-COMPILER_NAME = gfortran
-EXTRA_LIBS = -lgfortran
-
-CC       = gcc
-CFLAGS   = -O2 -fPIC
-
-# Optional Things
-
-# CGNS Functionality
-# USE_CGNS = -DUSE_CGNS
-# CGNS_LIB = -lcgns
-# CGNS_INCLUDE = -I/usr/local/include/
-
-# Tecplot Binary IO
-# USE_TECIO = -DUSE_TECIO 
-# TEC_LIB   = ../tecio/tecio.a
-# LIBSTDCpp = -lstdc++
-
-# Combine Flags
-FFLAGS = $(FLAGS) $(USE_CGNS) ${USE_TECIO} $(CGNS_INCLUDE)
-
-# Lib flags
-USER_LIBS = $(CGNS_LIB) $(TEC_LIB) $(LIBSTDCpp) $(EXTRA_LIBS)
+# Define additional flags for linking
+LINKER_FLAGS = 
