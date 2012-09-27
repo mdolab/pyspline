@@ -1,6 +1,6 @@
-#define NLSFail=5
-#define wolfe=.001
-#define nLine=20
+#define LSFailMax 5
+#define wolfe .001
+#define nLine 20
 
 subroutine point_curve(x0, t, k, coef, nctl, ndim, N, Niter, eps1, eps2, s, Diff)
 
@@ -52,7 +52,7 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, N, Niter, eps1, eps2, s, Diff
   real(kind=realType), allocatable          :: curve_vals(:, :), ss(:)
   real(kind=realType) :: c1
   ! Functions
-  real(kind=realType)                      :: norm, ndp
+  real(kind=realType)                      :: norm
 
   ! Initialization
   n_sub=1  ! Is 3  Good Here?? Huristic!
@@ -127,7 +127,7 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, N, Niter, eps1, eps2, s, Diff
                exit iteration_loop
         end if
 
-        c1 = ndp(deriv, Diff(:, ipt), ndim)/(norm(deriv, ndim)*norm(Diff(:, ipt), ndim))
+        !c1 = ndp(deriv, Diff(:, ipt), ndim)/(norm(deriv, ndim)*norm(Diff(:, ipt), ndim))
         if (c1 <= eps2) then
            exit iteration_loop
         end if
@@ -467,11 +467,11 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   real(kind=realType)                      :: R(nDim), low(nDim), high(nDim)
   real(kind=realType)                      :: pt(nDim), newpt(nDim), update(nDim)
   real(kind=realType)                      :: step, dist, nDist, pgrad
-  real(kind=realType)                      :: grad_norm, wolfe
+  real(kind=realType)                      :: grad_norm
   real(kind=realType)                      :: fval, nfval, c, p_diff
 
   real(kind=realType)                      :: grad(nDim), hessian(nDim, nDim)
-  integer                               :: iDim, jDim, ipt, i, j, k, m, nLine
+  integer                               :: iDim, jDim, ipt, i, j, k, m
   logical                               :: flag, cflag
   integer                               :: counter1
 
@@ -583,10 +583,6 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   high(2) = tv(Nctlv+kv)
   high(3) = tw(Nctlw+kw)
 
-  ! Number of line search iterations
-  nLine = 40
-  ! Tolerance for the strong wolfe line-search conditions
-  wolfe = 0.001
   do ipt=1, N
 
      pt(1) = u0(ipt)
@@ -707,7 +703,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
            end if
         end do lineloop
 
-        if ( m == nline ) then
+        if ( m == nLine + 1 ) then
            dist = ndist
         else
            ! Check if there has been no change in the coordinates
@@ -785,7 +781,7 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps1, 
   real(kind=realType) :: D, D0, s0, t0
   real(kind=realType) :: val0_1(3), val0_2(3)
   real(kind=realType) :: low(2), high(2), pt(2), R(ndim), ndist, fval, nfval, dist
-  real(kind=realType) :: hessian(2, 2), grad(2), wolfe, newpt(2), c, grad_norm
+  real(kind=realType) :: hessian(2, 2), grad(2), newpt(2), c, grad_norm
   real(kind=realType) :: pgrad, update(2), step, p_diff
   logical :: flag, cflag
   integer                          :: nline, m, idim
@@ -873,11 +869,6 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps1, 
 
   pt(1) = s0
   pt(2) = t0
-
-  ! Number of line search iterations
-  nLine = 40
-  ! Tolerance for the strong wolfe line-search conditions
-  wolfe = 0.001
 
   iteration_loop: do i=1, niter
 
@@ -1062,10 +1053,10 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
   real(kind=realType)  :: val_c(ndim), deriv_c(ndim), deriv2_C(ndim)
   real(kind=realType)  :: val0_s(ndim), val0_c(ndim)
   real(kind=realType)  :: u0, v0, s0, D0, D, gg(3)
-  real(kind=realType)  :: dist, hessian(3,3), grad(3), wolfe, newpt(3), c
+  real(kind=realType)  :: dist, hessian(3,3), grad(3), newpt(3), c
   real(kind=realType)  :: pgrad, update(3), step, p_diff
   real(kind=realType)  :: low(3), high(3), pt(3), R(nDim), ndist, fval, nfval
-  integer              :: i, j, m, l, nLine, istart, nss, nuu, nvv, n_sub
+  integer              :: i, j, m, l, istart, nss, nuu, nvv, n_sub
   integer              :: counter1, iDim, NLSFail
   logical              :: brute_force, flag, cflag
 
@@ -1179,11 +1170,6 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
   high(1) = tu(Nctlu+ku)
   high(2) = tv(Nctlv+kv)
   high(3) = tc(Nctlc+kc)
-
-  ! Number of line search iterations
-  nLine = 20
-  ! Tolerance for the strong wolfe line-search conditions
-  wolfe = 0.001
 
   pt(1) = u0
   pt(2) = v0
@@ -1319,18 +1305,18 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
         end if
      end do lineloop
      
-     if ( m == nline+1 ) then
+     if ( m == nLine+1 ) then
         dist = ndist
         nLSFail = nLSFail + 1
 
-        if (NLSFail > 5) then ! There is nothing more we can do...
+        if (NLSFail > LSFailMax) then ! There is nothing more we can do...
            exit Iteration_loop
         end if
      else
         NLSFail = 0
         ! Check if there has been no change in the coordinates
         p_diff = norm(pt-newpt, 2)
-        if (p_diff < eps1) then
+        if (p_diff < eps) then
            exit Iteration_loop
         end if
      end if
@@ -1576,20 +1562,3 @@ function dotproduct(x1, x2, n)
 
 end function dotproduct
 
-function ndp(x1, x2, n)
-  ! Compute norm of the dot_product
-  use precision
-  implicit none
-
-  real(kind=realType), intent(in) :: x1(n), x2(n)
-  integer, intent(in) :: n
-  integer :: i
-
-  real(kind=realType) ::  ndp
-  ndp = 0.0
-  do i=1, n
-     ndp = ndp + (x1(i)*x2(i))**2
-  end do
-  ndp = sqrt(ndp)
-end function ndp
-  
