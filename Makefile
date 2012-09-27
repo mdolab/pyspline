@@ -28,7 +28,7 @@ clean:
 			(cd $$subdir && make $@) || exit 1; \
 		done
 	rm -f *~ config.mk;
-	rm -f lib/lib* mod/* obj/*
+	rm -f lib/lib* mod/*.mod obj/*
 
 #      ******************************************************************
 #      *                                                                *

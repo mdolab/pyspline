@@ -48,7 +48,7 @@ exec(import_modules('geo_utils'))
 def writeTecplot1D(handle, name, data):
     """A Generic function to write a 1D data to tecplot. 
     Input:
-        handle: an open file handle or None if TECIO is used
+        handle: an open file handle 
         name, str: Name of zone in Tecplot
         data, numpy array: 2D array data to write
     Output:
@@ -71,7 +71,7 @@ def writeTecplot1D(handle, name, data):
 def writeTecplot2D(handle, name, data):
     """A Generic function to write a 2D data to tecplot. 
     Input:
-        handle: an open file handle or None if TECIO is used
+        handle: an open file handle 
         name, str: Name of zone in Tecplot
         data, numpy array: 2D array data to write
     Output:
@@ -97,7 +97,7 @@ def writeTecplot2D(handle, name, data):
 def writeTecplot3D(handle, name, data):
     """A Generic function to write a 3D data to tecplot. 
     Input:
-        handle: an open file handle or None if TECIO is used
+        handle: an open file handle
         name, str: Name of zone in Tecplot
         data, numpy array: 3D array data to write
     Output:
@@ -139,13 +139,8 @@ def openTecplot(file_name, ndim):
     Input:
         file_name, str: file name to open
         ndim, int: Number of spatial dimension
-    Optional: tecio, Boolean. This is typically set to USE_TECIO which 
-              pySpline sets depending on if tecio is available. 
-              tecio=False can be used expliclty get ascii files
     Output:
-
-        f: file handle to file. This can be then used with
-        writeTecplot{1,2,3}D. If TECIO is ueed, it is None
+        f: file handle to file. 
     """
     mpiPrint('Opening ascii Tecplot File: %s'%(file_name))
     f = open(file_name, 'w')
@@ -426,7 +421,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
         N_col_ind = numpy.zeros((nu+ndu)*self.k, 'intc')# |
         pyspline.curve_jacobian_wrap(
             su, sdu, self.t, self.k, self.Nctl, N_vals, N_row_ptr, N_col_ind)
-        N = _assembleMatrix(N_vals, N_col_ind, N_row_ptr, (nu+ndu, self.Nctl))
+        N = _assembleMatrix(N_vals, N_col_ind, N_row_ptr, (nu+ndu, self.Nctl)).tocsc()
 
         if self.interp:
             if USE_SCIPY:
@@ -455,7 +450,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
                 
             pyspline.curve_jacobian_wrap(su, sdu, self.t, self.k, self.Nctl, 
                                          N_vals, N_row_ptr, N_col_ind)
-            NTWN = N.transpose()*W*N # We need this either way
+            NTWN = (N.transpose()*W*N).tocsc() # We need this either way
 
             if nc + ndc == 0: # We are doing LMS but no
                               # constraints...just a straight weighted
@@ -463,8 +458,9 @@ Nctl=<number of control points> must be specified for a LMS fit'
 
                 if USE_SCIPY:
                     # Factorize once for efficiency                    
+
                     solve = scipy.sparse.linalg.dsolve.factorized( NTWN )
-                    
+
                     for idim in xrange(self.nDim):
                         self.coef[:, idim] = solve(N.transpose()*W*S[:, idim])
                     # end for
@@ -805,7 +801,7 @@ scipy is used.')
             None
             """
 
-        f = openTecplot(file_name, self.nDim, tecio)
+        f = openTecplot(file_name, self.nDim)
         if curve:
             self._writeTecplotCurve(f, size=size)
         if coef:
@@ -1246,145 +1242,116 @@ MUST be defined for task lms or interpolate'
         """
         return self.getValue(u, v)
 
-    def insertUKnot(self, u, r):
+    def insertKnot(self, direction, s, r):
         """
         Insert at knot in tu at u
         Required:
+            direction : 'u' or 'v' The parametric direction for the split
             u : Parametric position to split at
             r : The number of times to insert the knot
         Returns: r, the number of times the knot was actually added
         """
+        assert direction in ['u','v'], 'pySpline.surface.splitSurace: direction must be one of \
+\'u\' or \'v\''
 
-        u = geo_utils.checkInput(u, 'u', float, 0)
+        s = geo_utils.checkInput(s, 's', float, 0)
         r = geo_utils.checkInput(r, 'r', int, 0)
-        if u == 0.0:
+        if s <= 0.0:
             return 
-        if u == 1.0:
+        if s >= 1.0:
             return
         
         # This is relatively inefficient, but we'll do it for
         # simplicity just call insertknot for each slice in the
         # v-direction:
-
-        # Insert once to know how many times it was actually inserted
-        # so we know how big to make the new coef:
-        r, t_new, coef_new, break_pt = pyspline.insertknot(
-            u, r, self.tu, self.ku, self.coef[:,0].T)
-        new_coef = numpy.zeros((self.Nctlu + r, self.Nctlv, self.nDim))
-
-        for j in xrange(self.Nctlv):
-            r, t_new, coef_slice, break_pt = pyspline.insertknot(
-                u, r, self.tu, self.ku, self.coef[:,j].T)
-            new_coef[:,j] = coef_slice.T
-        self.tu = t_new
-        self.Nctlu = self.Nctlu + r
-        self.coef = new_coef
-
-        return r, break_pt
-
-    def insertVKnot(self, v, r):
-        """
-        Insert at knot in tu at u
-        Required:
-            v : Parametric position to split at
-            r : The number of times to insert the knot
-        Returns: r, the number of times the knot was actually added
-            """
-        v = geo_utils.checkInput(v, 'v', float, 0)
-        r = geo_utils.checkInput(r, 'r', int, 0)
         
-        # This is relatively inefficient, but we'll do it for
-        # simplicity just call insertknot for each slice in the
-        # u-direction:
+        if direction == 'u':
+            # Insert once to know how many times it was actually inserted
+            # so we know how big to make the new coef:
+            r, t_new, coef_new, break_pt = pyspline.insertknot(
+                s, r, self.tu, self.ku, self.coef[:,0].T)
+            new_coef = numpy.zeros((self.Nctlu + r, self.Nctlv, self.nDim))
+            
+            for j in xrange(self.Nctlv):
+                r, t_new, coef_slice, break_pt = pyspline.insertknot(
+                    s, r, self.tu, self.ku, self.coef[:,j].T)
+                new_coef[:,j] = coef_slice.T
+            self.tu = t_new
+            self.Nctlu = self.Nctlu + r
+        elif direction == 'v':
+            r, t_new, coef_new, break_pt = pyspline.insertknot(
+                s, r, self.tv, self.kv, self.coef[0,:].T)
+            new_coef = numpy.zeros((self.Nctlu, self.Nctlv+r, self.nDim))
 
-        # Insert once to know how many times it was actually inserted
-        # so we know how big to make the new coef:
-        r, t_new, coef_new, break_pt = pyspline.insertknot(
-            v, r, self.tv, self.kv, self.coef[0,:].T)
-        new_coef = numpy.zeros((self.Nctlu, self.Nctlv+r, self.nDim))
+            for i in xrange(self.Nctlu):
+                r, t_new, coef_slice, break_pt = pyspline.insertknot(
+                    s, r, self.tv, self.kv, self.coef[i,:].T)
+                new_coef[i,:] = coef_slice.T
+            self.tv = t_new
+            self.Nctlv = self.Nctlv + r
+        # end if
 
-        for i in xrange(self.Nctlu):
-            r, t_new, coef_slice, break_pt = pyspline.insertknot(
-                v, r, self.tv, self.kv, self.coef[i,:].T)
-            new_coef[i,:] = coef_slice.T
-        self.tv = t_new
-        self.Nctlv = self.Nctlv + r
         self.coef = new_coef
 
         return r, break_pt
 
-    def splitSurfaceU(self, u):
+    def splitSurface(self, direction, s):
         """
         Split surface into two surfaces at parametric location u
         Required: 
-            u : Parametric position to split at
+            direction : 'u' or 'v' The parametric direction for the split
+            s : Parametric position to split at
 
         Returns: surf1 and surf2, two pyspline surfaces. surf1
         is the lower part and surf2 is the upper part. 
         """
 
-        # Special case the start and end
-        if u == 0.0:
+        assert direction in ['u','v'], 'pySpline.surface.splitSurace: direction must be one of \
+\'u\' or \'v\''
+
+        # Special case the bounds: (same for both directions)
+        if s<= 0.0:
             return None, surface(tu=self.tu.copy(), tv=self.tv.copy(),
                                  ku=self.ku, kv=self.kv, coef=self.coef.copy())
-        if u == 1.0:
+        if s >= 1.0:
             return surface(tu=self.tu.copy(), tv=self.tv.copy(),
                            ku=self.ku, kv=self.kv, coef=self.coef.copy()), None
         
-        r, break_pt = self.insertUKnot(u, self.ku-1)
+        if direction == 'u':
+            r, break_pt = self.insertKnot(direciton, s, self.ku-1)
 
-        # r is the number of time the knot was actually added
-        s = self.ku-1-r # Back out the multiplicity of the point
-        break_pt = break_pt - s
+            # r is the number of time the knot was actually added
+            s = self.ku-1-r # Back out the multiplicity of the point
+            break_pt = break_pt - s
 
-        # -------- Process the Knot Vectors--------
-        t1 = numpy.hstack((self.tu[0:break_pt+self.ku-1-s].copy(),u))/u
-        t2 = (numpy.hstack((u,self.tu[break_pt:].copy()))-u)/(1.0-u)
+            # -------- Process the Knot Vectors--------
+            t1 = numpy.hstack((self.tu[0:break_pt+self.ku-1-s].copy(),u))/u
+            t2 = (numpy.hstack((u,self.tu[break_pt:].copy()))-u)/(1.0-u)
 
-        # ------- Proces the Coefficient Arrays
-        coef1 = self.coef[:break_pt,:,:].copy()
-        coef2 = self.coef[break_pt-1:,:,:].copy()
+            # ------- Proces the Coefficient Arrays
+            coef1 = self.coef[:break_pt,:,:].copy()
+            coef2 = self.coef[break_pt-1:,:,:].copy()
 
-        return surface(tu=t1, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef1),\
-            surface(tu=t2, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef2)
-
-
-    def splitSurfaceV(self, v):
-        """
-        Split surface into two surfaces at parametric location v
-        Required: 
-            v : Parametric position to split at
-
-        Returns: surf1 and surf2, two pyspline surfaces. surf1
-        is the lower part and surf2 is the upper part. 
-        """
-
-        # Special case the start and end
-        if v == 0.0:
-            return None, surface(tu=self.tu.copy(), tv=self.tv.copy(),
-                                 ku=self.ku, kv=self.kv, coef=self.coef.copy())
-        if v == 1.0:
-            return surface(tu=self.tu.copy(), tv=self.tv.copy(),
-                           ku=self.ku, kv=self.kv, coef=self.coef.copy()), None
+            return surface(tu=t1, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef1),\
+                surface(tu=t2, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef2)
+        elif direction == 'v':
+            r, break_pt = self.insertKnot(direction, s, self.kv-1)
         
+            # r is the number of time the knot was actually added
+            s = self.kv-1-r # Back out the multiplicity of the point
+            break_pt = break_pt - s
 
-        r, break_pt = self.insertVKnot(v, self.kv-1)
-        
-        # r is the number of time the knot was actually added
-        s = self.kv-1-r # Back out the multiplicity of the point
-        break_pt = break_pt - s
+            # -------- Process the Knot Vectors--------
+            t1 = numpy.hstack((self.tv[0:break_pt+self.kv-1-s].copy(),s))/s
+            t2 = (numpy.hstack((s,self.tv[break_pt:].copy()))-s)/(1.0-s)
 
-        # -------- Process the Knot Vectors--------
-        t1 = numpy.hstack((self.tv[0:break_pt+self.kv-1-s].copy(),v))/v
-        t2 = (numpy.hstack((v,self.tv[break_pt:].copy()))-v)/(1.0-v)
+            # ------- Proces the Coefficient Arrays
+            coef1 = self.coef[:,:break_pt,:].copy()
+            coef2 = self.coef[:,break_pt-1:,:].copy()
 
-        # ------- Proces the Coefficient Arrays
-        coef1 = self.coef[:,:break_pt,:].copy()
-        coef2 = self.coef[:,break_pt-1:,:].copy()
-        
-        return surface(tu=self.tu, tv=t1, ku=self.ku, kv=self.kv, coef=coef1),\
-            surface(tu=self.tu, tv=t2, ku=self.ku, kv=self.kv, coef=coef2)
-
+            return surface(tu=self.tu, tv=t1, ku=self.ku, kv=self.kv, coef=coef1),\
+                surface(tu=self.tu, tv=t2, ku=self.ku, kv=self.kv, coef=coef2)
+        # end if
 
     def windowSurface(self, uvLow, uvHigh):
         """Create a surface that is windowed by the rectangular
@@ -1402,16 +1369,16 @@ MUST be defined for task lms or interpolate'
         """
 
         # Do u-low split:
-        dummy, surf = self.splitSurfaceU(uvLow[0])
+        dummy, surf = self.splitSurface('u',uvLow[0])
 
         # Do u-high split (and re-normalize the split coordinate)
-        surf, dummy = surf.splitSurfaceU((uvHigh[0]-uvLow[0])/(1.0-uvLow[0]))
+        surf, dummy = surf.splitSurface('u',(uvHigh[0]-uvLow[0])/(1.0-uvLow[0]))
 
         # Do v-low split:
-        dummy, surf = surf.splitSurfaceV(uvLow[1])
+        dummy, surf = surf.splitSurface('v',uvLow[1])
 
         # Do v-high split (and re-normalize the split coordinate)
-        surf, dummy = surf.splitSurfaceV((uvHigh[1]-uvLow[1])/(1.0-uvLow[1]))
+        surf, dummy = surf.splitSurface('v',(uvHigh[1]-uvLow[1])/(1.0-uvLow[1]))
 
         return surf
         
@@ -1588,8 +1555,7 @@ MUST be defined for task lms or interpolate'
 
         return 
 
-    def writeTecplot(self, file_name, surfs=True, coef=True, orig=True,
-                     dir=False, tecio=USE_TECIO):
+    def writeTecplot(self, file_name, surfs=True, coef=True, orig=True, dir=False):
         """Write the surface to a tecplot dat file
         Required Arguments:
             file_name: The output file name
@@ -1600,7 +1566,7 @@ MUST be defined for task lms or interpolate'
             dir  : Boolean to write out surface direction indicators 
                    (default=False)
             """
-        f = openTecplot(file_name, self.nDim, tecio)
+        f = openTecplot(file_name, self.nDim)
 
         if surfs:
             self._writeTecplotSurface(f)
@@ -1726,7 +1692,6 @@ MUST be defined for task lms or interpolate'
         Pcount += 2
 
         return Pcount, counter
-
 
     def writeTin(self, handle):
         '''Write the pySpline surface to an open handle in .tin format'''
@@ -2561,8 +2526,8 @@ MUST be defined for task lms or interpolate'
         
         return
 
-    def writeTecplot(self, file_name, vols=True, coef=True, orig=False, 
-                     tecio=USE_TECIO):
+    def writeTecplot(self, file_name, vols=True, coef=True, orig=False):
+
         """Write the surface to a tecplot dat file
         Required Arguments:
             file_name: The output file name
@@ -2574,7 +2539,7 @@ MUST be defined for task lms or interpolate'
                    (default=False)
 
             """
-        f = openTecplot(file_name, self.nDim, tecio)
+        f = openTecplot(file_name, self.nDim)
         if vols:
             self._writeTecplotVolume(f)
         if coef:

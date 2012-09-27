@@ -25,8 +25,8 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
   implicit none
 
   ! Input
-  integer         , intent(inout)  :: r
-  integer         , intent(in)     :: k, nctl, ndim
+  integer            , intent(inout)  :: r
+  integer            , intent(in)     :: k, nctl, ndim
   real(kind=realType), intent(in)     :: u
   real(kind=realType), intent(in)     :: t(nctl+k)
   real(kind=realType), intent(in)     :: coef(ndim, nctl)
@@ -34,14 +34,13 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
   ! Output
   real(kind=realType), intent(out)    :: t_new(nctl+k+r)
   real(kind=realType), intent(out)    :: coef_new(ndim, nctl+r)
-  integer         , intent(out)    :: ileft
+  integer            , intent(out)    :: ileft
 
   ! Working
-  integer                          :: mflag, ilo, s, i, j, L
+  integer                             :: s, i, j, L
   real(kind=realType)                 :: alpha, temp(ndim, k)
 
-  ilo = 1
-  call intrv(t,nctl+k,u,ilo,ileft,mflag)
+  call findSpan(u, k, t, nctl, ileft)
 
   ! Compute its multiplicity
   s = 0 ! Knot multiplicity

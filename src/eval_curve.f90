@@ -21,25 +21,20 @@ subroutine eval_curve(s, t, k, coef, nctl, ndim, n, val)
   implicit none
   ! Input
   integer         , intent(in)     :: k, nctl, ndim, n
-  real(kind=realType), intent(in)     :: s(n)
-  real(kind=realType), intent(in)     :: t(nctl+k)
-  real(kind=realType), intent(in)     :: coef(ndim, nctl)
+  real(kind=realType), intent(in)  :: s(n)
+  real(kind=realType), intent(in)  :: t(nctl+k)
+  real(kind=realType), intent(in)  :: coef(ndim, nctl)
 
   ! Output
-  real(kind=realType), intent(out)    :: val(ndim, n)
+  real(kind=realType), intent(out) :: val(ndim, n)
 
   ! Working
-  integer                          :: i, l, idim, istart
-  integer                          :: ILEFT, IWORK, ILO, mflag
-  real(kind=realType)                 :: basisu(k)
+  integer                          :: i, l, idim, istart, ileft
+  real(kind=realType)              :: basisu(k)
 
   val(:, :) = 0.0
-  ILO = 1
   do i=1, n
-     call INTRV(T, NCTL+K, s(i), ILO, ILEFT, MFLAG)
-     if (mflag == 1) then
-        ileft = ileft-k
-     end if
+     call findSpan(s(i), k, t, nctl, ileft)
      call basis(t, nctl, k, s(i), ileft, basisu)
      istart = ileft-k
      do l=1, k
@@ -75,19 +70,19 @@ subroutine eval_curve_deriv(s, t, k, coef, nctl, ndim, val)
  
   ! Input
   integer         , intent(in)          :: k, nctl, ndim
-  real(kind=realType), intent(in)          :: s
-  real(kind=realType), intent(in)          :: t(nctl+k)
-  real(kind=realType), intent(in)          :: coef(ndim, nctl)
+  real(kind=realType), intent(in)       :: s
+  real(kind=realType), intent(in)       :: t(nctl+k)
+  real(kind=realType), intent(in)       :: coef(ndim, nctl)
 
   ! Output
-  real(kind=realType), intent(out)         :: val(ndim)
+  real(kind=realType), intent(out)      :: val(ndim)
 
   ! Working
   integer                               :: idim, inbv
-  real(kind=realType)                      :: work(3*k)
+  real(kind=realType)                   :: work(3*k)
 
   ! Functions
-  real(kind=realType)                      :: bvalu
+  real(kind=realType)                   :: bvalu
 
   inbv = 1
 
@@ -174,35 +169,29 @@ subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val)
   implicit none
   ! Input
   integer         , intent(in)          :: k, nctl, ndim, n
-  real(kind=realType), intent(in)          :: s(n)
-  real(kind=realType), intent(in)          :: t(nctl+k)
+  real(kind=realType), intent(in)       :: s(n)
+  real(kind=realType), intent(in)       :: t(nctl+k)
   complex*16      , intent(in)          :: coef(ndim, nctl)
 
   ! Output
   complex*16      , intent(out)         :: val(ndim, n)
 
   ! Working
-  integer                               :: ii, l, istart, ileft, idim, ilo, mflag
-  real(kind=realType)                      :: work(3*k)
-  real(kind=realType)                      :: basisu(k)
+  integer                               :: i, l, istart, ileft, idim
+  real(kind=realType)                   :: basisu(k)
 
   ! Functions
   real(kind=realType) bvalu
 
   val(:, :) = 0.0
-  ilo = 1
-  do ii=1, n
-     call intrv(t, nctl+k, s(ii), ilo, ileft, mflag)
-     if (mflag == 1) then
-        ileft = ileft-k
-     end if
-
-     call basis(t, nctl, k, s(ii), ileft, basisu)
+  do i=1, n
+     call findSpan(s(i), k, t, nctl, ileft)
+     call basis(t, nctl, k, s(i), ileft, basisu)
 
      istart = ileft - k
      do l=1, k
         do idim=1, ndim
-           val(idim, ii) = val(idim, ii) + &
+           val(idim, i) = val(idim, i) + &
                 cmplx(basisu(l)*real(coef(idim, istart+l)), &
                 basisu(l)*aimag(coef(idim, istart+l)))
 

@@ -7,12 +7,12 @@ subroutine findSpan(u, k, t, nctl, ind)
   !     Abstract: Determine the knot span index
 
   !     Description of Arguments
-  !     Input
+  !     Input:
   !     u       - Real, parametric location we are looking for
   !     k       - Integer, order of B-spline 
   !     t       - Real, size(nctl + k), knot vector
   !
-  !     Ouput 
+  !     Ouput: 
   !     ind     - Integer, knot span index
 
   use precision
@@ -30,14 +30,12 @@ subroutine findSpan(u, k, t, nctl, ind)
   if (u == t(nctl+1)) then
      ind = nctl
   else
-     low = k-1
-     high = nctl
+     low = k
+     high = nctl+1
 
      ! Do a binary search
      mid = (low+high)/2
-     print *,'mid beg:',mid
      do while ( (u < t(mid) .or. u >= t(mid+1)))
-        print *, 'mid:',mid
         if (u < t(mid)) then
            high = mid
         else
