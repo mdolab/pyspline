@@ -447,7 +447,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   pt(2) = v
   pt(3) = w
   
-  iteration_loop: do ii=1, 1!niter
+  iteration_loop: do ii=1, niter
      call eval_volume(pt(1), pt(2), pt(3), tu, tv, tw, ku, kv, kw, coef, &
           nctlu, nctlv, nctlw, ndim, 1, 1, 1, val)
      call eval_volume_deriv(pt(1), pt(2), pt(3), tu, tv, tw, ku, kv, kw, coef, &
