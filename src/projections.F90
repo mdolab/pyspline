@@ -1147,7 +1147,7 @@ subroutine point_volume_start(x0, uu, vv, ww, data, nu, nv, nw, ndim, N, u, v, w
 
   ! Input
   integer              , intent(in) :: nu, nv, nw, ndim, N
-  real(kind=realType)  , intent(in) :: x0(ndim, N), uu(nu), vv(nv), ww(nw), 
+  real(kind=realType)  , intent(in) :: x0(ndim, N), uu(nu), vv(nv), ww(nw)
   real(kind=realType)  , intent(in) :: data(ndim, nw, nv, nu)
   
   ! Output
