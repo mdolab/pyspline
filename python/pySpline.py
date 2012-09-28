@@ -775,7 +775,7 @@ scipy is used.')
                                               Niter, eps, s[i])
         # end for
 
-        return s.squeeze(), D.squeeze().T
+        return s.squeeze(), D.squeeze()
 
     def projectCurve(self, in_curve, Niter=25, eps=1e-10, **kwargs):
         """
