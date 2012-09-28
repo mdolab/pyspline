@@ -247,6 +247,7 @@ class curve(object):
         
         self.length = None
         self.gpts = None
+        self.data = None
 
         # We have provided information to create curve directly
         if 'k' in kwargs and 't' in kwargs and 'coef' in kwargs: 
@@ -655,6 +656,22 @@ scipy is used.')
         # end for
 
         return
+    
+    def _calcInterpolatedGrevillePoints(self):
+        self._calcGrevillePoints()
+        
+        s = []
+        s = [self.gpts[0]]
+        N = 4
+        for i in xrange(len(self.gpts)-1):
+            for j in xrange(N):
+                s.append( (self.gpts[i+1]-self.gpts[i])*(j+1)/(N+1) + self.gpts[i])
+            s.append(self.gpts[i+1])
+        # end for
+
+        self.sdata = numpy.array(s)
+
+        return
 
     def __call__(self, s):
         """
@@ -721,7 +738,7 @@ scipy is used.')
 
         return derivative
 
-    def projectPoint(self, x0, Niter=20, eps1=1e-6, eps2=1e-6, **kwargs):
+    def projectPoint(self, x0, Niter=25, eps=1e-10, **kwargs):
         """Project a point x0 or (points x0) onto the curve and return
         parametric position(s)
 
@@ -730,8 +747,7 @@ scipy is used.')
             x0   : A point(s) in nDim space for projection
         Optional Arguments:
             Niter: Maximum number of newton iterations
-            eps1 : Intersection/Relative change tolerance
-            eps2 : Cosine convergence measure tolerance
+            eps  : Tolerance
             s    : Initial guess for position
         Returns:
             s: Parametric position(s) of closest point on curve
@@ -747,14 +763,20 @@ scipy is used.')
 
         assert len(x0) == len(s), 'projectPoint: The length of x0\
  and s must be the same'
-        
-        s, D = pyspline.point_curve(x0.T, self.t, self.k, self.coef.T, 
-                                   Niter, eps1, eps2, s)
+
+        # If necessary get brute-force starting point
+        if numpy.any(s<0) or numpy.any(s>1):
+            s = pyspline.point_curve_start(x0.T, self.sdata, self.data.T)
+
+        D = numpy.zeros_like(x0)
+        for i in xrange(len(x0)):
+            s[i], D[i] = pyspline.point_curve(x0[i], self.t, self.k, self.coef.T, 
+                                              Niter, eps, s[i])
+        # end for
 
         return s.squeeze(), D.squeeze().T
 
-    def projectCurve(self, in_curve, Niter=250, eps1=1e-6, eps2=1e-6,
-                     **kwargs):
+    def projectCurve(self, in_curve, Niter=25, eps=1e-10, **kwargs):
         """
         Find the minimum distance between this curve (self) and a second
         curve passed in (curve)
@@ -762,8 +784,7 @@ scipy is used.')
             curve: A pyspline curve class to do the projection with
         Optional Arguments:
             Niter: Maximum number of newton iterations
-            eps1 : Intersection/Relative change tolerance
-            eps2 : Cosine convergence measure tolerance
+            eps  : Tolerance
             s    : Initial guess for curve1 (this curve class)
             t    : Initial guess for curve2 (cuve passed in)
         Returns:
@@ -777,16 +798,34 @@ scipy is used.')
             s = geo_utils.checkInput(kwargs['s'], 's', float, 0)
         if 't' in kwargs:
             t = geo_utils.checkInput(kwargs['t'], 't', float, 0)
-        Niter = geo_utils.checkInput(Niter, 'Niter', int, 0)
-        eps1  = geo_utils.checkInput(eps1, 'eps1', float, 0)
-        eps2  = geo_utils.checkInput(eps2, 'eps2', float, 0)
-        return pyspline.curve_curve(self.t, self.k, self.coef.T, 
-                                    in_curve.t, in_curve.k, 
-                                    in_curve.coef.T, Niter, 
-                                    eps1, eps2, s, t)
+        eps   = geo_utils.checkInput(eps, 'eps', float, 0)
 
-    def writeTecplot(self, file_name, curve=True, coef=True, orig=True, 
-                     size=0.1):
+        if s < 0 or s > 1 or t < 0 or t >1:
+            self._computeData()
+            in_curve._computeData()
+            s, t = pyspline.curve_curve_start(self.data.T, self.sdata, in_curve.data.T, 
+                                              in_curve.sdata)
+        # end if
+        s, t, Diff = pyspline.curve_curve(
+            self.t, self.k, self.coef.T, in_curve.t, in_curve.k, 
+            in_curve.coef.T, Niter, eps, s, t)
+        
+        return s, t, Diff
+        
+    def _computeData(self):
+        """
+        Compute discrete data that is used for the Tecplot
+        Visualization as well as the data for doing the brute-force
+        checks
+        """
+        # We will base the data on interpolated greville points
+
+        if self.data is None:
+            self._calcInterpolatedGrevillePoints()
+            self.data = self.getValue(self.sdata)
+        # end if
+    
+    def writeTecplot(self, file_name, curve=True, coef=True, orig=True):
         """
         Write the cuve to a tecplot dat file
         Required Arguments:
@@ -803,7 +842,7 @@ scipy is used.')
 
         f = openTecplot(file_name, self.nDim)
         if curve:
-            self._writeTecplotCurve(f, size=size)
+            self._writeTecplotCurve(f)
         if coef:
             writeTecplot1D(f, 'control_pts', self.coef)        
         if orig and self.orig_data:
@@ -817,21 +856,8 @@ scipy is used.')
         """
         Write the interpolated curve to a handle
         """
-        if 'size' in kwargs:
-            length = self.getLength()
-            n = int(numpy.floor(numpy.real(length/kwargs['size'])))
-            X = self.getValue(numpy.linspace(0, 1, n))
-        else:
-            if not self.s == None:
-                X = self.getValue(self.s)
-            else:
-                s = 0.5*(1-numpy.cos(numpy.linspace(0, numpy.pi, 
-                                                    self.k*self.Nctl+2)))
-                X = self.getValue(s)
-            # end if
-        # end if
-
-        writeTecplot1D(handle, 'interpolated', X)
+        self._computeData()
+        writeTecplot1D(handle, 'interpolated', self.data)
 
         return         
   
@@ -880,7 +906,7 @@ class surface(object):
         # end if      
 
         self.edge_curves = [None, None, None, None]
-
+        self.data = None
         if 'ku' in kwargs and 'kv' in kwargs and 'tu' in kwargs and 'tv' in \
                 kwargs and 'coef' in kwargs:
             self.X = None
@@ -1456,7 +1482,7 @@ MUST be defined for task lms or interpolate'
 
         return Xmin, Xmax
     
-    def projectPoint(self, x0, Niter=250, eps1=1e-6, eps2=1e-6, **kwargs):
+    def projectPoint(self, x0, Niter=25, eps=1e-10, **kwargs):
         """
         Project a point x0 onto the surface and return parametric position
         curve: 
@@ -1464,8 +1490,7 @@ MUST be defined for task lms or interpolate'
             x0   : A point or points in nDim space for projection
         Optional Arguments:
             Niter: Maximum number of newton iterations
-            eps1 : Intersection/Relative change tolerance
-            eps2 : Cosine convergence measure tolerance
+            eps  : Tolerance
             u    : Initial guess for u position
             v    : Initial guess for v position
         Returns:
@@ -1487,20 +1512,19 @@ MUST be defined for task lms or interpolate'
         else:
             v = -1*numpy.ones(len(x0))
         # end if
-        u, v, D = pyspline.point_surface(x0.T, self.tu, self.tv, self.ku, 
-                                       self.kv, self.coef.T, Niter,
-                                         eps1, eps2, u, v)
+        u, v, D = pyspline.point_surface(
+            x0.T, self.tu, self.tv, self.ku, self.kv, self.coef.T, Niter,
+            eps, u, v)
         return u.squeeze(), v.squeeze(), D.squeeze().T
 
-    def projectCurve(self, in_curve, Niter=25, eps1=1e-12, eps2=1e-12, **kwargs):
+    def projectCurve(self, in_curve, Niter=25, eps=1e-10, **kwargs):
         """
         Find the minimum distance between this surface and a curve
         Required Arguments:
             curve: A pyspline curve class to do the projection with
         Optional Arguments:
             Niter: Maximum number of newton iterations
-            eps1 : Intersection/Relative change tolerance
-            eps2 : Cosine convergence measure tolerance
+            eps  : Tolerance
             u    : Initial guess for u parameter on surface
             v    : Initial guess for v parameter on surface
             s    : Initial guess for s parameter on curve
@@ -1520,23 +1544,35 @@ MUST be defined for task lms or interpolate'
         if 's' in kwargs: 
             s = geo_utils.checkInput(kwargs['s'], 's', float, 0)
         Niter = geo_utils.checkInput(Niter, 'Niter', int, 0)
-        eps1  = geo_utils.checkInput(eps1, 'eps1', float, 0)
-        eps2  = geo_utils.checkInput(eps1, 'eps2', float, 0)
+        eps   = geo_utils.checkInput(eps, 'eps', float, 0)
+
         return pyspline.curve_surface(\
             in_curve.t, in_curve.k, in_curve.coef.T, self.tu, self.tv, \
-                self.ku, self.kv, self.coef.T, Niter, eps1, eps2, u, v, s)
+                self.ku, self.kv, self.coef.T, Niter, eps, u, v, s)
    
+    def _computeData(self):
+        """
+        Compute discrete data that is used for the Tecplot
+        Visualization as well as the data for doing the brute-force
+        checks
+        """
+        # We will base the data on interpolated greville points
 
+        if self.data is None:
+            self.edge_curves[0]._calcInterpolatedGrevillePoints()
+            self.udata = self.edge_curves[0].sdata
+            self.edge_curves[2]._calcInterpolatedGrevillePoints()
+            self.vdata = self.edge_curves[2].sdata
+            [V, U] = numpy.meshgrid(self.vdata, self.udata)
+            self.data = self.getValue(U,V)
+
+        # end if
+    
     def _writeTecplotSurface(self, handle):
         """Output this surface\'s data to a open file handle \'handle\' """
         
-        Nx = self.Nctlu*(self.ku)
-        Ny = self.Nctlv*(self.kv)
-        u_plot = 0.5*(1-numpy.cos(numpy.linspace(0, numpy.pi, Nx)))
-        v_plot = 0.5*(1-numpy.cos(numpy.linspace(0, numpy.pi, Ny)))
-        [V_plot, U_plot] = numpy.meshgrid(v_plot, u_plot)
-        X = self.getValue(U_plot, V_plot)
-        writeTecplot2D(handle, 'interpolated', X)
+        self._computeData()
+        writeTecplot2D(handle, 'interpolated', self.data)
         
         return
                     
@@ -1791,7 +1827,7 @@ class volume(object):
         self.face_surfaces = [None, None, None, None, None, None]
         self.edge_curves = [None, None, None, None, None, None,
                             None, None, None, None, None, None]
-
+        self.data = None
         if 'ku' in kwargs and 'kv' in kwargs and 'kw' in kwargs and \
                 'tu' in kwargs and 'tv' in kwargs and 'tw' in kwargs and \
                 'coef' in kwargs:
@@ -2461,7 +2497,7 @@ MUST be defined for task lms or interpolate'
 
         return Xmin, Xmax
 
-    def projectPoint(self, x0, Niter=25, eps=1e-6, n_sub=1):
+    def projectPoint(self, x0, Niter=25, eps=1e-10, **kwargs):
         """
         Project a point x0 onto the volume and return parametric position
 
@@ -2469,8 +2505,7 @@ MUST be defined for task lms or interpolate'
             x0   : A point or points in nDim space for projection
         Optional Arguments:
             Niter: Maximum number of newton iterations
-            eps1 : Intersection/Relative change tolerance
-            eps2 : Cosine convergence measure tolerance
+            eps  : Tolerance
             u    : Initial guess for u position
             v    : Initial guess for v position
             w    : Initial guess for w position 
@@ -2482,47 +2517,70 @@ MUST be defined for task lms or interpolate'
         """
       
         x0 = numpy.atleast_2d(x0)
+        if 'u' in kwargs and 'v' in kwargs and 'w' in kwargs:
+            u = numpy.atleast_1d(kwargs['u'])
+            v = numpy.atleast_1d(kwargs['v'])
+            w = numpy.atleast_1d(kwargs['w'])
+        else:
+            u = -1*numpy.ones(len(x0))
+            v = -1*numpy.ones(len(x0))
+            w = -1*numpy.ones(len(x0))
+        # end if
 
-        u, v, w, D = pyspline.point_volume(x0.T, self.tu, self.tv, self.tw, 
-                                        self.ku, self.kv, self.kw, 
-                                        self.coef.T, Niter, eps, n_sub)
+        assert len(x0) == len(u) == len(v) == len(w), 'volume projectPoint: The length of x0\
+ and u,v,w must be the same'
 
-        return u.squeeze(), v.squeeze(), w.squeeze(), D.squeeze().T
+        # If necessary get brute-force starting point
+        if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0) or numpy.any(v>1):
+            self._computeData()
+            u,v,w = pyspline.point_volume_start(x0.T, self.udata, self.vdata, self.wdata, 
+                                                self.data.T)
+        # end if
+        D = numpy.zeros_like(x0)
+        for i in xrange(len(x0)):
+            u[i], v[i], w[i], D[i] = pyspline.point_volume(
+                x0[i], self.tu, self.tv, self.tw, self.ku, self.kv, self.kw, self.coef.T, 
+                Niter, eps, u[i], v[i], w[i])
 
-    def _writeTecplotVolume(self, handle):
-        """Output this volume\'s data to a open file handle \'handle\' """
+        return u.squeeze(), v.squeeze(), w.squeeze(), D.squeeze()
 
-        self.U = None
-        if self.U is None:
-            # This works really well actually
-            Nx = self.Nctlu*self.ku+1
-            Ny = self.Nctlv*self.kv+1
-            Nz = self.Nctlw*self.kw+1
+    def _computeData(self):
+        """
+        Compute discrete data that is used for the Tecplot
+        Visualization as well as the data for doing the brute-force
+        checks
+        """
+        # We will base the data on interpolated greville points
 
-            u_plot = 0.5*(1-numpy.cos(numpy.linspace(0, numpy.pi, Nx)))
-            v_plot = 0.5*(1-numpy.cos(numpy.linspace(0, numpy.pi, Ny)))
-            w_plot = 0.5*(1-numpy.cos(numpy.linspace(0, numpy.pi, Nz)))
-        
-            # Dump re-interpolated surface
-            W_plot = numpy.zeros((Nx, Ny, Nz))
-            V_plot = numpy.zeros((Nx, Ny, Nz))
-            U_plot = numpy.zeros((Nx, Ny, Nz))
-
-            for i in xrange(Nx):
-                for j in xrange(Ny):
-                    for k in xrange(Nz):
-                        U_plot[i,j,k] = u_plot[i]
-                        V_plot[i,j,k] = v_plot[j]
-                        W_plot[i,j,k] = w_plot[k]
+        if self.data is None:
+            self.edge_curves[0]._calcInterpolatedGrevillePoints()
+            self.udata = self.edge_curves[0].sdata
+            self.edge_curves[2]._calcInterpolatedGrevillePoints()
+            self.vdata = self.edge_curves[2].sdata
+            self.edge_curves[8]._calcInterpolatedGrevillePoints()
+            self.wdata = self.edge_curves[8].sdata
+            U = numpy.zeros((len(self.udata),len(self.vdata),len(self.wdata)))
+            V = numpy.zeros((len(self.udata),len(self.vdata),len(self.wdata)))
+            W = numpy.zeros((len(self.udata),len(self.vdata),len(self.wdata)))
+            for i in xrange(len(self.udata)):
+                for j in xrange(len(self.vdata)):
+                    for k in xrange(len(self.wdata)):
+                        U[i,j,k] = self.udata[i]
+                        V[i,j,k] = self.vdata[j]
+                        W[i,j,k] = self.wdata[k]
                     # end for
                 # end for
             # end for
+            self.data = self.getValue(U,V,W)
+        # end if
 
-            values = self.getValue(U_plot, V_plot, W_plot)
-        else:
-            values = self.getValue(self.U, self.V, self.W)
+        return
+        
+    def _writeTecplotVolume(self, handle):
+        """Output this volume\'s data to a open file handle \'handle\' """
 
-        writeTecplot3D(handle, 'interpolated', values)
+        self._computeData()
+        writeTecplot3D(handle, 'interpolated', self.data)
         
         return
 

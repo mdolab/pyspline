@@ -1,8 +1,22 @@
-#define LSFailMax 5
+! This file contains all the projection functionality used in
+! pySpline. There are 5 combinations that can yield single solutions. They are:
+! 1. point-curve   (1 dof)
+! 2. point-surface (2 dof)
+! 3. point-volume  (3 dof)
+! 4. curve-cruve   (2 dof)
+! 5. curve-surface (3 dof)
+
+! Additionally, each combination requires a globlalization function to
+! obtain a good startin point for the Newton search if one is not
+! already provided. The five combinations of these brute-force
+! starting points are also included. 
+
+! Define some parameters used for all projection functions 
+#define LSFailMax 2
 #define wolfe .001
 #define nLine 20
 
-subroutine point_curve(x0, t, k, coef, nctl, ndim, N, Niter, eps1, eps2, s, Diff)
+subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
 
   !***DESCRIPTION
   !
@@ -12,180 +26,173 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, N, Niter, eps1, eps2, s, Diff
   !
   !     Description of Arguments
   !     Input
-  !     x0      - Real, array size(ndim, N) N points we are trying to invert
+  !     x0      - Real, array size(ndim) point we are trying to invert
   !     t       - Real, Knot vector. Length nctl+k
   !     k       - Integer, order of B-spline
   !     coef    - Real, Array of B-spline coefficients and weights. Size (ndim, nctl)
   !     nctl    - Integer, Number of control points
   !     ndim    - Integer, spatial dimension of curve
   !     Niter   - Integer, Maximum number of Netwton iterations
-  !     eps1    - Real - Eculdian Distance Convergence Measure
-  !     eps2    - Real - Cosine Convergence Measure
+  !     eps     - Real - Eculdian Distance Convergence Measure
   !     s       - Real, vector, length(N), guess parameters where C(s)
   !               is closest to x0 
   !
   !     Ouput 
-  !     s       - Real, vector, length(N) parameter where C(s) is closest to x0
-  !     diff    - Real, array, size(ndim, N)- Distance between x0 and curve(s)
+  !     s       - Real, parameter where C(s) is closest to x0
+  !     diff    - Real, array, size(ndim)- Distance between x0 and curve(s)
 
   use precision
   implicit none
+
   ! Input
-  real(kind=realType), intent(in)          :: x0(ndim, N)
-  integer            , intent(in)          :: k, nctl, ndim, N, niter
+  real(kind=realType), intent(in)          :: x0(ndim)
+  integer            , intent(in)          :: k, nctl, ndim, niter
   real(kind=realType), intent(in)          :: t(nctl+k)
   real(kind=realType), intent(in)          :: coef(ndim, nctl)
-  real(kind=realType), intent(in)          :: eps1, eps2
+  real(kind=realType), intent(in)          :: eps
 
   ! Output
-  real(kind=realType), intent(out)         :: s(N), Diff(ndim, N)
+  real(kind=realType), intent(out)         :: s, Diff(ndim)
 
   ! Working
-  real(kind=realType)                      :: val(ndim), deriv(ndim), deriv2(ndim)
-  integer                                  :: i, j, ipt, counter, max_inner_iter
-  integer                                  :: istart, nss
-  real(kind=realType)                      :: D, D0, delta, D2(ndim), s0(N)
-  integer                                  :: n_sub ! Huristic Value
-  logical                                  :: brute_force
+  real(kind=realType)   :: val(ndim), deriv(ndim), deriv2(ndim), step, c, dist, p_diff
+  real(kind=realType)   :: grad, hessian,  update, R(ndim), nDist, fval, nfval, pgrad, newPt
+  integer               :: m, ii, NLSFail
+  logical               :: flag, cflag
 
-  ! Alloctable
-  real(kind=realType), allocatable          :: curve_vals(:, :), ss(:)
-  real(kind=realType) :: c1
   ! Functions
-  real(kind=realType)                      :: norm
+  real(kind=realType)   :: norm
 
-  ! Initialization
-  n_sub=1  ! Is 3  Good Here?? Huristic!
-  brute_force = .False.
-  max_inner_iter = 20
-  ! Determine if any of the guesses are out of range, if so, do the brute force search
+  NLSFail = 0
+  iteration_loop: do ii=1, Niter
 
-  point_loop: do ipt=1, N
-     if (s(ipt) < 0 .or. s(ipt) > 1) then
-        brute_force = .True.
-        exit point_loop
+     ! Evaluate point and its derivatives
+     call eval_curve(s, t, k, coef, nctl, ndim, 1, val)
+     call eval_curve_deriv(s, t, k, coef, nctl, ndim, deriv)
+     call eval_curve_deriv2(s, t, k, coef, nctl, ndim, deriv2)
+     
+     ! Distance is R, "function value" fval is what we minimize
+     R = val - x0
+     nDist = norm(R, nDim)
+     fval = 0.5*nDist**2
+
+     ! Calculate the Gradient
+     grad = dot_product(R, deriv)
+
+     ! Calculate the Hessian
+     hessian = dot_product(deriv,deriv) + dot_product(R, deriv2)
+
+     ! Bounds checking
+     flag = .False.
+     if (s < t(1) + eps .and. grad >= 0.0) then
+        flag = .True. 
+        s = t(1)
      end if
-  end do point_loop
 
-  if (brute_force) then
-     ! Dynamically allot the required space for the brute-force search search
-         nss = nctl-k+2 + (nctl-k+1)*n_sub
-     allocate (ss(nss))
-     allocate(curve_vals(ndim, nss))
+     if (s > t(nctl + k)-eps .and. grad <= 0.0) then
+        flag = .True. 
+        s = t(nctl + k)
+     end if
 
-     counter = 1
-     do i=1, nctl-k+1
-        if (i==1) then
-           istart = 0
-        else
-           istart = 1
+     if (flag) then
+        grad = 0.0
+        hessian = 1.0
+     end if
+
+     ! Check the norm of the gradient
+     if (abs(grad) <  eps) then
+        exit iteration_loop
+     end if
+
+     ! "Invert" the hessian 
+     update = grad/hessian
+     update = -update
+     pgrad = update*grad !dot_product(update, grad)
+
+     ! Check that this is the descent direction
+     if (pgrad >= 0.0) then
+        update = -grad/norm(grad, 1)
+        pgrad = update*grad !dot_product(update, grad)
+     end if
+
+     step = 1.0
+     nDist = 0.0
+     lineLoop: do m=1, nLine
+        newPt = s + step*update
+        cflag = .False. ! Check if the constraint is applied
+
+        if (newpt > t(nctl+k)) then
+           cflag = .True. 
+           newPt = t(nctl+k)
         end if
-        do j=istart, n_sub+1
-           ss(counter) = t(i+k-1) + (real(j)/(n_sub+1)*(t(i+k)-t(i+k-1)))
-           counter = counter + 1
-        end do
-     end do
-  
-     do i=1, nss
-        call eval_curve(ss(i), t, k, coef, nctl, ndim, 1, curve_vals(:, i))
-     end  do
-
-     s0(:) = s(:)
-     ! Now do the actual searching
-     do ipt=1, N
+        if (newPt < t(1)) then
+           cflag = .True. 
+           newpt = t(1)
+        end if
         
-        if (s(ipt) < 0 .or. s(ipt) > 1) then ! Still only do it if we have a bad guess
-           D0 = norm(x0(:, ipt)-curve_vals(:, 1), ndim)
-           s0(ipt) = ss(1)
-           do i=1, nss
-              D = norm(curve_vals(:, i)-x0(:, ipt), ndim)
-              if (D<D0) then
-                 s0(ipt) = ss(i)
-                 D0 = D
-              end if
-           end do
+        ! Evaluate the new point
+        call eval_curve(newPt, t, k, coef, nctl, ndim, 1, val)
+
+        ! Distance is R, "function value" fval is what we minimize
+        R = val - x0
+        nDist = norm(R, nDim)
+        nfVal = 0.5*nDist**2
+        
+        ! Check if the new point satisfies the wolfe condition
+        if ( nfval < fval + pgrad * wolfe * step ) then
+           dist = ndist
+           exit lineloop
+        end if
+
+        ! Calculate the new step length
+        if ( cflag ) then
+           ! If the constraints are applied - and the new point
+           ! doesn't satisfy the Wolfe conditions, it doesn't make
+           ! sense to apply a quadratic approximation
+           step = 0.25 * step
         else
-           s0(i) = s(i)
+           ! c = nfval - fval - pgrad * step is always positive since
+           ! nfval - fval > pgrad * wolfe * step > pgrad * step
+           c = ( ( nfval - fval ) - pgrad * step )
+           step = - step * step * pgrad/( 2.0 * c ) 
+           ! This update is always less than the original step length
         end if
-     end do
-  else
-     s0(:) = s(:)   
-  end if
+     end do lineloop
 
-  s = s0
-  do ipt=1, N
-     call eval_curve(s0(ipt), t, k, coef, nctl, ndim, 1, val)
-     call eval_curve_deriv(s0(ipt), t, k, coef, nctl, ndim, deriv)
-     call eval_curve_deriv2(s0(ipt), t, k, coef, nctl, ndim, deriv2)
+     if ( m == nLine+1 ) then
+        dist = ndist
+        nLSFail = nLSFail + 1
 
-     Diff(:, ipt) = val-x0(:, ipt)
-    
-     iteration_loop: do i=1, Niter
-        ! Check the Convergence Criteria
-
-        if (norm(Diff(:, ipt), ndim) <= eps1) then
-               exit iteration_loop
+        if (NLSFail > LSFailMax) then ! There is nothing more we can do...
+           exit Iteration_loop
         end if
-
-        !c1 = ndp(deriv, Diff(:, ipt), ndim)/(norm(deriv, ndim)*norm(Diff(:, ipt), ndim))
-        if (c1 <= eps2) then
-           exit iteration_loop
+     else
+        NLSFail = 0
+        ! Check if there has been no change in the coordinates
+        p_diff = norm(s-newpt, 1)
+        if (p_diff < eps) then
+           exit Iteration_loop
         end if
+     end if
 
-        s0(ipt) = s(ipt)
-        call eval_curve(s0(ipt), t, k, coef, nctl, ndim, 1, val)
-        call eval_curve_deriv(s0(ipt), t, k, coef, nctl, ndim, deriv)
-        call eval_curve_deriv2(s0(ipt), t, k, coef, nctl, ndim, deriv2)
-        Diff(:, ipt) = val-x0(:, ipt)
+     s = newpt
+  end do iteration_loop
 
-        delta = -dot_product(deriv, Diff(:, ipt))/(dot_product(deriv2, Diff(:, ipt)) + norm(deriv, ndim)**2)
-
-        ! Bounds Checking
-
-        if (s0(ipt) + delta < t(1)) then
-           delta = t(1)-s0(ipt)
-        end if
-
-        if (s0(ipt) + delta > t(nctl+k)) then
-           delta = t(nctl+k) - s0(ipt)
-        end if
-
-        inner_loop: do j=1, max_inner_iter
-          
-           s(ipt) = s0(ipt) + delta
-           
-           call eval_curve(s(ipt), t, k, coef, nctl, ndim, 1, val)
-           D2 = val-x0(:, ipt)
-           if ( ( norm(D2, ndim)-norm(diff(:, ipt), ndim)) .ge. eps1) then
-              delta = delta * 0.5
-           else
-              exit inner_loop
-           end if
-        end do inner_loop
-
-        if (norm((s(ipt)-s0(ipt))*deriv, ndim) <= eps1) then
-           exit iteration_loop
-        end if
-
-     end do iteration_loop
-  end do
-  if (brute_force) then
-     deallocate(curve_vals, ss)
-  end if
+  diff = R
 
 end subroutine point_curve
 
-subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, N, niter, eps1, eps2, u, v, Diff)
+subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, eps, u, v, Diff)
 
   !***DESCRIPTION
   !
   !     Written by Gaetan Kenway
   !
-  !     Abstract: pint_surface attempts to solve the point inversion problem for a surface
+  !     Abstract: point_surface attempts to solve the point inversion problem for a surface
   !
   !     Description of Arguments
   !     Input
-  !     x0      - Real, array size(ndim, N) points we are trying to invert
+  !     x0      - Real, array size(ndim) point we are trying to invert
   !     tu      - Real, Knot vector in u. Length nctlu+ku
   !     tv      - Real, Knot vector in v. Length nctlv+kv
   !     ku      - Integer, order of B-spline in u
@@ -195,222 +202,184 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, N, niter,
   !     nctlv   - Integer, Number of control points in v
   !     ndim    - Integer, Spatial Dimension
   !     Niter   - Integer, Maximum number of Netwton iterations
-  !     eps1    - Real - Eculdian Distance Convergence Measure
-  !     eps2    - Real - Cosine Convergence Measure
+  !     eps     - Real - Eculdian Distance Convergence Measure
   !
   !     Ouput 
-  !     u       - Real, vector size(N), u parameters where S(u, v) is closest to x0
-  !     v       - Real, vector size(N), v parameters where S(u, v) is closest to x0
-  !     diff    - Real Array size(ndim, N) - Distance between x0 and S(u, v)
+  !     u       - Real, u parameter where S(u, v) is closest to x0
+  !     v       - Real, v parameter where S(u, v) is closest to x0
+  !     diff    - Real Array size(ndim) - Distance between x0 and S(u, v)
 
   use precision
   implicit none
+
   ! Input
-  real(kind=realType), intent(in)     :: x0(ndim, N)
-  integer            , intent(in)     :: ku, kv, nctlu, nctlv, ndim, niter, N
+  real(kind=realType), intent(in)     :: x0(ndim)
+  integer            , intent(in)     :: ku, kv, nctlu, nctlv, ndim, niter
   real(kind=realType), intent(in)     :: tu(nctlu+ku), tv(nctlv+kv)
   real(kind=realType), intent(in)     :: coef(ndim, nctlv, nctlu)
-  real(kind=realType), intent(in)     :: eps1, eps2
-  ! Output
-  real(kind=realType), intent(inout)  :: u(N), v(N)
-  real(kind=realType), intent(out)    :: diff(ndim, N)
+  real(kind=realType), intent(in)     :: eps
 
+  ! Output
+  real(kind=realType), intent(inout)  :: u, v
+  real(kind=realType), intent(inout)  :: diff(ndim)
 
   ! Working
-  real(kind=realType)  :: val(ndim), deriv(ndim, 2), deriv2(ndim, 2, 2)
-  real(kind=realType)  :: val0(ndim)
-  logical              :: brute_force
-  integer              :: i, j, counter, ipt, max_inner_iter
-  real(kind=realType)  :: D, D0, u0(N), v0(N), delta(2), D2(ndim)
-  real(kind=realType)  :: A(2, 2), ki(2)
-  integer              :: n_sub_u, n_sub_v  ! Huristic Value
-  integer              :: istart, nuu, nvv
-
-  ! Alloctable
-  real(kind=realType), allocatable  :: surface_vals(:, :, :), uu(:), vv(:)
+  real(kind=realType)   :: val(ndim), deriv(ndim, 2), deriv2(ndim, 2, 2)
+  real(kind=realType)   :: R(nDim), low(2), high(2), pt(2), newpt(2), update(2)
+  real(kind=realType)   :: step, dist, nDist, pgrad, fval, nfval, c, p_diff
+  real(kind=realType)   :: grad(2), hessian(2, 2)
+  integer               :: i, j, m, NLSFail, ii
+  logical               :: flag, cflag
 
   ! Functions     
-  real(kind=realType)               :: norm
+  real(kind=realType)                      :: norm
 
-!   max_inner_iter = 20
-!   if (ku == 2) then
-!      n_sub_u = 50
-!   else
-!      n_sub_u = 50
-!   end if
+  NLSFail = 0
 
-!   if (kv == 2) then
-!      n_sub_v = 50
-!   else
-!      n_sub_v = 50
-!   end if
+  ! Set lower and upper bounds for u, v based on knot vector
+  low(1) = tu(1)
+  low(2) = tv(1)
+  high(1) = tu(Nctlu+ku)
+  high(2) = tv(Nctlv+kv)
 
-!   brute_force = .True.
-!   ! First we will evaluate the surface at n points inside each knot span in each direction
+  pt(1) = u
+  pt(2) = v
 
-!   !if we are given a bad guess do the brute force
-!   point_loop: do ipt=1, N
-!      if (u(ipt) < 0 .or. u(ipt) > 1 .or. v(ipt) < 0 .or. v(ipt) > 1) then
-!         brute_force = .True.
-!         exit point_loop
-!      end if
-!   end do point_loop
-!   if (brute_force) then
-!      ! Generate the uu and vv values
-!      nuu = nctlu-ku+2 + (nctlu-ku+1)*n_sub_u
-!      nvv = nctlv-kv+2 + (nctlv-kv+1)*n_sub_v
-!      allocate (uu(nuu), vv(nvv))
- 
-!      counter = 1
-!      do i=1, nctlu-ku+1
-!         if (i==1) then
-!            istart = 0
-!         else
-!            istart = 1
-!         end if
-!         do j=istart, n_sub_u+1
-!            uu(counter) = tu(i+ku-1) + (real(j)/(n_sub_u+1)*(tu(i+ku)-tu(i+ku-1)))
-!            counter = counter + 1
-!         end do
-!      end do
-
-!      counter = 1
-!      do i=1, nctlv-kv+1
-!         if (i==1) then
-!            istart = 0
-!         else
-!            istart = 1
-!         end if
-!         do j=istart, n_sub_v+1
-!            vv(counter) = tv(i+kv-1) + (real(j)/(n_sub_v+1)*(tv(i+kv)-tv(i+kv-1)))
-!            counter = counter + 1
-!         end do
-!      end do
-!      allocate(surface_vals(ndim, nvv, nuu))
-
-!      do i=1, nuu
-!         do j=1, nvv
-!            call eval_surface(uu(i), vv(j), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, &
-!                 1, 1, surface_vals(:, j, i))
-!         end do
-!      end do
-
-!      ! Now do comparison
-!      u0(:) = u(:)   
-!      v0(:) = v(:)
-
-!      do ipt=1, N
-!         if (u(ipt) < 0 .or. u(ipt) > 1 .or. v(ipt) < 0 .or. v(ipt) > 1) then
-!            val0 = surface_vals(:, 1, 1)
-!            D0 = norm(val0-x0(ipt, :), ndim)
-!            u0(ipt) = uu(1)
-!            v0(ipt) = vv(1)
-!            do i = 1, nuu
-!               do j = 1, nvv
-!                  D = norm(surface_vals(:, j, i)-X0(:, ipt), ndim)
-!                  if (D<D0) then
-!                     u0(ipt) = uu(i)
-!                     v0(ipt) = vv(j)
-!                     D0 = D
-!                  end if
-!               end do
-!            end do
-!         else
-!            u0(ipt) = u(ipt)
-!            v0(ipt) = v(ipt)
-!         end if
-!      end do
-!   else
-!      u0(:) = u(:)   
-!      v0(:) = v(:)
-!   end if
-
-!   ! Now we have u0 and v0 so we can do the newton 
-!   u = u0
-!   v = v0
-
-!   do ipt=1, N
-
-!      call eval_surface(u(ipt), v(ipt), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, 1, 1, val)
-!      call eval_surface_deriv(u(ipt), v(ipt), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, deriv)
-!      call eval_surface_deriv2(u(ipt), v(ipt), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, deriv2)
+  iteration_loop: do ii=1, niter
+     call eval_surface(pt(1), pt(2), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, 1, 1, val)
+     call eval_surface_deriv(pt(1), pt(2), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, deriv)
+     call eval_surface_deriv2(pt(1), pt(2), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, deriv2)
+        
+     ! Distance is R, "function value" fval is what we minimize
+     R = val - X0
+     nDist = norm(R, nDim)
+     fval = 0.5*nDist**2
      
-!      Diff(:, ipt) = val - x0(:, ipt)
+     ! Calculate the Gradient
+     do i=1,2
+        grad(i) = dot_product(R, deriv(:, i))
+     end do
      
-!      iteration_loop: do i=1, niter
-!         ! Check the convergence criteria
-!         if (norm(Diff(:, ipt), ndim) <= eps1) then
-!            exit iteration_loop
-!         end if
+     ! Calculate the Hessian
+     do j=1, 2
+        do i=1, 2
+           hessian(i, j) = dot_product(deriv(:, i), deriv(:, j)) + &
+                dot_product(R, deriv2(:, i, j))
+        end do
+     end do
 
-!         if (norm(dot_product(deriv(:, 1), Diff(:, ipt)), ndim)/(norm(deriv(:, 1), ndim)*norm(Diff(:, ipt), ndim)) <= eps2 .and. &
-!              norm(dot_product(deriv(:, 2), Diff(:, ipt)), ndim)/(norm(deriv(:, 2), ndim)*norm(Diff(:, ipt), ndim)) <= eps2 ) then
-!            exit iteration_loop
-!         end if
-!         u0(ipt) = u(ipt)
-!         v0(ipt) = v(ipt)
-!         call eval_surface(u(ipt), v(ipt), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, 1, 1, val)
-!         call eval_surface_deriv(u(ipt), v(ipt), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, deriv)
-!         call eval_surface_deriv2(u(ipt), v(ipt), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, deriv2)
+     ! Bounds Checking
+     do i=1, 2
+        flag = .False.
+        if (pt(i) < low(i)+eps .and. grad(i) >= 0.0) then
+           flag = .True.
+           pt(i) = low(i)
+        end if
 
-!         Diff(:, ipt) = val-x0(:, ipt)
+        if (pt(i) > high(i)-eps .and. grad(i) <= 0.0) then
+           flag = .True.
+           pt(i) = high(i)
+        end if
 
-!         A(1, 1) = norm(deriv(:, 1), ndim)**2 + dot_product(Diff(:, ipt), deriv2(:, 1, 1))
-!         A(1, 2) = dot_product(deriv(:, 1), deriv(:, 2)) + dot_product(Diff(:, ipt), deriv2(:, 1, 2))
-!         A(2, 1) = A(1, 2)
-!         A(2, 2) = norm(deriv(:, 2), ndim)**2 + dot_product(Diff(:, ipt), deriv2(:, 2, 2))
+        if ( flag ) then
+           grad(i) = 0.0
+           hessian(:, i) = 0.0
+           hessian(i, :) = 0.0
+           hessian(i, i) = 1.0
+        end if
+     end do
 
-!         ki(1) = -dot_product(Diff(:, ipt), deriv(:, 1))
-!         ki(2) = -dot_product(Diff(:, ipt), deriv(:, 2))
+     if ( norm(grad,2) < eps) then
+        exit iteration_loop
+     end if
+        
+     ! Invert the hessian, compute the update and the projected gradient
+     call solve_2by2(hessian, grad, update)
+     update = -update
+     pgrad = dot_product(update, grad)
 
-!         call solve_2by2(A, ki, delta)
-
-!         ! Bounds Checking
-!         if (u0(ipt)+delta(1) < tu(1)) then
-!            delta(1) = tu(1)-u0(ipt)
-!         end if
-
-!         if (u0(ipt)+delta(1) > tu(nctlu+ku)) then
-!            delta(1) = tu(nctlu+ku)-u0(ipt)
-!         end if
-
-!         if (v0(ipt)+delta(2) < tv(1)) then
-!            delta(2) = tv(1)-v0(ipt)
-!         end if
-
-!         if (v0(ipt)+delta(2) > tv(nctlv+kv)) then
-!            delta(2) = tv(nctlv+kv)-v0(ipt)
-!         end if
-
-!         inner_loop: do j=1, max_inner_iter
-!            u(ipt) = u0(ipt) + delta(1)
-!            v(ipt) = v0(ipt) + delta(2)
+     !Check that this is a descent direction - 
+     !otherwise use the negative gradient    
+     if ( pgrad >= 0.0 ) then
+        update = -grad/norm(grad, 2)
+        pgrad = dot_product(update, grad)
+     end if
+        
+     step = 1.0
+     nDist = 0.0
+     lineloop: do m=1, nLine
           
-!            call eval_surface(u(ipt), v(ipt), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, 1, 1, val)
+        newpt = pt + step * update
 
-!            D2 = val-x0(:, ipt)
-      
-!            if ( (norm(D2, ndim)-norm(diff(:, ipt), ndim)) .ge. eps1) then
-!               delta = delta * 0.5
-!            else
-!               exit inner_loop
-!            end if
-!         end do inner_loop
-       
-!         ! No Change convergence Test
+        cflag = .False. ! Check if the constraints are applied
+        ! Check if the new point exceeds the bounds
+        do i=1, 2
+           if (newpt(i) > high(i)) then
+              cflag = .True.
+              newpt(i) = high(i)
+           else if (newpt(i) < low(i)) then
+              cflag = .True.
+              newpt(i) = low(i)
+           end if
+        end do
+           
+        ! Re-evaluate new position
+        call eval_surface(newpt(1), newpt(2), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, 1, 1, val)
 
-!         if (norm( (u(ipt)-u0(ipt))*deriv(:, 1) + (v(ipt)-v0(ipt))*deriv(:, 2), ndim) <= eps1) then
-!            exit iteration_loop
-!         end if
-!      end do iteration_loop
-!   end do
-!   if (brute_force) then
-!      deallocate(surface_vals, uu, vv)
-!   end if
+        ! Check if the new function value is lower, 
+        ! otherwise adjust the step size
+        R = val - X0
+        ndist = norm(R, nDim)
+        nfval = 0.5*ndist**2
+
+        ! Check if the new point satisfies the wolfe condition
+        if ( nfval < fval + pgrad * wolfe * step ) then
+           dist = ndist
+           exit lineloop
+        end if
+        
+        ! Calculate the new step length
+        if ( cflag ) then
+           ! If the constraints are applied - and the new point
+           ! doesn't satisfy the Wolfe conditions, it doesn't make
+           ! sense to apply a quadratic approximation
+           step = 0.25 * step
+        else
+           ! c = nfval - fval - pgrad * step is always positive since
+           ! nfval - fval > pgrad * wolfe * step > pgrad * step
+           c = ( ( nfval - fval ) - pgrad * step )
+           step = - step * step * pgrad/( 2.0 * c ) 
+           ! This update is always less than the original step length
+        end if
+     end do lineloop
+
+     if ( m == nLine + 1 ) then
+        dist = ndist
+        nLSFail = nLSFail + 1
+        if (NLSFail > LSFailMax) then 
+           exit Iteration_loop
+        end if
+     else
+        NLSFail = 0
+        ! Check if there has been no change in the coordinates
+        p_diff = norm(pt-newpt, nDim)
+        if (p_diff < eps) then
+           exit Iteration_loop
+        end if
+     end if
+
+     pt = newpt
+  end do iteration_loop
+     
+  ! Set the final values of the parameters and our distance function
+  u = pt(1)  
+  v = pt(2)
+  diff = R
+
 end subroutine point_surface
 
-subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, N, &
-     niter, eps, u, v, w, Diff, n_sub)
+subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, &
+     niter, eps, u, v, w, Diff)
 
   !***DESCRIPTION
   !
@@ -420,7 +389,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   !
   !     Description of Arguments
   !     Input
-  !     x0      - Real, array size(ndim, N) points we are trying to invert
+  !     x0      - Real, array size(ndim) point we are trying to invert
   !     tu      - Real, Knot vector in u. Length nctlu+ku
   !     tv      - Real, Knot vector in v. Length nctlv+kv
   !     tw      - Real, Knot vector in w. Length nctlw+kw
@@ -434,147 +403,38 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   !     ndim    - Integer, Spatial Dimension
   !     Niter   - Integer, Maximum number of Netwton iterations
   !     eps     - Real - Eculdian Distance Convergence Measure
-  !     n_sub   - A "try harder" parameter. Integer. Increases will increase
-  !               the chances of finding a solution
+  !
   !     Ouput 
-  !     u       - Real, vector size(N), u parameters where V(u, v, w) is closest to x0
-  !     v       - Real, vector size(N), v parameters where V(u, v, w) is closest to x0
-  !     w       - Real, vector size(N), w parameters where V(u, v, w) is closest to x0
+  !     u       - Real, u parameters where V(u, v, w) is closest to x0
+  !     v       - Real, v parameters where V(u, v, w) is closest to x0
+  !     w       - Real, w parameters where V(u, v, w) is closest to x0
   !     diff    - Real Array size(N, ndim) - Distance between x0 and V(u, v, w)
 
   use precision
   implicit none
   ! Input
-  real(kind=realType), intent(in)          :: x0(ndim, N)
-  integer            , intent(in)          :: ku, kv, kw, nctlu, nctlv, nctlw, ndim, niter, N
+  real(kind=realType), intent(in)          :: x0(ndim)
+  integer            , intent(in)          :: ku, kv, kw, nctlu, nctlv, nctlw, ndim, niter
   real(kind=realType), intent(in)          :: tu(nctlu+ku), tv(nctlv+kv), tw(nctlw+kw)
   real(kind=realType), intent(in)          :: coef(ndim, nctlw, nctlv, nctlu)
   real(kind=realType), intent(in)          :: eps
-  integer            , intent(in)          :: n_sub
+
   ! Output
-  real(kind=realType), intent(out)         :: u(N), v(N), w(N)
-  real(kind=realType), intent(out)         :: diff(ndim, N)
+  real(kind=realType), intent(inout)       :: u, v, w
+  real(kind=realType), intent(out)         :: diff(ndim)
 
   ! Working
-  real(kind=realType)                      :: D, D0, u0(N), v0(N), w0(N)
-  integer                                  :: n_sub_u, n_sub_v, n_sub_w, nuu, nvv, nww
-  integer                                  :: istart
-  real(kind=realType)                      :: val0(ndim)
+  real(kind=realType)   :: val(ndim), deriv(ndim, 3), deriv2(ndim, 3, 3)
+  real(kind=realType)   :: R(nDim), low(3), high(3), pt(3), newpt(3), update(3)
+  real(kind=realType)   :: step, dist, nDist, pgrad, fval, nfval, c, p_diff
+  real(kind=realType)   :: grad(3), hessian(3, 3)
+  integer               :: i, j, m, NLSFail, ii
+  logical               :: flag, cflag
 
-  real(kind=realType)                      :: val(ndim)
-  real(kind=realType)                      :: deriv(ndim, 3)
-  real(kind=realType)                      :: deriv2(ndim, 3, 3)
-  real(kind=realType)                      :: R(nDim), low(nDim), high(nDim)
-  real(kind=realType)                      :: pt(nDim), newpt(nDim), update(nDim)
-  real(kind=realType)                      :: step, dist, nDist, pgrad
-  real(kind=realType)                      :: grad_norm
-  real(kind=realType)                      :: fval, nfval, c, p_diff
-
-  real(kind=realType)                      :: grad(nDim), hessian(nDim, nDim)
-  integer                               :: iDim, jDim, ipt, i, j, k, m
-  logical                               :: flag, cflag
-  integer                               :: counter1
-
-  ! Alloctable
-  real(kind=realType), allocatable         :: volume_vals(:, :, :, :)
-  real(kind=realType), allocatable         :: uu(:), vv(:), ww(:)
   ! Functions     
-  real(kind=realType)                      :: norm
+  real(kind=realType)   :: norm
 
-   ! Generate the uu and vv values
-  nuu = nctlu-ku+2
-  nvv = nctlv-kv+2 
-  nww = nctlw-kw+2 
-
-  n_sub_u = n_sub
-  n_sub_v = n_sub
-  n_sub_w = n_sub
-
-  nuu = nctlu-ku+2 + (nctlu-ku+1)*n_sub_u
-  nvv = nctlv-kv+2 + (nctlv-kv+1)*n_sub_v
-  nww = nctlw-kw+2 + (nctlw-kw+1)*n_sub_w
-
-  allocate(volume_vals(ndim, nww, nvv, nuu))
-  allocate (uu(nuu), vv(nvv), ww(nww))
-
-  ! uu values
-  counter1 = 1
-  do i=1, nctlu-ku+1
-     if (i==1) then
-        istart = 0
-     else
-        istart = 1
-     end if
-     do j=istart, n_sub_u+1
-        uu(counter1) = tu(i+ku-1) + (real(j)/(n_sub_u+1)*(tu(i+ku)-tu(i+ku-1)))
-        counter1 = counter1 + 1
-     end do
-  end do
-  
-  ! vv values
-  counter1 = 1
-  do i=1, nctlv-kv+1
-     if (i==1) then
-        istart = 0
-     else
-        istart = 1
-     end if
-     do j=istart, n_sub_v+1
-        vv(counter1) = tv(i+kv-1) + (real(j)/(n_sub_v+1)*(tv(i+kv)-tv(i+kv-1)))
-        counter1 = counter1 + 1
-     end do
-  end do
-  
- ! ww values
-  counter1 = 1
-  do i=1, nctlw-kw+1
-     if (i==1) then
-        istart = 0
-     else
-        istart = 1
-     end if
-     do j=istart, n_sub_w+1
-        ww(counter1) = tw(i+kw-1) + (real(j)/(n_sub_w+1)*(tw(i+kw)-tw(i+kw-1)))
-        counter1 = counter1 + 1
-     end do
-  end do
-
-  do i=1, nuu
-     do j=1, nvv
-        do k=1, nww
-           call eval_volume(uu(i), vv(j), ww(k), &
-                tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, &
-                1, 1, 1, volume_vals(:, k, j, i))
-        end do
-     end do
-  end do
-  ! Now do comparison
-  u0(:) = u(:)   
-  v0(:) = v(:)
-  w0(:) = w(:)
-  do ipt=1, N
-     val0 = volume_vals(:, 1, 1, 1)
-     D0 = norm(val0-x0(:, ipt), ndim)
-     u0(ipt) = tu(ku)
-     v0(ipt) = tv(kv)
-     w0(ipt) = tw(kw)
-     do i = 1, nuu
-        do j = 1, nvv
-           do k = 1, nww
-              
-              D = norm(volume_vals(:, k, j, i)-X0(:, ipt), ndim)
-              if (D<D0) then
-                 u0(ipt) = uu(i)
-                 v0(ipt) = vv(j)
-                 w0(ipt) = ww(k)
-                 D0 = D
-              end if
-           end do
-        end do
-     end do
-
-  end do
-
+  NLSFail = 0
   ! Set lower and upper bounds for u, v, w based on knot vector
   low(1) = tu(1)
   low(2) = tv(1)
@@ -583,152 +443,149 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   high(2) = tv(Nctlv+kv)
   high(3) = tw(Nctlw+kw)
 
-  do ipt=1, N
-
-     pt(1) = u0(ipt)
-     pt(2) = v0(ipt)
-     pt(3) = w0(ipt)
-
-     iteration_loop: do i=1, niter
-        call eval_volume(pt(1), pt(2), pt(3), tu, tv, tw, ku, kv, kw, coef, &
-             nctlu, nctlv, nctlw, ndim, 1, 1, 1, val)
-        call eval_volume_deriv(pt(1), pt(2), pt(3), tu, tv, tw, ku, kv, kw, coef, &
-             nctlu, nctlv, nctlw, ndim, deriv)
-        call eval_volume_deriv2(pt(1), pt(2), pt(3), tu, tv, tw, ku, kv, kw, coef, &
-             nctlu, nctlv, nctlw, ndim, deriv2)
-        
-        ! Distance is R, "function value" fval is what we minimize
-        R = val - X0(:, ipt)
-        nDist = norm(R, nDim)
-        fval = 0.5*nDist**2
-
-        ! Calculate the Gradient
-        do idim=1, nDim
-           grad(idim) = dot_product(R, deriv(:, idim))
-        end do
-
-        ! Calculate the Hessian
-        do jDim=1, nDim
-           do iDim=1, nDim
-              hessian(iDim, jDim) = dot_product(deriv(:, iDim), deriv(:, jDim)) + &
-                   dot_product(R, deriv2(:, iDim, jDim))
-           end do
-        end do
-
-        ! Bounds Checking
-        do iDim=1, nDim
-           flag = .False.
-           if (pt(iDim) < low(iDim)+eps .and. grad(iDim) >= 0.0) then
-              flag = .True.
-              pt(iDim) = low(iDim)
-           end if
-
-           if (pt(iDim) > high(iDim)-eps .and. grad(iDim) <= 0.0) then
-              flag = .True.
-              pt(iDim) = high(iDim)
-           end if
-           if ( flag ) then
-              grad(iDim) = 0.0
-              hessian(:, iDim) = 0.0
-              hessian(iDim, :) = 0.0
-              hessian(iDim, iDim) = 1.0
-           end if
-        end do
-
-        ! Check the norm of the gradient
-        grad_norm = norm(grad, nDim)
-        if (grad_norm < eps) then
-           exit iteration_loop
-        end if
-        
-        ! Invert the hessian, compute the update and the projected gradient
-        call solve_3by3(hessian, grad, update)
-        update = -update
-        pgrad = dot_product(update, grad)
-
-        !Check that this is a descent direction - 
-        !otherwise use the negative gradient    
-        if ( pgrad >= 0.0 ) then
-           update = -grad/norm(grad, nDim)
-           pgrad = dot_product(update, grad)
-        end if
-        
-        step = 1.0
-        nDist = 0.0
-        lineloop: do m=1, nLine
-          
-           newpt = pt + step * update
-
-           cflag = .False. ! Check if the constraints are applied
-           ! Check if the new point exceeds the bounds
-           do iDim=1, nDim
-              if (newpt(iDim) > high(iDim)) then
-                 cflag = .True.
-                 newpt(iDim) = high(iDim)
-              else if (newpt(iDim) < low(iDim)) then
-                 cflag = .True.
-                 newpt(iDim) = low(iDim)
-              end if
-           end do
-           
-           ! Re-evaluate new position
-         
-           call eval_volume(newpt(1), newpt(2), newpt(3), &
-                tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, 1, 1, 1, val)
-
-           ! Check if the new function value is lower, 
-           ! otherwise adjust the step size
-           R = val - X0(:, ipt)
-           ndist = norm(R, nDim)
-           nfval = 0.5*ndist**2
-
-           ! Check if the new point satisfies the wolfe condition
-           if ( nfval < fval + pgrad * wolfe * step ) then
-              dist = ndist
-              exit lineloop
-           end if
-
-           ! Calculate the new step length
-           if ( cflag ) then
-              ! If the constraints are applied - and the new point
-              ! doesn't satisfy the Wolfe conditions, it doesn't make
-              ! sense to apply a quadratic approximation
-              step = 0.25 * step
-           else
-              ! c = nfval - fval - pgrad * step is always positive since
-              ! nfval - fval > pgrad * wolfe * step > pgrad * step
-              c = ( ( nfval - fval ) - pgrad * step )
-              step = - step * step * pgrad/( 2.0 * c ) 
-              ! This update is always less than the original step length
-           end if
-        end do lineloop
-
-        if ( m == nLine + 1 ) then
-           dist = ndist
-        else
-           ! Check if there has been no change in the coordinates
-           p_diff = norm(pt-newpt, nDim)
-           if (p_diff < eps) then
-              exit Iteration_loop
-           end if
-        end if
-        pt = newpt
-
-     end do iteration_loop
-     
-     ! Set the final values of the parameters and our distance function
-     u(ipt) = pt(1)  
-     v(ipt) = pt(2)
-     w(ipt) = pt(3)
-     diff(:, ipt) = R
-
-  end do
+  pt(1) = u
+  pt(2) = v
+  pt(3) = w
   
-  deallocate(volume_vals, uu, vv, ww)
+  iteration_loop: do ii=1, 1!niter
+     call eval_volume(pt(1), pt(2), pt(3), tu, tv, tw, ku, kv, kw, coef, &
+          nctlu, nctlv, nctlw, ndim, 1, 1, 1, val)
+     call eval_volume_deriv(pt(1), pt(2), pt(3), tu, tv, tw, ku, kv, kw, coef, &
+          nctlu, nctlv, nctlw, ndim, deriv)
+     call eval_volume_deriv2(pt(1), pt(2), pt(3), tu, tv, tw, ku, kv, kw, coef, &
+          nctlu, nctlv, nctlw, ndim, deriv2)
+        
+     ! Distance is R, "function value" fval is what we minimize
+     R = val - X0
+     nDist = norm(R, nDim)
+     fval = 0.5*nDist**2
+     ! Calculate the Gradient
+     do i=1,3
+        grad(i) = dot_product(R, deriv(:, i))
+     end do
+
+     ! Calculate the Hessian
+     do j=1, 3
+        do i=1, 3
+           hessian(i, j) = dot_product(deriv(:, i), deriv(:, j)) + &
+                dot_product(R, deriv2(:, i, j))
+        end do
+     end do
+     
+     ! Bounds Checking
+     do i=1, 3
+        flag = .False.
+        if (pt(i) < low(i)+eps .and. grad(i) >= 0.0) then
+           flag = .True.
+           pt(i) = low(i)
+        end if
+        
+        if (pt(i) > high(i)-eps .and. grad(i) <= 0.0) then
+           flag = .True.
+           pt(i) = high(i)
+        end if
+
+        if ( flag ) then
+           grad(i) = 0.0
+           hessian(:, i) = 0.0
+           hessian(i, :) = 0.0
+           hessian(i, i) = 1.0
+        end if
+     end do
+
+     if (norm(grad,3) < eps) then
+        exit iteration_loop
+     end if
+        
+     ! Invert the hessian, compute the update and the projected gradient
+     call solve_3by3(hessian, grad, update)
+
+     update = -update
+     pgrad = dot_product(update, grad)
+     
+     !Check that this is a descent direction - 
+     !otherwise use the negative gradient    
+     if ( pgrad >= 0.0 ) then
+        update = -grad/norm(grad, 3)
+        pgrad = dot_product(update, grad)
+     end if
+        
+     step = 1.0
+     nDist = 0.0
+     lineloop: do m=1, nLine
+          
+        newpt = pt + step * update
+           
+        cflag = .False. ! Check if the constraints are applied
+        ! Check if the new point exceeds the bounds
+        do i=1, 3
+           if (newpt(i) > high(i)) then
+              cflag = .True.
+              newpt(i) = high(i)
+           else if (newpt(i) < low(i)) then
+              cflag = .True.
+              newpt(i) = low(i)
+           end if
+        end do
+           
+        ! Re-evaluate new position
+        call eval_volume(newpt(1), newpt(2), newpt(3), &
+             tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, 1, 1, 1, val)
+        
+        ! Check if the new function value is lower, 
+        ! otherwise adjust the step size
+        R = val - X0
+        ndist = norm(R, nDim)
+        nfval = 0.5*ndist**2
+        
+        ! Check if the new point satisfies the wolfe condition
+        if ( nfval < fval + pgrad * wolfe * step ) then
+           dist = ndist
+           exit lineloop
+        end if
+        
+        ! Calculate the new step length
+        if ( cflag ) then
+           ! If the constraints are applied - and the new point
+           ! doesn't satisfy the Wolfe conditions, it doesn't make
+           ! sense to apply a quadratic approximation
+           step = 0.25 * step
+        else
+           ! c = nfval - fval - pgrad * step is always positive since
+           ! nfval - fval > pgrad * wolfe * step > pgrad * step
+           c = ( ( nfval - fval ) - pgrad * step )
+           step = - step * step * pgrad/( 2.0 * c ) 
+           ! This update is always less than the original step length
+        end if
+     end do lineloop
+
+     if ( m == nLine + 1 ) then
+        dist = ndist
+        nLSFail = nLSFail + 1
+        if (NLSFail > LSFailMax) then ! There is nothing more we can do...
+           exit Iteration_loop
+        end if
+     else
+        NLSFail = 0
+        ! Check if there has been no change in the coordinates
+        p_diff = norm(pt-newpt, 3)
+        if (p_diff < eps) then
+           exit Iteration_loop
+        end if
+     end if
+     pt = newpt
+
+  end do iteration_loop
+     
+  ! Set the final values of the parameters and our distance function
+  u = pt(1)  
+  v = pt(2)
+  w = pt(3)
+  diff = R
 
 end subroutine point_volume
 
-subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps1, eps2, s, t, Diff)
+subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps, s, t, Diff)
 
   !*** DESCRIPTION
   !
@@ -769,108 +626,33 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps1, 
   real(kind=realType), intent(in)     :: coef1(ndim, n1), coef2(ndim, n2)
   real(kind=realType), intent(inout)  :: s, t 
   integer            , intent(in)     :: Niter
-  real(kind=realType), intent(in)     :: eps1, eps2
-
+  real(kind=realType), intent(in)     :: eps
   real(kind=realType), intent(out)    :: Diff(ndim)
 
   ! Working
   real(kind=realType) :: val1(ndim), val2(ndim)
   real(kind=realType) :: deriv_c1(ndim), deriv2_c1(ndim)
   real(kind=realType) :: deriv_c2(ndim), deriv2_c2(ndim)
-  integer             :: i, j, max_inner_iter, counter1, istart
-  real(kind=realType) :: D, D0, s0, t0
-  real(kind=realType) :: val0_1(3), val0_2(3)
+  integer             :: i, m, ii, NLSFail
   real(kind=realType) :: low(2), high(2), pt(2), R(ndim), ndist, fval, nfval, dist
-  real(kind=realType) :: hessian(2, 2), grad(2), newpt(2), c, grad_norm
+  real(kind=realType) :: hessian(2, 2), grad(2), newpt(2), c
   real(kind=realType) :: pgrad, update(2), step, p_diff
   logical :: flag, cflag
-  integer                          :: nline, m, idim
-  integer                          :: n, nss, ntt ! Huristic Value
-  real(kind=realType), allocatable     :: curve1_vals(:, :), curve2_vals(:, :)
-  real(kind=realType), allocatable     :: ss(:), tt(:)
-  logical                          :: brute_force
+
   ! Functions 
   real(kind=realType)                 :: norm
   
-  max_inner_iter = 20
-  n = 25 ! Extra precision on brute force search
-  brute_force = .False.
-
-  nss = n1-k1+2 + (n1-k1+1)*n
-  ntt = n2-k2+2 + (n2-k2+1)*n
-
-  allocate (ss(nss), tt(ntt))
-  allocate(curve1_vals(ndim, nss), curve2_vals(ndim, ntt))
-
-  if (s < 0 .or. s > 1 .or. t < 0 .or. t > 1) then
-     ! Do a brute force approach to get good starting point
-     counter1 = 1
-     do i=1, n1-k1+1
-        if (i==1) then
-           istart = 0
-        else
-           istart = 1
-        end if
-        do j=istart, n+1
-           ss(counter1) = t1(i+k1-1) + (real(j)/(n+1)*(t1(i+k1)-t1(i+k1-1)))
-           counter1 = counter1 + 1
-        end do
-     end do
-
-     counter1 = 1
-     do i=1, n2-k2+1
-        if (i==1) then
-           istart = 0
-        else
-           istart = 1
-        end if
-        do j=istart, n+1
-           tt(counter1) = t2(i+k2-1) + (real(j)/(n+1)*(t2(i+k2)-t2(i+k2-1)))
-           counter1 = counter1 + 1
-        end do
-     end do
-
-     ! Evaluate the curve points to check:
-     do i=1, nss
-        call eval_curve(ss(i), t1, k1, coef1, n1, ndim, 1, curve1_vals(:, i))
-     end do
-
-     do i=1, ntt
-        call eval_curve(tt(i), t2, k2, coef2, n2, ndim, 1, curve2_vals(:, i))
-     end do
-     
-     val0_1 = curve1_vals(:, 1)
-     val0_2 = curve2_vals(:, 1)
-     D0 = norm(val0_1-val0_2, ndim)
-     s0 = ss(1)
-     t0 = tt(1)
-     do i = 1, nss
-        do j = 1, ntt
-           D = norm(curve1_vals(:, i)-curve2_vals(:, j), ndim)
-           if (D<D0) then
-              s0 = ss(i)
-              t0 = tt(j)
-              D0 = D
-           end if
-        end do
-     end do
-  else
-     s0 = s
-     t0 = t
-     call eval_curve(s, t1, k1, coef1, n1, ndim, 1, val1)
-     call eval_curve(t, t2, k2, coef2, n2, ndim, 1, val2)
-     D0 = norm(val1-val2, ndim)
-  end if
+  NLSFail = 0
 
   low(1) = t1(1)
   low(2) = t2(1)
   high(1) = t1(n1+k1)
   high(2) = t2(n2+k2)
 
-  pt(1) = s0
-  pt(2) = t0
+  pt(1) = s
+  pt(2) = t
 
-  iteration_loop: do i=1, niter
+  iteration_loop: do ii=1, niter
 
      call eval_curve(pt(1), t1, k1, coef1, n1, ndim, 1, val1)
      call eval_curve_deriv(pt(1), t1, k2, coef1, n1, ndim, deriv_c1)
@@ -896,30 +678,28 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps1, 
      hessian(2, 2) = dot_product(-deriv_c2, -deriv_c2) + dot_product(R, -deriv2_c2)
 
      ! Bounds Checking
-     do iDim=1, 2
+     do i=1, 2
         flag = .False.
-        if (pt(iDim) < low(iDim)+eps1 .and. grad(iDim) >= 0.0) then
+        if (pt(i) < low(i)+eps .and. grad(i) >= 0.0) then
            flag = .True.
-           pt(iDim) = low(iDim)
+           pt(i) = low(i)
         end if
         
-        if (pt(iDim) > high(iDim)-eps1 .and. grad(iDim) <= 0.0) then
+        if (pt(i) > high(i)-eps .and. grad(i) <= 0.0) then
            flag = .True.
-           pt(iDim) = high(iDim)
+           pt(i) = high(i)
         end if
         
         if ( flag ) then
-           grad(iDim) = 0.0
-           hessian(:, iDim) = 0.0
-           hessian(iDim, :) = 0.0
-           hessian(iDim, iDim) = 1.0
+           grad(i) = 0.0
+           hessian(:, i) = 0.0
+           hessian(i, :) = 0.0
+           hessian(i, i) = 1.0
         end if
      end do
 
-     ! Check the norm of the gradient
-     grad_norm = norm(grad, 2)
-
-     if (grad_norm < eps1) then
+     ! Zero-cosine check...slightly modifed from The NURBS Book
+     if (norm(grad,2) < eps) then
         exit iteration_loop
      end if
 
@@ -943,13 +723,13 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps1, 
         newpt = pt + step * update
         cflag = .False. ! Check if the constraints are applied
         ! Check if the new point exceeds the bounds
-        do iDim=1, 2
-           if (newpt(iDim) > high(iDim)) then
+        do i=1, 2
+           if (newpt(i) > high(i)) then
               cflag = .True.
-              newpt(iDim) = high(iDim)
-           else if (newpt(iDim) < low(iDim)) then
+              newpt(i) = high(i)
+           else if (newpt(i) < low(i)) then
               cflag = .True.
-              newpt(iDim) = low(iDim)
+              newpt(i) = low(i)
            end if
         end do
            
@@ -984,12 +764,17 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps1, 
         end if
      end do lineloop
      
-     if ( m == nline ) then
+     if ( m == nLine + 1) then
         dist = ndist
+        nLSFail = nLSFail + 1
+        if (NLSFail > LSFailMax) then
+           exit Iteration_loop
+        end if
      else
+        NLSFail = 0
         ! Check if there has been no change in the coordinates
         p_diff = norm(pt-newpt, 2)
-        if (p_diff < eps1) then
+        if (p_diff < eps) then
            exit Iteration_loop
         end if
      end if
@@ -1000,7 +785,6 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps1, 
   s = pt(1)
   t = pt(2)
   diff = R
-  deallocate(curve1_vals, curve2_vals, ss, tt)
 
 end subroutine curve_curve
 
@@ -1044,6 +828,7 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
   real(kind=realType), intent(in)      :: tc(nctlc+kc), tu(nctlu+ku), tv(nctlv+kv)
   real(kind=realType), intent(in)      :: coefc(ndim, nctlc), coefs(ndim, nctlv, nctlu)
   real(kind=realType), intent(in)      :: eps
+
   ! Output
   real(kind=realType), intent(inout)   :: u, v, s
   real(kind=realType), intent(out)     :: diff(ndim)
@@ -1051,117 +836,17 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
   ! Working
   real(kind=realType)  :: val_s(ndim), deriv_s(ndim, 2), deriv2_s(ndim, 2, 2)
   real(kind=realType)  :: val_c(ndim), deriv_c(ndim), deriv2_C(ndim)
-  real(kind=realType)  :: val0_s(ndim), val0_c(ndim)
-  real(kind=realType)  :: u0, v0, s0, D0, D, gg(3)
   real(kind=realType)  :: dist, hessian(3,3), grad(3), newpt(3), c
   real(kind=realType)  :: pgrad, update(3), step, p_diff
   real(kind=realType)  :: low(3), high(3), pt(3), R(nDim), ndist, fval, nfval
-  integer              :: i, j, m, l, istart, nss, nuu, nvv, n_sub
-  integer              :: counter1, iDim, NLSFail
-  logical              :: brute_force, flag, cflag
-
-  ! Allocatable 
-  real(kind=realType), allocatable     :: curve_vals(:, :), uu(:), vv(:), ss(:)
-  real(kind=realType), allocatable     :: surface_vals(:, :, :)
+  integer              :: i, m, ii
+  integer              :: NLSFail
+  logical              :: flag, cflag
 
   ! Functions     
-  real(kind=realType)                  :: norm
+  real(kind=realType)  :: norm
 
-  n_sub = 1
   NLSFail = 0
-
-  ! First we will evaluate the surface at n points inside each knot
-  ! span in each direction if we are given a bad guess do the brute
-  ! force
-  brute_force = .False.
-  if (u < 0 .or. u > 1 .or. v < 0 .or. v > 1 .or. s < 0 .or. s > 1) then
-     brute_force = .True.
-
-     ! Generate the ss, uu and vv values
-     nuu = nctlu-ku+2 + (nctlu-ku+1)*n_sub
-     nvv = nctlv-kv+2 + (nctlv-kv+1)*n_sub
-     nss = nctlc-kc+2 + (nctlc-kc+1)*n_sub
-
-     allocate (ss(nss), uu(nuu), vv(nvv))
-
-     counter1 = 1
-     do i=1, nctlc-kc+1
-        if (i==1) then
-           istart = 0
-        else
-           istart = 1
-        end if
-        do j=istart, n_sub+1
-           ss(counter1) = tc(i+kc-1) + (real(j)/(n_sub+1)*(tc(i+kc)-tc(i+kc-1)))
-           counter1 = counter1 + 1
-        end do
-     end do
-
-     counter1 = 1
-     do i=1, nctlu-ku+1
-        if (i==1) then
-           istart = 0
-        else
-           istart = 1
-        end if
-        do j=istart, n_sub+1
-           uu(counter1) = tu(i+ku-1) + (real(j)/(n_sub+1)*(tu(i+ku)-tu(i+ku-1)))
-           counter1 = counter1 + 1
-        end do
-     end do
-
-     counter1 = 1
-     do i=1, nctlv-kv+1
-        if (i==1) then
-           istart = 0
-        else
-           istart = 1
-        end if
-        do j=istart, n_sub+1
-           vv(counter1) = tv(i+kv-1) + (real(j)/(n_sub+1)*(tv(i+kv)-tv(i+kv-1)))
-           counter1 = counter1 + 1
-        end do
-     end do
-
-     allocate(curve_vals(ndim, nss), surface_vals(ndim, nvv, nuu))
-
-     do i=1, nss
-        call eval_curve(ss(i), tc, kc, coefc, nctlc, ndim, 1, curve_vals(:, i))
-     end  do
-
-     do i=1, nuu
-        do j=1, nvv
-           call eval_surface(uu(i), vv(j), tu, tv, ku, kv, coefs, nctlu, nctlv, ndim, 1, 1, &
-                surface_vals(:, j, i))
-        end do
-     end do
-
-     ! Now do comparison
-     val0_s = surface_vals(:, 1, 1)
-     val0_c = curve_vals(:, 1)
-     D0 = norm(val0_s-val0_c, ndim)
-     u0 = uu(1)
-     v0 = vv(1)
-     s0 = ss(1)
-     do l = 1, nss
-        do i = 1, nuu
-           do j = 1, nvv
-              D = norm(surface_vals(:, j, i)-curve_vals(:, l), ndim)
-              if (D<D0) then
-                 u0 = uu(i)
-                 v0 = vv(j)
-                 s0 = ss(l)
-                 D0 = D
-              end if
-           end do
-        end do
-     end do
-     deallocate(curve_vals, surface_vals, uu, vv, ss)
-  else
-     u0 = u
-     v0 = v
-     s0 = s
-  end if
 
   ! Set lower and upper bounds of u,v, s based on knot vector
   low(1) = tu(1)
@@ -1171,19 +856,19 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
   high(2) = tv(Nctlv+kv)
   high(3) = tc(Nctlc+kc)
 
-  pt(1) = u0
-  pt(2) = v0
-  pt(3) = s0
+  pt(1) = u
+  pt(2) = v
+  pt(3) = s
 
-  iteration_loop: do i=1, niter
+  iteration_loop: do ii=1, niter
      
      ! Evaluate the surface and the curve
      call eval_surface(pt(1), pt(2), tu, tv, ku, kv, coefs, nctlu, nctlv, &
           ndim, 1, 1, val_s)
      call eval_surface_deriv(pt(1), pt(2), tu, tv, ku, kv, coefs, &
           nctlu, nctlv, ndim, deriv_s)
-     call eval_surface_deriv2(u0, v0, tu, tv, ku, kv, coefs, nctlu, nctlv, &
-          ndim, deriv2_s)
+     call eval_surface_deriv2(pt(1), pt(2), tu, tv, ku, kv, coefs, &
+          nctlu, nctlv, ndim, deriv2_s)
 
      call eval_curve(pt(3), tc, kc, coefc, nctlc, ndim, 1, val_c)
      call eval_curve_deriv(pt(3), tc, kc, coefc, nctlc, ndim, deriv_c)
@@ -1214,32 +899,27 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
      hessian(3, 3) = dot_product(deriv_c, deriv_c) - dot_product(R, deriv2_c)
      
      ! Bounds Checking
-     do iDim=1, 3
+     do i=1, 3
         flag = .False.
-        if (pt(iDim) < low(iDim)+eps .and. grad(iDim) >= 0.0) then
+        if (pt(i) < low(i)+eps .and. grad(i) >= 0.0) then
            flag = .True.
-           pt(iDim) = low(iDim)
+           pt(i) = low(i)
         end if
         
-        if (pt(iDim) > high(iDim)-eps .and. grad(iDim) <= 0.0) then
+        if (pt(i) > high(i)-eps .and. grad(i) <= 0.0) then
            flag = .True.
-           pt(iDim) = high(iDim)
+           pt(i) = high(i)
         end if
         
         if ( flag ) then
-           grad(iDim) = 0.0
-           hessian(:, iDim) = 0.0
-           hessian(iDim, :) = 0.0
-           hessian(iDim, iDim) = 1.0
+           grad(i) = 0.0
+           hessian(:, i) = 0.0
+           hessian(i, :) = 0.0
+           hessian(i, i) = 1.0
         end if
      end do
 
-     ! Zero-cosine check...slightly modifed from The NURBS Book
-     gg(1) = grad(1)/(norm(deriv_s(:,1),ndim)*norm(R,3))
-     gg(2) = grad(2)/(norm(deriv_s(:,2),ndim)*norm(R,3))
-     gg(3) = grad(3)/(norm(deriv_c     ,ndim)*norm(R,3))
-
-     if (norm(gg,ndim) < eps) then
+     if (norm(grad,3) < eps) then
         exit iteration_loop
      end if
 
@@ -1264,13 +944,13 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
         cflag = .False. ! Check if the constraints are applied
 
         ! Check if the new point exceeds the bounds
-        do iDim=1, 3
-           if (newpt(iDim) > high(iDim)) then
+        do i=1, 3
+           if (newpt(i) > high(i)) then
               cflag = .True.
-              newpt(iDim) = high(iDim)
-           else if (newpt(iDim) < low(iDim)) then
+              newpt(i) = high(i)
+           else if (newpt(i) < low(i)) then
               cflag = .True.
-              newpt(iDim) = low(iDim)
+              newpt(i) = low(i)
            end if
         end do
 
@@ -1330,6 +1010,275 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
   diff = R
 
 end subroutine curve_surface
+
+! ------------------------------------------------------------------------------------
+!              Globalization Functions
+! ------------------------------------------------------------------------------------
+
+subroutine point_curve_start(x0, uu, data, nu, ndim, N, u)
+  
+  !***DESCRIPTION
+  !
+  !     Written by Gaetan Kenway
+  !
+  !     Abstract: point_curve_start uses discrete data to determine a good
+  !     starting point for the curve projection algorithm
+
+  !     Description of Arguments
+  !     Input
+  !     x0      - Real, array size (ndim, N), Points we want to globalize
+  !     uu      - Real, array size(nu) u-parameter values defining data
+  !     data    - Real, array size(ndim, nu) - Data to compare against
+  !     nu      - Integer, number of uu data
+  !     ndim    - Integer, Spatial dimension
+  !     N       - Integer, number of points to check
+  !
+  !     Ouput
+  !     u       - Real, array size(N) - cloested u-parameters
+
+  use precision
+  implicit none
+
+  ! Input
+  integer              , intent(in) :: nu, ndim, N
+  real(kind=realType)  , intent(in) :: x0(ndim, N), uu(nu), data(ndim, nu)
+  
+  ! Output
+  real(kind=realType)  , intent(out) :: u(N)
+
+  ! Working
+  real(kind=realType)  :: D, norm
+  integer              :: ipt, i
+
+  do ipt=1,N
+     D = 1e20
+     do i=1,nu
+        if (norm(X0(:, ipt)-data(:, i), ndim) < D) then
+           u(ipt) = uu(i)
+           D = norm(X0(:, ipt)-data(:, i), ndim)
+        end if
+     end do
+  end do
+
+end subroutine point_curve_start
+
+subroutine point_surface_start(x0, uu, vv, data, nu, nv, ndim, N, u, v)
+  
+  !***DESCRIPTION
+  !
+  !     Written by Gaetan Kenway
+  !
+  !     Abstract: point_surface_start uses discrete data to determine a good
+  !     starting point for the surface projection algorithm
+
+  !     Description of Arguments
+  !     Input
+  !     x0      - Real, array size (ndim, N), Points we want to globalize
+  !     uu      - Real, array size(nu) u-parameter values defining data
+  !     vv      - Real, array size(nv) v-parameter values defining data
+  !     data    - Real, array size(ndim, nw, nv, nu) - Data to compare against
+  !     nu      - Integer, number of uu data
+  !     nv      - Integer, number of vv data
+  !     ndim    - Integer, Spatial dimension
+  !     N       - Integer, number of points to check
+  !
+  !     Ouput
+  !     u       - Real, array size(N) - cloested u-parameters
+  !     v       - Real, array size(N) - cloested v-parameters
+
+  use precision
+  implicit none
+
+  ! Input
+  integer              , intent(in) :: nu, nv, ndim, N
+  real(kind=realType)  , intent(in) :: x0(ndim, N), uu(nu), vv(nv), data(ndim, nu, nv)
+  
+  ! Output
+  real(kind=realType)  , intent(out) :: u(N), v(N)
+
+  ! Working
+  real(kind=realType)  :: D, norm
+  integer              :: ipt, i, j
+
+  do ipt=1,N
+     D = 1e20
+     do i=1,nu
+        do j=1,nv
+           if (norm(X0(:, ipt)-data(:, j, i), ndim) < D) then
+              u(ipt) = uu(i)
+              v(ipt) = vv(i)
+              D = norm(X0(:, ipt)-data(:, j, i), ndim)
+           end if
+        end do
+     end do
+  end do
+
+end subroutine point_surface_start
+
+subroutine point_volume_start(x0, uu, vv, ww, data, nu, nv, nw, ndim, N, u, v, w)
+  
+  !***DESCRIPTION
+  !
+  !     Written by Gaetan Kenway
+  !
+  !     Abstract: point_volume_start uses discrete data to determine a good
+  !     starting point for the volume projection algorithm
+
+  !     Description of Arguments
+  !     Input
+  !     x0      - Real, array size (ndim, N), Points we want to globalize
+  !     uu      - Real, array size(nu) u-parameter values defining data
+  !     vv      - Real, array size(nv) v-parameter values defining data
+  !     ww      - Real, array size(nw) w-parameter values defining data
+  !     data    - Real, array size(ndim, nw, nv, nu) - Data to compare against
+  !     nu      - Integer, number of uu data
+  !     nv      - Integer, number of vv data
+  !     nw      - Integer, number of ww data
+  !     ndim    - Integer, Spatial dimension
+  !     N       - Integer, number of points to check
+  !
+  !     Ouput
+  !     u       - Real, array size(N) - cloested u-parameters
+  !     v       - Real, array size(N) - cloested v-parameters
+  !     w       - Real, array size(N) - cloested w-parameters
+
+  use precision
+  implicit none
+
+  ! Input
+  integer              , intent(in) :: nu, nv, nw, ndim, N
+  real(kind=realType)  , intent(in) :: x0(ndim, N), uu(nu), vv(nv), ww(nw), data(ndim, nu, nv, nw)
+  
+  ! Output
+  real(kind=realType)  , intent(out) :: u(N), v(N), w(N)
+
+  ! Working
+  real(kind=realType)  :: D, norm
+  integer              :: ipt, i, j, k
+
+  do ipt=1,N
+     D = 1e20
+     do i=1,nu
+        do j=1,nv
+           do k=1,nw
+              if (norm(X0(:, ipt)-data(:,k, j, i), ndim) < D) then
+                 u(ipt) = uu(i)
+                 v(ipt) = vv(j)
+                 w(ipt) = ww(k)
+                 D = norm(X0(:, ipt)-data(:,k, j, i), ndim)
+              end if
+           end do
+        end do
+     end do
+  end do
+
+end subroutine point_volume_start
+
+subroutine curve_curve_start(data1, uu1, data2, uu2, nu1, nu2, ndim, s1, s2)
+  
+  !***DESCRIPTION
+  !
+  !     Written by Gaetan Kenway
+  !
+  !     Abstract: point_surface_start uses discrete data to determine a good
+  !     starting point for the surface projection algorithm
+
+  !     Description of Arguments
+  !     Input
+  !     data1   - Real, array size (ndim, nu1), Points from first curve
+  !     uu1     - Real, array size (nu1), parameter values from first curve
+  !     data2   - Real, array size (ndim, nu2), Points from second curve
+  !     uu2     - Real, array size (nu2), parameter values from second curve
+  !     nu1     - Integer, number of points in data1
+  !     nu2     - Integer, number of points in data2
+  !     ndim    - Integer, Spatial dimension
+  !
+  !     Ouput
+  !     s1      - Real, parameter value on curve1
+  !     s2      - Real, parameter value on curve2
+
+  use precision
+  implicit none
+
+  ! Input
+  integer              , intent(in) :: nu1, nu2, ndim
+  real(kind=realType)  , intent(in) :: data1(ndim, nu1), uu1(nu1), data2(ndim, nu2), uu2(nu2)
+  
+  ! Output
+  real(kind=realType)  , intent(out) :: s1, s2
+
+  ! Working
+  real(kind=realType)  :: D, norm
+  integer              :: i, j
+
+  D = 1e20
+  do i=1,nu1
+     do j=1,nu2
+        if (norm(data1(:,i) - data2(:,j), ndim) < D) then
+           s1 = uu1(i)
+           s2 = uu2(j)
+           D = norm(data1(:,i) - data2(:,j), ndim)
+        end if
+     end do
+  end do
+
+end subroutine curve_curve_start
+
+subroutine curve_surface_start(data1, uu1, data2, uu2, vv2, nu1, nu2, nv2, ndim, s, u, v)
+  
+  !***DESCRIPTION
+  !
+  !     Written by Gaetan Kenway
+  !
+  !     Abstract: point_surface_start uses discrete data to determine a good
+  !     starting point for the surface projection algorithm
+
+  !     Description of Arguments
+  !     Input
+  !     data1   - Real, array size (ndim, nu1), Points from curve
+  !     uu1     - Real, array size (nu1), parameter values from curve
+  !     data2   - Real, array size (ndim, nv2, nu2), Points from surface
+  !     uu2     - Real, array size (nu2), u parameter values from surface
+  !     vv2     - Real, array size (nv2), v parameter values from surface
+  !     nu1     - Integer, number of points in data1
+  !     nu2     - Integer, number of u-points in data2
+  !     nv2     - Integer, number of v-points in data2
+  !     ndim    - Integer, Spatial dimension
+  !
+  !     Ouput
+  !     s       - Real, parameter value on curve
+  !     u       - Real, u-parameter value on surface
+  !     v       - Real, v-parameter value on surface
+
+  use precision
+  implicit none
+
+  ! Input
+  integer              , intent(in) :: nu1, nu2, nv2, ndim
+  real(kind=realType)  , intent(in) :: data1(ndim, nu1), uu1(nu1)
+  real(kind=realtype)  , intent(in) :: data2(ndim, nv2, nu2), uu2(nu2), vv2(nv2)
+  
+  ! Output
+  real(kind=realType)  , intent(out) :: s, u, v
+
+  ! Working
+  real(kind=realType)  :: D, norm
+  integer              :: i, j, k
+
+  D = 1e20
+  do i=1,nu1
+     do j=1,nu2
+        do k=1,nv2
+           if (norm(data1(:,i) - data2(:, k, j), ndim) < D) then
+              s = uu1(i)
+              u = uu2(j)
+              v = vv2(k)
+              D = norm(data1(:,i) - data2(:, k, j), ndim)
+           end if
+        end do
+     end do
+  end do
+end subroutine curve_surface_start
 
 subroutine solve_2by2(A, b, x)
   
