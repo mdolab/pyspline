@@ -155,6 +155,7 @@ subroutine eval_surface_deriv2(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, v
   ! Working
   integer                           :: idim
   real(kind=realType)               :: b2val
+
   do idim=1, ndim
      val(idim, 1, 1) = b2val(v, u, 0, 2, tv, tu, nctlv, nctlu, kv, ku, coef(idim, :, :))
      val(idim, 1, 2) = b2val(v, u, 1, 1, tv, tu, nctlv, nctlu, kv, ku, coef(idim, :, :))

@@ -587,7 +587,7 @@ scipy is used.')
         u = geo_utils.checkInput(u, 'u', float, 0)
 
         # First determine if u is very close to an existing knot
-        ileft, mflag = pyspline.intrv(self.t, u, 1)
+        ileft = pyspline.findspan(u, self.k, self.t, self.Nctl)
         if abs(u-self.t[ileft-1]) < 0.005:
             u = self.t[ileft-1]
         # end if
@@ -1344,15 +1344,15 @@ MUST be defined for task lms or interpolate'
                            ku=self.ku, kv=self.kv, coef=self.coef.copy()), None
         
         if direction == 'u':
-            r, break_pt = self.insertKnot(direciton, s, self.ku-1)
+            r, break_pt = self.insertKnot(direction, s, self.ku-1)
 
             # r is the number of time the knot was actually added
             s = self.ku-1-r # Back out the multiplicity of the point
             break_pt = break_pt - s
 
             # -------- Process the Knot Vectors--------
-            t1 = numpy.hstack((self.tu[0:break_pt+self.ku-1-s].copy(),u))/u
-            t2 = (numpy.hstack((u,self.tu[break_pt:].copy()))-u)/(1.0-u)
+            t1 = numpy.hstack((self.tu[0:break_pt+self.ku-1-s].copy(),s))/s
+            t2 = (numpy.hstack((s,self.tu[break_pt:].copy()))-s)/(1.0-s)
 
             # ------- Proces the Coefficient Arrays
             coef1 = self.coef[:break_pt,:,:].copy()
@@ -1498,6 +1498,35 @@ MUST be defined for task lms or interpolate'
             v    : Parametric position(s) v on surface
             D    : Distance(s) between point(s) and surface(u, v)
         """
+
+        x0 = numpy.atleast_2d(x0)
+        if 'u' in kwargs and 'v' in kwargs:
+            u = numpy.atleast_1d(kwargs['u'])
+            v = numpy.atleast_1d(kwargs['v'])
+        else:
+            u = -1*numpy.ones(len(x0))
+            v = -1*numpy.ones(len(x0))
+        # end if
+
+        assert len(x0) == len(u) == len(v), 'surface projectPoint: The length of x0\
+ and u,v,w must be the same'
+
+        # If necessary get brute-force starting point
+        if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0):
+            self._computeData()
+            u,v = pyspline.point_surface_start(
+                x0.T, self.udata, self.vdata, self.data.T)
+        # end if
+
+        D = numpy.zeros_like(x0)
+        for i in xrange(len(x0)):
+            u[i], v[i], D[i] = pyspline.point_surface(
+                x0[i], self.tu, self.tv, self.ku, self.kv, self.coef.T, 
+                Niter, eps, u[i], v[i])
+
+        return u.squeeze(), v.squeeze(), D.squeeze()
+
+
         # We will use a starting point u0, v0 if given
         x0 = numpy.atleast_2d(x0)
 

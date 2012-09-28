@@ -32,15 +32,6 @@
        real(kind=realtype) dimension(ndim, nctl+r), intent(out), depend(ndim, r, nctl) :: coef_new
        integer intent(out) :: ileft
      end subroutine insertknot
-
-     subroutine findspan(u,k,t, nctl,ind) ! in :test:findSpan.f90
-       real(kind=realtype) intent(in) :: u
-       integer intent(in) :: k
-       real(kind=realtype) dimension(nctl+k),intent(in),depend(k,nctl) :: t
-       integer intent(in) :: nctl
-       integer intent(out) :: ind
-     end subroutine findspan
-
      subroutine curve_jacobian_wrap(s, sd, t, k, nctl, n, nd, vals, row_ptr, col_ind) ! in :test:compute_curve.f90
        real(kind=realtype) dimension(n), intent(in) :: s
        real(kind=realtype) dimension(nd), intent(in) :: sd
@@ -335,9 +326,9 @@
        integer, optional,intent(in),check(len(x0)>=ndim),depend(x0) :: ndim=len(x0)
        integer intent(in) :: niter
        real(kind=realtype) intent(in) :: eps
-       real(kind=realtype) intent(inout) :: u
-       real(kind=realtype) intent(inout) :: v
-       real(kind=realtype) dimension(ndim),intent(inout),depend(ndim) :: diff
+       real(kind=realtype) intent(in,out) :: u
+       real(kind=realtype) intent(in,out) :: v
+       real(kind=realtype) dimension(ndim),intent(out),depend(ndim) :: diff
      end subroutine point_surface
      subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,niter,eps,u,v,w,diff) ! in :test:projections.F90
        real(kind=realtype) dimension(ndim),intent(in) :: x0
@@ -390,9 +381,9 @@
        integer, optional,intent(in),check(shape(coefc,0)==ndim),depend(coefc) :: ndim=shape(coefc,0)
        integer intent(in) :: niter
        real(kind=realtype) intent(in) :: eps
-       real(kind=realtype) intent(inout) :: u
-       real(kind=realtype) intent(inout) :: v
-       real(kind=realtype) intent(inout) :: s
+       real(kind=realtype) intent(in,out) :: u
+       real(kind=realtype) intent(in,out) :: v
+       real(kind=realtype) intent(in,out) :: s
        real(kind=realtype) dimension(ndim),intent(out),depend(ndim) :: diff
      end subroutine curve_surface
   subroutine point_curve_start(x0,uu,data,nu,ndim,n,u) ! in :test:projections.F90
@@ -528,6 +519,31 @@
        integer optional, intent(in), check(shape(l_index, 0)==nctlw), depend(l_index) :: nctlw=shape(l_index, 0)
        integer optional, intent(in), check(len(vals)>=nnz), depend(vals) :: nnz=len(vals)
      end subroutine getbasisptvolume
+
+     subroutine basis(t,nctl,k,u,ind,b) ! in :test:basis.f90
+       real(kind=realtype) dimension(nctl+k),intent(in),depend(nctl,k) :: t
+       integer intent(in) :: nctl
+       integer intent(in) :: k
+       real(kind=realtype) intent(in) :: u
+       integer intent(in) :: ind
+       real(kind=realtype) dimension(k),intent(out),depend(k) :: b
+     end subroutine basis
+     subroutine derivbasis(t,nctl,ku,u,ind,n,bd) ! in :test:basis.f90
+       real(kind=realtype) dimension(nctl+ku),intent(in),depend(nctl,ku) :: t
+       integer intent(in) :: nctl
+       integer intent(in) :: ku
+       real(kind=realtype) intent(in) :: u
+       integer intent(in) :: ind
+       integer intent(in) :: n
+       real(kind=realtype) dimension(n + 1,n + 1),intent(out),depend(n,n) :: bd
+     end subroutine derivbasis
+     subroutine findspan(u,k,t,nctl,ind) ! in :test:findSpan.f90
+       real(kind=realtype) intent(in) :: u
+       integer intent(in) :: k
+       real(kind=realtype) dimension(nctl+k),intent(in),depend(k,nctl) :: t
+       integer intent(in) :: nctl
+       integer intent(out) :: ind
+     end subroutine findspan
   end interface
 end program
 
