@@ -775,7 +775,7 @@ scipy is used.')
                                               Niter, eps, s[i])
         # end for
 
-        return s.squeeze(), D.squeeze().T
+        return s.squeeze(), D.squeeze()
 
     def projectCurve(self, in_curve, Niter=25, eps=1e-10, **kwargs):
         """
@@ -1526,26 +1526,6 @@ MUST be defined for task lms or interpolate'
                 Niter, eps, u[i], v[i])
 
         return u.squeeze(), v.squeeze(), D.squeeze()
-
-
-        # We will use a starting point u0, v0 if given
-        x0 = numpy.atleast_2d(x0)
-
-        if 'u' in kwargs:
-            u = numpy.array([kwargs['u']])
-        else:
-            u = -1*numpy.ones(len(x0))
-        # end if
-
-        if 'v' in kwargs:
-            v = numpy.array([kwargs['v']])
-        else:
-            v = -1*numpy.ones(len(x0))
-        # end if
-        u, v, D = pyspline.point_surface(
-            x0.T, self.tu, self.tv, self.ku, self.kv, self.coef.T, Niter,
-            eps, u, v)
-        return u.squeeze(), v.squeeze(), D.squeeze().T
 
     def projectCurve(self, in_curve, Niter=25, eps=1e-10, **kwargs):
         """
