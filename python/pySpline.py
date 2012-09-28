@@ -766,6 +766,7 @@ scipy is used.')
 
         # If necessary get brute-force starting point
         if numpy.any(s<0) or numpy.any(s>1):
+            self._computeData()
             s = pyspline.point_curve_start(x0.T, self.sdata, self.data.T)
 
         D = numpy.zeros_like(x0)
