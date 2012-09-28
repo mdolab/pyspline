@@ -27,8 +27,10 @@ subroutine findSpan(u, k, t, nctl, ind)
   ! Working
   integer :: low, mid, high
 
-  if (u == t(nctl+1)) then
+  if (u >= t(nctl+1)) then
      ind = nctl
+  else if (u < t(k)) then
+     ind = k
   else
      low = k
      high = nctl+1

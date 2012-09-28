@@ -35,11 +35,11 @@ subroutine tfi2d(e0, e1, e2, e3, Nu, Nv, X)
   integer :: i,j
 
   do i=1,Nu
-     U(i) = dble(i-1)/(Nu-1)
+     U(i) = real(i-1)/(Nu-1)
   end do
 
   do j=1,Nv
-     V(j) = dble(j-1)/(Nv-1)
+     V(j) = real(j-1)/(Nv-1)
   end do
 
   do i=1,Nu

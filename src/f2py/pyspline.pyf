@@ -311,104 +311,154 @@
        integer optional, intent(in), check(shape(coef, 0)==ndim), depend(coef) :: ndim=shape(coef, 0)
        real(kind=realtype) dimension(ndim, 3, 3), intent(out), depend(ndim) :: val
      end subroutine eval_volume_deriv2
-
-     subroutine point_curve(x0, t, k, coef, nctl, ndim, n, niter, eps1, eps2, s, diff) ! in :test:projections.f90
-       real(kind=realtype) dimension(ndim, n), intent(in) :: x0
-       real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
+     subroutine point_curve(x0,t,k,coef,nctl,ndim,niter,eps,s,diff) ! in :test:projections.F90
+       real(kind=realtype) dimension(ndim),intent(in) :: x0
+       real(kind=realtype) dimension(nctl+k),intent(in),depend(k,nctl) :: t
        integer intent(in) :: k
-       real(kind=realtype) dimension(ndim, nctl), intent(in), depend(ndim) :: coef
-       integer optional, intent(in), check(shape(coef, 1)==nctl), depend(coef) :: nctl=shape(coef, 1)
-       integer optional, intent(in), check(shape(x0, 0)==ndim), depend(x0) :: ndim=shape(x0, 0)
-       integer optional, intent(in), check(shape(x0, 1)==n), depend(x0) :: n=shape(x0, 1)
+       real(kind=realtype) dimension(ndim,nctl),intent(in),depend(ndim) :: coef
+       integer, optional,intent(in),check(shape(coef,1)==nctl),depend(coef) :: nctl=shape(coef,1)
+       integer, optional,intent(in),check(len(x0)>=ndim),depend(x0) :: ndim=len(x0)
        integer intent(in) :: niter
-       real(kind=realtype) intent(in) :: eps1
-       real(kind=realtype) intent(in) :: eps2
-       real(kind=realtype) dimension(n), intent(in, out), depend(n) :: s
-       real(kind=realtype) dimension(ndim, n), intent(out), depend(ndim, n) :: diff
+       real(kind=realtype) intent(in) :: eps
+       real(kind=realtype) intent(in,out) :: s
+       real(kind=realtype) dimension(ndim),intent(out),depend(ndim) :: diff
      end subroutine point_curve
-
-     subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, n, niter, eps1, eps2, u, v, diff) ! in :test:projections.f90
-       real(kind=realtype) dimension(ndim, n), intent(in) :: x0
-       real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
-       real(kind=realtype) dimension(nctlv+kv), intent(in), depend(kv, nctlv) :: tv
+     subroutine point_surface(x0,tu,tv,ku,kv,coef,nctlu,nctlv,ndim,niter,eps,u,v,diff) ! in :test:projections.F90
+       real(kind=realtype) dimension(ndim),intent(in) :: x0
+       real(kind=realtype) dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       real(kind=realtype) dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
        integer intent(in) :: ku
        integer intent(in) :: kv
-       real(kind=realtype) dimension(ndim, nctlv, nctlu), intent(in), depend(ndim) :: coef
-       integer optional, intent(in), check(shape(coef, 2)==nctlu), depend(coef) :: nctlu=shape(coef, 2)
-       integer optional, intent(in), check(shape(coef, 1)==nctlv), depend(coef) :: nctlv=shape(coef, 1)
-       integer optional, intent(in), check(shape(x0, 0)==ndim), depend(x0) :: ndim=shape(x0, 0)
-       integer optional, intent(in), check(shape(x0, 1)==n), depend(x0) :: n=shape(x0, 1)
+       real(kind=realtype) dimension(ndim,nctlv,nctlu),intent(in),depend(ndim) :: coef
+       integer, optional,intent(in),check(shape(coef,2)==nctlu),depend(coef) :: nctlu=shape(coef,2)
+       integer, optional,intent(in),check(shape(coef,1)==nctlv),depend(coef) :: nctlv=shape(coef,1)
+       integer, optional,intent(in),check(len(x0)>=ndim),depend(x0) :: ndim=len(x0)
        integer intent(in) :: niter
-       real(kind=realtype) intent(in) :: eps1
-       real(kind=realtype) intent(in) :: eps2
-       real(kind=realtype) dimension(n), intent(in, out), depend(n) :: u
-       real(kind=realtype) dimension(n), intent(in, out), depend(n) :: v
-       real(kind=realtype) dimension(ndim, n), intent(out), depend(ndim, n) :: diff
+       real(kind=realtype) intent(in) :: eps
+       real(kind=realtype) intent(inout) :: u
+       real(kind=realtype) intent(inout) :: v
+       real(kind=realtype) dimension(ndim),intent(inout),depend(ndim) :: diff
      end subroutine point_surface
-
-     subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, n, niter, eps, u, v, w, diff, n_sub) ! in :test:projections.f90
-       real(kind=realtype) dimension(ndim, n), intent(in) :: x0
-       real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
-       real(kind=realtype) dimension(nctlv+kv), intent(in), depend(kv, nctlv) :: tv
-       real(kind=realtype) dimension(nctlw+kw), intent(in), depend(kw, nctlw) :: tw
+     subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,niter,eps,u,v,w,diff) ! in :test:projections.F90
+       real(kind=realtype) dimension(ndim),intent(in) :: x0
+       real(kind=realtype) dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       real(kind=realtype) dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
+       real(kind=realtype) dimension(nctlw+kw),intent(in),depend(kw,nctlw) :: tw
        integer intent(in) :: ku
        integer intent(in) :: kv
        integer intent(in) :: kw
-       real(kind=realtype) dimension(ndim, nctlw, nctlv, nctlu), intent(in), depend(ndim) :: coef
-       integer optional, intent(in), check(shape(coef, 3)==nctlu), depend(coef) :: nctlu=shape(coef, 3)
-       integer optional, intent(in), check(shape(coef, 2)==nctlv), depend(coef) :: nctlv=shape(coef, 2)
-       integer optional, intent(in), check(shape(coef, 1)==nctlw), depend(coef) :: nctlw=shape(coef, 1)
-       integer optional, intent(in), check(shape(x0, 0)==ndim), depend(x0) :: ndim=shape(x0, 0)
-       integer optional, intent(in), check(shape(x0, 1)==n), depend(x0) :: n=shape(x0, 1)
+       real(kind=realtype) dimension(ndim,nctlw,nctlv,nctlu),intent(in),depend(ndim) :: coef
+       integer, optional,intent(in),check(shape(coef,3)==nctlu),depend(coef) :: nctlu=shape(coef,3)
+       integer, optional,intent(in),check(shape(coef,2)==nctlv),depend(coef) :: nctlv=shape(coef,2)
+       integer, optional,intent(in),check(shape(coef,1)==nctlw),depend(coef) :: nctlw=shape(coef,1)
+       integer, optional,intent(in),check(len(x0)>=ndim),depend(x0) :: ndim=len(x0)
        integer intent(in) :: niter
        real(kind=realtype) intent(in) :: eps
-       real(kind=realtype) dimension(n), intent(out), depend(n) :: u
-       real(kind=realtype) dimension(n), intent(out), depend(n) :: v
-       real(kind=realtype) dimension(n), intent(out), depend(n) :: w
-       real(kind=realtype) dimension(ndim, n), intent(out), depend(ndim, n) :: diff
-       integer intent(in) :: n_sub
+       real(kind=realtype) intent(in,out) :: u
+       real(kind=realtype) intent(in,out) :: v
+       real(kind=realtype) intent(in,out) :: w
+       real(kind=realtype) dimension(ndim),intent(out),depend(ndim) :: diff
      end subroutine point_volume
-
-     subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, niter, eps1, eps2, s, t, diff) ! in :test:projections.f90
-       real(kind=realtype) dimension(n1+k1), intent(in), depend(k1, n1) :: t1
+     subroutine curve_curve(t1,k1,coef1,t2,k2,coef2,n1,n2,ndim,niter,eps,s,t,diff) ! in :test:projections.F90
+       real(kind=realtype) dimension(n1+k1),intent(in),depend(k1,n1) :: t1
        integer intent(in) :: k1
-       real(kind=realtype) dimension(ndim, n1), intent(in) :: coef1
-       real(kind=realtype) dimension(n2+k2), intent(in), depend(k2, n2) :: t2
+       real(kind=realtype) dimension(ndim,n1),intent(in) :: coef1
+       real(kind=realtype) dimension(n2+k2),intent(in),depend(k2,n2) :: t2
        integer intent(in) :: k2
-       real(kind=realtype) dimension(ndim, n2), intent(in), depend(ndim) :: coef2
-       integer optional, intent(in), check(shape(coef1, 1)==n1), depend(coef1) :: n1=shape(coef1, 1)
-       integer optional, intent(in), check(shape(coef2, 1)==n2), depend(coef2) :: n2=shape(coef2, 1)
-       integer optional, intent(in), check(shape(coef1, 0)==ndim), depend(coef1) :: ndim=shape(coef1, 0)
+       real(kind=realtype) dimension(ndim,n2),intent(in),depend(ndim) :: coef2
+       integer, optional,intent(in),check(shape(coef1,1)==n1),depend(coef1) :: n1=shape(coef1,1)
+       integer, optional,intent(in),check(shape(coef2,1)==n2),depend(coef2) :: n2=shape(coef2,1)
+       integer, optional,intent(in),check(shape(coef1,0)==ndim),depend(coef1) :: ndim=shape(coef1,0)
        integer intent(in) :: niter
-       real(kind=realtype) intent(in) :: eps1
-       real(kind=realtype) intent(in) :: eps2
-       real(kind=realtype) intent(in, out) :: s
-       real(kind=realtype) intent(in, out) :: t
-       real(kind=realtype) dimension(ndim), intent(out), depend(ndim) :: diff
+       real(kind=realtype) intent(in) :: eps
+       real(kind=realtype) intent(in,out) :: s
+       real(kind=realtype) intent(in,out) :: t
+       real(kind=realtype) dimension(ndim),intent(out),depend(ndim) :: diff
      end subroutine curve_curve
-
-     subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, nctlc, nctlu, nctlv, ndim, niter, eps1, eps2, u, v, s, diff) ! in :test:projections.f90
-       real(kind=realtype) dimension(nctlc+kc), intent(in), depend(kc, nctlc) :: tc
+     subroutine curve_surface(tc,kc,coefc,tu,tv,ku,kv,coefs,nctlc,nctlu,nctlv,ndim,niter,eps,u,v,s,diff) ! in :test:projections.F90
+       real(kind=realtype) dimension(nctlc+kc),intent(in),depend(kc,nctlc) :: tc
        integer intent(in) :: kc
-       real(kind=realtype) dimension(ndim, nctlc), intent(in) :: coefc
-       real(kind=realtype) dimension(nctlu+ku), intent(in), depend(ku, nctlu) :: tu
-       real(kind=realtype) dimension(nctlv+kv), intent(in), depend(kv, nctlv) :: tv
+       real(kind=realtype) dimension(ndim,nctlc),intent(in) :: coefc
+       real(kind=realtype) dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
+       real(kind=realtype) dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
        integer intent(in) :: ku
        integer intent(in) :: kv
-       real(kind=realtype) dimension(ndim, nctlv, nctlu), intent(in), depend(ndim) :: coefs
-       integer optional, intent(in), check(shape(coefc, 1)==nctlc), depend(coefc) :: nctlc=shape(coefc, 1)
-       integer optional, intent(in), check(shape(coefs, 2)==nctlu), depend(coefs) :: nctlu=shape(coefs, 2)
-       integer optional, intent(in), check(shape(coefs, 1)==nctlv), depend(coefs) :: nctlv=shape(coefs, 1)
-       integer optional, intent(in), check(shape(coefc, 0)==ndim), depend(coefc) :: ndim=shape(coefc, 0)
+       real(kind=realtype) dimension(ndim,nctlv,nctlu),intent(in),depend(ndim) :: coefs
+       integer, optional,intent(in),check(shape(coefc,1)==nctlc),depend(coefc) :: nctlc=shape(coefc,1)
+       integer, optional,intent(in),check(shape(coefs,2)==nctlu),depend(coefs) :: nctlu=shape(coefs,2)
+       integer, optional,intent(in),check(shape(coefs,1)==nctlv),depend(coefs) :: nctlv=shape(coefs,1)
+       integer, optional,intent(in),check(shape(coefc,0)==ndim),depend(coefc) :: ndim=shape(coefc,0)
        integer intent(in) :: niter
-       real(kind=realtype) intent(in) :: eps1
-       real(kind=realtype) intent(in) :: eps2
-       real(kind=realtype) intent(in, out) :: u
-       real(kind=realtype) intent(in, out) :: v
-       real(kind=realtype) intent(in, out) :: s
-       real(kind=realtype) dimension(ndim), intent(out), depend(ndim) :: diff
+       real(kind=realtype) intent(in) :: eps
+       real(kind=realtype) intent(inout) :: u
+       real(kind=realtype) intent(inout) :: v
+       real(kind=realtype) intent(inout) :: s
+       real(kind=realtype) dimension(ndim),intent(out),depend(ndim) :: diff
      end subroutine curve_surface
-
+  subroutine point_curve_start(x0,uu,data,nu,ndim,n,u) ! in :test:projections.F90
+            use precision
+            real(kind=realtype) dimension(ndim,n),intent(in) :: x0
+            real(kind=realtype) dimension(nu),intent(in) :: uu
+            real(kind=realtype) dimension(ndim,nu),intent(in),depend(ndim,nu) :: data
+            integer, optional,intent(in),check(len(uu)>=nu),depend(uu) :: nu=len(uu)
+            integer, optional,intent(in),check(shape(x0,0)==ndim),depend(x0) :: ndim=shape(x0,0)
+            integer, optional,intent(in),check(shape(x0,1)==n),depend(x0) :: n=shape(x0,1)
+            real(kind=realtype) dimension(n),intent(out),depend(n) :: u
+        end subroutine point_curve_start
+        subroutine point_surface_start(x0,uu,vv,data,nu,nv,ndim,n,u,v) ! in :test:projections.F90
+            use precision
+            real(kind=realtype) dimension(ndim,n),intent(in) :: x0
+            real(kind=realtype) dimension(nu),intent(in) :: uu
+            real(kind=realtype) dimension(nv),intent(in) :: vv
+            real(kind=realtype) dimension(ndim,nu,nv),intent(in),depend(ndim,nu,nv) :: data
+            integer, optional,intent(in),check(len(uu)>=nu),depend(uu) :: nu=len(uu)
+            integer, optional,intent(in),check(len(vv)>=nv),depend(vv) :: nv=len(vv)
+            integer, optional,intent(in),check(shape(x0,0)==ndim),depend(x0) :: ndim=shape(x0,0)
+            integer, optional,intent(in),check(shape(x0,1)==n),depend(x0) :: n=shape(x0,1)
+            real(kind=realtype) dimension(n),intent(out),depend(n) :: u
+            real(kind=realtype) dimension(n),intent(out),depend(n) :: v
+        end subroutine point_surface_start
+        subroutine point_volume_start(x0,uu,vv,ww,data,nu,nv,nw,ndim,n,u,v,w) ! in :test:projections.F90
+            use precision
+            real(kind=realtype) dimension(ndim,n),intent(in) :: x0
+            real(kind=realtype) dimension(nu),intent(in) :: uu
+            real(kind=realtype) dimension(nv),intent(in) :: vv
+            real(kind=realtype) dimension(nw),intent(in) :: ww
+            real(kind=realtype) dimension(ndim,nu,nv,nw),intent(in),depend(ndim,nu,nv,nw) :: data
+            integer, optional,intent(in),check(len(uu)>=nu),depend(uu) :: nu=len(uu)
+            integer, optional,intent(in),check(len(vv)>=nv),depend(vv) :: nv=len(vv)
+            integer, optional,intent(in),check(len(ww)>=nw),depend(ww) :: nw=len(ww)
+            integer, optional,intent(in),check(shape(x0,0)==ndim),depend(x0) :: ndim=shape(x0,0)
+            integer, optional,intent(in),check(shape(x0,1)==n),depend(x0) :: n=shape(x0,1)
+            real(kind=realtype) dimension(n),intent(out),depend(n) :: u
+            real(kind=realtype) dimension(n),intent(out),depend(n) :: v
+            real(kind=realtype) dimension(n),intent(out),depend(n) :: w
+        end subroutine point_volume_start
+     subroutine curve_curve_start(data1,uu1,data2,uu2,nu1,nu2,ndim,s1,s2) ! in :test:projections.F90
+       real(kind=realtype) dimension(ndim,nu1),intent(in) :: data1
+       real(kind=realtype) dimension(nu1),intent(in),depend(nu1) :: uu1
+       real(kind=realtype) dimension(ndim,nu2),intent(in),depend(ndim) :: data2
+       real(kind=realtype) dimension(nu2),intent(in),depend(nu2) :: uu2
+       integer, optional,intent(in),check(shape(data1,1)==nu1),depend(data1) :: nu1=shape(data1,1)
+       integer, optional,intent(in),check(shape(data2,1)==nu2),depend(data2) :: nu2=shape(data2,1)
+       integer, optional,intent(in),check(shape(data1,0)==ndim),depend(data1) :: ndim=shape(data1,0)
+       real(kind=realtype) intent(out) :: s1
+       real(kind=realtype) intent(out) :: s2
+     end subroutine curve_curve_start
+     subroutine curve_surface_start(data1,uu1,data2,uu2,vv2,nu1,nu2,nv2,ndim,s,u,v) ! in :test:projections.F90
+       real(kind=realtype) dimension(ndim,nu1),intent(in) :: data1
+       real(kind=realtype) dimension(nu1),intent(in),depend(nu1) :: uu1
+       real(kind=realtype) dimension(ndim,nv2,nu2),intent(in),depend(ndim) :: data2
+       real(kind=realtype) dimension(nu2),intent(in),depend(nu2) :: uu2
+       real(kind=realtype) dimension(nv2),intent(in),depend(nv2) :: vv2
+       integer, optional,intent(in),check(shape(data1,1)==nu1),depend(data1) :: nu1=shape(data1,1)
+       integer, optional,intent(in),check(shape(data2,2)==nu2),depend(data2) :: nu2=shape(data2,2)
+       integer, optional,intent(in),check(shape(data2,1)==nv2),depend(data2) :: nv2=shape(data2,1)
+       integer, optional,intent(in),check(shape(data1,0)==ndim),depend(data1) :: ndim=shape(data1,0)
+       real(kind=realtype) intent(out) :: s
+       real(kind=realtype) intent(out) :: u
+       real(kind=realtype) intent(out) :: v
+     end subroutine curve_surface_start
      subroutine line_plane(ia, vc, p0, v1, v2, n, sol, pid, n_sol) ! in :test:projections.f90
        real(kind=realtype) dimension(3), intent(in) :: ia
        real(kind=realtype) dimension(3), intent(in) :: vc
