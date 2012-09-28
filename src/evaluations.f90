@@ -33,7 +33,7 @@ function bvalu(t, coef, nctl, K, ideriv, s)
 
   ! Working
   integer                          :: l, istart, ileft
-  real(kind=realType)              :: B(k), Bd(k,k)
+  real(kind=realType)              :: B(k), Bd(ideriv+1,k)
 
   bvalu = 0.0
 
@@ -97,7 +97,7 @@ function b2val(u, v, idu, idv, tu, tv, nctlu, nctlv, ku, kv, coef)
   integer                          :: i, j
   integer                          :: ileftu, ileftv, istartu, istartv
   real(kind=realType)              :: Bu(ku), Bv(kv)
-  real(kind=realType)              :: Bud(ku, ku), Bvd(kv, kv)
+  real(kind=realType)              :: Bud(idu+1, ku), Bvd(idv+1, kv)
 
   ! Find knot spans
   call findSpan(u, ku, tu, nctlu, ileftu)
@@ -183,7 +183,9 @@ function b3val(u, v, w, idu, idv, idw, tu, tv, tw, nctlu, nctlv, nctlw, &
   integer                          :: ileftu, ileftv, ileftw
   integer                          :: istartu, istartv, istartw
   real(kind=realType)              :: Bu(ku), Bv(kv), Bw(kw)
-  real(kind=realType)              :: Bud(ku, ku), Bvd(kv, kv), Bwd(kw, kw)
+  real(kind=realType)              :: Bud(idu+1, ku)
+  real(kind=realType)              :: Bvd(idv+1, kv)
+  real(kind=realType)              :: Bwd(idw+1, kw)
 
   ! Find knot spans
   call findSpan(u, ku, tu, nctlu, ileftu)

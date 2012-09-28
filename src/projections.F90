@@ -221,7 +221,7 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
 
   ! Output
   real(kind=realType), intent(inout)  :: u, v
-  real(kind=realType), intent(inout)  :: diff(ndim)
+  real(kind=realType), intent(out)    :: diff(ndim)
 
   ! Working
   real(kind=realType)   :: val(ndim), deriv(ndim, 2), deriv2(ndim, 2, 2)
@@ -246,8 +246,8 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
   pt(2) = v
 
   iteration_loop: do ii=1, niter
-     call eval_surface(pt(1), pt(2), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, 1, 1, val)
-     call eval_surface_deriv(pt(1), pt(2), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, deriv)
+     call eval_surface       (pt(1), pt(2), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, 1, 1, val)
+     call eval_surface_deriv (pt(1), pt(2), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, deriv)
      call eval_surface_deriv2(pt(1), pt(2), tu, tv, ku, kv, coef, nctlu, nctlv, ndim, deriv2)
         
      ! Distance is R, "function value" fval is what we minimize

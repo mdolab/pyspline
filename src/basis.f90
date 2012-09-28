@@ -83,7 +83,7 @@ subroutine derivBasis(t, nctl, ku, u, ind, n, Bd)
   integer,             intent(in)  :: nctl, ku, ind, n
   
   ! Output
-  real(kind=realType), intent(out) :: Bd(0:ku-1,0:ku-1)
+  real(kind=realType), intent(out) :: Bd(0:n,0:n)
 
   ! Working
   real(kind=realType)              :: left(0:ku-1), right(0:ku-1), saved
@@ -93,7 +93,7 @@ subroutine derivBasis(t, nctl, ku, u, ind, n, Bd)
   ! To be consistent with algorithm in The NURBS Book we will use
   ! zero-based ordering here
   ndu(0,0) = 1.0
-  
+
   ! Define degree as k-1...easier 
   p = ku-1
   do j=1,p
@@ -164,6 +164,7 @@ subroutine derivBasis(t, nctl, ku, u, ind, n, Bd)
         s2 = j
      end do
   end do
+
 
   ! Multiply through by the correct factors (Eq 2.9)
   r = p
