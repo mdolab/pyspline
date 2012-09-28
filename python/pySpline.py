@@ -1321,12 +1321,12 @@ MUST be defined for task lms or interpolate'
 
         return r, break_pt
 
-    def splitSurface(self, direction, s):
+    def splitSurface(self, direction, t):
         """
         Split surface into two surfaces at parametric location u
         Required: 
             direction : 'u' or 'v' The parametric direction for the split
-            s : Parametric position to split at
+            t : Parametric position to split at
 
         Returns: surf1 and surf2, two pyspline surfaces. surf1
         is the lower part and surf2 is the upper part. 
@@ -1336,23 +1336,23 @@ MUST be defined for task lms or interpolate'
 \'u\' or \'v\''
 
         # Special case the bounds: (same for both directions)
-        if s<= 0.0:
+        if t<= 0.0:
             return None, surface(tu=self.tu.copy(), tv=self.tv.copy(),
                                  ku=self.ku, kv=self.kv, coef=self.coef.copy())
-        if s >= 1.0:
+        if t >= 1.0:
             return surface(tu=self.tu.copy(), tv=self.tv.copy(),
                            ku=self.ku, kv=self.kv, coef=self.coef.copy()), None
         
         if direction == 'u':
-            r, break_pt = self.insertKnot(direction, s, self.ku-1)
+            r, break_pt = self.insertKnot(direction, t, self.ku-1)
 
             # r is the number of time the knot was actually added
             s = self.ku-1-r # Back out the multiplicity of the point
             break_pt = break_pt - s
 
             # -------- Process the Knot Vectors--------
-            t1 = numpy.hstack((self.tu[0:break_pt+self.ku-1-s].copy(),s))/s
-            t2 = (numpy.hstack((s,self.tu[break_pt:].copy()))-s)/(1.0-s)
+            t1 = numpy.hstack((self.tu[0:break_pt+self.ku-1-s].copy(),t))/t
+            t2 = (numpy.hstack((t,self.tu[break_pt:].copy()))-t)/(1.0-t)
 
             # ------- Proces the Coefficient Arrays
             coef1 = self.coef[:break_pt,:,:].copy()
@@ -1361,15 +1361,15 @@ MUST be defined for task lms or interpolate'
             return surface(tu=t1, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef1),\
                 surface(tu=t2, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef2)
         elif direction == 'v':
-            r, break_pt = self.insertKnot(direction, s, self.kv-1)
+            r, break_pt = self.insertKnot(direction, t, self.kv-1)
         
             # r is the number of time the knot was actually added
             s = self.kv-1-r # Back out the multiplicity of the point
             break_pt = break_pt - s
 
             # -------- Process the Knot Vectors--------
-            t1 = numpy.hstack((self.tv[0:break_pt+self.kv-1-s].copy(),s))/s
-            t2 = (numpy.hstack((s,self.tv[break_pt:].copy()))-s)/(1.0-s)
+            t1 = numpy.hstack((self.tv[0:break_pt+self.kv-1-s].copy(),t))/t
+            t2 = (numpy.hstack((t,self.tv[break_pt:].copy()))-t)/(1.0-t)
 
             # ------- Proces the Coefficient Arrays
             coef1 = self.coef[:,:break_pt,:].copy()
