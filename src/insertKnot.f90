@@ -45,13 +45,13 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
   ! Compute its multiplicity
   s = 0 ! Knot multiplicity
   mult: do i=0,k-1
-     if (t(ileft-i) == u) then 
+     if (abs(t(ileft-i) -u ) < 1e-12) then 
         s = s + 1
      else
         exit mult
      end if
   end do mult
-  
+
   ! We need to make sure that the requested multipliity r, plus 
   ! the actual multiplicity of this know is less than (k-1)
 

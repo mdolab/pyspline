@@ -585,7 +585,8 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
 
 end subroutine point_volume
 
-subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps, s, t, Diff)
+subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter,&
+     eps, s, t, Diff)
 
   !*** DESCRIPTION
   !
@@ -614,7 +615,7 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps, s
   !     Output:
   !     s       - Real: parameter on Curve 1
   !     t       - Real: parameter on Curve 2
-  !     D       - Real: Distance between curve 
+  !     Diff    - Real: Distance between curves
   !
 
   use precision
@@ -634,7 +635,8 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps, s
   real(kind=realType) :: deriv_c1(ndim), deriv2_c1(ndim)
   real(kind=realType) :: deriv_c2(ndim), deriv2_c2(ndim)
   integer             :: i, m, ii, NLSFail
-  real(kind=realType) :: low(2), high(2), pt(2), R(ndim), ndist, fval, nfval, dist
+  real(kind=realType) :: low(2), high(2), pt(2), R(ndim), ndist
+  real(kind=realType) :: fval, nfval, dist
   real(kind=realType) :: hessian(2, 2), grad(2), newpt(2), c
   real(kind=realType) :: pgrad, update(2), step, p_diff
   logical :: flag, cflag
@@ -654,12 +656,12 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps, s
 
   iteration_loop: do ii=1, niter
 
-     call eval_curve(pt(1), t1, k1, coef1, n1, ndim, 1, val1)
-     call eval_curve_deriv(pt(1), t1, k2, coef1, n1, ndim, deriv_c1)
+     call eval_curve       (pt(1), t1, k1, coef1, n1, ndim, 1, val1)
+     call eval_curve_deriv (pt(1), t1, k2, coef1, n1, ndim, deriv_c1)
      call eval_curve_deriv2(pt(1), t1, k2, coef1, n1, ndim, deriv2_c1)
      
-     call eval_curve(pt(2), t2, k2, coef2, n2, ndim, 1, val2)
-     call eval_curve_deriv(pt(2), t2, k2, coef2, n2, ndim, deriv_c2)
+     call eval_curve       (pt(2), t2, k2, coef2, n2, ndim, 1, val2)
+     call eval_curve_deriv (pt(2), t2, k2, coef2, n2, ndim, deriv_c2)
      call eval_curve_deriv2(pt(2), t2, k2, coef2, n2, ndim, deriv2_c2)
 
      ! Distance is R, "function value" fval is what we minimize
@@ -690,7 +692,7 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, eps, s
            pt(i) = high(i)
         end if
         
-        if ( flag ) then
+        if (flag) then
            grad(i) = 0.0
            hessian(:, i) = 0.0
            hessian(i, :) = 0.0
