@@ -659,10 +659,8 @@ scipy is used.')
     
     def _calcInterpolatedGrevillePoints(self):
         self._calcGrevillePoints()
-        
-        s = []
         s = [self.gpts[0]]
-        N = 4
+        N = 2
         for i in xrange(len(self.gpts)-1):
             for j in xrange(N):
                 s.append( (self.gpts[i+1]-self.gpts[i])*(j+1)/(N+1) + self.gpts[i])
@@ -804,14 +802,73 @@ scipy is used.')
         if s < 0 or s > 1 or t < 0 or t >1:
             self._computeData()
             in_curve._computeData()
-            s, t = pyspline.curve_curve_start(self.data.T, self.sdata, in_curve.data.T, 
-                                              in_curve.sdata)
+            s, t = pyspline.curve_curve_start(
+                self.data.T, self.sdata, in_curve.data.T, in_curve.sdata)
+
         # end if
         s, t, Diff = pyspline.curve_curve(
             self.t, self.k, self.coef.T, in_curve.t, in_curve.k, 
             in_curve.coef.T, Niter, eps, s, t)
         
         return s, t, Diff
+        
+    def projectCurveMultiSol(self, in_curve, Niter=25, eps=1e-10, **kwargs):
+        """
+        Find the minimum distance between this curve (self) and a
+        second curve passed in (curve). This tries to find more than
+        one solution if there are more than one.
+
+        Required Arguments:
+            curve: A pyspline curve class to do the projection with
+        Optional Arguments:
+            Niter: Maximum number of newton iterations
+            eps  : Tolerance
+            s    : Initial guess for curve1 (this curve class)
+            t    : Initial guess for curve2 (cuve passed in)
+        Returns:
+            s    : Parametric position on curve1 (this class)
+            t    : Parametric position on curve2 (curve passed in)
+            D    : Distance between curve1(s) and curve2(t)
+            """
+        s = -1
+        t = -1
+        if 's' in kwargs:
+            s = geo_utils.checkInput(kwargs['s'], 's', float, 0)
+        if 't' in kwargs:
+            t = geo_utils.checkInput(kwargs['t'], 't', float, 0)
+        eps   = geo_utils.checkInput(eps, 'eps', float, 0)
+
+        self._computeData()
+        in_curve._computeData()
+
+        u_sol = []
+        t_sol = []
+        diff  = []
+        for i in xrange(len(self.sdata)):
+            for j in xrange(len(in_curve.sdata)):
+                s, t, Diff = pyspline.curve_curve(
+                    self.t, self.k, self.coef.T, in_curve.t, in_curve.k, 
+                    in_curve.coef.T, Niter, eps, self.sdata[i], in_curve.sdata[j])
+
+                if numpy.linalg.norm(Diff) < eps:
+                    # Its a solution. Check it it is already in list:
+                    if len(u_sol) == 0:
+                        u_sol.append(s)
+                        t_sol.append(t)
+                        diff.append(Diff)
+                    # end if
+
+                    for ii in xrange(len(u_sol)):
+                        if abs(u_sol[ii] - s) < eps and abs(t_sol[ii]-t) < eps:
+                            pass
+                        else:
+                            u_sol.append(s), t_sol.append(t), diff.append(Diff)
+                        # end if
+                    # end for
+            # end for
+        # end for
+
+        return numpy.array(u_sol), numpy.array(t_sol), numpy.array(diff)
         
     def _computeData(self):
         """
@@ -1295,32 +1352,38 @@ MUST be defined for task lms or interpolate'
         if direction == 'u':
             # Insert once to know how many times it was actually inserted
             # so we know how big to make the new coef:
-            r, t_new, coef_new, break_pt = pyspline.insertknot(
+            actual_r, t_new, coef_new, break_pt = pyspline.insertknot(
                 s, r, self.tu, self.ku, self.coef[:,0].T)
-            new_coef = numpy.zeros((self.Nctlu + r, self.Nctlv, self.nDim))
+
+            new_coef = numpy.zeros((self.Nctlu + actual_r, self.Nctlv, self.nDim))
             
             for j in xrange(self.Nctlv):
-                r, t_new, coef_slice, break_pt = pyspline.insertknot(
+                actual_r, t_new, coef_slice, break_pt = pyspline.insertknot(
                     s, r, self.tu, self.ku, self.coef[:,j].T)
-                new_coef[:,j] = coef_slice.T
-            self.tu = t_new
-            self.Nctlu = self.Nctlu + r
+                new_coef[:,j] = coef_slice[:,0:self.Nctlu+actual_r].T
+
+            self.tu = t_new[0:self.Nctlu+self.ku+actual_r]
+            self.Nctlu = self.Nctlu + actual_r
+
         elif direction == 'v':
-            r, t_new, coef_new, break_pt = pyspline.insertknot(
+            actual_r, t_new, coef_new, break_pt = pyspline.insertknot(
                 s, r, self.tv, self.kv, self.coef[0,:].T)
-            new_coef = numpy.zeros((self.Nctlu, self.Nctlv+r, self.nDim))
+
+            new_coef = numpy.zeros((self.Nctlu, self.Nctlv+actual_r,self.nDim))
 
             for i in xrange(self.Nctlu):
-                r, t_new, coef_slice, break_pt = pyspline.insertknot(
+                actual_r, t_new, coef_slice, break_pt = pyspline.insertknot(
                     s, r, self.tv, self.kv, self.coef[i,:].T)
-                new_coef[i,:] = coef_slice.T
-            self.tv = t_new
-            self.Nctlv = self.Nctlv + r
+                new_coef[i,:] = coef_slice[:,0:self.Nctlv+actual_r].T
+
+            self.tv = t_new[0:self.Nctlv+self.kv+actual_r]
+            self.Nctlv = self.Nctlv + actual_r
         # end if
 
         self.coef = new_coef
 
-        return r, break_pt
+        # break_pt is converted to zero backed ordering here!!!
+        return actual_r, break_pt-1
 
     def splitSurface(self, direction, t):
         """
@@ -1345,38 +1408,50 @@ MUST be defined for task lms or interpolate'
                            ku=self.ku, kv=self.kv, coef=self.coef.copy()), None
         
         if direction == 'u':
+
             r, break_pt = self.insertKnot(direction, t, self.ku-1)
 
-            # r is the number of time the knot was actually added
-            s = self.ku-1-r # Back out the multiplicity of the point
-            break_pt = break_pt - s
+            if r == self.ku -1:
+                # A new knot was inserted, so index of relevant place
+                # in knot vector is
+                break_pt = break_pt + 1
+            else:
+                break_pt = break_pt
+            # end if
 
-            # -------- Process the Knot Vectors--------
-            t1 = numpy.hstack((self.tu[0:break_pt+self.ku-1-s].copy(),t))/t
-            t2 = (numpy.hstack((t,self.tu[break_pt:].copy()))-t)/(1.0-t)
-
-            # ------- Proces the Coefficient Arrays
-            coef1 = self.coef[:break_pt,:,:].copy()
+            tt = self.tu[break_pt]
+            # Process knot vectors:
+            t1 = numpy.hstack((self.tu[0:break_pt+self.ku-1].copy(),tt))/tt
+            t2 = (numpy.hstack((tt,self.tu[break_pt:].copy()))-tt)/(1.0-tt)
+            
+            coef1 = self.coef[0:break_pt,:,:].copy()
             coef2 = self.coef[break_pt-1:,:,:].copy()
 
-            return surface(tu=t1, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef1),\
+            return \
+                surface(tu=t1, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef1),\
                 surface(tu=t2, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef2)
         elif direction == 'v':
+
             r, break_pt = self.insertKnot(direction, t, self.kv-1)
-        
-            # r is the number of time the knot was actually added
-            s = self.kv-1-r # Back out the multiplicity of the point
-            break_pt = break_pt - s
 
-            # -------- Process the Knot Vectors--------
-            t1 = numpy.hstack((self.tv[0:break_pt+self.kv-1-s].copy(),t))/t
-            t2 = (numpy.hstack((t,self.tv[break_pt:].copy()))-t)/(1.0-t)
+            if r == self.kv-1:
+                # A new knot was inserted, so index of relevant place
+                # in knot vector is
+                break_pt = break_pt + 1
+            else:
+                break_pt = break_pt
+            # end if
 
-            # ------- Proces the Coefficient Arrays
-            coef1 = self.coef[:,:break_pt,:].copy()
-            coef2 = self.coef[:,break_pt-1:,:].copy()
+            tt = self.tv[break_pt]
+            # Process knot vectors:
+            t1 = numpy.hstack((self.tv[0:break_pt+self.kv-1].copy(),tt))/tt
+            t2 = (numpy.hstack((tt,self.tv[break_pt:].copy()))-tt)/(1.0-tt)
+            
+            coef1 = self.coef[:, 0:break_pt,:].copy()
+            coef2 = self.coef[:, break_pt-1:,:].copy()
 
-            return surface(tu=self.tu, tv=t1, ku=self.ku, kv=self.kv, coef=coef1),\
+            return \
+                surface(tu=self.tu, tv=t1, ku=self.ku, kv=self.kv, coef=coef1),\
                 surface(tu=self.tu, tv=t2, ku=self.ku, kv=self.kv, coef=coef2)
         # end if
 
