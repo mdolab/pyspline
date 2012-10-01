@@ -568,13 +568,19 @@ scipy is used.')
         u = geo_utils.checkInput(u, 'u', float, 0)
         r = geo_utils.checkInput(r, 'r', int, 0)
         
-        r, t_new, coef_new, break_pt = pyspline.insertknot(
-            u, r, self.t, self.k, self.coef.T)
-        self.t = t_new
-        self.coef = coef_new.T
-        self.Nctl = self.Nctl + r
+        if u <= 0:
+            return
+        if u >= 1.0:
+            return
         
-        return
+        actual_r, t_new, coef_new, break_pt = pyspline.insertknot(
+            u, r, self.t, self.k, self.coef.T)
+        self.t = t_new[0:self.Nctl+self.k+actual_r]
+        self.coef = coef_new[:,0:self.Nctl+actual_r].T
+        self.Nctl = self.Nctl + actual_r
+
+        # break_pt is converted to zero based ordering here!!!
+        return actual_r, break_pt-1
 
     def splitCurve(self, u):
         """ 
@@ -586,48 +592,43 @@ scipy is used.')
         """
         u = geo_utils.checkInput(u, 'u', float, 0)
 
-        # First determine if u is very close to an existing knot
-        ileft = pyspline.findspan(u, self.k, self.t, self.Nctl)
-        if abs(u-self.t[ileft-1]) < 0.005:
-            u = self.t[ileft-1]
-        # end if
+        if u <= 0.0:
+            return None, curve(t=self.t.copy(), k=self.k, 
+                                  coef=self.coef.copy())
+        if u >= 1.0:
+            return curve(t=self.t.copy(), k=self.k, 
+                                  coef=self.coef.copy()), None
 
-        r, t_new, coef_new, break_pt = pyspline.insertknot(
-            u, self.k-1, self.t, self.k, self.coef.T)
-        coef_new = coef_new.T
-            
-        # r is the number of time the knot was actually added
-        s = self.k-1-r # Back out the multiplicity of the point
-        break_pt = break_pt - s
         
-        # -------- Process the Knot Vectors--------
-        t1 = numpy.zeros(break_pt + self.k)
-        t2 = numpy.zeros(self.Nctl+2*self.k-break_pt-s)
-        t1[0:break_pt] = t_new[0:break_pt]
-        t1[break_pt:] = self.k*[u]
-        if s == 0:
-            t2[1:] = t_new[break_pt:]
-        else:
-            t2[1:] = t_new[break_pt:-s]
-        t2[0]  = u
+        r, break_pt = self.insertKnot(u, self.k-1)
 
-        # Now Normalize
-        t1 = t1/t1[-1]
-        t2 = (t2-u)/(1-u)
-
-        # ------- Proces the Coefficient Arrays
-        coef1 = numpy.zeros((break_pt, self.nDim))
-        coef2 = numpy.zeros((len(t2)-self.k, self.nDim))
-        coef1[:, :] = coef_new[0:break_pt, :]
-        if s == 0:
-            coef2[:, :] = coef_new[break_pt-1:, :]        
+        if r == self.k -1:
+            # A new knot was inserted, so index of relevant place
+            # in knot vector is
+            break_pt = break_pt + 1
         else:
-            coef2[:, :] = coef_new[break_pt-1:-s, :]        
+            break_pt = break_pt
         # end if
-        curve1 = curve(k=self.k, t=t1, coef=coef1)
-        curve2 = curve(k=self.k, t=t2, coef=coef2)
 
-        return curve1, curve2
+        uu = self.t[break_pt]
+
+        # Process knot vectors:
+        t1 = numpy.hstack((self.t[0:break_pt+self.k-1].copy(),uu))/uu
+        t2 = (numpy.hstack((uu,self.t[break_pt:].copy()))-uu)/(1.0-uu)
+            
+        coef1 = self.coef[0:break_pt,:].copy()
+        coef2 = self.coef[break_pt-1:,:].copy()
+
+        return \
+            curve(t=t1, k=self.k, coef=coef1),\
+            curve(t=t2, k=self.k, coef=coef2)
+
+    def windowCurve(self, uLow, uHigh):
+        dummy, curve = self.splitCurve(uLow)
+        curve, dummy = curve.splitCurve((uHigh-uLow)/(1.0-uLow))
+
+        return curve
+
 
     def getLength(self):
         """ Compute the length of the curve using the Eculdian Norm
@@ -1382,7 +1383,7 @@ MUST be defined for task lms or interpolate'
 
         self.coef = new_coef
 
-        # break_pt is converted to zero backed ordering here!!!
+        # break_pt is converted to zero based ordering here!!!
         return actual_r, break_pt-1
 
     def splitSurface(self, direction, t):
