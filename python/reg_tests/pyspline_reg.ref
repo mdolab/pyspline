@@ -1,0 +1,1203 @@
++--------------------------------------+
+           Create Tests   
++--------------------------------------+
+-----------  2D k=2 test ----------
+Testing pt 0.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                  0.6 1e-12 1e-12
+Deriv:
+@value                  2.2 1e-12 1e-12
+@value                  1.6 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    0 1e-12 1e-12
+@value                  0.6 1e-12 1e-12
+Deriv:
+@value                  2.2 1e-12 1e-12
+@value                  1.6 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    0 1e-12 1e-12
+@value                  0.6 1e-12 1e-12
+Deriv:
+@value                  2.2 1e-12 1e-12
+@value                  1.6 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                  0.6 1e-12 1e-12
+Deriv:
+@value                  2.2 1e-12 1e-12
+@value                  1.6 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+------- Cruve with inserted knots ----------
+Testing pt 0.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                  0.6 1e-12 1e-12
+Deriv:
+@value                  2.2 1e-12 1e-12
+@value                  1.6 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    0 1e-12 1e-12
+@value                  0.6 1e-12 1e-12
+Deriv:
+@value                  2.2 1e-12 1e-12
+@value                  1.6 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    0 1e-12 1e-12
+@value                  0.6 1e-12 1e-12
+Deriv:
+@value                  2.2 1e-12 1e-12
+@value                  1.6 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                  0.6 1e-12 1e-12
+Deriv:
+@value                  2.2 1e-12 1e-12
+@value                  1.6 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Curve length:
+@value    5.352640006408969 1e-12 1e-12
+These points should be the same (window curve test)
+@value   0.4400000000000001 1e-12 1e-12
+@value                 0.92 1e-12 1e-12
+@value   0.4400000000000001 1e-12 1e-12
+@value   0.9199999999999999 1e-12 1e-12
+These three points should be the same (split curve test)
+@value                  1.1 1e-12 1e-12
+@value                  1.4 1e-12 1e-12
+@value                  1.1 1e-12 1e-12
+@value                  1.4 1e-12 1e-12
+@value                  1.1 1e-12 1e-12
+@value                  1.4 1e-12 1e-12
+These two points should be the same (reverse test)
+@value   0.8800000000000001 1e-12 1e-12
+@value                 1.24 1e-12 1e-12
+@value   0.8800000000000001 1e-12 1e-12
+@value                 1.24 1e-12 1e-12
+Opening ascii Tecplot File: tmp.dat
+Opening ascii Tecplot File: tmp.dat
+-----------  2D k=3 test ----------
+Testing pt 0.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                 0.45 1e-12 1e-12
+Deriv:
+@value                 2.84 1e-12 1e-12
+@value                  4.2 1e-12 1e-12
+Second Derivative
+@value                 1.48 1e-12 1e-12
+@value    9.200000000000001 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    0 1e-12 1e-12
+@value                 0.45 1e-12 1e-12
+Deriv:
+@value                 2.84 1e-12 1e-12
+@value                  4.2 1e-12 1e-12
+Second Derivative
+@value                 1.48 1e-12 1e-12
+@value    9.200000000000001 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    0 1e-12 1e-12
+@value                 0.45 1e-12 1e-12
+Deriv:
+@value                 2.84 1e-12 1e-12
+@value                  4.2 1e-12 1e-12
+Second Derivative
+@value                 1.48 1e-12 1e-12
+@value    9.200000000000001 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                 0.45 1e-12 1e-12
+Deriv:
+@value                 2.84 1e-12 1e-12
+@value                  4.2 1e-12 1e-12
+Second Derivative
+@value                 1.48 1e-12 1e-12
+@value    9.200000000000001 1e-12 1e-12
+------- Cruve with inserted knots ----------
+Testing pt 0.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                 0.45 1e-12 1e-12
+Deriv:
+@value                 2.84 1e-12 1e-12
+@value    4.199999999999999 1e-12 1e-12
+Second Derivative
+@value                 1.48 1e-12 1e-12
+@value    9.200000000000003 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    0 1e-12 1e-12
+@value                 0.45 1e-12 1e-12
+Deriv:
+@value                 2.84 1e-12 1e-12
+@value    4.199999999999999 1e-12 1e-12
+Second Derivative
+@value                 1.48 1e-12 1e-12
+@value    9.200000000000003 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    0 1e-12 1e-12
+@value                 0.45 1e-12 1e-12
+Deriv:
+@value                 2.84 1e-12 1e-12
+@value    4.199999999999999 1e-12 1e-12
+Second Derivative
+@value                 1.48 1e-12 1e-12
+@value    9.200000000000003 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                 0.45 1e-12 1e-12
+Deriv:
+@value                 2.84 1e-12 1e-12
+@value    4.199999999999999 1e-12 1e-12
+Second Derivative
+@value                 1.48 1e-12 1e-12
+@value    9.200000000000003 1e-12 1e-12
+Curve length:
+@value    9.550214449482713 1e-12 1e-12
+These points should be the same (window curve test)
+@value               0.5976 1e-12 1e-12
+@value                1.474 1e-12 1e-12
+@value   0.5975999999999999 1e-12 1e-12
+@value                1.474 1e-12 1e-12
+These three points should be the same (split curve test)
+@value                1.605 1e-12 1e-12
+@value                  3.7 1e-12 1e-12
+@value                1.605 1e-12 1e-12
+@value                  3.7 1e-12 1e-12
+@value                1.605 1e-12 1e-12
+@value                  3.7 1e-12 1e-12
+These two points should be the same (reverse test)
+@value               1.2544 1e-12 1e-12
+@value    2.866000000000001 1e-12 1e-12
+@value               1.2544 1e-12 1e-12
+@value    2.866000000000001 1e-12 1e-12
+Opening ascii Tecplot File: tmp.dat
+Opening ascii Tecplot File: tmp.dat
+-----------  2D k=4 test ----------
+Testing pt 0.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                 -0.6 1e-12 1e-12
+Deriv:
+@value                  5.4 1e-12 1e-12
+@value                 13.2 1e-12 1e-12
+Second Derivative
+@value                -13.2 1e-12 1e-12
+@value   -9.599999999999994 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    0 1e-12 1e-12
+@value                 -0.6 1e-12 1e-12
+Deriv:
+@value                  5.4 1e-12 1e-12
+@value                 13.2 1e-12 1e-12
+Second Derivative
+@value                -13.2 1e-12 1e-12
+@value   -9.599999999999994 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    0 1e-12 1e-12
+@value                 -0.6 1e-12 1e-12
+Deriv:
+@value                  5.4 1e-12 1e-12
+@value                 13.2 1e-12 1e-12
+Second Derivative
+@value                -13.2 1e-12 1e-12
+@value   -9.599999999999994 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                 -0.6 1e-12 1e-12
+Deriv:
+@value                  5.4 1e-12 1e-12
+@value                 13.2 1e-12 1e-12
+Second Derivative
+@value                -13.2 1e-12 1e-12
+@value   -9.599999999999994 1e-12 1e-12
+------- Cruve with inserted knots ----------
+Testing pt 0.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                 -0.6 1e-12 1e-12
+Deriv:
+@value                  5.4 1e-12 1e-12
+@value                 13.2 1e-12 1e-12
+Second Derivative
+@value                -13.2 1e-12 1e-12
+@value   -9.599999999999994 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    0 1e-12 1e-12
+@value                 -0.6 1e-12 1e-12
+Deriv:
+@value                  5.4 1e-12 1e-12
+@value                 13.2 1e-12 1e-12
+Second Derivative
+@value                -13.2 1e-12 1e-12
+@value   -9.599999999999994 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    0 1e-12 1e-12
+@value                 -0.6 1e-12 1e-12
+Deriv:
+@value                  5.4 1e-12 1e-12
+@value                 13.2 1e-12 1e-12
+Second Derivative
+@value                -13.2 1e-12 1e-12
+@value   -9.599999999999994 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    0 1e-12 1e-12
+@value                 -0.6 1e-12 1e-12
+Deriv:
+@value                  5.4 1e-12 1e-12
+@value                 13.2 1e-12 1e-12
+Second Derivative
+@value                -13.2 1e-12 1e-12
+@value   -9.599999999999994 1e-12 1e-12
+Curve length:
+@value    10.59071959647285 1e-12 1e-12
+These points should be the same (window curve test)
+@value   0.8816000000000002 1e-12 1e-12
+@value              1.69696 1e-12 1e-12
+@value   0.8816000000000002 1e-12 1e-12
+@value              1.69696 1e-12 1e-12
+These three points should be the same (split curve test)
+@value                2.075 1e-12 1e-12
+@value                 2.44 1e-12 1e-12
+@value                2.075 1e-12 1e-12
+@value                 2.44 1e-12 1e-12
+@value                2.075 1e-12 1e-12
+@value                 2.44 1e-12 1e-12
+These two points should be the same (reverse test)
+@value               1.6288 1e-12 1e-12
+@value              2.70368 1e-12 1e-12
+@value               1.6288 1e-12 1e-12
+@value              2.70368 1e-12 1e-12
+Opening ascii Tecplot File: tmp.dat
+Opening ascii Tecplot File: tmp.dat
++--------------------------------------+
+              LMS Tests   
++--------------------------------------+
+--------- Test helix data with k=2-------
+Rms is: 0.006765
+Testing pt 0.000000
+Value:
+@value    1.009165114946194 1e-12 1e-12
+@value 0.0006094621089554598 1e-12 1e-12
+@value -4.829744964798793e-18 1e-12 1e-12
+Deriv:
+@value   -1.141568088470903 1e-12 1e-12
+@value     6.19992361712474 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value    1.009165114946194 1e-12 1e-12
+@value 0.0006094621089554598 1e-12 1e-12
+@value -4.829744964798793e-18 1e-12 1e-12
+Deriv:
+@value   -1.141568088470903 1e-12 1e-12
+@value     6.19992361712474 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value    1.009165114946194 1e-12 1e-12
+@value 0.0006094621089554598 1e-12 1e-12
+@value -4.829744964798793e-18 1e-12 1e-12
+Deriv:
+@value   -1.141568088470903 1e-12 1e-12
+@value     6.19992361712474 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value    1.009165114946194 1e-12 1e-12
+@value 0.0006094621089554598 1e-12 1e-12
+@value -4.829744964798793e-18 1e-12 1e-12
+Deriv:
+@value   -1.141568088470903 1e-12 1e-12
+@value     6.19992361712474 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+------- Cruve with inserted knots ----------
+Testing pt 0.000000
+Value:
+@value    1.009165114946194 1e-12 1e-12
+@value 0.0006094621089554598 1e-12 1e-12
+@value -4.829744964798793e-18 1e-12 1e-12
+Deriv:
+@value   -1.141568088470903 1e-12 1e-12
+@value     6.19992361712474 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value    1.009165114946194 1e-12 1e-12
+@value 0.0006094621089554598 1e-12 1e-12
+@value -4.829744964798793e-18 1e-12 1e-12
+Deriv:
+@value   -1.141568088470903 1e-12 1e-12
+@value     6.19992361712474 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value    1.009165114946194 1e-12 1e-12
+@value 0.0006094621089554598 1e-12 1e-12
+@value -4.829744964798793e-18 1e-12 1e-12
+Deriv:
+@value   -1.141568088470903 1e-12 1e-12
+@value     6.19992361712474 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value    1.009165114946194 1e-12 1e-12
+@value 0.0006094621089554598 1e-12 1e-12
+@value -4.829744964798793e-18 1e-12 1e-12
+Deriv:
+@value   -1.141568088470903 1e-12 1e-12
+@value     6.19992361712474 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Curve length:
+@value    6.405881887836229 1e-12 1e-12
+These points should be the same (window curve test)
+@value    0.313052752061159 1e-12 1e-12
+@value   0.9618237371474924 1e-12 1e-12
+@value   0.2000000000000003 1e-12 1e-12
+@value   0.3130527520611589 1e-12 1e-12
+@value   0.9618237371474923 1e-12 1e-12
+@value   0.2000000000000003 1e-12 1e-12
+These three points should be the same (split curve test)
+@value  -0.9922354197318183 1e-12 1e-12
+@value -2.914335439641036e-16 1e-12 1e-12
+@value   0.5000000000000001 1e-12 1e-12
+@value  -0.9922354197318183 1e-12 1e-12
+@value -2.914335439641036e-16 1e-12 1e-12
+@value   0.5000000000000001 1e-12 1e-12
+@value  -0.9922354197318183 1e-12 1e-12
+@value -2.914335439641036e-16 1e-12 1e-12
+@value   0.5000000000000001 1e-12 1e-12
+These two points should be the same (reverse test)
+@value  -0.8202849344301463 1e-12 1e-12
+@value   0.5962002118420547 1e-12 1e-12
+@value   0.4000000000000001 1e-12 1e-12
+@value  -0.8202849344301463 1e-12 1e-12
+@value   0.5962002118420547 1e-12 1e-12
+@value   0.4000000000000001 1e-12 1e-12
+Project point 0.400000 1.500000 1.500000
+@value   0.7717043348868128 1e-12 1e-12
+@value  -0.2648195051446305 1e-12 1e-12
+@value  -0.5166524651361464 1e-12 1e-12
+@value   -1.271704334886813 1e-12 1e-12
+Project point -0.100000 0.500000 1.800000
+@value                    0 1e-12 1e-12
+@value    1.109165114946194 1e-12 1e-12
+@value  -0.5006094621089558 1e-12 1e-12
+@value  -0.7999999999999998 1e-12 1e-12
+Project point -0.001257 0.999857 0.250000
+@value                 0.75 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+--------- Test helix data with k=3-------
+Rms is: 0.000546
+Testing pt 0.000000
+Value:
+@value   0.9999490251612624 1e-12 1e-12
+@value -0.0003411285008811159 1e-12 1e-12
+@value -2.276780510327622e-17 1e-12 1e-12
+Deriv:
+@value -0.001547487162909533 1e-12 1e-12
+@value    6.386011356623293 1e-12 1e-12
+@value    1.000000000000003 1e-12 1e-12
+Second Derivative
+@value    -38.9186039718083 1e-12 1e-12
+@value   -8.382521930614786 1e-12 1e-12
+@value -6.039613253960852e-14 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value   0.9999490251612624 1e-12 1e-12
+@value -0.0003411285008811159 1e-12 1e-12
+@value -2.276780510327622e-17 1e-12 1e-12
+Deriv:
+@value -0.001547487162909533 1e-12 1e-12
+@value    6.386011356623293 1e-12 1e-12
+@value    1.000000000000003 1e-12 1e-12
+Second Derivative
+@value    -38.9186039718083 1e-12 1e-12
+@value   -8.382521930614786 1e-12 1e-12
+@value -6.039613253960852e-14 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value   0.9999490251612624 1e-12 1e-12
+@value -0.0003411285008811159 1e-12 1e-12
+@value -2.276780510327622e-17 1e-12 1e-12
+Deriv:
+@value -0.001547487162909533 1e-12 1e-12
+@value    6.386011356623293 1e-12 1e-12
+@value    1.000000000000003 1e-12 1e-12
+Second Derivative
+@value    -38.9186039718083 1e-12 1e-12
+@value   -8.382521930614786 1e-12 1e-12
+@value -6.039613253960852e-14 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value   0.9999490251612624 1e-12 1e-12
+@value -0.0003411285008811159 1e-12 1e-12
+@value -2.276780510327622e-17 1e-12 1e-12
+Deriv:
+@value -0.001547487162909533 1e-12 1e-12
+@value    6.386011356623293 1e-12 1e-12
+@value    1.000000000000003 1e-12 1e-12
+Second Derivative
+@value    -38.9186039718083 1e-12 1e-12
+@value   -8.382521930614786 1e-12 1e-12
+@value -6.039613253960852e-14 1e-12 1e-12
+------- Cruve with inserted knots ----------
+Testing pt 0.000000
+Value:
+@value   0.9999490251612624 1e-12 1e-12
+@value -0.0003411285008811159 1e-12 1e-12
+@value -2.276780510327622e-17 1e-12 1e-12
+Deriv:
+@value -0.001547487162909533 1e-12 1e-12
+@value    6.386011356623293 1e-12 1e-12
+@value    1.000000000000003 1e-12 1e-12
+Second Derivative
+@value    -38.9186039718083 1e-12 1e-12
+@value   -8.382521930614786 1e-12 1e-12
+@value -6.039613253960852e-14 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value   0.9999490251612624 1e-12 1e-12
+@value -0.0003411285008811159 1e-12 1e-12
+@value -2.276780510327622e-17 1e-12 1e-12
+Deriv:
+@value -0.001547487162909533 1e-12 1e-12
+@value    6.386011356623293 1e-12 1e-12
+@value    1.000000000000003 1e-12 1e-12
+Second Derivative
+@value    -38.9186039718083 1e-12 1e-12
+@value   -8.382521930614786 1e-12 1e-12
+@value -6.039613253960852e-14 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value   0.9999490251612624 1e-12 1e-12
+@value -0.0003411285008811159 1e-12 1e-12
+@value -2.276780510327622e-17 1e-12 1e-12
+Deriv:
+@value -0.001547487162909533 1e-12 1e-12
+@value    6.386011356623293 1e-12 1e-12
+@value    1.000000000000003 1e-12 1e-12
+Second Derivative
+@value    -38.9186039718083 1e-12 1e-12
+@value   -8.382521930614786 1e-12 1e-12
+@value -6.039613253960852e-14 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value   0.9999490251612624 1e-12 1e-12
+@value -0.0003411285008811159 1e-12 1e-12
+@value -2.276780510327622e-17 1e-12 1e-12
+Deriv:
+@value -0.001547487162909533 1e-12 1e-12
+@value    6.386011356623293 1e-12 1e-12
+@value    1.000000000000003 1e-12 1e-12
+Second Derivative
+@value    -38.9186039718083 1e-12 1e-12
+@value   -8.382521930614786 1e-12 1e-12
+@value -6.039613253960852e-14 1e-12 1e-12
+Curve length:
+@value    6.314121266078091 1e-12 1e-12
+These points should be the same (window curve test)
+@value   0.3096727201272779 1e-12 1e-12
+@value   0.9507836585599081 1e-12 1e-12
+@value   0.2000000000000002 1e-12 1e-12
+@value    0.309672720127278 1e-12 1e-12
+@value   0.9507836585599082 1e-12 1e-12
+@value   0.2000000000000003 1e-12 1e-12
+These three points should be the same (split curve test)
+@value  -0.9998212291298862 1e-12 1e-12
+@value -3.469446951953614e-16 1e-12 1e-12
+@value   0.5000000000000001 1e-12 1e-12
+@value  -0.9998212291298862 1e-12 1e-12
+@value -3.469446951953614e-16 1e-12 1e-12
+@value   0.5000000000000001 1e-12 1e-12
+@value  -0.9998212291298862 1e-12 1e-12
+@value -3.469446951953614e-16 1e-12 1e-12
+@value   0.5000000000000001 1e-12 1e-12
+These two points should be the same (reverse test)
+@value  -0.8088607998634452 1e-12 1e-12
+@value   0.5882042108393041 1e-12 1e-12
+@value   0.4000000000000003 1e-12 1e-12
+@value  -0.8088607998634451 1e-12 1e-12
+@value   0.5882042108393042 1e-12 1e-12
+@value   0.4000000000000001 1e-12 1e-12
+Project point 0.400000 1.500000 1.500000
+@value   0.7706423461553698 1e-12 1e-12
+@value  -0.2714080877052135 1e-12 1e-12
+@value   -0.508294317257859 1e-12 1e-12
+@value    -1.27064234615537 1e-12 1e-12
+Project point -0.100000 0.500000 1.800000
+@value                    0 1e-12 1e-12
+@value    1.099949025161262 1e-12 1e-12
+@value  -0.4996588714991193 1e-12 1e-12
+@value                 -0.8 1e-12 1e-12
+Project point 0.000145 1.000140 0.250000
+@value                 0.75 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+--------- Test helix data with k=4-------
+Rms is: 0.000055
+Testing pt 0.000000
+Value:
+@value    1.000004509243352 1e-12 1e-12
+@value 1.401378351811821e-05 1e-12 1e-12
+@value 3.152561496595167e-17 1e-12 1e-12
+Deriv:
+@value 0.003959226195128451 1e-12 1e-12
+@value    6.280754960721075 1e-12 1e-12
+@value   0.9999999999999947 1e-12 1e-12
+Second Derivative
+@value   -40.28210620279947 1e-12 1e-12
+@value  0.06959323157536801 1e-12 1e-12
+@value 3.410605131648481e-13 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value    1.000004509243352 1e-12 1e-12
+@value 1.401378351811821e-05 1e-12 1e-12
+@value 3.152561496595167e-17 1e-12 1e-12
+Deriv:
+@value 0.003959226195128451 1e-12 1e-12
+@value    6.280754960721075 1e-12 1e-12
+@value   0.9999999999999947 1e-12 1e-12
+Second Derivative
+@value   -40.28210620279947 1e-12 1e-12
+@value  0.06959323157536801 1e-12 1e-12
+@value 3.410605131648481e-13 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value    1.000004509243352 1e-12 1e-12
+@value 1.401378351811821e-05 1e-12 1e-12
+@value 3.152561496595167e-17 1e-12 1e-12
+Deriv:
+@value 0.003959226195128451 1e-12 1e-12
+@value    6.280754960721075 1e-12 1e-12
+@value   0.9999999999999947 1e-12 1e-12
+Second Derivative
+@value   -40.28210620279947 1e-12 1e-12
+@value  0.06959323157536801 1e-12 1e-12
+@value 3.410605131648481e-13 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value    1.000004509243352 1e-12 1e-12
+@value 1.401378351811821e-05 1e-12 1e-12
+@value 3.152561496595167e-17 1e-12 1e-12
+Deriv:
+@value 0.003959226195128451 1e-12 1e-12
+@value    6.280754960721075 1e-12 1e-12
+@value   0.9999999999999947 1e-12 1e-12
+Second Derivative
+@value   -40.28210620279947 1e-12 1e-12
+@value  0.06959323157536801 1e-12 1e-12
+@value 3.410605131648481e-13 1e-12 1e-12
+------- Cruve with inserted knots ----------
+Testing pt 0.000000
+Value:
+@value    1.000004509243352 1e-12 1e-12
+@value 1.401378351811821e-05 1e-12 1e-12
+@value 3.152561496595167e-17 1e-12 1e-12
+Deriv:
+@value 0.003959226195128451 1e-12 1e-12
+@value    6.280754960721075 1e-12 1e-12
+@value   0.9999999999999947 1e-12 1e-12
+Second Derivative
+@value   -40.28210620279947 1e-12 1e-12
+@value  0.06959323157536801 1e-12 1e-12
+@value 3.410605131648481e-13 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value    1.000004509243352 1e-12 1e-12
+@value 1.401378351811821e-05 1e-12 1e-12
+@value 3.152561496595167e-17 1e-12 1e-12
+Deriv:
+@value 0.003959226195128451 1e-12 1e-12
+@value    6.280754960721075 1e-12 1e-12
+@value   0.9999999999999947 1e-12 1e-12
+Second Derivative
+@value   -40.28210620279947 1e-12 1e-12
+@value  0.06959323157536801 1e-12 1e-12
+@value 3.410605131648481e-13 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value    1.000004509243352 1e-12 1e-12
+@value 1.401378351811821e-05 1e-12 1e-12
+@value 3.152561496595167e-17 1e-12 1e-12
+Deriv:
+@value 0.003959226195128451 1e-12 1e-12
+@value    6.280754960721075 1e-12 1e-12
+@value   0.9999999999999947 1e-12 1e-12
+Second Derivative
+@value   -40.28210620279947 1e-12 1e-12
+@value  0.06959323157536801 1e-12 1e-12
+@value 3.410605131648481e-13 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value    1.000004509243352 1e-12 1e-12
+@value 1.401378351811821e-05 1e-12 1e-12
+@value 3.152561496595167e-17 1e-12 1e-12
+Deriv:
+@value 0.003959226195128451 1e-12 1e-12
+@value    6.280754960721075 1e-12 1e-12
+@value   0.9999999999999947 1e-12 1e-12
+Second Derivative
+@value   -40.28210620279947 1e-12 1e-12
+@value  0.06959323157536801 1e-12 1e-12
+@value 3.410605131648481e-13 1e-12 1e-12
+Curve length:
+@value    6.307929544627594 1e-12 1e-12
+These points should be the same (window curve test)
+@value   0.3089884084919446 1e-12 1e-12
+@value    0.951014562004494 1e-12 1e-12
+@value   0.2000000000000002 1e-12 1e-12
+@value   0.3089884084919446 1e-12 1e-12
+@value   0.9510145620044939 1e-12 1e-12
+@value   0.2000000000000002 1e-12 1e-12
+These three points should be the same (split curve test)
+@value  -0.9999255382379137 1e-12 1e-12
+@value -7.216449660063518e-16 1e-12 1e-12
+@value   0.4999999999999998 1e-12 1e-12
+@value  -0.9999255382379136 1e-12 1e-12
+@value -7.216449660063517e-16 1e-12 1e-12
+@value   0.4999999999999997 1e-12 1e-12
+@value  -0.9999255382379136 1e-12 1e-12
+@value -7.216449660063517e-16 1e-12 1e-12
+@value   0.4999999999999997 1e-12 1e-12
+These two points should be the same (reverse test)
+@value  -0.8090158390972771 1e-12 1e-12
+@value   0.5878115135674199 1e-12 1e-12
+@value   0.4000000000000003 1e-12 1e-12
+@value  -0.8090158390972773 1e-12 1e-12
+@value   0.5878115135674198 1e-12 1e-12
+@value   0.4000000000000004 1e-12 1e-12
+Project point 0.400000 1.500000 1.500000
+@value   0.7706881523149167 1e-12 1e-12
+@value  -0.2703695921564689 1e-12 1e-12
+@value  -0.5083551247370611 1e-12 1e-12
+@value   -1.270688152306847 1e-12 1e-12
+Project point -0.100000 0.500000 1.800000
+@value                    0 1e-12 1e-12
+@value    1.100004509243352 1e-12 1e-12
+@value  -0.5000140137835184 1e-12 1e-12
+@value                 -0.8 1e-12 1e-12
+Project point 0.000017 0.999980 0.250000
+@value                 0.75 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
++--------------------------------------+
+           Interp Tests   
++--------------------------------------+
+--------- Test helix data with k=2-------
+Testing pt 0.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value  -0.1993190292834441 1e-12 1e-12
+@value    6.278968045999892 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value  -0.1993190292834441 1e-12 1e-12
+@value    6.278968045999892 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value  -0.1993190292834441 1e-12 1e-12
+@value    6.278968045999892 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value  -0.1993190292834441 1e-12 1e-12
+@value    6.278968045999892 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+------- Cruve with inserted knots ----------
+Testing pt 0.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value  -0.1993190292834441 1e-12 1e-12
+@value    6.278968045999892 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value  -0.1993190292834441 1e-12 1e-12
+@value    6.278968045999892 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value  -0.1993190292834441 1e-12 1e-12
+@value    6.278968045999892 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value  -0.1993190292834441 1e-12 1e-12
+@value    6.278968045999892 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Curve length:
+@value    6.361223765764117 1e-12 1e-12
+These points should be the same (window curve test)
+@value   0.3089135445809931 1e-12 1e-12
+@value   0.9507513652082811 1e-12 1e-12
+@value   0.2000000000000003 1e-12 1e-12
+@value   0.3089135445809931 1e-12 1e-12
+@value    0.950751365208281 1e-12 1e-12
+@value   0.2000000000000003 1e-12 1e-12
+These three points should be the same (split curve test)
+@value  -0.9994965423831851 1e-12 1e-12
+@value -1.006139616066548e-16 1e-12 1e-12
+@value                  0.5 1e-12 1e-12
+@value  -0.9994965423831851 1e-12 1e-12
+@value -1.006139616066548e-16 1e-12 1e-12
+@value                  0.5 1e-12 1e-12
+@value  -0.9994965423831851 1e-12 1e-12
+@value -1.006139616066548e-16 1e-12 1e-12
+@value                  0.5 1e-12 1e-12
+These two points should be the same (reverse test)
+@value  -0.8086271867550151 1e-12 1e-12
+@value    0.587499512805904 1e-12 1e-12
+@value   0.4000000000000002 1e-12 1e-12
+@value   -0.808627186755015 1e-12 1e-12
+@value    0.587499512805904 1e-12 1e-12
+@value   0.4000000000000001 1e-12 1e-12
+Project point 0.400000 1.500000 1.500000
+@value   0.7696008108771361 1e-12 1e-12
+@value  -0.2771977381460451 1e-12 1e-12
+@value  -0.5078817079555903 1e-12 1e-12
+@value   -1.269600810877136 1e-12 1e-12
+Project point -0.100000 0.500000 1.800000
+@value                    0 1e-12 1e-12
+@value                  1.1 1e-12 1e-12
+@value  -0.5000000000000002 1e-12 1e-12
+@value                 -0.8 1e-12 1e-12
+Project point -0.000004 0.999622 0.250000
+@value                 0.75 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+--------- Test helix data with k=3-------
+Testing pt 0.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value -0.0002423241372184748 1e-12 1e-12
+@value    6.289763755319743 1e-12 1e-12
+@value                    1 1e-12 1e-12
+Second Derivative
+@value   -39.41718761895117 1e-12 1e-12
+@value   -2.137550445330703 1e-12 1e-12
+@value 8.526512829121202e-14 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value -0.0002423241372184748 1e-12 1e-12
+@value    6.289763755319743 1e-12 1e-12
+@value                    1 1e-12 1e-12
+Second Derivative
+@value   -39.41718761895117 1e-12 1e-12
+@value   -2.137550445330703 1e-12 1e-12
+@value 8.526512829121202e-14 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value -0.0002423241372184748 1e-12 1e-12
+@value    6.289763755319743 1e-12 1e-12
+@value                    1 1e-12 1e-12
+Second Derivative
+@value   -39.41718761895117 1e-12 1e-12
+@value   -2.137550445330703 1e-12 1e-12
+@value 8.526512829121202e-14 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value -0.0002423241372184748 1e-12 1e-12
+@value    6.289763755319743 1e-12 1e-12
+@value                    1 1e-12 1e-12
+Second Derivative
+@value   -39.41718761895117 1e-12 1e-12
+@value   -2.137550445330703 1e-12 1e-12
+@value 8.526512829121202e-14 1e-12 1e-12
+------- Cruve with inserted knots ----------
+Testing pt 0.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value -0.0002423241372184748 1e-12 1e-12
+@value    6.289763755319743 1e-12 1e-12
+@value                    1 1e-12 1e-12
+Second Derivative
+@value   -39.41718761895117 1e-12 1e-12
+@value   -2.137550445330703 1e-12 1e-12
+@value 8.526512829121202e-14 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value -0.0002423241372184748 1e-12 1e-12
+@value    6.289763755319743 1e-12 1e-12
+@value                    1 1e-12 1e-12
+Second Derivative
+@value   -39.41718761895117 1e-12 1e-12
+@value   -2.137550445330703 1e-12 1e-12
+@value 8.526512829121202e-14 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value -0.0002423241372184748 1e-12 1e-12
+@value    6.289763755319743 1e-12 1e-12
+@value                    1 1e-12 1e-12
+Second Derivative
+@value   -39.41718761895117 1e-12 1e-12
+@value   -2.137550445330703 1e-12 1e-12
+@value 8.526512829121202e-14 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value -0.0002423241372184748 1e-12 1e-12
+@value    6.289763755319743 1e-12 1e-12
+@value                    1 1e-12 1e-12
+Second Derivative
+@value   -39.41718761895117 1e-12 1e-12
+@value   -2.137550445330703 1e-12 1e-12
+@value 8.526512829121202e-14 1e-12 1e-12
+Curve length:
+@value    6.361215886119691 1e-12 1e-12
+These points should be the same (window curve test)
+@value   0.3090152798043512 1e-12 1e-12
+@value   0.9510570341406573 1e-12 1e-12
+@value   0.2000000000000003 1e-12 1e-12
+@value   0.3090152798043511 1e-12 1e-12
+@value   0.9510570341406573 1e-12 1e-12
+@value   0.2000000000000003 1e-12 1e-12
+These three points should be the same (split curve test)
+@value  -0.9999998732013923 1e-12 1e-12
+@value -7.979727989493313e-17 1e-12 1e-12
+@value                  0.5 1e-12 1e-12
+@value  -0.9999998732013923 1e-12 1e-12
+@value -7.979727989493313e-17 1e-12 1e-12
+@value                  0.5 1e-12 1e-12
+@value  -0.9999998732013923 1e-12 1e-12
+@value -7.979727989493313e-17 1e-12 1e-12
+@value                  0.5 1e-12 1e-12
+These two points should be the same (reverse test)
+@value  -0.8090178071270437 1e-12 1e-12
+@value   0.5877839458681623 1e-12 1e-12
+@value   0.4000000000000001 1e-12 1e-12
+@value   -0.809017807127044 1e-12 1e-12
+@value   0.5877839458681625 1e-12 1e-12
+@value   0.4000000000000002 1e-12 1e-12
+Project point 0.400000 1.500000 1.500000
+@value   0.7706839285995981 1e-12 1e-12
+@value  -0.2704066121865817 1e-12 1e-12
+@value  -0.5084328535611384 1e-12 1e-12
+@value   -1.270683928599598 1e-12 1e-12
+Project point -0.100000 0.500000 1.800000
+@value                    0 1e-12 1e-12
+@value                  1.1 1e-12 1e-12
+@value  -0.5000000000000002 1e-12 1e-12
+@value                 -0.8 1e-12 1e-12
+Project point -0.000002 1.000000 0.250000
+@value                 0.75 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+--------- Test helix data with k=4-------
+Testing pt 0.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value 0.0002878354608810696 1e-12 1e-12
+@value    6.283203033038276 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value   -39.59038300543398 1e-12 1e-12
+@value -0.006273334569868894 1e-12 1e-12
+@value 2.842170943040401e-14 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value 0.0002878354608810696 1e-12 1e-12
+@value    6.283203033038276 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value   -39.59038300543398 1e-12 1e-12
+@value -0.006273334569868894 1e-12 1e-12
+@value 2.842170943040401e-14 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value 0.0002878354608810696 1e-12 1e-12
+@value    6.283203033038276 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value   -39.59038300543398 1e-12 1e-12
+@value -0.006273334569868894 1e-12 1e-12
+@value 2.842170943040401e-14 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value 0.0002878354608810696 1e-12 1e-12
+@value    6.283203033038276 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value   -39.59038300543398 1e-12 1e-12
+@value -0.006273334569868894 1e-12 1e-12
+@value 2.842170943040401e-14 1e-12 1e-12
+------- Cruve with inserted knots ----------
+Testing pt 0.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value 0.0002878354608810696 1e-12 1e-12
+@value    6.283203033038276 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value   -39.59038300543398 1e-12 1e-12
+@value -0.006273334569868894 1e-12 1e-12
+@value 2.842170943040401e-14 1e-12 1e-12
+Testing pt 0.500000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value 0.0002878354608810696 1e-12 1e-12
+@value    6.283203033038276 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value   -39.59038300543398 1e-12 1e-12
+@value -0.006273334569868894 1e-12 1e-12
+@value 2.842170943040401e-14 1e-12 1e-12
+Testing pt 0.750000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value 0.0002878354608810696 1e-12 1e-12
+@value    6.283203033038276 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value   -39.59038300543398 1e-12 1e-12
+@value -0.006273334569868894 1e-12 1e-12
+@value 2.842170943040401e-14 1e-12 1e-12
+Testing pt 1.000000
+Value:
+@value                    1 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+Deriv:
+@value 0.0002878354608810696 1e-12 1e-12
+@value    6.283203033038276 1e-12 1e-12
+@value    1.000000000000001 1e-12 1e-12
+Second Derivative
+@value   -39.59038300543398 1e-12 1e-12
+@value -0.006273334569868894 1e-12 1e-12
+@value 2.842170943040401e-14 1e-12 1e-12
+Curve length:
+@value    6.361209755761561 1e-12 1e-12
+These points should be the same (window curve test)
+@value   0.3090169882488165 1e-12 1e-12
+@value   0.9510565000724691 1e-12 1e-12
+@value   0.2000000000000002 1e-12 1e-12
+@value   0.3090169882488165 1e-12 1e-12
+@value   0.9510565000724691 1e-12 1e-12
+@value   0.2000000000000002 1e-12 1e-12
+These three points should be the same (split curve test)
+@value  -0.9999999577054185 1e-12 1e-12
+@value -7.979727989493313e-17 1e-12 1e-12
+@value   0.5000000000000001 1e-12 1e-12
+@value  -0.9999999577054185 1e-12 1e-12
+@value -7.979727989493313e-17 1e-12 1e-12
+@value   0.5000000000000001 1e-12 1e-12
+@value  -0.9999999577054185 1e-12 1e-12
+@value -7.979727989493313e-17 1e-12 1e-12
+@value   0.5000000000000001 1e-12 1e-12
+These two points should be the same (reverse test)
+@value  -0.8090169631187105 1e-12 1e-12
+@value   0.5877852289993803 1e-12 1e-12
+@value   0.4000000000000001 1e-12 1e-12
+@value  -0.8090169631187107 1e-12 1e-12
+@value   0.5877852289993805 1e-12 1e-12
+@value   0.4000000000000002 1e-12 1e-12
+Project point 0.400000 1.500000 1.500000
+@value   0.7706836273979165 1e-12 1e-12
+@value  -0.2704064529130491 1e-12 1e-12
+@value  -0.5084328296075172 1e-12 1e-12
+@value   -1.270683627397916 1e-12 1e-12
+Project point -0.100000 0.500000 1.800000
+@value                    0 1e-12 1e-12
+@value                  1.1 1e-12 1e-12
+@value  -0.5000000000000002 1e-12 1e-12
+@value                 -0.8 1e-12 1e-12
+Project point -0.000000 1.000000 0.250000
+@value                 0.75 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
+@value                    0 1e-12 1e-12
