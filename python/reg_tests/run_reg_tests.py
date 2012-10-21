@@ -60,14 +60,14 @@ if __name__ == '__main__':
 
     # Set the proper return codes for the script running this:
     if res == 0: #reg.REG_FILES_MATCH
-        print 'Success!'
+        print '%s: Success!'%(module_name)
         sys.exit(0)
     elif res == 1: #reg.REG_FILES_DO_NOT_MATCH
-        print 'Failure!'
+        print '%s: Failure!'%(module_name)
         if not nodiff:
             os.system('%s %s_reg.ref %s_reg'%(diff_cmd, module_name, module_name))
         sys.exit(1)
     elif res == -1: #reg.REG_ERROR
-        print 'Error in regression. Missing files.'
+        print '%s: Error in regression. Missing files.'%(module_name)
         sys.exit(1)
 
