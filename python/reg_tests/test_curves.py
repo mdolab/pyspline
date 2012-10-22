@@ -27,7 +27,7 @@ def eval_test(curve):
         print 'Deriv:'
         reg_write(curve.getDerivative(0))
         print 'Second Derivative'
-        reg_write(curve.getSecondDerivative(0))
+        reg_write(curve.getSecondDerivative(0),1e-10,1e-10)
     # end for
 
 
@@ -67,11 +67,12 @@ def run_curve_test(curve):
 def run_project_test(curve):
     # Run point projection and curve projection tests'
     pts = [[0.4,1.5,1.5],[-.1,0.5,1.8], curve(0.75)]
+    # Default tolerance is 1e-10. so only check to 1e-9
     s, D = curve.projectPoint(pts)
     for i in xrange(len(s)):
         print 'Project point %f %f %f'%(pts[i][0],pts[i][1],pts[i][2])
-        reg_write(s[i])
-        reg_write(D[i])
+        reg_write(s[i],1e-9,1e-9)
+        reg_write(D[i],1e-9,1e-9)
 
 
 def io_test(curve):
