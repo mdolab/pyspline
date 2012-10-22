@@ -581,8 +581,12 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   u = pt(1)  
   v = pt(2)
   w = pt(3)
-  diff = R
 
+  ! Get the ACTUAL difference
+  call eval_volume(pt(1), pt(2), pt(3), &
+       tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, 1, 1, 1, val)
+  diff = val - X0
+    
 end subroutine point_volume
 
 subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter,&
