@@ -24,7 +24,7 @@ def run_volume_test(volume):
     for pt in pts:
         print 'Testing pt (%f %f)'%(pt[0],pt[1])
         print 'Value:'
-        reg_write(volume(pt[0], pt[1], pt[2]))
+        reg_write(volume(pt[0], pt[1], pt[2]),1e-10,1e-10)
 
     print 'Get value corner'
     for i in xrange(8):
