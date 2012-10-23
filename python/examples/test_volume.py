@@ -30,4 +30,3 @@ import time
 timeA = time.time()
 u,v,w,D = vol.projectPoint(Y)
 print 'Time to project %d points: %f seconds:'%(M, time.time()-timeA)
-
