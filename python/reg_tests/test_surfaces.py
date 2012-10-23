@@ -29,7 +29,7 @@ def eval_test(surface):
         print 'Deriv:'
         reg_write(surface.getDerivative(pt[0],pt[1]),1e-10,1e-10)
         print 'Second Derivative'
-        reg_write(surface.getSecondDerivative(pt[0],pt[1]),1e-10,1e-10)
+        reg_write(surface.getSecondDerivative(pt[0],pt[1]),1e-8,1e-8)
 
     print 'Orig values at each corner'
     if surface.orig_data:
