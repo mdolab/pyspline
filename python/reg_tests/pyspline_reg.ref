@@ -1630,7 +1630,6 @@ Test get bounds
 @value    1.017040974832436 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value 0.000175564621302284 1e-09 1e-09
 v:
@@ -1640,7 +1639,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.51215553] [ 0.67261528]
 u:
 @value   0.5595882841800693 1e-09 1e-09
 v:
@@ -1650,7 +1648,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.78642309] [ 0.67261528]
 u:
 @value   0.7395160369960315 1e-09 1e-09
 v:
@@ -1660,31 +1657,26 @@ D:
 @value   0.2341775919157612 1e-09 1e-09
 @value  -0.2568447124090378 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.60357805] [ 0.]
 u:
 @value   0.6342780810745194 1e-09 1e-09
 v:
@@ -2152,7 +2144,6 @@ Test get bounds
 @value    1.001311423124954 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -2162,7 +2153,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.51215553] [ 0.66607031]
 u:
 @value   0.5458170136810991 1e-09 1e-09
 v:
@@ -2172,7 +2162,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.69500057] [ 0.66607031]
 u:
 @value   0.7351911225000883 1e-09 1e-09
 v:
@@ -2182,31 +2171,26 @@ D:
 @value   0.2307002474474689 1e-09 1e-09
 @value  -0.2888986647191482 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.60357805] [ 0.]
 u:
 @value   0.6349999999999999 1e-09 1e-09
 v:
@@ -2674,7 +2658,6 @@ Test get bounds
 @value   0.9929859225879651 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value 6.034760121269758e-07 1e-09 1e-09
 v:
@@ -2684,7 +2667,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.57779148] [ 0.67261528]
 u:
 @value   0.5777914841131557 1e-09 1e-09
 v:
@@ -2694,7 +2676,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73890255] [ 0.67261528]
 u:
 @value    0.751645197020869 1e-09 1e-09
 v:
@@ -2704,31 +2685,26 @@ D:
 @value   0.2325025380425787 1e-09 1e-09
 @value  -0.2594166069033494 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61874865] [ 0.]
 u:
 @value   0.6337264436642253 1e-09 1e-09
 v:
@@ -3196,7 +3172,6 @@ Test get bounds
 @value   0.9787707726635096 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -3206,7 +3181,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.57779148] [ 0.66607031]
 u:
 @value   0.5777914840975831 1e-09 1e-09
 v:
@@ -3216,7 +3190,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73890255] [ 0.66607031]
 u:
 @value   0.7519714467674289 1e-09 1e-09
 v:
@@ -3226,31 +3199,26 @@ D:
 @value   0.2334296097151549 1e-09 1e-09
 @value  -0.2973019655556786 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61874865] [ 0.]
 u:
 @value                0.635 1e-09 1e-09
 v:
@@ -3718,7 +3686,6 @@ Test get bounds
 @value    1.143480779480736 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value 0.0001741613402595832 1e-09 1e-09
 v:
@@ -3728,7 +3695,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.60357805] [ 0.60572342]
 u:
 @value   0.5687604638398022 1e-09 1e-09
 v:
@@ -3738,7 +3704,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.78642309] [ 0.71937929]
 u:
 @value   0.7378991470714714 1e-09 1e-09
 v:
@@ -3748,31 +3713,26 @@ D:
 @value   0.2801604406359965 1e-09 1e-09
 @value  -0.2498413388050515 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.60357805] [ 0.]
 u:
 @value   0.6315066416954662 1e-09 1e-09
 v:
@@ -4240,7 +4200,6 @@ Test get bounds
 @value    1.049716856056916 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -4250,7 +4209,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.51215553] [ 0.64601138]
 u:
 @value   0.5511755836470973 1e-09 1e-09
 v:
@@ -4260,7 +4218,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.69500057] [ 0.64601138]
 u:
 @value   0.7368102358608546 1e-09 1e-09
 v:
@@ -4270,31 +4227,26 @@ D:
 @value   0.2450423778290802 1e-09 1e-09
 @value  -0.2721023598133786 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.60357805] [ 0.]
 u:
 @value   0.6349999999999999 1e-09 1e-09
 v:
@@ -4762,7 +4714,6 @@ Test get bounds
 @value    1.115909037956623 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -4772,7 +4723,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.57779148] [ 0.60572342]
 u:
 @value    0.577791484620278 1e-09 1e-09
 v:
@@ -4782,7 +4732,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73890255] [ 0.71937929]
 u:
 @value   0.7506187480409602 1e-09 1e-09
 v:
@@ -4792,31 +4741,26 @@ D:
 @value   0.2796855985123945 1e-09 1e-09
 @value  -0.2533253148282757 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61874865] [ 0.]
 u:
 @value   0.6310047823818665 1e-09 1e-09
 v:
@@ -5284,7 +5228,6 @@ Test get bounds
 @value    1.024169716576617 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -5294,7 +5237,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.57779148] [ 0.64601138]
 u:
 @value   0.5777914841122884 1e-09 1e-09
 v:
@@ -5304,7 +5246,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73890255] [ 0.64601138]
 u:
 @value   0.7518652777092777 1e-09 1e-09
 v:
@@ -5314,31 +5255,26 @@ D:
 @value   0.2494060782235898 1e-09 1e-09
 @value  -0.2759247848950227 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61874865] [ 0.]
 u:
 @value                0.635 1e-09 1e-09
 v:
@@ -5806,7 +5742,6 @@ Test get bounds
 @value    1.662621102641826 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value 0.0001738476723471725 1e-09 1e-09
 v:
@@ -5816,7 +5751,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.60357805] [ 0.60586394]
 u:
 @value   0.5648486909459592 1e-09 1e-09
 v:
@@ -5826,7 +5760,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.69500057] [ 0.60586394]
 u:
 @value   0.7365426115911708 1e-09 1e-09
 v:
@@ -5836,31 +5769,26 @@ D:
 @value   0.2614997077266512 1e-09 1e-09
 @value  -0.2756815763676699 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.60357805] [ 0.]
 u:
 @value   0.6312917274813054 1e-09 1e-09
 v:
@@ -6328,7 +6256,6 @@ Test get bounds
 @value    1.097139915562338 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -6338,7 +6265,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.51215553] [ 0.6719072]
 u:
 @value   0.5510086218069153 1e-09 1e-09
 v:
@@ -6348,7 +6274,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.69500057] [ 0.6719072]
 u:
 @value    0.736858749540551 1e-09 1e-09
 v:
@@ -6358,31 +6283,26 @@ D:
 @value   0.2458524683152818 1e-09 1e-09
 @value   -0.271457570928717 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.60357805] [ 0.]
 u:
 @value   0.6349999999999999 1e-09 1e-09
 v:
@@ -6850,7 +6770,6 @@ Test get bounds
 @value    1.621781898001301 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -6860,7 +6779,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.57779148] [ 0.60586394]
 u:
 @value   0.5777914841184748 1e-09 1e-09
 v:
@@ -6870,7 +6788,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73890255] [ 0.71697505]
 u:
 @value   0.7505925675243382 1e-09 1e-09
 v:
@@ -6880,31 +6797,26 @@ D:
 @value   0.2627328346979971 1e-09 1e-09
 @value  -0.2792478637537783 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61874865] [ 0.]
 u:
 @value   0.6308565482975834 1e-09 1e-09
 v:
@@ -7372,7 +7284,6 @@ Test get bounds
 @value    1.072265553484741 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -7382,7 +7293,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.57779148] [ 0.61822356]
 u:
 @value   0.5777914841058077 1e-09 1e-09
 v:
@@ -7392,7 +7302,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73890255] [ 0.6719072]
 u:
 @value   0.7517177827642795 1e-09 1e-09
 v:
@@ -7402,31 +7311,26 @@ D:
 @value   0.2503514624501766 1e-09 1e-09
 @value  -0.2754008672105371 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61874865] [ 0.]
 u:
 @value                0.635 1e-09 1e-09
 v:
@@ -7894,7 +7798,6 @@ Test get bounds
 @value   0.9932651294587284 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value 3.76238208885814e-05 1e-09 1e-09
 v:
@@ -7904,7 +7807,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.50657841] [ 0.67261528]
 u:
 @value   0.5723682031015204 1e-09 1e-09
 v:
@@ -7914,7 +7816,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73574714] [ 0.67261528]
 u:
 @value   0.7463971530607731 1e-09 1e-09
 v:
@@ -7924,31 +7825,26 @@ D:
 @value   0.2356735825415215 1e-09 1e-09
 @value  -0.2602656891338905 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62116277] [ 0.]
 u:
 @value   0.6341458787826433 1e-09 1e-09
 v:
@@ -8416,7 +8312,6 @@ Test get bounds
 @value   0.9806964981294796 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -8426,7 +8321,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.62116277] [ 0.62441301]
 u:
 @value   0.5635962541191668 1e-09 1e-09
 v:
@@ -8436,7 +8330,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73574714] [ 0.66607031]
 u:
 @value    0.742940781109687 1e-09 1e-09
 v:
@@ -8446,31 +8339,26 @@ D:
 @value   0.2348073034837541 1e-09 1e-09
 @value  -0.2959914761985359 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62116277] [ 0.]
 u:
 @value   0.6349999999999999 1e-09 1e-09
 v:
@@ -8938,7 +8826,6 @@ Test get bounds
 @value    1.006673951165237 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -8948,7 +8835,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.58329585] [ 0.67261528]
 u:
 @value   0.5815497578125773 1e-09 1e-09
 v:
@@ -8958,7 +8844,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.76403589] [ 0.67261528]
 u:
 @value   0.7517893482327731 1e-09 1e-09
 v:
@@ -8968,31 +8853,26 @@ D:
 @value   0.2376804157306802 1e-09 1e-09
 @value  -0.2599557507187669 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62900711] [ 0.]
 u:
 @value   0.6334939134646383 1e-09 1e-09
 v:
@@ -9460,7 +9340,6 @@ Test get bounds
 @value   0.9827750043225876 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -9470,7 +9349,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.58329585] [ 0.66607031]
 u:
 @value   0.5709104387239837 1e-09 1e-09
 v:
@@ -9480,7 +9358,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.76403589] [ 0.66607031]
 u:
 @value    0.750732721772414 1e-09 1e-09
 v:
@@ -9490,31 +9367,26 @@ D:
 @value    0.238108336096277 1e-09 1e-09
 @value  -0.2946807732129472 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62900711] [ 0.]
 u:
 @value   0.6350000000000002 1e-09 1e-09
 v:
@@ -9982,7 +9854,6 @@ Test get bounds
 @value    1.117351082098979 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value 0.0001002212022429703 1e-09 1e-09
 v:
@@ -9992,7 +9863,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.62116277] [ 0.60572342]
 u:
 @value   0.5793819856682931 1e-09 1e-09
 v:
@@ -10002,7 +9872,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73574714] [ 0.71937929]
 u:
 @value    0.744598971500571 1e-09 1e-09
 v:
@@ -10012,31 +9881,26 @@ D:
 @value   0.2822057544820331 1e-09 1e-09
 @value  -0.2532880466538233 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62116277] [ 0.]
 u:
 @value   0.6316704754646406 1e-09 1e-09
 v:
@@ -10504,7 +10368,6 @@ Test get bounds
 @value    1.028914013839137 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -10514,7 +10377,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.62116277] [ 0.64601138]
 u:
 @value   0.5680278790631603 1e-09 1e-09
 v:
@@ -10524,7 +10386,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73574714] [ 0.64601138]
 u:
 @value   0.7439857249092885 1e-09 1e-09
 v:
@@ -10534,31 +10395,26 @@ D:
 @value   0.2504270204610459 1e-09 1e-09
 @value  -0.2756236251086895 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62116277] [ 0.]
 u:
 @value   0.6349999999999999 1e-09 1e-09
 v:
@@ -11026,7 +10882,6 @@ Test get bounds
 @value    1.137425184463309 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -11036,7 +10891,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.58329585] [ 0.60572342]
 u:
 @value   0.5873322008150057 1e-09 1e-09
 v:
@@ -11046,7 +10900,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.76403589] [ 0.71937929]
 u:
 @value   0.7504756659596132 1e-09 1e-09
 v:
@@ -11056,31 +10909,26 @@ D:
 @value   0.2846156104553428 1e-09 1e-09
 @value  -0.2529486912770075 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62900711] [ 0.]
 u:
 @value   0.6318086734902405 1e-09 1e-09
 v:
@@ -11548,7 +11396,6 @@ Test get bounds
 @value    1.034373848978896 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -11558,7 +11405,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.58329585] [ 0.64601138]
 u:
 @value   0.5762582815058332 1e-09 1e-09
 v:
@@ -11568,7 +11414,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.76403589] [ 0.64601138]
 u:
 @value   0.7506680997317479 1e-09 1e-09
 v:
@@ -11578,31 +11423,26 @@ D:
 @value   0.2522856205472075 1e-09 1e-09
 @value  -0.2740773921217595 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62900711] [ 0.]
 u:
 @value                0.635 1e-09 1e-09
 v:
@@ -12070,7 +11910,6 @@ Test get bounds
 @value    1.626546399122168 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value 0.0001132019747502644 1e-09 1e-09
 v:
@@ -12080,7 +11919,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.62116277] [ 0.60586394]
 u:
 @value   0.5760130983811991 1e-09 1e-09
 v:
@@ -12090,7 +11928,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73574714] [ 0.71697505]
 u:
 @value   0.7441663913603991 1e-09 1e-09
 v:
@@ -12100,31 +11937,26 @@ D:
 @value   0.2651661976359976 1e-09 1e-09
 @value  -0.2792257330989344 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62116277] [ 0.]
 u:
 @value   0.6315079121964836 1e-09 1e-09
 v:
@@ -12592,7 +12424,6 @@ Test get bounds
 @value    1.080577284067687 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -12602,7 +12433,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.62116277] [ 0.61822356]
 u:
 @value   0.5679973465695426 1e-09 1e-09
 v:
@@ -12612,7 +12442,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.73574714] [ 0.6719072]
 u:
 @value   0.7439728674242956 1e-09 1e-09
 v:
@@ -12622,31 +12451,26 @@ D:
 @value   0.2514071553959685 1e-09 1e-09
 @value  -0.2750342442094198 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62116277] [ 0.]
 u:
 @value   0.6349999999999999 1e-09 1e-09
 v:
@@ -13114,7 +12938,6 @@ Test get bounds
 @value    1.649788376082123 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -13124,7 +12947,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.58329585] [ 0.60586394]
 u:
 @value   0.5842016856555007 1e-09 1e-09
 v:
@@ -13134,7 +12956,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.76403589] [ 0.71697505]
 u:
 @value   0.7503631969748605 1e-09 1e-09
 v:
@@ -13144,31 +12965,26 @@ D:
 @value    0.268247309960485 1e-09 1e-09
 @value  -0.2792871841848117 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62900711] [ 0.]
 u:
 @value   0.6318912387039386 1e-09 1e-09
 v:
@@ -13636,7 +13452,6 @@ Test get bounds
 @value    1.084435053727267 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -13646,7 +13461,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.58329585] [ 0.61822356]
 u:
 @value   0.5762979726800724 1e-09 1e-09
 v:
@@ -13656,7 +13470,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.76403589] [ 0.6719072]
 u:
 @value   0.7504949765364171 1e-09 1e-09
 v:
@@ -13666,31 +13479,26 @@ D:
 @value   0.2532437059487593 1e-09 1e-09
 @value  -0.2734917449206771 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.62900711] [ 0.]
 u:
 @value                0.635 1e-09 1e-09
 v:
@@ -14158,7 +13966,6 @@ Test get bounds
 @value   0.9932177031186872 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value 5.665203890110471e-06 1e-09 1e-09
 v:
@@ -14168,7 +13975,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.61516295] [ 0.57843688]
 u:
 @value   0.5778882989882248 1e-09 1e-09
 v:
@@ -14178,7 +13984,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.72627407] [ 0.67261528]
 u:
 @value   0.7484418081198509 1e-09 1e-09
 v:
@@ -14188,31 +13993,26 @@ D:
 @value   0.2326343848684851 1e-09 1e-09
 @value   -0.259999392690565 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61516295] [ 0.]
 u:
 @value   0.6341108124326807 1e-09 1e-09
 v:
@@ -14680,7 +14480,6 @@ Test get bounds
 @value   0.9807996893826464 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -14690,7 +14489,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.61516295] [ 0.62441301]
 u:
 @value   0.5684237006830849 1e-09 1e-09
 v:
@@ -14700,7 +14498,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.72627407] [ 0.66607031]
 u:
 @value   0.7458037417326968 1e-09 1e-09
 v:
@@ -14710,31 +14507,26 @@ D:
 @value   0.2316766453011616 1e-09 1e-09
 @value  -0.2971184214393584 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61516295] [ 0.]
 u:
 @value   0.6350000000000002 1e-09 1e-09
 v:
@@ -15202,7 +14994,6 @@ Test get bounds
 @value    1.021698637912445 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -15212,7 +15003,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.59096585] [ 0.67261528]
 u:
 @value   0.5825788473493374 1e-09 1e-09
 v:
@@ -15222,7 +15012,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.7477625] [ 0.67261528]
 u:
 @value   0.7511580183004506 1e-09 1e-09
 v:
@@ -15232,31 +15021,26 @@ D:
 @value   0.2381577727927127 1e-09 1e-09
 @value  -0.2588860826980018 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.6432314] [ 0.]
 u:
 @value    0.633222787280838 1e-09 1e-09
 v:
@@ -15724,7 +15508,6 @@ Test get bounds
 @value   0.9787707726635098 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -15734,7 +15517,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.59096585] [ 0.66607031]
 u:
 @value   0.5718502431523947 1e-09 1e-09
 v:
@@ -15744,7 +15526,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.7477625] [ 0.66607031]
 u:
 @value   0.7503419305621647 1e-09 1e-09
 v:
@@ -15754,31 +15535,26 @@ D:
 @value   0.2387406345350138 1e-09 1e-09
 @value  -0.2929317107563606 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.6432314] [ 0.]
 u:
 @value   0.6349999999999999 1e-09 1e-09
 v:
@@ -16246,7 +16022,6 @@ Test get bounds
 @value    1.117377664196465 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value 8.169091047881898e-05 1e-09 1e-09
 v:
@@ -16256,7 +16031,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.61516295] [ 0.60572342]
 u:
 @value   0.5839565057852695 1e-09 1e-09
 v:
@@ -16266,7 +16040,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.72627407] [ 0.71937929]
 u:
 @value    0.746829938822503 1e-09 1e-09
 v:
@@ -16276,31 +16049,26 @@ D:
 @value   0.2788545265444742 1e-09 1e-09
 @value  -0.2535424924879318 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61516295] [ 0.]
 u:
 @value   0.6316065888375283 1e-09 1e-09
 v:
@@ -16768,7 +16536,6 @@ Test get bounds
 @value    1.029375964634847 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -16778,7 +16545,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.61516295] [ 0.64601138]
 u:
 @value   0.5729088715897488 1e-09 1e-09
 v:
@@ -16788,7 +16554,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.72627407] [ 0.64601138]
 u:
 @value    0.746399012740418 1e-09 1e-09
 v:
@@ -16798,31 +16563,26 @@ D:
 @value   0.2480645846742258 1e-09 1e-09
 @value  -0.2761137035803164 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61516295] [ 0.]
 u:
 @value   0.6350000000000002 1e-09 1e-09
 v:
@@ -17290,7 +17050,6 @@ Test get bounds
 @value    1.166254683266087 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -17300,7 +17059,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.59096585] [ 0.60572342]
 u:
 @value   0.5883985587971657 1e-09 1e-09
 v:
@@ -17310,7 +17068,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.7477625] [ 0.71937929]
 u:
 @value   0.7498923088966906 1e-09 1e-09
 v:
@@ -17320,31 +17077,26 @@ D:
 @value   0.2849807851823174 1e-09 1e-09
 @value  -0.2518152500639433 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.6432314] [ 0.]
 u:
 @value   0.6322934928632746 1e-09 1e-09
 v:
@@ -17812,7 +17564,6 @@ Test get bounds
 @value    1.029535649636214 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -17822,7 +17573,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.59096585] [ 0.64601138]
 u:
 @value   0.5772809780684743 1e-09 1e-09
 v:
@@ -17832,7 +17582,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.7477625] [ 0.64601138]
 u:
 @value    0.750198091332936 1e-09 1e-09
 v:
@@ -17842,31 +17591,26 @@ D:
 @value    0.252061101081543 1e-09 1e-09
 @value  -0.2728083368526921 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.6432314] [ 0.]
 u:
 @value   0.6349999999999999 1e-09 1e-09
 v:
@@ -18334,7 +18078,6 @@ Test get bounds
 @value    1.626797164652069 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value 9.599457341164267e-05 1e-09 1e-09
 v:
@@ -18344,7 +18087,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.61516295] [ 0.60586394]
 u:
 @value   0.5808973879511291 1e-09 1e-09
 v:
@@ -18354,7 +18096,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.72627407] [ 0.71697505]
 u:
 @value    0.746706791235052 1e-09 1e-09
 v:
@@ -18364,31 +18105,26 @@ D:
 @value   0.2620177800745775 1e-09 1e-09
 @value  -0.2790432665654101 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61516295] [ 0.]
 u:
 @value   0.6314411952421263 1e-09 1e-09
 v:
@@ -18856,7 +18592,6 @@ Test get bounds
 @value    1.081140614145535 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -18866,7 +18601,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.61516295] [ 0.61822356]
 u:
 @value   0.5728868388422653 1e-09 1e-09
 v:
@@ -18876,7 +18610,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.72627407] [ 0.6719072]
 u:
 @value   0.7463551133054861 1e-09 1e-09
 v:
@@ -18886,31 +18619,26 @@ D:
 @value   0.2489181555147493 1e-09 1e-09
 @value  -0.2758140091506023 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.61516295] [ 0.]
 u:
 @value   0.6350000000000002 1e-09 1e-09
 v:
@@ -19378,7 +19106,6 @@ Test get bounds
 @value    1.665206021716596 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -19388,7 +19115,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.59096585] [ 0.60586394]
 u:
 @value   0.5853483328126323 1e-09 1e-09
 v:
@@ -19398,7 +19124,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.7477625] [ 0.71697505]
 u:
 @value   0.7499040792755675 1e-09 1e-09
 v:
@@ -19408,31 +19133,26 @@ D:
 @value   0.2687475141917259 1e-09 1e-09
 @value  -0.2784094902772062 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.6432314] [ 0.]
 u:
 @value   0.6325414888126468 1e-09 1e-09
 v:
@@ -19900,7 +19620,6 @@ Test get bounds
 @value     1.08089940961453 1e-12 1e-12
 ------------- These points should be fully inside of domain
 Projecting point (0.000000 0.000000 0.000000)
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
@@ -19910,7 +19629,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (2.000000 3.000000 -1.000000)
-[ 0.59096585] [ 0.61822356]
 u:
 @value   0.5773072744303024 1e-09 1e-09
 v:
@@ -19920,7 +19638,6 @@ D:
 @value                    0 1e-09 1e-09
 @value                    0 1e-09 1e-09
 Projecting point (3.000000 2.500000 -0.100000)
-[ 0.7477625] [ 0.6719072]
 u:
 @value   0.7500065553614338 1e-09 1e-09
 v:
@@ -19930,31 +19647,26 @@ D:
 @value   0.2530224469773952 1e-09 1e-09
 @value  -0.2721934624591533 1e-09 1e-09
  ----------- This should be (0,0) corner
-[ 0.] [ 0.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (0,1) corner
-[ 0.] [ 1.]
 u:
 @value                    0 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be (1,0) corner
-[ 1.] [ 0.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    0 1e-09 1e-09
  ---------- This should be (1,1) corner
-[ 1.] [ 1.]
 u:
 @value                    1 1e-09 1e-09
 v:
 @value                    1 1e-09 1e-09
  ---------- This should be  edge zero (*,0)
-[ 0.6432314] [ 0.]
 u:
 @value   0.6349999999999999 1e-09 1e-09
 v:
