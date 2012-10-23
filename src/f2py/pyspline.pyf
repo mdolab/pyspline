@@ -399,7 +399,7 @@
        real(kind=realtype) dimension(ndim,n),intent(in) :: x0
        real(kind=realtype) dimension(nu),intent(in) :: uu
        real(kind=realtype) dimension(nv),intent(in) :: vv
-       real(kind=realtype) dimension(ndim,nu,nv),intent(in),depend(ndim,nu,nv) :: data
+       real(kind=realtype) dimension(ndim,nv,nu),intent(in),depend(ndim,nv,nu) :: data
        integer, optional,intent(in),check(len(uu)>=nu),depend(uu) :: nu=len(uu)
        integer, optional,intent(in),check(len(vv)>=nv),depend(vv) :: nv=len(vv)
        integer, optional,intent(in),check(shape(x0,0)==ndim),depend(x0) :: ndim=shape(x0,0)

@@ -1097,7 +1097,8 @@ subroutine point_surface_start(x0, uu, vv, data, nu, nv, ndim, N, u, v)
 
   ! Input
   integer              , intent(in) :: nu, nv, ndim, N
-  real(kind=realType)  , intent(in) :: x0(ndim, N), uu(nu), vv(nv), data(ndim, nu, nv)
+  real(kind=realType)  , intent(in) :: x0(ndim, N), uu(nu), vv(nv)
+  real(kind=realType)  , intent(in) :: data(ndim, nv, nu)
   
   ! Output
   real(kind=realType)  , intent(out) :: u(N), v(N)
@@ -1105,14 +1106,14 @@ subroutine point_surface_start(x0, uu, vv, data, nu, nv, ndim, N, u, v)
   ! Working
   real(kind=realType)  :: D, norm
   integer              :: ipt, i, j
-
+  
   do ipt=1,N
      D = 1e20
      do i=1,nu
         do j=1,nv
            if (norm(X0(:, ipt)-data(:, j, i), ndim) < D) then
               u(ipt) = uu(i)
-              v(ipt) = vv(i)
+              v(ipt) = vv(j)
               D = norm(X0(:, ipt)-data(:, j, i), ndim)
            end if
         end do
