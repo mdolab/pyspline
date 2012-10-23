@@ -1594,7 +1594,7 @@ MUST be defined for task lms or interpolate'
             u,v = pyspline.point_surface_start(
                 x0.T, self.udata, self.vdata, self.data.T)
         # end if
-        print u,v
+       
         D = numpy.zeros_like(x0)
         for i in xrange(len(x0)):
             u[i], v[i], D[i] = pyspline.point_surface(
