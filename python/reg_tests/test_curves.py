@@ -1,7 +1,7 @@
 # =============================================================================
 # Standard Python modules                                           
 # =============================================================================
-import os, sys, argparse
+import os, sys
 
 # =============================================================================
 # External Python modules
@@ -14,7 +14,6 @@ import numpy
 from mdo_regression_helper import *
 sys.path.append('../')
 import pySpline
-import numpy
 
 def eval_test(curve):
     '''Eval fixed points from the curve'''
@@ -23,11 +22,11 @@ def eval_test(curve):
     for pt in pts:
         print 'Testing pt %f'%(pt)
         print 'Value:'
-        reg_write(curve(0.0))
+        reg_write(curve(pt))
         print 'Deriv:'
-        reg_write(curve.getDerivative(0))
+        reg_write(curve.getDerivative(pt))
         print 'Second Derivative'
-        reg_write(curve.getSecondDerivative(0),1e-10,1e-10)
+        reg_write(curve.getSecondDerivative(pt),1e-10,1e-10)
     # end for
 
 

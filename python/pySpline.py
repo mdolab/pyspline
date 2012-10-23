@@ -1594,7 +1594,7 @@ MUST be defined for task lms or interpolate'
             u,v = pyspline.point_surface_start(
                 x0.T, self.udata, self.vdata, self.data.T)
         # end if
-
+        print u,v
         D = numpy.zeros_like(x0)
         for i in xrange(len(x0)):
             u[i], v[i], D[i] = pyspline.point_surface(
@@ -1631,6 +1631,15 @@ MUST be defined for task lms or interpolate'
             s = geo_utils.checkInput(kwargs['s'], 's', float, 0)
         Niter = geo_utils.checkInput(Niter, 'Niter', int, 0)
         eps   = geo_utils.checkInput(eps, 'eps', float, 0)
+
+        # If necessary get brute-force starting point
+        if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0):
+            self._computeData()
+            in_curve._computeData()
+            s, u, v = pyspline.curve_surface_start(
+                in_curve.data.T, in_curve.sdata, self.data.T, 
+                self.udata, self.vdata)
+        # end if
 
         return pyspline.curve_surface(\
             in_curve.t, in_curve.k, in_curve.coef.T, self.tu, self.tv, \
