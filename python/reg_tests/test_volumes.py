@@ -64,8 +64,8 @@ def run_volume_test(volume):
 
 def run_project_test(volume):
     # Run a bunch of point projections: Tolerance for projections is
-    # 1e-10, so only enforce that things match to 1e-9 or 10*eps
-    eps = 1e-10
+    # 1e-10, so only enforce that things match to 1e-8 or 100*eps
+    eps = 1e-8
 
     print '------------- These points should be fully inside of domain'
     pts= [[0,0,0],[.025,.09,.3],[.2,.3,.1]]
@@ -73,13 +73,13 @@ def run_project_test(volume):
         print 'Projecting point (%f %f %f)'%(pt[0],pt[1],pt[2])
         u,v,w,D = volume.projectPoint(pt)
         print 'u:'
-        reg_write(u, eps*10, eps*10)
+        reg_write(u, eps, eps)
         print 'v:'
-        reg_write(v, eps*10, eps*10)
+        reg_write(v, eps, eps)
         print 'w:'
-        reg_write(w, eps*10, eps*10)
+        reg_write(w, eps, eps)
         print 'D:'
-        reg_write(D, eps*10, eps*10)
+        reg_write(D, eps, eps)
     # end for
 
 def io_test(volume):

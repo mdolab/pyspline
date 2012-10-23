@@ -82,56 +82,55 @@ def run_surface_test(surface):
     
 
 def run_project_test(surface):
-    # Run a bunch of point projections: Tolerance for projections is
-    # 1e-10, so only enforce that things match to 1e-9 or 10*eps
-    eps = 1e-10
+    # Run a bunch of point projections: Only try to match to 1e-8
+    eps = 1e-8
 
     print '------------- These points should be fully inside of domain'
     pts= [[0,0,0],[2,3,-1],[3,2.5,-.1]]
     for pt in pts:
         print 'Projecting point (%f %f %f)'%(pt[0],pt[1],pt[2])
-        u,v,D = surface.projectPoint(pt)
+        u,v,D = surface.projectPoint(pt,eps=1e-12)
         print 'u:'
-        reg_write(u, eps*10, eps*10)
+        reg_write(u, eps, eps)
         print 'v:'
-        reg_write(v, eps*10, eps*10)
+        reg_write(v, eps, eps)
         print 'D:'
         reg_write(D, eps*10, eps*10)
 
     print ' ----------- This should be (0,0) corner'
-    u,v,D = surface.projectPoint([-1,-1,0])
+    u,v,D = surface.projectPoint([-1,-1,0],eps=1e-12)
     print 'u:'
-    reg_write(u, eps*10, eps*10)
+    reg_write(u, eps, eps)
     print 'v:'
-    reg_write(v, eps*10, eps*10)
+    reg_write(v, eps, eps)
 
     print ' ---------- This should be (0,1) corner'
-    u,v,D = surface.projectPoint([-1,5,0])
+    u,v,D = surface.projectPoint([-1,5,0],eps=1e-12)
     print 'u:'
-    reg_write(u, eps*10, eps*10)
+    reg_write(u, eps, eps)
     print 'v:'
-    reg_write(v, eps*10, eps*10)
+    reg_write(v, eps, eps)
 
     print ' ---------- This should be (1,0) corner'
-    u,v,D = surface.projectPoint([6,-1,0])
+    u,v,D = surface.projectPoint([6,-1,0],eps=1e-12)
     print 'u:'
-    reg_write(u, eps*10, eps*10)
+    reg_write(u, eps, eps)
     print 'v:'
-    reg_write(v, eps*10, eps*10)
+    reg_write(v, eps, eps)
 
     print ' ---------- This should be (1,1) corner'
-    u,v,D = surface.projectPoint([6,6,0])
+    u,v,D = surface.projectPoint([6,6,0],eps=1e-12)
     print 'u:'
-    reg_write(u, eps*10, eps*10)
+    reg_write(u, eps, eps)
     print 'v:'
-    reg_write(v, eps*10, eps*10)
+    reg_write(v, eps, eps)
 
     print ' ---------- This should be  edge zero (*,0)'
-    u,v,D = surface.projectPoint([2.54,-1,0])
+    u,v,D = surface.projectPoint([2.54,-1,0],eps=1e-12)
     print 'u:'
-    reg_write(u, eps*10, eps*10)
+    reg_write(u, eps, eps)
     print 'v:'
-    reg_write(v,eps*10, eps*10)
+    reg_write(v,eps, eps)
 
 
     # Curve projection
@@ -144,11 +143,11 @@ def run_project_test(surface):
         u,v,s,D = surface.projectCurve(curve)
         print ' ---------- surface-curve projection with kc=%d'%(kc)
         print 'u:'
-        reg_write(u, eps*10, eps*10)
+        reg_write(u, eps, eps)
         print 'v:'
-        reg_write(v, eps*10, eps*10)
+        reg_write(v, eps, eps)
         print 's:'
-        reg_write(s, eps*10, eps*10)
+        reg_write(s, eps, eps)
         print 'D:'
         reg_write(D, eps*10, eps*10)
  
