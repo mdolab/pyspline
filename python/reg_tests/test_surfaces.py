@@ -17,14 +17,17 @@ import pySpline
 
 def eval_test(surface):
     '''Eval fixed points from the surface'''
-    # ----------- Evaluation and derivative functions ---------------
+    # Evaluations are only good to about 1e-10 since there is fitting
+    # involved
+
+    #----------- Evaluation and derivative functions ---------------
     pts = [[0,0],[1,0],[0,1],[1,1],[.25,.25],[.75,.25]]
     for pt in pts:
         print 'Testing pt (%f %f)'%(pt[0],pt[1])
         print 'Value:'
-        reg_write(surface(pt[0],pt[1]))
+        reg_write(surface(pt[0],pt[1]),1e-10,1e-10)
         print 'Deriv:'
-        reg_write(surface.getDerivative(pt[0],pt[1]))
+        reg_write(surface.getDerivative(pt[0],pt[1]),1e-10,1e-10)
         print 'Second Derivative'
         reg_write(surface.getSecondDerivative(pt[0],pt[1]),1e-10,1e-10)
 
