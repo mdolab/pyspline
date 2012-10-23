@@ -374,8 +374,12 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
   ! Set the final values of the parameters and our distance function
   u = pt(1)  
   v = pt(2)
-  diff = R
 
+  ! Get the ACTUAL difference
+  call eval_surface(pt(1), pt(2), tu, tv, ku, kv, coef, nctlu, nctlv, &
+       ndim, 1, 1, val)
+  diff = val - X0
+    
 end subroutine point_surface
 
 subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, &
