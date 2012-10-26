@@ -18,3 +18,4 @@ F2PY = f2py
 
 # Define additional flags for linking
 LINKER_FLAGS = 
+SO_LINKER_FLAGS =-fPIC -shared

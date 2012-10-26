@@ -13,7 +13,7 @@ default:
 	@echo "Supported architectures: LINUX_INTEL"
 	@echo "                         LINUX_GFORTRAN"
 	@echo "                         LINUX_INTEL_SCINET"
-	@echo "                         BASALT"
+	@echo "                         OSX_GFORTRAN"
 
 all:	 default
 
@@ -71,5 +71,12 @@ LINUX_INTEL_SCINET:
 	mkdir -p obj
 	if [ ! -f "config/config.LINUX_INTEL_SCINET.mk" ]; then cp "config/defaults/config.LINUX_INTEL_SCINET.mk" ./config; fi
 	ln -sf config/config.LINUX_INTEL_SCINET.mk config.mk
+	make module
+	(cd src/f2py && make)
+
+OSX_GFORTRAN:
+	mkdir -p obj
+	if [ ! -f "config/config.OSX_GFORTRAN.mk" ]; then cp "config/defaults/config.OSX_GFORTRAN.mk" ./config; fi
+	ln -sf config/config.OSX_GFORTRAN.mk config.mk
 	make module
 	(cd src/f2py && make)

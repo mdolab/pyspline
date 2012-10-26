@@ -14,7 +14,7 @@ default: all
 all:
 
 # Generate Python inlude directory
-	 $(eval PYTHON_INCLUDES = $(shell $(PYTHON-CONFIG) --includes))
+	$(eval PYTHON_INCLUDES = $(shell $(PYTHON-CONFIG) --includes))
 	 @echo "#------------------------------------------------------#"
 	 @echo Python Inclue Flags $(PYTHON_INCLUDES)
 	 @echo "#------------------------------------------------------#"
@@ -42,7 +42,7 @@ all:
 	$(CC) $(CC_FLAGS) $(PYTHON_INCLUDES) -I$(NUMPY_INCLUDES) -c \
 	$(F2PY_ROOT)/src/fortranobject.c -o fortranobject.o
 
-	$(FF90) -shared $(PYTHON_OBJECTS) $(LINKER_ALL_FLAGS) -o pyspline.so
+	$(FF90) $(SO_LINKER_FLAGS) $(PYTHON_OBJECTS) $(LINKER_ALL_FLAGS) -o pyspline.so
 	$(PYTHON) importTest.py
 	mv pyspline.so ../../python
 

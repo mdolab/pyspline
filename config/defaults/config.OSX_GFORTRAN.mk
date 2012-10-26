@@ -1,11 +1,11 @@
-# Config File for LINUX and INTEL Compiler
+# Config File for LINUX and GFORTRAN Compiler
 AR       = ar
 AR_FLAGS = -rvs
 RM       = /bin/rm -rf
 
 # Fortran compiler and flags
-FF90        = ifort
-FF90_FLAGS  = -r8 -O2 -fPIC
+FF90        = gfortran
+FF90_FLAGS  = -fdefault-real-8 -O2 -fPIC
 
 # C compiler and flags
 CC       = gcc
@@ -18,4 +18,4 @@ F2PY = f2py
 
 # Define additional flags for linking
 LINKER_FLAGS = 
-SO_LINKER_FLAGS =-fPIC -shared
+SO_LINKER_FLAGS=-fPIC -dynamiclib -single_module -undefined dynamic_lookup -multiply_defined suppress
