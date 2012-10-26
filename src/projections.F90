@@ -374,8 +374,12 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
   ! Set the final values of the parameters and our distance function
   u = pt(1)  
   v = pt(2)
-  diff = R
 
+  ! Get the ACTUAL difference
+  call eval_surface(pt(1), pt(2), tu, tv, ku, kv, coef, nctlu, nctlv, &
+       ndim, 1, 1, val)
+  diff = val - X0
+    
 end subroutine point_surface
 
 subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, &
@@ -581,8 +585,12 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   u = pt(1)  
   v = pt(2)
   w = pt(3)
-  diff = R
 
+  ! Get the ACTUAL difference
+  call eval_volume(pt(1), pt(2), pt(3), &
+       tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, 1, 1, 1, val)
+  diff = val - X0
+    
 end subroutine point_volume
 
 subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter,&
@@ -1093,7 +1101,8 @@ subroutine point_surface_start(x0, uu, vv, data, nu, nv, ndim, N, u, v)
 
   ! Input
   integer              , intent(in) :: nu, nv, ndim, N
-  real(kind=realType)  , intent(in) :: x0(ndim, N), uu(nu), vv(nv), data(ndim, nu, nv)
+  real(kind=realType)  , intent(in) :: x0(ndim, N), uu(nu), vv(nv)
+  real(kind=realType)  , intent(in) :: data(ndim, nv, nu)
   
   ! Output
   real(kind=realType)  , intent(out) :: u(N), v(N)
@@ -1101,14 +1110,14 @@ subroutine point_surface_start(x0, uu, vv, data, nu, nv, ndim, N, u, v)
   ! Working
   real(kind=realType)  :: D, norm
   integer              :: ipt, i, j
-
+  
   do ipt=1,N
      D = 1e20
      do i=1,nu
         do j=1,nv
            if (norm(X0(:, ipt)-data(:, j, i), ndim) < D) then
               u(ipt) = uu(i)
-              v(ipt) = vv(i)
+              v(ipt) = vv(j)
               D = norm(X0(:, ipt)-data(:, j, i), ndim)
            end if
         end do
