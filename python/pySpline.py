@@ -1594,7 +1594,7 @@ MUST be defined for task lms or interpolate'
             u,v = pyspline.point_surface_start(
                 x0.T, self.udata, self.vdata, self.data.T)
         # end if
-
+       
         D = numpy.zeros_like(x0)
         for i in xrange(len(x0)):
             u[i], v[i], D[i] = pyspline.point_surface(
@@ -1631,6 +1631,15 @@ MUST be defined for task lms or interpolate'
             s = geo_utils.checkInput(kwargs['s'], 's', float, 0)
         Niter = geo_utils.checkInput(Niter, 'Niter', int, 0)
         eps   = geo_utils.checkInput(eps, 'eps', float, 0)
+
+        # If necessary get brute-force starting point
+        if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0):
+            self._computeData()
+            in_curve._computeData()
+            s, u, v = pyspline.curve_surface_start(
+                in_curve.data.T, in_curve.sdata, self.data.T, 
+                self.udata, self.vdata)
+        # end if
 
         return pyspline.curve_surface(\
             in_curve.t, in_curve.k, in_curve.coef.T, self.tu, self.tv, \
@@ -2544,7 +2553,7 @@ MUST be defined for task lms or interpolate'
             w = s
         elif edge == 11:
             u = self.umax
-            v = self.vamx
+            v = self.vmax
             w = s
 
         u = numpy.atleast_3d(u).T
@@ -2557,7 +2566,6 @@ MUST be defined for task lms or interpolate'
         vals = pyspline.eval_volume(u, v, w, self.tu, self.tv, self.tw, 
                                     self.ku, self.kv, self.kw, self.coef.T)
         return vals.squeeze().T
-
 
     def getBounds(self):
         """Determine the extents of the volume
@@ -2727,20 +2735,6 @@ MUST be defined for task lms or interpolate'
         # end if
         
         return 
-
-    def getCoefQuality(self):
-        """ Return a list of the quality of the volumes defined by the
-        network of control points"""
-        return pyspline.quality_volume(self.coef.T)
-
-    def getCoefQualityDeriv(self, offset, localIndex, vals, col_ind):
-        """ Fill up this volume's contribution of the dQdx matrix"""
-        return pyspline.quality_volume_deriv(
-            self.coef.T, offset, localIndex.T, vals, col_ind)
-
-    def verifyQualityDeriv(self):
-        """Print out FD verification of the derivative calc"""
-        pyspline.verify_quality_volume_deriv(self.coef.T)
 
 # ----------------------------------------------------------------------
 #                     Misc Helper Functions
