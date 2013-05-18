@@ -248,7 +248,7 @@ class curve(object):
         self.length = None
         self.gpts = None
         self.data = None
-
+        self.local_interp = False
         # We have provided information to create curve directly
         if 'k' in kwargs and 't' in kwargs and 'coef' in kwargs: 
             self.s = None
@@ -262,6 +262,96 @@ class curve(object):
                 kwargs['t'], 't', float, 1, self.Nctl+self.k)
             self.orig_data = False
             self._calcGrevillePoints()
+
+        elif 'local_interp' in kwargs:
+            # Local, non-global interpolation. We could use this for
+            # second-order (linear interpolation) but there is not
+            # much point, since it would be the same as 'interp'
+            # below. 
+            self.local_interp = True
+            if 'k' in kwargs:
+                mpiPrint('* Warning: k is ignored for local_interp. \
+Cubic spline order is always used')
+            self.k = 4
+            
+            self.orig_data = True
+            if 'X' in kwargs:
+                self.X = numpy.atleast_2d(kwargs['X'])
+                if numpy.rank(kwargs['X']) == 1:
+                    self.X = numpy.transpose(self.X)
+            elif 'x' in kwargs and 'y' in kwargs and 'z'in kwargs:
+                self.X = numpy.vstack([kwargs['x'], kwargs['y'], kwargs['z']]).T
+            elif 'x' in kwargs and 'y' in kwargs:
+                self.X = numpy.vstack([kwargs['x'], kwargs['y']]).T
+            elif 'x' in kwargs:
+                self.X = numpy.transpose(numpy.atleast_2d(kwargs['x']))
+            # enf if
+
+            self.nDim = self.X.shape[1]
+            self.N = self.X.shape[0]
+
+            if 's' in kwargs:
+                self.s = geo_utils.checkInput(
+                    kwargs['s'], 's', float, 1, self.N)
+            else:
+                assert self.nDim > 1, 'Error, pySpline: For 1D splines,\
+ the basis, s must be given'
+                self._getParameterization()
+            # end if
+
+            # Now we have the data we need to generate the local
+            # interpolation
+     
+            T = numpy.zeros((self.N, self.nDim))
+            # Compute tangents
+                 qq = numpy.zeros_like(self.X)
+            T  = numpy.zeros_like(self.X)
+            delta_s = numpy.zeros(self.N)
+            for i in xrange(1, self.N):
+                delta_s[i] = self.s[i]-self.s[i-1]
+                qq[i, :] = self.X[i]-self.X[i-1] 
+            # end for
+
+            for i in xrange(1, self.N-1):
+                a = delta_s[i]/(delta_s[i] + delta_s[i+1])
+                T[i] = (1-a)*qq[i] + a*qq[i+1]
+            # end for
+
+            # Do the start and end points: (eqn: 9.32, The NURBS book)
+            T[0] = 2*qq[1]/delta_s[1] - T[1]
+            T[-1] = 2*qq[-1]/delta_s[-1] - T[-2]
+
+            # Normalize
+            for i in xrange(self.N):
+                T[i] /= numpy.linalg.norm(T[i])
+            # end for
+                
+            # Final coefficients and t
+            self.coef = numpy.zeros((2*(self.N-1)+2,self.nDim))
+            self.t    = numpy.zeros(len(self.coef) + self.k)
+            
+            # End Pts
+            self.coef[0] = self.X[0].copy()
+            self.coef[-1] = self.X[-1].copy()
+
+            # Interior coefficients
+            for i in xrange(self.N-1):
+                a = self.length*(self.s[i+1]-self.s[i])
+                self.coef[2*i+1] = self.X[i] + a/3.0*T[i]
+                self.coef[2*i+2] = self.X[i+1] - a/3.0*T[i+1]
+            # end for
+
+            # Knots
+            self.t[-4:] = 1.0
+            u = numpy.zeros(self.N)
+            for i in xrange(0,self.N-1):
+                u[i+1] = u[i] + numpy.linalg.norm(self.coef[2*i+2]-self.coef[2*i+1])
+            # end for
+
+            for i in xrange(1,self.N-1):
+                self.t[2*i+2] = u[i]/u[self.N-1]
+                self.t[2*i+3] = u[i]/u[self.N-1]
+            # end for
 
         else: #lms or interpolate function
             assert 'k' in kwargs and ('X' in kwargs or 'x' in kwargs), \
@@ -355,7 +445,7 @@ Nctl=<number of control points> must be specified for a LMS fit'
             """
 
         # Return if we don't have original data to fit
-        if not self.orig_data:
+        if not self.orig_data or self.local_interp:
             return
 
         # Do the sparation between the constrained and unconstrained: 
@@ -628,7 +718,6 @@ scipy is used.')
         curve, dummy = curve.splitCurve((uHigh-uLow)/(1.0-uLow))
 
         return curve
-
 
     def getLength(self):
         """ Compute the length of the curve using the Eculdian Norm
@@ -2871,18 +2960,10 @@ def line(*args, **kwargs):
         # end if
     # end if
 
-
 #==============================================================================
 # Class Test
 #==============================================================================
 if __name__ == '__main__':
     print 'There are two examples in the example directory.'
     print 'Look at test_curve.py and test_surf.py for more information'
-
-
-def test_pySpline():
-    # create a curve:
-    c = curve(k=2, s=[0, 0.5, 1], x=[0, .25, .5])
-    val = c(0.5)
-    assert val == 0.25
 

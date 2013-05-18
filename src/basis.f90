@@ -165,7 +165,6 @@ subroutine derivBasis(t, nctl, ku, u, ind, n, Bd)
      end do
   end do
 
-
   ! Multiply through by the correct factors (Eq 2.9)
   r = p
   do k=1,n
