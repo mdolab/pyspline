@@ -304,7 +304,7 @@ Cubic spline order is always used')
      
             T = numpy.zeros((self.N, self.nDim))
             # Compute tangents
-                 qq = numpy.zeros_like(self.X)
+            qq = numpy.zeros_like(self.X)
             T  = numpy.zeros_like(self.X)
             delta_s = numpy.zeros(self.N)
             for i in xrange(1, self.N):
@@ -329,7 +329,7 @@ Cubic spline order is always used')
             # Final coefficients and t
             self.coef = numpy.zeros((2*(self.N-1)+2,self.nDim))
             self.t    = numpy.zeros(len(self.coef) + self.k)
-            
+            self.Nctl = len(self.coef)
             # End Pts
             self.coef[0] = self.X[0].copy()
             self.coef[-1] = self.X[-1].copy()
@@ -688,24 +688,17 @@ scipy is used.')
         if u >= 1.0:
             return curve(t=self.t.copy(), k=self.k, 
                                   coef=self.coef.copy()), None
-
         
         r, break_pt = self.insertKnot(u, self.k-1)
-
-        if r == self.k -1:
-            # A new knot was inserted, so index of relevant place
-            # in knot vector is
-            break_pt = break_pt + 1
-        else:
-            break_pt = break_pt
-        # end if
-
-        uu = self.t[break_pt]
+        # Break point is now at the right so we need to adjust the
+        # counter to the left
+        break_pt = break_pt - self.k + 2
 
         # Process knot vectors:
+        uu = self.t[break_pt]
         t1 = numpy.hstack((self.t[0:break_pt+self.k-1].copy(),uu))/uu
         t2 = (numpy.hstack((uu,self.t[break_pt:].copy()))-uu)/(1.0-uu)
-            
+
         coef1 = self.coef[0:break_pt,:].copy()
         coef2 = self.coef[break_pt-1:,:].copy()
 
@@ -1500,14 +1493,9 @@ MUST be defined for task lms or interpolate'
         if direction == 'u':
 
             r, break_pt = self.insertKnot(direction, t, self.ku-1)
-
-            if r == self.ku -1:
-                # A new knot was inserted, so index of relevant place
-                # in knot vector is
-                break_pt = break_pt + 1
-            else:
-                break_pt = break_pt
-            # end if
+            # Break point is now at the right so we need to adjust the
+            # counter to the left
+            break_pt = break_pt - self.ku + 2
 
             tt = self.tu[break_pt]
             # Process knot vectors:
@@ -1523,14 +1511,9 @@ MUST be defined for task lms or interpolate'
         elif direction == 'v':
 
             r, break_pt = self.insertKnot(direction, t, self.kv-1)
-
-            if r == self.kv-1:
-                # A new knot was inserted, so index of relevant place
-                # in knot vector is
-                break_pt = break_pt + 1
-            else:
-                break_pt = break_pt
-            # end if
+            # Break point is now at the right so we need to adjust the
+            # counter to the left
+            break_pt = break_pt - self.kv + 2
 
             tt = self.tv[break_pt]
             # Process knot vectors:
