@@ -2699,13 +2699,13 @@ MUST be defined for task lms or interpolate'
         # If necessary get brute-force starting point
         if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0) or numpy.any(v>1):
             self._computeData()
-            u,v,w = pyspline.point_volume_start(x0.T, self.udata, self.vdata, self.wdata, 
+            u,v,w = pyspline.point_volume_start(x0.real.T, self.udata, self.vdata, self.wdata, 
                                                 self.data.T)
         # end if
         D = numpy.zeros_like(x0)
         for i in xrange(len(x0)):
             u[i], v[i], w[i], D[i] = pyspline.point_volume(
-                x0[i], self.tu, self.tv, self.tw, self.ku, self.kv, self.kw, self.coef.T, 
+                x0[i].real, self.tu, self.tv, self.tw, self.ku, self.kv, self.kw, self.coef.T, 
                 Niter, eps, u[i], v[i], w[i])
 
         return u.squeeze(), v.squeeze(), w.squeeze(), D.squeeze()
