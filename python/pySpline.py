@@ -21,7 +21,7 @@ History
 # ===========================================================================
 # Standard Python modules
 # ===========================================================================
-import sys, warnings
+import sys, os, warnings
 
 # ===========================================================================
 # External Python modules
@@ -40,10 +40,13 @@ except:
 # ===========================================================================
 # Custom Python modules
 # ===========================================================================
+from mdo_import_helper import mpiPrint, MExt
 
-import pyspline
-from mdo_import_helper import mpiPrint, import_modules
-exec(import_modules('geo_utils'))
+# Explictly only search the local directory that this file resides in
+pyspline = MExt('pyspline', [os.path.dirname(os.path.realpath(__file__))])._module
+
+
+from pygeo import geo_utils
 
 # ===========================================================================
 def writeTecplot1D(handle, name, data):
