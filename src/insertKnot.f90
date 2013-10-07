@@ -5,7 +5,7 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
   !     Written by Gaetan Kenway
   !
   !     Abstract insertKnot inserts a knot u into the curve, r times
-  !
+  !     Adapted from "The NURBS Book" Algorithm 5.1
   !     Description of Arguments
   !     Input
   !     u       - Real, location of knot to insert
@@ -58,6 +58,15 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
   if (s + r + 1 > k) then
      r = k-1-s
   end if
+
+  ! If we *can't* insert the knot, we MUST copy t and coef to t_new
+  ! and coef_new and return
+  if (r == 0) then
+     coef_new(:,1:nctl) = coef(:,1:nctl)
+     t_new(1:nctl+k) = t(1:nctl+k)
+     return
+  end if
+
   ! --------- Load New Knot Vector -------
   do i=1,ileft
      t_new(i) = t(i)
@@ -70,36 +79,33 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
   do i=ileft+1,nctl+k
      t_new(i+r) = t(i)
   end do
-
+ coef_new = -99.0
   ! -------- Save unaltered Control Points
-
   do i=1,ileft-(k-1)
      coef_new(:,i) = coef(:,i)
   end do
   
-  do i=ileft,nctl
+  do i=ileft-s,nctl
      coef_new(:,i+r) = coef(:,i)
   end do
   
-  do i=1,k-s
-     temp(:,i) = coef(:,ileft-k+i)
+  do i=0,k-1-s
+     temp(:,i+1) = coef(:,ileft-(k-1)+i)
   end do
 
-  L = 0
   do j=1,r
-     L = ileft-k+j+1
+     L = ileft-(k-1) + j
      do i=0,k-1-j-s
         alpha = (u-t(L+i))/(t(i+ileft+1)-t(L+i))
         temp(:,i+1) = alpha*temp(:,i+2) + (1.0-alpha)*temp(:,i+1)
      end do
      coef_new(:,L) = temp(:,1)
-     coef_new(:,ileft+r-j) = temp(:,k-j)
+     coef_new(:,ileft+r-j-s) = temp(:,k-j-s)
   end do
-  if (L > 0) then
-     do i=L+1,ileft-1
-        coef_new(:,i) = temp(:,i-L+1)
-     end do
-  end if
+
+  do i=L+1,ileft-s-1
+     coef_new(:,i) = temp(:,i-L+1)
+  end do
 
   call findSpan(u, k, t_new, nctl+r, ileft)
 end subroutine insertKnot
