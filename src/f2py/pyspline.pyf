@@ -1,7 +1,7 @@
   !    -*- f90 -*-
   ! Note: the context of this file is case sensitive.
   
-  python module pyspline ! in 
+  python module libspline ! in 
   interface  ! in :pyspline
      subroutine knots_interp(x, deriv_ptr, n, nd, k, t) ! in :test:knots_interp.f90
        real(kind=realtype) dimension(n), intent(in) :: x
