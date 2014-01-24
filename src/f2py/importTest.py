@@ -1,15 +1,13 @@
 #! /usr/bin/env python
-
+from __future__ import print_function
 import sys
 
-name = 'pyspline'
-print "Testing if module %s can be imported..." % name
-import_cmd = "import %s" % name
+print('Testing if module pyspline can be imported...')
 try:
-    exec import_cmd
-except Exception, inst:
-    print "Error: %s." % inst
+    import pyspline
+except:
+    print('Error importing pyspline.so.' )
     sys.exit(1)
 # end try
 
-print "Module %s was successfully imported." % name
+print('Module pyspline was successfully imported.')
