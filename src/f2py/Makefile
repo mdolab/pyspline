@@ -7,7 +7,7 @@ include ${RULES_FILE}
 LINKER_ALL_FLAGS = $(FF90_FLAGS) -L$(LIBDIR) -lspline $(LINKER_FLAGS) 
 
 PYTHON_OBJECTS = fortranobject.o \
-		 pysplinemodule.o \
+		 libsplinemodule.o\
 
 default: all
 
@@ -37,14 +37,14 @@ all:
 	f2py pyspline.pyf
 	@echo " "
 	$(CC) $(CC_FLAGS) $(PYTHON_INCLUDES) -I$(NUMPY_INCLUDES) \
-	-I$(F2PY_ROOT)/src -c pysplinemodule.c
+	-I$(F2PY_ROOT)/src -c libsplinemodule.c
 
 	$(CC) $(CC_FLAGS) $(PYTHON_INCLUDES) -I$(NUMPY_INCLUDES) -c \
 	$(F2PY_ROOT)/src/fortranobject.c -o fortranobject.o
 
-	$(FF90) $(SO_LINKER_FLAGS) $(PYTHON_OBJECTS) $(LINKER_ALL_FLAGS) -o pyspline.so
+	$(FF90) $(SO_LINKER_FLAGS) $(PYTHON_OBJECTS) $(LINKER_ALL_FLAGS) -o libspline.so
 	$(PYTHON) importTest.py
-	mv pyspline.so ../../python
+	mv libspline.so ../../python
 
 # Clean up temporary files
 	-rm *.o

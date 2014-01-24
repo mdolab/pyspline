@@ -79,7 +79,7 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
   do i=ileft+1,nctl+k
      t_new(i+r) = t(i)
   end do
- coef_new = -99.0
+
   ! -------- Save unaltered Control Points
   do i=1,ileft-(k-1)
      coef_new(:,i) = coef(:,i)
