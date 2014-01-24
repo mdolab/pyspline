@@ -118,14 +118,14 @@ subroutine curve_para_corr(t, k, s, coef, nctl, ndim, length, n, X)
   use precision
   implicit none
   ! Input/Output
-  integer           , intent(in)      :: k, nctl, ndim, n
+  integer              , intent(in)      :: k, nctl, ndim, n
   real(kind=realType)  , intent(in)      :: t(nctl+k)
   real(kind=realType)  , intent(inout)   :: s(n)
   real(kind=realType)  , intent(in)      :: coef(ndim, nctl)
   real(kind=realType)  , intent(in)      :: X(ndim, n)
   real(kind=realType)  , intent(in)      :: length
   ! Working
-  integer                            :: i, j, max_inner_iter
+  integer                               :: i, j, max_inner_iter
   real(kind=realType)                   :: D(ndim), D2(ndim)
   real(kind=realType)                   :: val(ndim), deriv(ndim)
   real(kind=realType)                   :: c, s_tilde, norm

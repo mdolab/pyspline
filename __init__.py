@@ -1,5 +1,6 @@
-import sys, os
-cur_dir = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(cur_dir, 'python'))
-import pySpline
-__all__ = ['pySpline']
+from . import python
+from python import pySpline
+from python.pySpline import curve
+from python.pySpline import surface
+from python.pySpline import volume
+__all__ = ['pySpline', 'curve', 'surface', 'volume']
