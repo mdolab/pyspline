@@ -4,10 +4,10 @@ import sys
 
 print('Testing if module pyspline can be imported...')
 try:
-    import pyspline
+    import libspline
 except:
-    print('Error importing pyspline.so.' )
+    print('Error importing libspline.so')
     sys.exit(1)
 # end try
 
-print('Module pyspline was successfully imported.')
+print('Module libspline was successfully imported.')

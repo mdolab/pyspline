@@ -1,32 +1,31 @@
+from __future__ import print_function
 # This is a test script to test the functionality of the 
 # pySpline curve class
 
-from numpy import *
-from pylab import *
 import sys,time
 sys.path.append('../')
-
+import numpy
 import pySpline
 
 # Get some Helix-like data
 
 n = 100
-theta = linspace(.0000,2*pi,n)
-x = cos(theta)
-y = sin(theta)
-z = linspace(0,1,n)
-print 'Helix Data'
+theta = numpy.linspace(.0000,2*numpy.pi,n)
+x = numpy.cos(theta)
+y = numpy.sin(theta)
+z = numpy.linspace(0,1,n)
+print('Helix Data')
 curve = pySpline.curve(x=x,y=y,z=z,k=4,Nctl=16,niter=100)
 curve.writeTecplot('helix.dat')
 
 # Load naca0012 data
-print 'Naca 0012 data'
-x,y = loadtxt('naca0012',unpack=True)
+print('Naca 0012 data')
+x,y = numpy.loadtxt('naca0012',unpack=True)
 curve = pySpline.curve(x=x,y=y,k=4,Nctl=11,niter=500)
 curve.writeTecplot('naca_data.dat')
 
 # Projection Tests
-print 'Projection Tests'
+print('Projection Tests')
 x = [0,2,3,5]
 y = [-2,5,3,0]
 z = [0,0,0,0]

@@ -1,3 +1,4 @@
+from __future__ import print_function
 # =============================================================================
 # Standard Python modules                                           
 # =============================================================================
@@ -20,15 +21,14 @@ def eval_test(curve):
     # ----------- Evaluation and derivative functions ---------------
     pts = [0.0, 0.5, 0.75, 1.0]
     for pt in pts:
-        print 'Testing pt %f'%(pt)
-        print 'Value:'
+        print('Testing pt %f'%(pt))
+        print('Value:')
         reg_write(curve(pt))
-        print 'Deriv:'
+        print('Deriv:')
         reg_write(curve.getDerivative(pt))
-        print 'Second Derivative'
+        print('Second Derivative')
         reg_write(curve.getSecondDerivative(pt),1e-10,1e-10)
     # end for
-
 
 def run_curve_test(curve): 
     ''' This function is used to test the functions that are apart of
@@ -39,26 +39,26 @@ def run_curve_test(curve):
 
     # Inset a knot at 0.25 with multiplicity of k-1 and retest
     curve.insertKnot(0.25,curve.k-1)
-    print '------- Cruve with inserted knots ----------'
+    print('------- Cruve with inserted knots ----------')
     eval_test(curve)
     
-    print 'Curve length:'
+    print('Curve length:')
     reg_write(curve.getLength())
 
     curve_windowed = curve.windowCurve(0.1, 0.90)
-    print 'These points should be the same (window curve test)'
+    print('These points should be the same (window curve test)')
     reg_write(curve(0.2))
     reg_write(curve_windowed((0.2-0.1)/(0.90-0.1)))
 
     # Split the curve in two:
     curve1, curve2 = curve.splitCurve(0.5)
-    print 'These three points should be the same (split curve test)'
+    print('These three points should be the same (split curve test)')
     reg_write(curve1(1.0))
     reg_write(curve2(0.0))
     reg_write(curve(0.5))
 
     # Reverse test:
-    print 'These two points should be the same (reverse test)'
+    print('These two points should be the same (reverse test)')
     reg_write(curve(0.4))
     curve.reverse()
     reg_write(curve(0.6))
@@ -68,8 +68,8 @@ def run_project_test(curve):
     pts = [[0.4,1.5,1.5],[-.1,0.5,1.8], curve(0.75)]
     # Default tolerance is 1e-10. so only check to 1e-9
     s, D = curve.projectPoint(pts)
-    for i in xrange(len(s)):
-        print 'Project point %f %f %f'%(pts[i][0],pts[i][1],pts[i][2])
+    for i in range(len(s)):
+        print('Project point %f %f %f'%(pts[i][0],pts[i][1],pts[i][2]))
         reg_write(s[i],1e-9,1e-9)
         reg_write(D[i],1e-9,1e-9)
 
@@ -80,10 +80,10 @@ def io_test(curve):
     curve.writeTecplot('tmp.dat',coef=False, orig=False)
     os.remove('tmp.dat')
 
-print '+--------------------------------------+'
-print '           Create Tests   '
-print '+--------------------------------------+'
-print '-----------  2D k=2 test ----------'
+print('+--------------------------------------+')
+print('           Create Tests   ')
+print('+--------------------------------------+')
+print('-----------  2D k=2 test ----------')
 k = 2
 t = [0,0,0.5,1,1]
 coef = numpy.zeros((3,2))
@@ -94,7 +94,7 @@ curve = pySpline.curve(t=t,k=k,coef=coef)
 run_curve_test(curve)
 io_test(curve)
 
-print '-----------  2D k=3 test ----------'
+print('-----------  2D k=3 test ----------')
 k = 3
 t = [0,0,0,0.5,1,1,1]
 coef = numpy.zeros((4,2))
@@ -106,7 +106,7 @@ curve = pySpline.curve(t=t,k=k,coef=coef)
 run_curve_test(curve)
 io_test(curve)
 
-print '-----------  2D k=4 test ----------'
+print('-----------  2D k=4 test ----------')
 k = 4
 t = [0,0,0,0,0.5,1,1,1,1]
 coef = numpy.zeros((5,2))
@@ -127,20 +127,20 @@ x = numpy.cos(theta)
 y = numpy.sin(theta)
 z = numpy.linspace(0,1,n)
 
-print '+--------------------------------------+'
-print '              LMS Tests   '
-print '+--------------------------------------+'
+print('+--------------------------------------+')
+print('              LMS Tests   ')
+print('+--------------------------------------+')
 for k in [2,3,4]:
-    print '--------- Test helix data with k=%d-------'%(k)
-    curve = pySpline.curve(x=x,y=y,z=z,k=k,Nctl=16,niter=50)
+    print('--------- Test helix data with k=%d-------'%(k))
+    curve = pySpline.curve(x=x,y=y,z=z,k=k,nCtl=16,niter=50)
     run_curve_test(curve)
     run_project_test(curve)
 
-print '+--------------------------------------+'
-print '           Interp Tests   '
-print '+--------------------------------------+'
+print('+--------------------------------------+')
+print('           Interp Tests   ')
+print('+--------------------------------------+')
 for k in [2,3,4]:
-    print '--------- Test helix data with k=%d-------'%(k)
+    print('--------- Test helix data with k=%d-------'%(k))
     curve = pySpline.curve(x=x,y=y,z=z,k=k)
     run_curve_test(curve)
     run_project_test(curve)
