@@ -1,3 +1,4 @@
+from __future__ import print_function
 # =============================================================================
 # Standard Python modules                                           
 # =============================================================================
@@ -6,7 +7,7 @@ import os, sys, argparse
 # =============================================================================
 # Extension modules
 # =============================================================================
-from mdo_import_helper import mdo_regression_helper as reg
+import mdo_regression_helper as reg
 
 # define scripts to run:
 test_scripts = ['test_curves.py','test_surfaces.py','test_volumes.py']
@@ -55,13 +56,13 @@ else:
 
 # Set the proper return codes for the script running this:
 if res == 0: #reg.REG_FILES_MATCH
-    print '%s: Success!'%(module_name)
+    print('%s: Success!'%(module_name))
 elif res == 1: #reg.REG_FILES_DO_NOT_MATCH
-    print '%s: Failure!'%(module_name)
+    print('%s: Failure!'%(module_name))
     if not nodiff:
         os.system('%s %s_reg.ref %s_reg'%(diff_cmd, module_name, module_name))
 elif res == -1: #reg.REG_ERROR
-    print '%s: Error in regression. Missing files.'%(module_name)
+    print('%s: Error in regression. Missing files.'%(module_name))
 # end if
 
 # Exit with code from reg_file_comp:
