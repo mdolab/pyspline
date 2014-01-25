@@ -15,10 +15,9 @@ def reg_write(values, rel_tol=1e-12, abs_tol=1e-12):
     values = numpy.atleast_1d(values)
     values = values.flatten()
     for val in values:
-        str = '@value %20.16g %g %g'%(val, rel_tol, abs_tol)
-        print(str)
-    # end for
-
+        s = '@value %20.16g %g %g'% (val, rel_tol, abs_tol)
+        print(s)
+ 
     return
 
 def _reg_str_comp(str1, str2):
@@ -65,35 +64,34 @@ def reg_file_comp(ref_file, comp_file):
     try:
         f = open(ref_file, 'r')
     except IOError:
-        print('File %s was not found. Cannot do comparison.'%(ref_file))
+        print('File %s was not found. Cannot do comparison.'% ref_file)
         return REG_ERROR
     for line in f.readlines():
         all_ref_lines.append(line)
         if line[0:6] == '@value':
             ref_values.append(line)
-    # end for
+
     f.close()
 
     try:
         f = open(comp_file, 'r')
     except IOError:
-        print('File %s was not found. Cannot do comparison.'%(comp_file))
+        print('File %s was not found. Cannot do comparison.'% comp_file)
         return REG_ERROR
 
     for line in f.readlines():
         if line[0:6] == '@value':
             comp_values.append(line)
-    # end for
+
     f.close()
 
     # Copy the comp_file to compe_file.orig
-    os.system('cp %s %s.orig'%(comp_file, comp_file))
+    os.system('cp %s %s.orig'% (comp_file, comp_file))
 
     # We must check that we have the same number of @value's to compare:
     if len(ref_values) != len(comp_values):
         print('Error: number of @value lines in file not the same!')
         return REG_FILES_DO_NOT_MATCH
-    # end if
     
     # Open the (new) comp_file:
     f = open(comp_file,'w')
@@ -107,24 +105,22 @@ def reg_file_comp(ref_file, comp_file):
     for i in range(len(all_ref_lines)):
         line = all_ref_lines[i]
         if line[0:6] == '@value':
-            if _reg_str_comp(line,comp_values[j]) is False:            
+            if _reg_str_comp(line, comp_values[j]) is False:            
                 f.write(comp_values[j])
                 res = REG_FILES_DO_NOT_MATCH
             else:
                 f.write(line)
-            # end if
+
             j += 1
         else:
             f.write(line)
-        # end if
-    # end for
 
     f.close()
 
     return res
 
 if __name__ == '__main__':
-    import numpy
+
     print('Single int write:')
     reg_write(1)
     
@@ -132,23 +128,23 @@ if __name__ == '__main__':
     reg_write(3.14159)
 
     print('List write:')
-    reg_write([1.0,3.5,6.0],1e-8,1e-10)
+    reg_write([1.0, 3.5, 6.0], 1e-8, 1e-10)
 
     print('1D Numpy array write')
-    vals = numpy.linspace(0,numpy.pi,5)
+    vals = numpy.linspace(0, numpy.pi, 5)
     reg_write(vals, 1e-12, 1e-12)
     
     print('2D Numpy array write:')
-    vals = numpy.linspace(0,9.876,4).reshape((2,2))
+    vals = numpy.linspace(0, 9.876, 4).reshape((2, 2))
     reg_write(vals)
 
     str1 = "@value    3.141592653589793 1e-12 1e-12"
     str2 = "@value    3.141592653589999 1e-12 1e-12"
 
-    print('This comp should be True: ',reg_comp(str1, str2))
+    print('This comp should be True: ', _reg_str_comp(str1, str2))
 
     str1 = "@value    3.141592653589793 1e-12 1e-12"
     str2 = "@value    3.141592999999999 1e-12 1e-12"
 
-    print('This comp should be False: ',reg_comp(str1, str2))
+    print('This comp should be False: ', _reg_str_comp(str1, str2))
 
