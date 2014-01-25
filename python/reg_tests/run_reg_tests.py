@@ -6,7 +6,7 @@ import os, sys, argparse
 # =============================================================================
 # Extension modules
 # =============================================================================
-import mdo_regression_helper as reg
+from mdo_import_helper import mdo_regression_helper as reg
 
 # define scripts to run:
 test_scripts = ['test_curves.py','test_surfaces.py','test_volumes.py']

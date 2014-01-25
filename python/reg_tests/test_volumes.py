@@ -1,3 +1,4 @@
+from __future__ import print_function
 # =============================================================================
 # Standard Python modules                                           
 # =============================================================================
@@ -22,43 +23,43 @@ def run_volume_test(volume):
     # ----------- Evaluation and derivative functions ---------------
     pts = [[0,0,0],[1,1,1],[.25,.5,.95]]
     for pt in pts:
-        print 'Testing pt (%f %f)'%(pt[0],pt[1])
-        print 'Value:'
+        print('Testing pt (%f %f)'%(pt[0],pt[1]))
+        print('Value:')
         reg_write(volume(pt[0], pt[1], pt[2]),1e-10,1e-10)
 
-    print 'Get value corner'
-    for i in xrange(8):
-        print 'Pt %d'%(i)
+    print('Get value corner')
+    for i in range(8):
+        print('Pt %d'%(i))
         reg_write(volume.getOrigValueCorner(i))
     # end for
 
-    print 'Get Value edge:'
-    for i in xrange(12):
-        print 'Edge %d'%(i)
+    print('Get Value edge:')
+    for i in range(12):
+        print('Edge %d'%(i))
         reg_write(volume.getValueEdge(i, 0.25))
         reg_write(volume.getValueEdge(i, 0.75))
 
-    if volume.orig_data:
-        print 'Orig values at each corner'
-        for i in xrange(8):
+    if volume.origData:
+        print('Orig values at each corner')
+        for i in range(8):
             reg_write(volume.getOrigValueCorner(i))
         # end for
 
-        print 'GetOrigValuesFace'
-        for i in xrange(6):
+        print('GetOrigValuesFace')
+        for i in range(6):
             reg_write(volume.getOrigValuesFace(i))
         # end for
 
-        print 'getMidPointEdge'
-        for i in xrange(12):
+        print('getMidPointEdge')
+        for i in range(12):
             reg_write(volume.getMidPointEdge(i))
 
-        print 'getMidPointFace'
-        for i in xrange(6):
+        print('getMidPointFace')
+        for i in range(6):
             reg_write(volume.getMidPointFace(i))
 
 
-    print 'Test get bounds'
+    print('Test get bounds')
     reg_write(volume.getBounds())
     
 
@@ -67,18 +68,18 @@ def run_project_test(volume):
     # 1e-10, so only enforce that things match to 1e-8 or 100*eps
     eps = 1e-8
 
-    print '------------- These points should be fully inside of domain'
+    print('------------- These points should be fully inside of domain')
     pts= [[0,0,0],[.025,.09,.3],[.2,.3,.1]]
     for pt in pts:
-        print 'Projecting point (%f %f %f)'%(pt[0],pt[1],pt[2])
+        print('Projecting point (%f %f %f)'%(pt[0],pt[1],pt[2]))
         u,v,w,D = volume.projectPoint(pt)
-        print 'u:'
+        print('u:')
         reg_write(u, eps, eps)
-        print 'v:'
+        print('v:')
         reg_write(v, eps, eps)
-        print 'w:'
+        print('w:')
         reg_write(w, eps, eps)
-        print 'D:'
+        print('D:')
         reg_write(D, eps, eps)
     # end for
 
@@ -90,7 +91,7 @@ def io_test(volume):
     # These three calls, are private functions normally only called
     # from pyGeo. We are not checking their output, rather just making
     # sure they run. 
-    volume._writeBvol(f, False)
+
     os.remove('tmp.dat')
 
     return
@@ -802,17 +803,17 @@ X[:,:,:,2] = data[2*nval:3*nval].reshape((9,7,11),order='f')
 for ku in [2,4]:
     for kv in [3,4]:
         for kw in [2,4]:
-            for Nctlu in [4,6]:
-                for Nctlv in [8]:
-                    for Nctlw in [5,7]:
-                        print '+'+'-'*78+'+'
-                        print ' '*10 + 'Testing Volume with ku=%d, kv=%d, \
-kw=%d, Nctlu=%d, Nctlv=%d, Nctlw=%d'%(ku, kv, kw, Nctlu, Nctlv, Nctlw)
-                        print '+'+'-'*78+'+'
+            for nCtlu in [4,6]:
+                for nCtlv in [8]:
+                    for nCtlw in [5,7]:
+                        print('+'+'-'*78+'+')
+                        print(' '*10 + 'Testing Volume with ku=%d, kv=%d, \
+kw=%d, nCtlu=%d, nCtlv=%d, nCtlw=%d'%(ku, kv, kw, nCtlu, nCtlv, nCtlw))
+                        print('+'+'-'*78+'+')
 
                         volume = pySpline.volume(
                             X=X, ku=ku, kv=kv, kw=kw,
-                            Nctlu=Nctlu, Nctlv=Nctlv, Nctlw=Nctlw)
+                            nCtlu=nCtlu, nCtlv=nCtlv, nCtlw=nCtlw)
                         volume.recompute()
                         run_volume_test(volume)
                         run_project_test(volume)

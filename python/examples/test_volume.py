@@ -1,3 +1,4 @@
+from __future__ import print_function
  # This simple script test some of the volume functionality in pySpline
 import numpy
 import sys
@@ -21,7 +22,7 @@ vol.writeTecplot('vol.dat',orig=True)
 # Generate random data 
 M = 10000
 Y = numpy.zeros((M,3))
-for i in xrange(M):
+for i in range(M):
     Y[i,0] = numpy.random.random()*.5+.25
     Y[i,1] = numpy.random.random()*.5+.25
     Y[i,2] = numpy.random.random()*.5+.25
@@ -29,4 +30,4 @@ for i in xrange(M):
 import time
 timeA = time.time()
 u,v,w,D = vol.projectPoint(Y)
-print 'Time to project %d points: %f seconds:'%(M, time.time()-timeA)
+print('Time to project %d points: %f seconds:'%(M, time.time()-timeA))
