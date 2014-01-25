@@ -31,7 +31,6 @@ def run_volume_test(volume):
     for i in range(8):
         print('Pt %d'%(i))
         reg_write(volume.getOrigValueCorner(i))
-    # end for
 
     print('Get Value edge:')
     for i in range(12):
@@ -43,12 +42,10 @@ def run_volume_test(volume):
         print('Orig values at each corner')
         for i in range(8):
             reg_write(volume.getOrigValueCorner(i))
-        # end for
 
         print('GetOrigValuesFace')
         for i in range(6):
             reg_write(volume.getOrigValuesFace(i))
-        # end for
 
         print('getMidPointEdge')
         for i in range(12):
@@ -81,7 +78,6 @@ def run_project_test(volume):
         reg_write(w, eps, eps)
         print('D:')
         reg_write(D, eps, eps)
-    # end for
 
 def io_test(volume):
     '''Test the writing functions'''

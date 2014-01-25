@@ -28,7 +28,6 @@ def eval_test(curve):
         reg_write(curve.getDerivative(pt))
         print('Second Derivative')
         reg_write(curve.getSecondDerivative(pt),1e-10,1e-10)
-    # end for
 
 def run_curve_test(curve): 
     ''' This function is used to test the functions that are apart of

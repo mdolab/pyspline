@@ -155,13 +155,9 @@ def run_project_test(surface):
         print('D:')
         reg_write(D, eps*10, eps*10)
  
-    # end for
-
-    return
-
 def io_test(surface):
     '''Test the writing functions'''
-    surface.writeTecplot('tmp.dat', surfs=True, coef=True, orig=True,
+    surface.writeTecplot('tmp.dat', surf=True, coef=True, orig=True,
                          dir=True)
     f = open('tmp.dat','w')
     # These three calls, are private functions normally only called
