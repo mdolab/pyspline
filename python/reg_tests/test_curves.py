@@ -2,7 +2,7 @@ from __future__ import print_function
 # =============================================================================
 # Standard Python modules                                           
 # =============================================================================
-import os, sys
+import os
 
 # =============================================================================
 # External Python modules
@@ -13,70 +13,69 @@ import numpy
 # Extension modules
 # =============================================================================
 from mdo_regression_helper import *
-sys.path.append('../')
-import pySpline
+from pyspline import pySpline
 
-def eval_test(curve):
+def eval_test(crv):
     '''Eval fixed points from the curve'''
     # ----------- Evaluation and derivative functions ---------------
     pts = [0.0, 0.5, 0.75, 1.0]
     for pt in pts:
         print('Testing pt %f'%(pt))
         print('Value:')
-        reg_write(curve(pt))
+        reg_write(crv(pt))
         print('Deriv:')
-        reg_write(curve.getDerivative(pt))
+        reg_write(crv.getDerivative(pt))
         print('Second Derivative')
-        reg_write(curve.getSecondDerivative(pt),1e-10,1e-10)
+        reg_write(crv.getSecondDerivative(pt),1e-10,1e-10)
 
-def run_curve_test(curve): 
+def run_curve_test(crv): 
     ''' This function is used to test the functions that are apart of
-    the curve class. They operate on the 'curve' that is passed. '''
+    the curve class. They operate on the 'crv' that is passed. '''
 
     # Test the evaluations
-    eval_test(curve)
+    eval_test(crv)
 
     # Inset a knot at 0.25 with multiplicity of k-1 and retest
-    curve.insertKnot(0.25,curve.k-1)
+    crv.insertKnot(0.25,crv.k-1)
     print('------- Cruve with inserted knots ----------')
-    eval_test(curve)
+    eval_test(crv)
     
     print('Curve length:')
-    reg_write(curve.getLength())
+    reg_write(crv.getLength())
 
-    curve_windowed = curve.windowCurve(0.1, 0.90)
+    curve_windowed = crv.windowCurve(0.1, 0.90)
     print('These points should be the same (window curve test)')
-    reg_write(curve(0.2))
+    reg_write(crv(0.2))
     reg_write(curve_windowed((0.2-0.1)/(0.90-0.1)))
 
     # Split the curve in two:
-    curve1, curve2 = curve.splitCurve(0.5)
+    curve1, curve2 = crv.splitCurve(0.5)
     print('These three points should be the same (split curve test)')
     reg_write(curve1(1.0))
     reg_write(curve2(0.0))
-    reg_write(curve(0.5))
+    reg_write(crv(0.5))
 
     # Reverse test:
     print('These two points should be the same (reverse test)')
-    reg_write(curve(0.4))
-    curve.reverse()
-    reg_write(curve(0.6))
+    reg_write(crv(0.4))
+    crv.reverse()
+    reg_write(crv(0.6))
 
-def run_project_test(curve):
+def run_project_test(crv):
     # Run point projection and curve projection tests'
-    pts = [[0.4,1.5,1.5],[-.1,0.5,1.8], curve(0.75)]
+    pts = [[0.4,1.5,1.5],[-.1,0.5,1.8], crv(0.75)]
     # Default tolerance is 1e-10. so only check to 1e-9
-    s, D = curve.projectPoint(pts)
+    s, D = crv.projectPoint(pts)
     for i in range(len(s)):
         print('Project point %f %f %f'%(pts[i][0],pts[i][1],pts[i][2]))
         reg_write(s[i],1e-9,1e-9)
         reg_write(D[i],1e-9,1e-9)
 
 
-def io_test(curve):
+def io_test(crv):
     '''Test the writing functions'''
-    curve.writeTecplot('tmp.dat')
-    curve.writeTecplot('tmp.dat',coef=False, orig=False)
+    crv.writeTecplot('tmp.dat')
+    crv.writeTecplot('tmp.dat',coef=False, orig=False)
     os.remove('tmp.dat')
 
 print('+--------------------------------------+')
