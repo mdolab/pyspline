@@ -13,6 +13,7 @@ import numpy
 # Extension modules
 # =============================================================================
 from mdo_regression_helper import *
+# Make sure we run the module in this repository and import module directly
 sys.path.append('../')
 import pySpline
 
@@ -170,27 +171,28 @@ def io_test(surface):
 
     return
 
-# Create a generic surface
-nu = 10
-nv = 10
-u = numpy.linspace(0,4,nu)
-v = numpy.linspace(0,4,nv)
-[V,U] = numpy.meshgrid(v,u)
-Z = numpy.cos(U)*numpy.sin(V)
+if __name__ == '__main__':
+    # Create a generic surface
+    nu = 10
+    nv = 10
+    u = numpy.linspace(0,4,nu)
+    v = numpy.linspace(0,4,nv)
+    [V,U] = numpy.meshgrid(v,u)
+    Z = numpy.cos(U)*numpy.sin(V)
 
 
-for ku in [2, 3, 4]:
-    for kv in [2, 3, 4]:
-        for nCtlu in [5, 10]:
-            for nCtlv in [5, 10]:
-                print('+'+'-'*78+'+')
-                print(' '*20 + 'Testing Surface with ku=%d, kv=%d, nCtlu=%d,\
- nCtlv=%d'%(ku,kv,nCtlu,nCtlv))
-                print('+'+'-'*78+'+')
-                surface = pySpline.surface(x=U, y=V, z=Z, ku=ku, kv=kv, 
-                                           nCtlu=nCtlu, nCtlv=nCtlv)
-                surface.recompute()
-                run_surface_test(surface)
-                run_project_test(surface)
-                io_test(surface)
+    for ku in [2, 3, 4]:
+        for kv in [2, 3, 4]:
+            for nCtlu in [5, 10]:
+                for nCtlv in [5, 10]:
+                    print('+'+'-'*78+'+')
+                    print(' '*20 + 'Testing Surface with ku=%d, kv=%d, nCtlu=%d,\
+     nCtlv=%d'%(ku,kv,nCtlu,nCtlv))
+                    print('+'+'-'*78+'+')
+                    surface = pySpline.surface(x=U, y=V, z=Z, ku=ku, kv=kv, 
+                                               nCtlu=nCtlu, nCtlv=nCtlv)
+                    surface.recompute()
+                    run_surface_test(surface)
+                    run_project_test(surface)
+                    io_test(surface)
 

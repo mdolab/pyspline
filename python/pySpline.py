@@ -12,7 +12,7 @@ Revision: 1.0   $Date: 24/05/2009$
 
 Developers:
 -----------
-- Gaetan Kenway (GKK)
+Gaetan Kenway (GKK)
 
 History
 -------
@@ -38,17 +38,17 @@ class Error(Exception):
     was a expliclty raised exception.
     """
     def __init__(self, message):
-      msg = '\n+'+'-'*78+'+'+'\n' + '| pySpline Error: '
-      i = 17
-      for word in message.split():
-         if len(word) + i + 1 > 78: # Finish line and start new one
-            msg += ' '*(78-i)+'|\n| ' + word + ' '
-            i = 1 + len(word)+1
-         else:
-            msg += word + ' '
-            i += len(word)+1
-      msg += ' '*(78-i) + '|\n' + '+'+'-'*78+'+'+'\n'
-      print(msg)
+       msg = '\n+'+'-'*78+'+'+'\n' + '| pySpline Error: '
+       i = 17
+       for word in message.split():
+           if len(word) + i + 1 > 78: # Finish line and start new one
+               msg += ' '*(78-i)+'|\n| ' + word + ' '
+               i = 1 + len(word)+1
+           else:
+               msg += word + ' '
+               i += len(word)+1
+       msg += ' '*(78-i) + '|\n' + '+'+'-'*78+'+'+'\n'
+       print(msg)
 
 def writeTecplot1D(handle, name, data):
     """A Generic function to write a 1D data zone to a tecplot file.
@@ -223,7 +223,7 @@ def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
         
     # Finally check that the shape is correct:
     if dataShape is not None:
-        if tmp.shape != dataShape:
+        if tmp.shape != tuple(dataShape):
             raise Error('\%s\' was not the correct shape. Input was shape %s\
             while requested dataShape was %s.'%(
                             inputName, repr(tmp.shape), repr(dataShape)))     
@@ -294,7 +294,8 @@ class curve(object):
             self.coef = numpy.atleast_2d(kwargs['coef'])
             self.nCtl = self.coef.shape[0]
             self.nDim = self.coef.shape[1]
-            self.t = checkInput(kwargs['t'], 't', float, 1, (self.nCtl+self.k, ))
+            self.t = checkInput(kwargs['t'], 't', float, 1,
+                                (self.nCtl+self.k, ))
             self.origData = False
             self._calcGrevillePoints()
 
@@ -371,7 +372,8 @@ class curve(object):
             self.t[-4:] = 1.0
             u = numpy.zeros(self.N)
             for i in range(0, self.N-1):
-                u[i+1] = u[i] + numpy.linalg.norm(self.coef[2*i+2]-self.coef[2*i+1])
+                u[i+1] = u[i] + numpy.linalg.norm(
+                    self.coef[2*i+2]-self.coef[2*i+1])
 
             for i in range(1, self.N-1):
                 self.t[2*i+2] = u[i]/u[self.N-1]
@@ -526,7 +528,8 @@ nCtl=<number of control points> must be specified for a LMS fit'
         nColInd = numpy.zeros((nu+ndu)*self.k, 'intc')# |
         libspline.curve_jacobian_wrap(
             su, sdu, self.t, self.k, self.nCtl, nVals, nRowPtr, nColInd)
-        N = _assembleMatrix(nVals, nColInd, nRowPtr, (nu+ndu, self.nCtl)).tocsc()
+        N = _assembleMatrix(nVals, nColInd, nRowPtr,
+                            (nu+ndu, self.nCtl)).tocsc()
 
         if self.interp:
             # Factorize once for efficiency
@@ -764,7 +767,8 @@ nCtl=<number of control points> must be specified for a LMS fit'
         N = 2
         for i in range(len(self.gpts)-1):
             for j in range(N):
-                s.append( (self.gpts[i+1]-self.gpts[i])*(j+1)/(N+1) + self.gpts[i])
+                s.append((self.gpts[i+1]-self.gpts[i])*\
+                         (j+1)/(N+1) + self.gpts[i])
             s.append(self.gpts[i+1])
 
         self.sdata = numpy.array(s)
@@ -887,12 +891,13 @@ nCtl=<number of control points> must be specified for a LMS fit'
         # If necessary get brute-force starting point
         if numpy.any(s<0) or numpy.any(s>1):
             self._computeData()
-            s = libspline.point_curve_start(x0.T, self.sdata, self.data.T)
+            s = libspline.point_curve_start(
+                x0.T, self.sdata, self.data.T)
 
         D = numpy.zeros_like(x0)
         for i in range(len(x0)):
-            s[i], D[i] = libspline.point_curve(x0[i], self.t, self.k, self.coef.T, 
-                                               nIter, eps, s[i])
+            s[i], D[i] = libspline.point_curve(x0[i], self.t, self.k,
+                                               self.coef.T, nIter, eps, s[i])
         return s.squeeze(), D.squeeze()
 
     def projectCurve(self, inCurve, nIter=25, eps=1e-10, **kwargs):
@@ -1003,7 +1008,9 @@ nCtl=<number of control points> must be specified for a LMS fit'
                         if abs(uSol[ii] - s) < eps and abs(tSol[ii]-t) < eps:
                             pass
                         else:
-                            uSol.append(s); tSol.append(t); diff.append(Diff)
+                            uSol.append(s)
+                            tSol.append(t)
+                            diff.append(Diff)
 
         return numpy.array(uSol), numpy.array(tSol), numpy.array(diff)
         
@@ -1029,7 +1036,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
             File name for tecplot file. Should have .dat extension
         curve : bool
             Flag to write discrete approximation of the actual curve
-        coef: bool
+        coef : bool
             Flag to write b-spline coefficients
         orig : bool
             Flag to write original data (used for fitting) if it exists
@@ -1250,7 +1257,8 @@ MUST be defined for task lms or interpolate'
             temp = numpy.zeros(self.Nu, 'd')
 
             for i in range(self.Nu-1):
-                temp[i+1] = temp[i] + numpy.linalg.norm(self.X[i, j]-self.X[i+1, j])
+                temp[i+1] = temp[i] + numpy.linalg.norm(
+                    self.X[i, j]-self.X[i+1, j])
 
             if temp[-1] == 0: # We have a singular point
                 singularSounter += 1
@@ -1271,7 +1279,8 @@ MUST be defined for task lms or interpolate'
         for i in range(self.Nu): 
             temp = numpy.zeros(self.Nv, 'd')
             for j in range(self.Nv-1):
-                temp[j+1] = temp[j] + numpy.linalg.norm(self.X[i, j] - self.X[i, j+1])
+                temp[j+1] = temp[j] + numpy.linalg.norm(
+                    self.X[i, j] - self.X[i, j+1])
 
             if temp[-1] == 0: #We have a singular point
                 singularSounter += 1
@@ -1461,15 +1470,15 @@ MUST be defined for task lms or interpolate'
         s : float
             Parametric position along 'direction' to insert
         r : int
-            Desired number of times to insert.
+        Desired number of times to insert.
 
         Returns
         -------
         r : int
             The **actual** number of times the knot was inserted. 
         """
-        assert direction in ['u', 'v'], 'libspline.surface.splitSurace: direction must be one of \
-\'u\' or \'v\''
+        assert direction in ['u', 'v'], 'libspline.surface.splitSurace: \
+direction must be one of \'u\' or \'v\''
 
         s = checkInput(s, 's', float, 0)
         r = checkInput(r, 'r', int, 0)
@@ -1537,8 +1546,8 @@ MUST be defined for task lms or interpolate'
             Upper part of the surface
         """
 
-        assert direction in ['u', 'v'], 'libspline.surface.splitSurace: direction must be one of \
-\'u\' or \'v\''
+        assert direction in ['u', 'v'], 'libspline.surface.splitSurace: \
+        direction must be one of \'u\' or \'v\''
 
         # Special case the bounds: (same for both directions)
         if s <= 0.0:
@@ -1761,8 +1770,8 @@ MUST be defined for task lms or interpolate'
             u = -1*numpy.ones(len(x0))
             v = -1*numpy.ones(len(x0))
 
-        assert len(x0) == len(u) == len(v), 'surface projectPoint: The length of x0\
- and u, v, w must be the same'
+        assert len(x0) == len(u) == len(v), 'surface projectPoint: The length of \
+        x0 and u, v, w must be the same'
 
         # If necessary get brute-force starting point
         if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0):
@@ -1860,8 +1869,9 @@ MUST be defined for task lms or interpolate'
             writeTecplot1D(handle, 'surface%d direction'%(isurf), data)
         else:
             print('Not Enough control points to output direction indicator')
-
-    def writeTecplot(self, fileName, surf=True, coef=True, orig=True, dir=False):
+            
+    def writeTecplot(self, fileName, surf=True, coef=True, orig=True,
+                     dir=False):
         """
         Write the surface to a tecplot .dat file
 
@@ -1997,7 +2007,8 @@ MUST be defined for task lms or interpolate'
         handle.write('bspline\n')
 
         # Sizes and Order
-        handle.write('%d, %d, %d, %d, 0\n'%(self.nCtlu, self.nCtlv, self.ku, self.kv))
+        handle.write('%d, %d, %d, %d, 0\n'% (
+            self.nCtlu, self.nCtlv, self.ku, self.kv))
 
         # U - Knot Vector
         for i in range(len(self.tu)):
@@ -2795,19 +2806,19 @@ MUST be defined for task lms or interpolate'
             v = -1*numpy.ones(len(x0))
             w = -1*numpy.ones(len(x0))
 
-        assert len(x0) == len(u) == len(v) == len(w), 'volume projectPoint: The length of x0\
- and u, v, w must be the same'
+        assert len(x0) == len(u) == len(v) == len(w), 'volume projectPoint: \
+        The length of x0 and u, v, w must be the same'
 
         # If necessary get brute-force starting point
         if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0) or numpy.any(v>1):
             self._computeData()
-            u, v, w = libspline.point_volume_start(x0.real.T, self.udata, self.vdata, self.wdata, 
-                                                self.data.T)
+            u, v, w = libspline.point_volume_start(
+                x0.real.T, self.udata, self.vdata, self.wdata, self.data.T)
         D = numpy.zeros_like(x0)
         for i in range(len(x0)):
             u[i], v[i], w[i], D[i] = libspline.point_volume(
-                x0[i].real, self.tu, self.tv, self.tw, self.ku, self.kv, self.kw, self.coef.T, 
-                nIter, eps, u[i], v[i], w[i])
+                x0[i].real, self.tu, self.tv, self.tw, self.ku, self.kv,
+                self.kw, self.coef.T, nIter, eps, u[i], v[i], w[i])
 
         return u.squeeze(), v.squeeze(), w.squeeze(), D.squeeze()
 
