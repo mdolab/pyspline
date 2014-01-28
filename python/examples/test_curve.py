@@ -3,9 +3,8 @@ from __future__ import print_function
 # pySpline curve class
 
 import sys,time
-sys.path.append('../')
 import numpy
-import pySpline
+from pyspline import pySpline
 
 # Get some Helix-like data
 

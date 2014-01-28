@@ -3,8 +3,7 @@ from __future__ import print_function
 # pySpline surface
 import sys
 import numpy
-sys.path.append('../')
-import pySpline
+from pyspline import pySpline
 
 # Create a generic surface
 nu = 20

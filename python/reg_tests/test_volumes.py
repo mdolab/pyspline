@@ -13,8 +13,7 @@ import numpy
 # Extension modules
 # =============================================================================
 from mdo_regression_helper import *
-sys.path.append('../')
-import pySpline
+from pyspline import pySpline
 
 def run_volume_test(volume):
     ''' This function is used to test the functions that are apart of
