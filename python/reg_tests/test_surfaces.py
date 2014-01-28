@@ -159,13 +159,13 @@ def run_project_test(surface):
 def io_test(surface):
     '''Test the writing functions'''
     surface.writeTecplot('tmp.dat', surf=True, coef=True, orig=True,
-                         dir=True)
+                         directions=True)
     f = open('tmp.dat','w')
     # These three calls, are private functions normally only called
     # from pyGeo. We are not checking their output, rather just making
     # sure they run. 
-    surface._writeIGES_directory(f, 0, 0)
-    surface._writeIGES_directory(f, 0, 0)
+    surface.writeIGES_directory(f, 0, 0)
+    surface.writeIGES_directory(f, 0, 0)
     surface.writeTin(f)
     os.remove('tmp.dat')
 

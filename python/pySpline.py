@@ -38,17 +38,18 @@ class Error(Exception):
     was a expliclty raised exception.
     """
     def __init__(self, message):
-       msg = '\n+'+'-'*78+'+'+'\n' + '| pySpline Error: '
-       i = 17
-       for word in message.split():
-           if len(word) + i + 1 > 78: # Finish line and start new one
-               msg += ' '*(78-i)+'|\n| ' + word + ' '
-               i = 1 + len(word)+1
-           else:
-               msg += word + ' '
-               i += len(word)+1
-       msg += ' '*(78-i) + '|\n' + '+'+'-'*78+'+'+'\n'
-       print(msg)
+        msg = '\n+'+'-'*78+'+'+'\n' + '| pySpline Error: '
+        i = 17
+        for word in message.split():
+            if len(word) + i + 1 > 78: # Finish line and start new one
+                msg += ' '*(78-i)+'|\n| ' + word + ' '
+                i = 1 + len(word)+1
+            else:
+                msg += word + ' '
+                i += len(word)+1
+        msg += ' '*(78-i) + '|\n' + '+'+'-'*78+'+'+'\n'
+        print(msg)
+        Exception.__init__()
 
 def writeTecplot1D(handle, name, data):
     """A Generic function to write a 1D data zone to a tecplot file.
@@ -284,6 +285,7 @@ class curve(object):
         self.length = None
         self.gpts = None
         self.data = None
+        self.sdata = None
         self.localInterp = False
         # We have provided information to create curve directly
         if 'k' in kwargs and 't' in kwargs and 'coef' in kwargs: 
@@ -297,7 +299,7 @@ class curve(object):
             self.t = checkInput(kwargs['t'], 't', float, 1,
                                 (self.nCtl+self.k, ))
             self.origData = False
-            self._calcGrevillePoints()
+            self.calcGrevillePoints()
 
         elif 'localInterp' in kwargs:
             # Local, non-global interpolation. We could use this for
@@ -519,7 +521,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
             else:
                 self.t = libspline.knots_lms(self.s, self.nCtl, self.k)
 
-        self._calcGrevillePoints()
+        self.calcGrevillePoints()
         self.coef = numpy.zeros((self.nCtl, self.nDim), 'd')
 
         # Get the 'N' jacobain
@@ -750,7 +752,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
      
         return length
 
-    def _calcGrevillePoints(self):
+    def calcGrevillePoints(self):
         """Calculate the Greville points"""
         self.gpts = numpy.zeros(self.nCtl)
         for i in range(self.nCtl):
@@ -758,11 +760,11 @@ nCtl=<number of control points> must be specified for a LMS fit'
                 self.gpts[i] += self.t[i+n+1]
             self.gpts[i] = self.gpts[i] / (self.k-1)
     
-    def _calcInterpolatedGrevillePoints(self):
+    def calcInterpolatedGrevillePoints(self):
         """
         Compute greville points, but with addtional interpolated knots
         """
-        self._calcGrevillePoints()
+        self.calcGrevillePoints()
         s = [self.gpts[0]]
         N = 2
         for i in range(len(self.gpts)-1):
@@ -890,7 +892,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
 
         # If necessary get brute-force starting point
         if numpy.any(s<0) or numpy.any(s>1):
-            self._computeData()
+            self.computeData()
             s = libspline.point_curve_start(
                 x0.T, self.sdata, self.data.T)
 
@@ -937,8 +939,8 @@ nCtl=<number of control points> must be specified for a LMS fit'
         eps   = checkInput(eps, 'eps', float, 0)
 
         if s < 0 or s > 1 or t < 0 or t > 1:
-            self._computeData()
-            inCurve._computeData()
+            self.computeData()
+            inCurve.computeData()
             s, t = libspline.curve_curve_start(
                 self.data.T, self.sdata, inCurve.data.T, inCurve.sdata)
 
@@ -985,8 +987,8 @@ nCtl=<number of control points> must be specified for a LMS fit'
             t = checkInput(kwargs['t'], 't', float, 0)
         eps   = checkInput(eps, 'eps', float, 0)
 
-        self._computeData()
-        inCurve._computeData()
+        self.computeData()
+        inCurve.computeData()
 
         uSol = []
         tSol = []
@@ -1014,7 +1016,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
 
         return numpy.array(uSol), numpy.array(tSol), numpy.array(diff)
         
-    def _computeData(self):
+    def computeData(self):
         """
         Compute discrete data that is used for the Tecplot
         Visualization as well as the data for doing the brute-force
@@ -1023,7 +1025,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
         # We will base the data on interpolated greville points
 
         if self.data is None:
-            self._calcInterpolatedGrevillePoints()
+            self.calcInterpolatedGrevillePoints()
             self.data = self.getValue(self.sdata)
     
     def writeTecplot(self, fileName, curve=True, coef=True, orig=True):
@@ -1043,7 +1045,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
             """
         f = openTecplot(fileName, self.nDim)
         if curve:
-            self._computeData()
+            self.computeData()
             writeTecplot1D(f, 'interpolated', self.data)
         if coef:
             writeTecplot1D(f, 'control_pts', self.coef)        
@@ -1092,6 +1094,8 @@ class surface(object):
 
         self.edgeCurves = [None, None, None, None]
         self.data = None
+        self.udata = None
+        self.vdata = None
         if 'ku' in kwargs and 'kv' in kwargs and 'tu' in kwargs and 'tv' in \
                 kwargs and 'coef' in kwargs:
             self.X = None
@@ -1114,7 +1118,7 @@ class surface(object):
             self.vmax = self.tv[-1]
             self.nDim = self.coef.shape[2]
             self.origData = False
-            self._setEdgeCurves()
+            self.setEdgeCurves()
             self.interp =  False
             return
         else: # We have LMS/Interpolate
@@ -1204,7 +1208,7 @@ MUST be defined for task lms or interpolate'
             else:
                 if self.nDim == 3:
                     self.u, self.v, self.U, self.V = \
-                        self._calcParameterization()
+                        self.calcParameterization()
                 else:
                     raise Error('Automatic parameterization of ONLY available\
  for spatial data in 3 dimensions. Please supply u and v key word arguments\
@@ -1214,7 +1218,7 @@ MUST be defined for task lms or interpolate'
             self.umax = 1
             self.vmin = 0
             self.vmax = 1
-            self._calcKnots()
+            self.calcKnots()
             self.coef = numpy.zeros((self.nCtlu, self.nCtlv, self.nDim))
             if recompute:
                 self.recompute()
@@ -1244,9 +1248,9 @@ MUST be defined for task lms or interpolate'
                 self.coef[:, :, idim] = \
                              solve(rhs).reshape([self.nCtlu, self.nCtlv])
 
-        self._setEdgeCurves()
+        self.setEdgeCurves()
 
-    def _calcParameterization(self):
+    def calcParameterization(self):
         """Compute a spatial parameterization"""
         
         u = numpy.zeros(self.Nu, 'd')
@@ -1296,7 +1300,7 @@ MUST be defined for task lms or interpolate'
 
         return u, v, U, V
 
-    def _calcKnots(self):
+    def calcKnots(self):
         """ Determine the knots depending on if it is inerpolated or
         an LMS fit"""
         if self.interp:
@@ -1308,7 +1312,7 @@ MUST be defined for task lms or interpolate'
             self.tu = libspline.knots_lms(self.u, self.nCtlu, self.ku)
             self.tv = libspline.knots_lms(self.v, self.nCtlv, self.kv)
 
-    def _setEdgeCurves(self):
+    def setEdgeCurves(self):
         """Create curve spline objects for each of the edges"""
         self.edgeCurves[0] = curve(k=self.ku, t=self.tu, 
                                     coef=self.coef[:, 0])
@@ -1442,13 +1446,13 @@ MUST be defined for task lms or interpolate'
         
         return self.edgeCurves[edge](s)
 
-    def _getBasisPt(self, u, v, vals, istart, colInd, lIndex):
-        # This function should only be called from pyGeo
-        # The purpose is to compute the basis function for 
-        # a u, v point and add it to pyGeo's global dPt/dCoef
-        # matrix. vals, row_ptr, col_ind is the CSR data and 
-        # lIndex in the local -> global mapping for this 
-        # surface
+    def getBasisPt(self, u, v, vals, istart, colInd, lIndex):
+        """This function should only be called from pyGeo
+        The purpose is to compute the basis function for 
+        a u, v point and add it to pyGeo's global dPt/dCoef
+        matrix. vals, row_ptr, col_ind is the CSR data and 
+        lIndex in the local -> global mapping for this 
+        surface"""
         return libspline.getbasisptsurface(u, v, self.tu, self.tv, self.ku, 
                                           self.kv, vals, colInd, istart, 
                                           lIndex.T)
@@ -1775,7 +1779,7 @@ direction must be one of \'u\' or \'v\''
 
         # If necessary get brute-force starting point
         if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0):
-            self._computeData()
+            self.computeData()
             u, v = libspline.point_surface_start(
                 x0.T, self.udata, self.vdata, self.data.T)
        
@@ -1832,8 +1836,8 @@ direction must be one of \'u\' or \'v\''
 
         # If necessary get brute-force starting point
         if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0):
-            self._computeData()
-            inCurve._computeData()
+            self.computeData()
+            inCurve.computeData()
             s, u, v = libspline.curve_surface_start(
                 inCurve.data.T, inCurve.sdata, self.data.T, 
                 self.udata, self.vdata)
@@ -1842,7 +1846,7 @@ direction must be one of \'u\' or \'v\''
             inCurve.t, inCurve.k, inCurve.coef.T, self.tu, self.tv, \
                 self.ku, self.kv, self.coef.T, nIter, eps, u, v, s)
    
-    def _computeData(self):
+    def computeData(self):
         """
         Compute discrete data that is used for the Tecplot
         Visualization as well as the data for doing the brute-force
@@ -1851,14 +1855,14 @@ direction must be one of \'u\' or \'v\''
 
         # We will base the data on interpolated greville points
         if self.data is None:
-            self.edgeCurves[0]._calcInterpolatedGrevillePoints()
+            self.edgeCurves[0].calcInterpolatedGrevillePoints()
             self.udata = self.edgeCurves[0].sdata
-            self.edgeCurves[2]._calcInterpolatedGrevillePoints()
+            self.edgeCurves[2].calcInterpolatedGrevillePoints()
             self.vdata = self.edgeCurves[2].sdata
             [V, U] = numpy.meshgrid(self.vdata, self.udata)
             self.data = self.getValue(U, V)
                     
-    def _writeDirections(self, handle, isurf):
+    def writeDirections(self, handle, isurf):
         """Write out and indication of the surface direction"""
         if self.nCtlu >= 3 and self.nCtlv >= 3:
             data = numpy.zeros((4, self.nDim))
@@ -1871,7 +1875,7 @@ direction must be one of \'u\' or \'v\''
             print('Not Enough control points to output direction indicator')
             
     def writeTecplot(self, fileName, surf=True, coef=True, orig=True,
-                     dir=False):
+                     directions=False):
         """
         Write the surface to a tecplot .dat file
 
@@ -1890,17 +1894,17 @@ direction must be one of \'u\' or \'v\''
             """
         f = openTecplot(fileName, self.nDim)
         if surf:
-            self._computeData()
+            self.computeData()
             writeTecplot2D(f, 'interpolated', self.data)
         if coef:
             writeTecplot2D(f, 'control_pts', self.coef)
         if orig and self.origData:
             writeTecplot2D(f, 'orig_data', self.X)
-        if dir:
-            self._writeDirections(f, 0)
+        if directions:
+            self.writeDirections(f, 0)
         closeTecplot(f)
 
-    def _writeIGES_directory(self, handle, Dcount, Pcount):
+    def writeIGES_directory(self, handle, Dcount, Pcount):
         """
         Write the IGES file header information (Directory Entry Section)
         for this surface
@@ -1924,7 +1928,7 @@ direction must be one of \'u\' or \'v\''
 
         return Pcount , Dcount
 
-    def _writeIGES_parameters(self, handle, Pcount, counter):
+    def writeIGES_parameters(self, handle, Pcount, counter):
         """
         Write the IGES parameter information for this surface
         """
@@ -2089,6 +2093,9 @@ class volume(object):
         self.edgeCurves = [None, None, None, None, None, None, 
                             None, None, None, None, None, None]
         self.data = None
+        self.udata = None
+        self.vdata = None
+        self.wdata = None
         if 'ku' in kwargs and 'kv' in kwargs and 'kw' in kwargs and \
                 'tu' in kwargs and 'tv' in kwargs and 'tw' in kwargs and \
                 'coef' in kwargs:
@@ -2123,8 +2130,8 @@ class volume(object):
             self.wmin = self.tw[0]
             self.wmax = self.tw[-1]
             self.origData = False
-            self._setFaceSurfaces()
-            self._setEdgeCurves()
+            self.setFaceSurfaces()
+            self.setEdgeCurves()
 
         else: # We have LMS/Interpolate
             # Do some checking on the number of control points
@@ -2221,7 +2228,7 @@ MUST be defined for task lms or interpolate'
                 self.w = checkInput(kwargs['w'], 'w', float, 1)
             else:
                 if self.nDim == 3:
-                    self._calcParameterization()
+                    self.calcParameterization()
                 else:
                     Error('Automatic parameterization of ONLY available\
  for spatial data in 3 dimensions. Please supply u and v key word arguments\
@@ -2233,8 +2240,8 @@ MUST be defined for task lms or interpolate'
             self.vmax = 1
             self.wmin = 0
             self.wmax = 1
-            self._calcKnots()
-            self._setCoefSize()
+            self.calcKnots()
+            self.setCoefSize()
 
             if recompute:
                 self.recompute()
@@ -2243,7 +2250,7 @@ MUST be defined for task lms or interpolate'
     def recompute(self):
         """Recompute the volume if any driving data has been modified"""
 
-        self._setCoefSize()
+        self.setCoefSize()
 
         vals, rowPtr, colInd = libspline.volume_jacobian_wrap(\
             self.U, self.V, self.W, self.tu, self.tv, self.tw, self.ku, \
@@ -2266,13 +2273,13 @@ MUST be defined for task lms or interpolate'
                 self.coef[:, :, :, idim] = solve(rhs).reshape(
                     [self.nCtlu, self.nCtlv, self.nCtlw])
      
-        self._setFaceSurfaces()
-        self._setEdgeCurves()
+        self.setFaceSurfaces()
+        self.setEdgeCurves()
   
-    def _setCoefSize(self):
+    def setCoefSize(self):
         self.coef = numpy.zeros((self.nCtlu, self.nCtlv, self.nCtlw, self.nDim))
    
-    def _calcParameterization(self):
+    def calcParameterization(self):
         """ Compute distance based parametrization. Use the fortran
         function for this"""
         S, u, v, w = libspline.para3d(self.X.T)
@@ -2287,7 +2294,7 @@ MUST be defined for task lms or interpolate'
 
         return
 
-    def _calcKnots(self):
+    def calcKnots(self):
         """ Determine the knots depending on if it is inerpolated or
         an LMS fit"""
         if self.interp:
@@ -2562,7 +2569,7 @@ MUST be defined for task lms or interpolate'
     
         return val
  
-    def _setFaceSurfaces(self):
+    def setFaceSurfaces(self):
         """Create face spline objects for each of the faces"""
       
         self.faceSurfaces[0] = surface(
@@ -2584,7 +2591,7 @@ MUST be defined for task lms or interpolate'
             ku=self.kv, kv=self.kw, tu=self.tv, tv=self.tw, 
             coef=self.coef[-1, :, :, :])
         
-    def _setEdgeCurves(self):
+    def setEdgeCurves(self):
         """Create edge spline objects for each edge"""
       
         self.edgeCurves[0] = curve(k=self.ku, t=self.tu, 
@@ -2612,12 +2619,12 @@ MUST be defined for task lms or interpolate'
         self.edgeCurves[11] = curve(k=self.kw, t=self.tw, 
                                      coef=self.coef[-1, -1, :])
 
-    def _getBasisPt(self, u, v, w, vals, istart, colInd, lIndex):
-        # This function should only be called from pyBlock The purpose
-        # is to compute the basis function for a u, v, w point and add
-        # it to pyBlcoks's global dPt/dCoef
-        # matrix. vals, rowPtr, colInd is the CSR data and lIndex in
-        # the local -> global mapping for this volume
+    def getBasisPt(self, u, v, w, vals, istart, colInd, lIndex):
+        """ This function should only be called from pyBlock The purpose
+        is to compute the basis function for a u, v, w point and add
+        it to pyBlcoks's global dPt/dCoef
+        matrix. vals, rowPtr, colInd is the CSR data and lIndex in
+        the local -> global mapping for this volume"""
 
         return libspline.getbasisptvolume(u, v, w, self.tu, self.tv, self.tw, 
                                          self.ku, self.kv, self.kw, vals, 
@@ -2811,7 +2818,7 @@ MUST be defined for task lms or interpolate'
 
         # If necessary get brute-force starting point
         if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0) or numpy.any(v>1):
-            self._computeData()
+            self.computeData()
             u, v, w = libspline.point_volume_start(
                 x0.real.T, self.udata, self.vdata, self.wdata, self.data.T)
         D = numpy.zeros_like(x0)
@@ -2822,7 +2829,7 @@ MUST be defined for task lms or interpolate'
 
         return u.squeeze(), v.squeeze(), w.squeeze(), D.squeeze()
 
-    def _computeData(self):
+    def computeData(self):
         """
         Compute discrete data that is used for the Tecplot
         Visualization as well as the data for doing the brute-force
@@ -2830,11 +2837,11 @@ MUST be defined for task lms or interpolate'
         """
         # Only recompute if it doesn't exist already
         if self.data is None:
-            self.edgeCurves[0]._calcInterpolatedGrevillePoints()
+            self.edgeCurves[0].calcInterpolatedGrevillePoints()
             self.udata = self.edgeCurves[0].sdata
-            self.edgeCurves[2]._calcInterpolatedGrevillePoints()
+            self.edgeCurves[2].calcInterpolatedGrevillePoints()
             self.vdata = self.edgeCurves[2].sdata
-            self.edgeCurves[8]._calcInterpolatedGrevillePoints()
+            self.edgeCurves[8].calcInterpolatedGrevillePoints()
             self.wdata = self.edgeCurves[8].sdata
             U = numpy.zeros((len(self.udata), len(self.vdata), len(self.wdata)))
             V = numpy.zeros((len(self.udata), len(self.vdata), len(self.wdata)))
@@ -2867,7 +2874,7 @@ MUST be defined for task lms or interpolate'
             """
         f = openTecplot(fileName, self.nDim)
         if vols:
-            self._computeData()
+            self.computeData()
             writeTecplot3D(f, 'interpolated', self.data)
         if coef:
             writeTecplot3D(f, 'control_pts', self.coef)
