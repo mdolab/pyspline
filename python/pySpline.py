@@ -1,5 +1,3 @@
-from __future__ import print_function
-from __future__ import division
 """
 pySpline
 
@@ -18,6 +16,8 @@ History
 -------
 	v. 1.0 - Initial Class Creation (GKK, 2009)
 """
+from __future__ import print_function
+from __future__ import division
 
 # ===========================================================================
 # External Python modules
@@ -1889,7 +1889,7 @@ direction must be one of \'u\' or \'v\''
             Flag to write b-spline coefficients
         orig : bool
             Flag to write original data (used for fitting) if it exists
-        dir : bool
+        directions : bool
             Flag to write surface direction visualization
             """
         f = openTecplot(fileName, self.nDim)
@@ -1915,9 +1915,9 @@ direction must be one of \'u\' or \'v\''
         # control points
         assert self.nDim == 3, 'Must have 3 dimensions to write to IGES file'
         paraEntries = 13 + (len(self.tu)) + (len(self.tv)) + \
-            self.nCtlu*self.nCtlv + 3*self.nCtlu*self.nCtlv+1
+                      self.nCtlu*self.nCtlv + 3*self.nCtlu*self.nCtlv+1
 
-        paraLines = (paraEntries-10) / 3 + 2
+        paraLines = (paraEntries-10) // 3 + 2
         if numpy.mod(paraEntries-10, 3) != 0:
             paraLines += 1
 
@@ -1926,81 +1926,93 @@ direction must be one of \'u\' or \'v\''
         Dcount += 2
         Pcount += paraLines
 
-        return Pcount , Dcount
+        return Pcount , Dcount 
 
     def writeIGES_parameters(self, handle, Pcount, counter):
         """
         Write the IGES parameter information for this surface
         """
-
-        handle.write('%12d, %12d, %12d, %12d, %12d, %7dP%7d\n'\
+        handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'\
                          %(128, self.nCtlu-1, self.nCtlv-1, \
                                self.ku-1, self.kv-1, Pcount, counter))
         counter += 1
-        handle.write('%12d, %12d, %12d, %12d, %12d, %7dP%7d\n'\
+        handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'\
                          %(0, 0, 1, 0, 0, Pcount, counter))
         counter += 1
-        posCounter = 0
+        pos_counter = 0
 
-        for i in range(len(self.tu)):
-            posCounter += 1
-            handle.write('%20.12g, '%(numpy.real(self.tu[i])))
-            if numpy.mod(posCounter, 3) == 0:
+        for i in xrange(len(self.tu)):
+            pos_counter += 1
+            handle.write('%20.12g,'%(numpy.real(self.tu[i])))
+            if numpy.mod(pos_counter, 3) == 0:
                 handle.write('  %7dP%7d\n'%(Pcount, counter))
                 counter += 1
-                posCounter = 0
+                pos_counter = 0
+            # end if
+        # end for
 
-        for i in range(len(self.tv)):
-            posCounter += 1
-            handle.write('%20.12g, '%(numpy.real(self.tv[i])))
-            if numpy.mod(posCounter, 3) == 0:
+        for i in xrange(len(self.tv)):
+            pos_counter += 1
+            handle.write('%20.12g,'%(numpy.real(self.tv[i])))
+            if numpy.mod(pos_counter, 3) == 0:
                 handle.write('  %7dP%7d\n'%(Pcount, counter))
                 counter += 1
-                posCounter = 0
+                pos_counter = 0
+            # end if
+        # end for
 
-        for i in range(self.nCtlu*self.nCtlv):
-            posCounter += 1
-            handle.write('%20.12g, '%(1.0))
-            if numpy.mod(posCounter, 3) == 0:
+        for i in xrange(self.nCtlu*self.nCtlv):
+            pos_counter += 1
+            handle.write('%20.12g,'%(1.0))
+            if numpy.mod(pos_counter, 3) == 0:
                 handle.write('  %7dP%7d\n'%(Pcount, counter))
                 counter += 1
-                posCounter = 0
+                pos_counter = 0
+            # end if
+        # end for 
 
-        for j in range(self.nCtlv):
-            for i in range(self.nCtlu):
-                for idim in range(3):
-                    posCounter += 1
-                    handle.write('%20.12g, '%(numpy.real(
+        for j in xrange(self.nCtlv):
+            for i in xrange(self.nCtlu):
+                for idim in xrange(3):
+                    pos_counter += 1
+                    handle.write('%20.12g,'%(numpy.real(
                                 self.coef[i, j, idim])))
-                    if numpy.mod(posCounter, 3) == 0:
+                    if numpy.mod(pos_counter, 3) == 0:
                         handle.write('  %7dP%7d\n'%(Pcount, counter))
                         counter += 1
-                        posCounter = 0
+                        pos_counter = 0
+                    # end if
+                # end for
+            # end for
+        # end for
                         
         # Ouput the ranges
-        for  i in range(4):
-            posCounter += 1
+        for  i in xrange(4):
+            pos_counter += 1
             if i == 0:
-                handle.write('%20.12g, '%(numpy.real(self.umin)))
+                handle.write('%20.12g,'%(numpy.real(self.umin)))
             if i == 1:
-                handle.write('%20.12g, '%(numpy.real(self.umax)))
+                handle.write('%20.12g,'%(numpy.real(self.umax)))
             if i == 2:
-                handle.write('%20.12g, '%(numpy.real(self.vmin)))
+                handle.write('%20.12g,'%(numpy.real(self.vmin)))
             if i == 3:
                 # semi-colon for the last entity
                 handle.write('%20.12g;'%(numpy.real(self.vmax)))
-            if numpy.mod(posCounter, 3)==0:
+            if numpy.mod(pos_counter, 3)==0:
                 handle.write('  %7dP%7d\n'%(Pcount, counter))
                 counter += 1
-                posCounter = 0
+                pos_counter = 0
             else: # We have to close it up anyway
                 if i == 3:
-                    for j  in range(3-posCounter):
+                    for j  in xrange(3-pos_counter):
                         handle.write('%21s'%(' '))
-
-                    posCounter = 0
+                    # end for
+                    pos_counter = 0
                     handle.write('  %7dP%7d\n'%(Pcount, counter))
                     counter += 1
+                # end if
+            # end if
+        # end for
 
         Pcount += 2
 
@@ -2246,7 +2258,7 @@ MUST be defined for task lms or interpolate'
             if recompute:
                 self.recompute()
         # end if (Interpolation type)
-
+       
     def recompute(self):
         """Recompute the volume if any driving data has been modified"""
 
@@ -2802,8 +2814,9 @@ MUST be defined for task lms or interpolate'
             If the points are 'inside' the volume, D should
             be less than eps. 
         """
-      
+
         x0 = numpy.atleast_2d(x0)
+
         if 'u' in kwargs and 'v' in kwargs and 'w' in kwargs:
             u = numpy.atleast_1d(kwargs['u'])
             v = numpy.atleast_1d(kwargs['v'])
