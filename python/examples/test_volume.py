@@ -1,11 +1,9 @@
 from __future__ import print_function
  # This simple script test some of the volume functionality in pySpline
 import numpy
-import sys
-sys.path.append('../')
-import pySpline
+from pyspline import pySpline
 
-X= numpy.zeros((2,2,2,3))
+X = numpy.zeros((2,2,2,3))
 X[0,0,0,:] = [0,0,0]
 X[1,0,0,:] = [1.1,-.1,-.1]
 X[1,1,0,:] = [0.9,1.05,.2]
@@ -16,7 +14,7 @@ X[1,0,1,:] = [1.2,-.2,1.8]
 X[1,1,1,:] = [1.2,1.0,2]
 X[0,1,1,:] = [-.2,1.3,2.1]
 
-vol = pySpline.volume(X=X, ku=2, kv=2, kw=2, Nctlu=2, Nctlv=2, Nctlw=2)
+vol = pySpline.Volume(X=X, ku=2, kv=2, kw=2, Nctlu=2, Nctlv=2, Nctlw=2)
 vol.writeTecplot('vol.dat',orig=True)
 
 # Generate random data 

@@ -142,7 +142,7 @@ def run_project_test(surface):
         y = [4,3,2,1]
         z = [-3,1,3,5]
 
-        curve = pySpline.curve(k=kc,x=x,y=y,z=z)
+        curve = pySpline.Curve(k=kc,x=x,y=y,z=z)
         u,v,s,D = surface.projectCurve(curve)
         print(' ---------- surface-curve projection with kc=%d'%(kc))
         print('u:')
@@ -187,7 +187,7 @@ if __name__ == '__main__':
                     print(' '*20 + 'Testing Surface with ku=%d, kv=%d, nCtlu=%d,\
      nCtlv=%d'%(ku,kv,nCtlu,nCtlv))
                     print('+'+'-'*78+'+')
-                    surface = pySpline.surface(x=U, y=V, z=Z, ku=ku, kv=kv, 
+                    surface = pySpline.Surface(x=U, y=V, z=Z, ku=ku, kv=kv, 
                                                nCtlu=nCtlu, nCtlv=nCtlv)
                     surface.recompute()
                     run_surface_test(surface)
