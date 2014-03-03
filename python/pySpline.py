@@ -1,20 +1,9 @@
 """
 pySpline
+--------
 
-Contains classes for working with B-spline curves, surfaces and
-volumes
-
-Copyright (c) 2009 by G. Kenway
-All rights reserved. Not to be used for commercial purposes.
-Revision: 1.0   $Date: 24/05/2009$
-
-Developers:
------------
-Gaetan Kenway (GKK)
-
-History
--------
-	v. 1.0 - Initial Class Creation (GKK, 2009)
+Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
+:class:`Volume`
 """
 from __future__ import print_function
 from __future__ import division
@@ -22,6 +11,7 @@ from __future__ import division
 # ===========================================================================
 # External Python modules
 # ===========================================================================
+import warnings
 import numpy
 from scipy import sparse
 from scipy.sparse import linalg
@@ -236,50 +226,82 @@ def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
 # =============================================================================
 # pySpline classes
 # =============================================================================
-class curve(object):
+class Curve(object):
     """
     Create an instance of a b-spline curve. There are two
     ways to initialize the class
 
-    Creation: Create an instance of the spline class
-    directly by supplying the required information. **kwargs MUST
-    contain the folloiwng information:
+    * **Creation**: Create an instance of the spline class
+      directly by supplying the required information. kwargs MUST
+      contain the folloiwng information: ``k, t, coef``.
 
-        k, integer: Order for spline
-        t, real array: Knot vector 
-        coef, real array size(nCtl, nDim): Array of control points
 
-    LMS/Interpolation
+    * **LMS/Interpolation**: Create an instance of the spline class by
+      using an interpolating spline to given data points or a LMS
+      spline. The following keyword argument information is required:
 
-    Create an instance of the spline class by using an
-    interpolating spline to given data points or a LMS spline. The
-    following keyword argument information is required:
+      1. ``k`` Spline Order
 
-        k, integer: Order for spline
-        X, real, array, size(len(s), nDim): Array of data to fit 
-          --> OR  x=<vals>, len(s) ->1D interpolation
-          --> OR  x=<vals>, y=<vals>, each of len(s) 
-                  -> 2D parametric curve
-          --> OR  x=<vals>, y=<vals>, z=<vals> each of len(s) 
-                  -> 3D parametric curve
-        s, real, array: (OPTIONAL for nDim >=2 ) Array of s values 
+      2. ``X`` real arry size (N, nDim) of data to fit. **OR**
+          1. ``x`` (1D) and ``s`` for 1D
+          2. ``x`` (1D) and ``y`` (1D) for 2D spatial curve
+          3. ``x`` (1D) and ``y``` (1D) and ``z`` 1D for 3D spatial curve
 
-    For LMS spline:
-         nCtl -> (integer) number of control points (Less than len(s)
+      3. ``s`` real array of size (N). Optional for nDim >= 2
 
-    Optional Data:
-
-    weights:   A array of weighting factors for each fitting point
-               A value of -1 can be used to exactly constrain a point
-
-    deriv and derivPtr: deriv is a array which contains
-                         derivative information at point indicies
-                         defined by derivPtr derivWeights: A
-                         array of len deriv_ptr which contains
-                         derivative weighting A value of -1 can be
-                         used to exactly constrain a derivative
-
-    nIter:  The number of Hoscheks parameter corrections to run
+    Parameters
+    ----------
+    k : int
+        Order for spline
+    nCtl : int
+        Number of control points. Used only by LMS initialization.
+    t : array, list
+        Knot vector. Used only for creation. Must be size ``nCtl + k``
+    coef : array, size (nCtl, nDim)
+        Coefficients to use. Only used for creation. The second
+        dimension determine the spatial order of the spline
+    X : arary, size (N, ndim)
+        Full array of data to interpolate/fit
+    x : array, size (N)
+        Just x coordinates of data to fit
+    y : array, size (N)
+        Just y coordinates of data to fit
+    z : array, size (N)
+        Just z coordinates of data to fit
+    s : array, size(N)
+        Optional parameter to use. Not required for nDim >=2
+    nIter : int
+        The number of Hoscheks parameter correction iterations to
+        run. Only used for LMS fitting.
+    weight : array, size(N)
+        A array of weighting factors for each fitting point. A value
+        of -1 can be used to exactly constrain a point. By default,
+        all weights are 1.0
+    deriv : array, size (len(derivPtr), nDim)
+        Array containing derivitve information the
+        user wants to use at a particular point. **EXPERIMENTAL**
+    derivPtr : int, array, size (nDerivPtr)
+        Array of indices pointing to the index of points in X (or
+        x,y,z), for which the user has supplied a derivative for in
+        ``deriv``. **EXPERIMENTAL**
+    derivWeights : array size(nDerivPtr)
+        Optional array of the weighting to use for
+        derivatives. A value of -1 can be used to exactly constrain a
+        derivative. **EXPERIMENTAL**
+ 
+    Examples
+    --------
+    >>> x = [0, 0.5, 1.0]
+    >>> y = [0, 0.25, 1.0]
+    >>> s = [0., 0.5, 1.0]
+    >>> # Spatial interpolated seg
+    >>> line_seg = pySpline.Curve(x=x, y=y, k=2)
+    >>> # With explict parameter values
+    >>> line_seg = pySpline.Curve(x=x, y=y, k=2, s=s)
+    >>> #LMS parabolic curve
+    >>> parabola = pySpline.Curve(x=x, y=y, k=3)
+    >>> #LMS parabolic curve with parameter values
+    >>> parabola = pySpline.Curve(x=x, y=y, k=3, s=s)
     """
     def __init__(self, **kwargs):
         self.length = None
@@ -674,8 +696,8 @@ nCtl=<number of control points> must be specified for a LMS fit'
 
     def splitCurve(self, u):
         """
-        Split the curve at parametric position u. This usest he
-        insertKnot routine
+        Split the curve at parametric position u. This uses the
+        :func:`insertKnot` routine
 
         Parameters
         ----------
@@ -698,10 +720,10 @@ nCtl=<number of control points> must be specified for a LMS fit'
         u = checkInput(u, 'u', float, 0)
 
         if u <= 0.0:
-            return None, curve(t=self.t.copy(), k=self.k, 
+            return None, Curve(t=self.t.copy(), k=self.k, 
                                   coef=self.coef.copy())
         if u >= 1.0:
-            return curve(t=self.t.copy(), k=self.k, 
+            return Curve(t=self.t.copy(), k=self.k, 
                                   coef=self.coef.copy()), None
         
         r, breakPt = self.insertKnot(u, self.k-1)
@@ -718,8 +740,8 @@ nCtl=<number of control points> must be specified for a LMS fit'
         coef2 = self.coef[breakPt-1:, :].copy()
 
         return \
-            curve(t=t1, k=self.k, coef=coef1), \
-            curve(t=t2, k=self.k, coef=coef2)
+            Curve(t=t1, k=self.k, coef=coef1), \
+            Curve(t=t2, k=self.k, coef=coef2)
 
     def windowCurve(self, uLow, uHigh):
         """
@@ -792,7 +814,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
 
         Returns
         -------
-        values: array of size nDim or an array of size (N, 3)
+        values : array of size nDim or an array of size (N, 3)
             The evaluated points. If a single scalar s was given, the
             result with be an array of legnth nDim (or a scalar if
             nDim=1). If a vector of s values were given it will be an
@@ -1054,44 +1076,68 @@ nCtl=<number of control points> must be specified for a LMS fit'
         
         closeTecplot(f)
 
-class surface(object):
+class Surface(object):
+
+    """
+    Create an instance of a b-spline surface. There are two
+    ways to initialize the class
+
+    * **Creation**: Create an instance of the Surface class
+      directly by supplying the required information: kwargs MUST
+      contain the folloiwng information: ``ku, kv, tu, tv, coef``.
+
+    * **LMS/Interpolation**: Create an instance of the Surface class by
+      using an interpolating spline to given data points or a LMS
+      spline. The following keyword argument information is required:
+
+      1. ``ku`` and ``kv`` Spline Orders
+
+      2. ``X`` real arry size (Nu, Nv, nDim) of data to fit. **OR**
+          1. ``x`` (2D) and ``y`` (2D)  for 2D surface interpolation
+          2. ``x`` (3D) and ``y`` (3D) and ``z`` (3) for 3D surface
+
+      3. ``u``, ``v`` real array of size (Nu, Nv). Optional
+
+      4. ``nCtlu``, ``nCtlv`` Specify number of control points. Only for
+         LMS fitting.
+   
+    Parameters
+    ----------
+    ku : int
+       Spline order in u
+    kv : int
+       Spline order in v
+    nCtlu : int
+       Number of control points in u
+    nCtlv : int
+       Number of control points in v
+    coef : array, size (nCtlu, nCtl, nDim)
+       b-spline coefficient array.
+    tu : array, size(nCtlu + ku)
+       knot array in u
+    tv : array, size(nCtlv + kv)
+       knot array in v
+    X : array, size (Nu, Nv, ndim)
+       Full data array to fit
+    x : array, size (Nu, Nv)
+       Just x data to fit/interpolate
+    y : array, size (Nu, Nv)
+       Just y data to fit/interpolate
+    u : array, size (Nu, Nv)
+       Explict u parameters to use. Optional.
+    v : array, size (Nu, Nv)
+       Explict v parameters to use. Optional.
+    nIter : int
+       Number of Hoscheks parater corrections to run
+
+    Notes
+    -----
+    The orientation of the nodes, edges and faces is the same as the
+    **bottom** surface as described in :class:`Volume` documentation. 
+    """
+    
     def __init__(self, recompute=True, **kwargs):
-        """
-        Create an instance of a b-spline surface. There are two
-        ways to initialize the class
-
-        Creation: Create an instance of the spline class
-        directly by supplying the required information. **kwargs MUST
-        contain the folloiwng information:
-
-            ku, integer: Order for spline in u
-            kv, integer: Order for spline in v
-            tu, real array: Knot vector for u
-            tv, real array: Knot vector for v
-            coef, real array size(nCtlu, nCtlv, nDim): Array of control points
-
-        LMS/Interpolation
-        Create an instance of the spline class by using an interpolating spline to given data points. **kwarg
-        or a LMS spline. The following information is required:
-
-            ku, integer: Order for spline in u
-            kv, integer: Order for spline in v
-            X, real, array, size(len(u), len(v), nDim): Array of data to fit 
-              --> OR  x=<vals>, (len(u), len(v) -2D interpolation
-              --> OR  x=<vals>, y=<vals>, each of size (len(u), len(v) 
-              --> OR  x=<vals>, y=<vals>, z=<vals> each of len(s) ->3D parametric surface
-            u, v, real, arrays: (OPTIONAL for nDim == 3 ) Arrays of u and v values
-            
-        For LMS spline:
-            nCtlu -> (integer) number of control points in u
-            nCtlv -> (integer) number of control points in v
-
-        Optional Data:
-           u    : array of u parameter locations (optional for ndim == 3)
-           v    : array of v parameter locations (optional for ndim == 3)
-           nIter:  The number of Hoschek\'s parameter corrections to run
-           """
-
+     
         self.edgeCurves = [None, None, None, None]
         self.data = None
         self.udata = None
@@ -1314,13 +1360,13 @@ MUST be defined for task lms or interpolate'
 
     def setEdgeCurves(self):
         """Create curve spline objects for each of the edges"""
-        self.edgeCurves[0] = curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[0] = Curve(k=self.ku, t=self.tu, 
                                     coef=self.coef[:, 0])
-        self.edgeCurves[1] = curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[1] = Curve(k=self.ku, t=self.tu, 
                                     coef=self.coef[:, -1])
-        self.edgeCurves[2] = curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[2] = Curve(k=self.kv, t=self.tv, 
                                     coef=self.coef[0, :])
-        self.edgeCurves[3] = curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[3] = Curve(k=self.kv, t=self.tv, 
                                     coef=self.coef[-1, :])
 
     def getValueCorner(self, corner):
@@ -1555,10 +1601,10 @@ direction must be one of \'u\' or \'v\''
 
         # Special case the bounds: (same for both directions)
         if s <= 0.0:
-            return None, surface(tu=self.tu.copy(), tv=self.tv.copy(), 
+            return None, Surface(tu=self.tu.copy(), tv=self.tv.copy(), 
                                  ku=self.ku, kv=self.kv, coef=self.coef.copy())
         if s >= 1.0:
-            return surface(tu=self.tu.copy(), tv=self.tv.copy(), 
+            return Surface(tu=self.tu.copy(), tv=self.tv.copy(), 
                            ku=self.ku, kv=self.kv, coef=self.coef.copy()), None
         
         if direction == 'u':
@@ -1576,8 +1622,8 @@ direction must be one of \'u\' or \'v\''
             coef2 = self.coef[breakPt-1:, :, :].copy()
 
             return \
-                surface(tu=t1, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef1), \
-                surface(tu=t2, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef2)
+                Surface(tu=t1, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef1), \
+                Surface(tu=t2, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef2)
         elif direction == 'v':
 
             r, breakPt = self.insertKnot(direction, s, self.kv-1)
@@ -1594,8 +1640,8 @@ direction must be one of \'u\' or \'v\''
             coef2 = self.coef[:, breakPt-1:, :].copy()
 
             return \
-                surface(tu=self.tu, tv=t1, ku=self.ku, kv=self.kv, coef=coef1), \
-                surface(tu=self.tu, tv=t2, ku=self.ku, kv=self.kv, coef=coef2)
+                Surface(tu=self.tu, tv=t1, ku=self.ku, kv=self.kv, coef=coef1), \
+                Surface(tu=self.tu, tv=t2, ku=self.ku, kv=self.kv, coef=coef2)
 
     def windowSurface(self, uvLow, uvHigh):
         """Create a surface that is windowed by the rectangular
@@ -1661,6 +1707,7 @@ direction must be one of \'u\' or \'v\''
                                 
     def getDerivative(self, u, v):
         """ Evaluate the first derivatvies of the spline surface
+
         Parameters
         ----------
         u : float
@@ -2040,67 +2087,99 @@ direction must be one of \'u\' or \'v\''
                 handle.write('%16.12g, %16.12g, %16.12g\n'%(
                     self.coef[i, j, 0], self.coef[i, j, 1], self.coef[i, j, 2]))
 
-class volume(object):
+class Volume(object):
+    """
+    Create an instance of a b-spline vurface. There are two
+    ways to initialize the class
+
+    * **Creation**: Create an instance of the Volume class directly by
+      supplying the required information: kwargs MUST contain the
+      folloiwng information: ``ku, kv, kw, tu, tv, tw, coef``.
+
+    * **LMS/Interpolation**: Create an instance of the Volume class by
+      using an interpolating spline to given data points or a LMS
+      spline. The following keyword argument information is required:
+
+      1. ``ku`` and ``kv`` and ``kw`` Spline Orders
+
+      2. ``X`` real arry size (Nu, Nv, Nw, nDim) of data to fit. **OR**
+          1. ``x`` (3D) and ``y`` (3D)  ``z`` (3D) 3D volume interpolation/fitting
+
+      3. ``u``, ``v``, ``w`` real array of size (Nu, Nv, Nw). Optional
+
+      4. ``nCtlu``, ``nCtlv``, ``nCtlw``.  Specify number of control points. Only for
+         LMS fitting.
+   
+    Parameters
+    ----------
+    ku : int
+       Spline order in u
+    kv : int
+       Spline order in v
+    kw : int
+       Spline order in w
+    nCtlu : int
+       Number of control points in u
+    nCtlv : int
+       Number of control points in u
+    nCtlw : int
+       Number of control points in w
+    coef : array, size (nCtlu, nCtl, nDim)
+       b-spline coefficient array.
+    tu : array, size(nCtlu + ku)
+       knot array in u
+    tv : array, size(nCtlv + kv)
+       knot array in v
+    tw : array, size(nCtlw + kw)
+       knot array in w
+    X : array, size (Nu, Nv, Nw, ndim)
+       Full data array to fit
+    x : array, size (Nu, Nv)
+       Just x data to fit/interpolate
+    y : array, size (Nu, Nv, Nw)
+       Just y data to fit/interpolate
+    z : array, size (Nu, Nv, Nw)
+       Just z data to fit/interpolate
+    u : array, size (Nu, Nv, Nw)
+       Explict u parameters to use. Optional.
+    v : array, size (Nu, Nv, Nw)
+       Explict v parameters to use. Optional.
+    w : array, size (Nu, Nv, Nw)
+       Explict w parameters to use. Optional.
+    nIter : int
+       Number of Hoscheks parater corrections to run
+    recompute : bool
+       Specifies whether the actual fitting is completed. 
+
+    Notes
+    -----
+    The orientation of the nodes, edges and faces for the volumes is
+    gven below::
+
+               NODES      |           EDGES         |           FACES
+           6           7|             5          |                   
+           #-----------#|       #------------#  |          #-----------#
+          /           / |      /|           /|  |         /|          /|
+         /           /  |     / |          / |  |        / |         / |
+        /           /   |   6/  |        7/  |  |       /  |   1    /  |
+       /           /    |   /   |10      /   |11|      /   |    ---------- 5
+      /           /     |  /    |    4  /    |  |     /    |      /    |(back)
+     #-----------#      | #------------#     |  |    #-----------#     |
+     4           5      | |     |      |     |  |    |     |     |     |
+                        | |     |      |     |  |    |     |     |     | <-3 
+           2           3| |     |   1  |     |  |2-> |     |     |     |  
+           #-----------#| |     #------|-----#  |    |     #-----|-----#
+          /           / | |8   /       |9   /   |4 ----------    |    /
+         /           /  | |   /        |   /    |    |   /       |   /
+        /           /   | |  /2        |  /3    |    |  /      0 |  /
+       /           /    | | /          | /      |    | /         | /
+      /           /     | |/           |/       |    |/          |/
+     #-----------#      | #------------#        |    #-----------#
+     0           1      |         0             |
+   """
+
 
     def __init__(self, recompute=True, **kwargs):
-        """
-        Create an instance of a b-spline surface. There are two
-        ways to initialize the class
-
-        Creation: Create an instance of the volume spline class
-        directly by supplying the required information. **kwargs MUST
-        contain the folloiwng information:
-
-            ku, integer: Order for spline in u
-            kv, integer: Order for spline in v
-            kw, integer: Order for spline in w
-            tu, real array: Knot vector for u
-            tv, real array: Knot vector for v
-            tw, real array: Knot vector for w
-            coef, real array size(nCtlu, nCtlv, nCtlw, nDim): Array of
-            control points
-
-        LMS/Interpolation
-
-        Create an instance of the Volume spline class by using an
-        interpolating (or lms) spline to given data points. The
-        following information is required:
-
-            ku, integer: Order for spline in u
-            kv, integer: Order for spline in v
-            kw, integer: Order for spline in w
-            X, real, array, size(len(u), len(v), len(w), nDim): Array
-            of data to fit
-            u, v, w real, arrays: (OPTIONAL for nDim == 3 ) Arrays of
-            u, v, w values
-
-
-        Optional: recompute: Specifies whether the actual fitting is complted.
-                             Default is True
-
-
-           NODES      |           EDGES          |           FACES
-       6             7|             5          |                   
-       #-------------#|       #-------------#  |          #-------------#
-      /             / |      /|            /|  |         /|            /|
-     /             /  |     / |           / |  |        / |           / |
-    /             /   |   6/  |         7/  |  |       /  |   1      /  |
-   /             /    |   /   |10       /   |11|      /   |      ---------- 5
-  /             /     |  /    |    4   /    |  |     /    |        /    |(back)
- #-------------#      | #-------------#     |  |    #-------------#     |
- 4             5      | |     |       |     |  |    |     |       |     |
-                      | |     |       |     |  |    |     |       |     | <-3 
-       2             3| |     |   1   |     |  |2-> |     |       |     |  
-       #-------------#| |     #-------|-----#  |    |     #-------|-----#
-      /             / | |8   /        |9   /   |4 ----------      |    /
-     /             /  | |   /         |   /    |    |   /         |   /
-    /             /   | |  /2         |  /3    |    |  /      0   |  /
-   /             /    | | /           | /      |    | /           | /
-  /             /     | |/            |/       |    |/            |/
- #-------------#      | #-------------#        |    #-------------#
- 0             1      |         0              |
-
-  """
         self.faceSurfaces = [None, None, None, None, None, None]
         self.edgeCurves = [None, None, None, None, None, None, 
                             None, None, None, None, None, None]
@@ -2584,51 +2663,51 @@ MUST be defined for task lms or interpolate'
     def setFaceSurfaces(self):
         """Create face spline objects for each of the faces"""
       
-        self.faceSurfaces[0] = surface(
+        self.faceSurfaces[0] = Surface(
             ku=self.ku, kv=self.kv, tu=self.tu, tv=self.tv, 
             coef=self.coef[:, :, 0, :])
-        self.faceSurfaces[1] = surface(
+        self.faceSurfaces[1] = Surface(
             ku=self.ku, kv=self.kv, tu=self.tu, tv=self.tv, 
             coef=self.coef[:, :, -1, :])
-        self.faceSurfaces[2] = surface(
+        self.faceSurfaces[2] = Surface(
             ku=self.ku, kv=self.kw, tu=self.tu, tv=self.tw, 
             coef=self.coef[:, 0, :, :])
-        self.faceSurfaces[3] = surface(
+        self.faceSurfaces[3] = Surface(
             ku=self.ku, kv=self.kw, tu=self.tu, tv=self.tw, 
             coef=self.coef[:, -1, :, :])
-        self.faceSurfaces[4] = surface(
+        self.faceSurfaces[4] = Surface(
             ku=self.kv, kv=self.kw, tu=self.tv, tv=self.tw, 
             coef=self.coef[0, :, :, :])
-        self.faceSurfaces[5] = surface(
+        self.faceSurfaces[5] = Surface(
             ku=self.kv, kv=self.kw, tu=self.tv, tv=self.tw, 
             coef=self.coef[-1, :, :, :])
         
     def setEdgeCurves(self):
         """Create edge spline objects for each edge"""
       
-        self.edgeCurves[0] = curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[0] = Curve(k=self.ku, t=self.tu, 
                                     coef=self.coef[:, 0, 0])
-        self.edgeCurves[1] = curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[1] = Curve(k=self.ku, t=self.tu, 
                                     coef=self.coef[:, -1, 0])
-        self.edgeCurves[2] = curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[2] = Curve(k=self.kv, t=self.tv, 
                                     coef=self.coef[0, :, 0])
-        self.edgeCurves[3] = curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[3] = Curve(k=self.kv, t=self.tv, 
                                     coef=self.coef[-1, :, 0])
-        self.edgeCurves[4] = curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[4] = Curve(k=self.ku, t=self.tu, 
                                     coef=self.coef[:, 0, -1])
-        self.edgeCurves[5] = curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[5] = Curve(k=self.ku, t=self.tu, 
                                     coef=self.coef[:, -1, -1])
-        self.edgeCurves[6] = curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[6] = Curve(k=self.kv, t=self.tv, 
                                     coef=self.coef[0, :, -1])
-        self.edgeCurves[7] = curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[7] = Curve(k=self.kv, t=self.tv, 
                                     coef=self.coef[-1, :, -1])
-        self.edgeCurves[8] = curve(k=self.kw, t=self.tw, 
+        self.edgeCurves[8] = Curve(k=self.kw, t=self.tw, 
                                     coef=self.coef[0, 0, :])
-        self.edgeCurves[9] = curve(k=self.kw, t=self.tw, 
+        self.edgeCurves[9] = Curve(k=self.kw, t=self.tw, 
                                     coef=self.coef[-1, 0, :])
-        self.edgeCurves[10] = curve(k=self.kw, t=self.tw, 
+        self.edgeCurves[10] = Curve(k=self.kw, t=self.tw, 
                                      coef=self.coef[0, -1, :])
-        self.edgeCurves[11] = curve(k=self.kw, t=self.tw, 
+        self.edgeCurves[11] = Curve(k=self.kw, t=self.tw, 
                                      coef=self.coef[-1, -1, :])
 
     def getBasisPt(self, u, v, w, vals, istart, colInd, lIndex):
@@ -2895,23 +2974,36 @@ MUST be defined for task lms or interpolate'
             writeTecplot3D(f, 'orig_data', self.X)
         closeTecplot(f)
 
+# For backwards compatibility, the old curve, surface and volume definitions:
+def curve(*args, **kwargs):
+    warnings.warn('pySpline.curve has been changed to Curve()')
+    return Curve(*args, **kwargs)
+def surface(*args, **kwargs):
+    warnings.warn('pySpline.surface has been changed to Surface()')
+    return Surface(*args, **kwargs)
+def volume(*args, **kwargs):
+    warnings.warn('pySpline.volume has been changed to Volume()')
+    return Volume(*args, **kwargs)
+
     # ----------------------------------------------------------------------
     #                     Misc Helper Functions
     # ----------------------------------------------------------------------
 
 def trilinearVolume(*args):
-    """This is a short-cut function to create a trilinear b-spline volume
+    """This is a short-cut function to create a trilinear b-spline
+    volume. It can be created with ``x`` **OR** with ``xmin`` and
+    ``xmax``.
 
     Parameters
     ----------
     x : array of size (2, 2, 2, 3)
         Coordinates of the corners of the box.
 
-    **OR**
-
-    xmin, xmax: Arrays of size (3)
-        The extreme lower and upper corner of the box. In this case, 
-        by construction, the box will be coordinate axis alinged.         
+    xmin : array of size (3)
+        The extreme lower corner of the box
+    xmax : array of size (3)
+        The extreme upper corner of the box. In this case, by
+        construction, the box will be coordinate axis alinged.
         """
     tu = [0, 0, 1, 1]
     tv = [0, 0, 1, 1]
@@ -2921,7 +3013,7 @@ def trilinearVolume(*args):
     kw = 2
 
     if len(args) == 1:
-        return volume(coef=args[0], tu=tu, tv=tv, tw=tw, ku=ku, kv=kv, kw=kw)
+        return Volume(coef=args[0], tu=tu, tv=tv, tw=tw, ku=ku, kv=kv, kw=kw)
     elif len(args) == 2:
         xmin = numpy.array(args[0]).astype('d')
         xmax = numpy.array(args[1]).astype('d')
@@ -2943,37 +3035,37 @@ def trilinearVolume(*args):
         coef[0, 1, 1, :] = [xLow, yHigh, zHigh]
         coef[1, 1, 1, :] = [xHigh, yHigh, zHigh]
 
-        return volume(coef=coef, tu=tu, tv=tv, tw=tw, ku=ku, kv=kv, kw=kw)
+        return Volume(coef=coef, tu=tu, tv=tv, tw=tw, ku=ku, kv=kv, kw=kw)
     else:
         raise Error('An unknown number of arguments was passed to\
- trilinear  volume')
+ trilinear  Volume')
 
 def bilinearSurface(*args):
-    """This is short-cut function to create a bilinear surface
+    """This is short-cut function to create a bilinear surface.
+
     Args can contain:
-        x: array of size(4, 3) The four corners of the array arranged in
-        the coordinate direction orientation:
 
-        2          3
-        /----------\
-        |          |
-        |          |
-        |          |
-        \----------/
-        0          1
+    1.  ``x`` array of size(4, 3).  The four corners of the array
+        arranged in the coordinate direction orientation::
+
+          2          3
+          +----------+
+          |          |
+          |          |
+          |          |
+          +----------+
+          0          1
     
-   OR
+    2. ``p1``, ``p2``, ``p3``, ``p4``. Individual corner points in CCW Ordering::
 
-   Args can contain pt1, pt2, pt3, pt4 is CCW Ordering
-
-        3          2
-        /----------\
-        |          |
-        |          |
-        |          |
-        \----------/
-        0          1
-        """
+          3          2
+          +----------+
+          |          |
+          |          |
+          |          |
+          +----------+
+          0          1
+          """
     if len(args) == 1:
         # One argument passed in ... assume its X
         assert len(args[0]) == 4, 'Error: a single argument passed to bilinear\
@@ -2983,7 +3075,7 @@ def bilinearSurface(*args):
         coef[1, 0] = args[0][1]
         coef[0, 1] = args[0][2]
         coef[1, 1] = args[0][3]
-        return surface(coef=coef, tu=[0, 0, 1, 1], tv=[0, 0, 1, 1], ku=2, kv=2)
+        return Surface(coef=coef, tu=[0, 0, 1, 1], tv=[0, 0, 1, 1], ku=2, kv=2)
     else:
         # Assume 4 arguments
         coef = numpy.zeros([2, 2, 3])
@@ -2991,31 +3083,25 @@ def bilinearSurface(*args):
         coef[1, 0] = args[1]
         coef[0, 1] = args[3]
         coef[1, 1] = args[2]
-        return surface(coef=coef, tu=[0, 0, 1, 1], tv=[0, 0, 1, 1], ku=2, kv=2)
+        return Surface(coef=coef, tu=[0, 0, 1, 1], tv=[0, 0, 1, 1], ku=2, kv=2)
 
 def line(*args, **kwargs):
-    """This is a short cut function to create a line curve
+    """This is a short cut function to create a line as a pySpline Curve object.
 
-    Args can contain:
-       X: array of size(2, ndim) The two end points
-       
-       OR:
-       x1, x2: The two end points (each of size ndim)
+    Args can contain: (pick one)
 
-       OR:
-       x1, dir=direction
-       x1 and the keyword argument direction
-
-       OR: 
-       x1, dir=direction, length=length
-       x1, direction and specific length
-       """
+    1. ``X`` array of size(2, ndim). The two end points
+    2. ``x1``, ``x2`` The two end points (each of size ndim)
+    3. ``x```, dir=dirction. A point and a displcement vector
+    4. ``x1``, dir=direction, length=length. As 3. but with a specific length
+    """
+    
     if len(args) == 2:
         # Its a two-point type
-        return curve(coef=[args[0], args[1]], k=2, t=[0, 0, 1, 1])
+        return Curve(coef=[args[0], args[1]], k=2, t=[0, 0, 1, 1])
     elif len(args) == 1:
         if len(args[0]) == 2: # its X
-            return curve(coef=args[0], k=2, t=[0, 0, 1, 1])
+            return Curve(coef=args[0], k=2, t=[0, 0, 1, 1])
         elif 'dir' in kwargs:
             # We have point and direction
             if 'length' in kwargs:
@@ -3024,7 +3110,7 @@ def line(*args, **kwargs):
             else:
                 x2 = args[0] + kwargs['dir']
 
-            return curve(coef=[args[0], x2], k=2, t=[0, 0, 1, 1])
+            return Curve(coef=[args[0], x2], k=2, t=[0, 0, 1, 1])
         else:
             Error('Error: dir must be specified if only 1 argument is given')
 

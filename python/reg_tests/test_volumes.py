@@ -806,7 +806,7 @@ for ku in [2,4]:
 kw=%d, nCtlu=%d, nCtlv=%d, nCtlw=%d'%(ku, kv, kw, nCtlu, nCtlv, nCtlw))
                         print('+'+'-'*78+'+')
 
-                        volume = pySpline.volume(
+                        volume = pySpline.Volume(
                             X=X, ku=ku, kv=kv, kw=kw,
                             nCtlu=nCtlu, nCtlv=nCtlv, nCtlw=nCtlw)
                         volume.recompute()
