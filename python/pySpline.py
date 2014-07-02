@@ -25,10 +25,10 @@ from . import libspline
 class Error(Exception):
     """
     Format the error message in a box to make it clear this
-    was a expliclty raised exception.
+    was a explicitly raised exception.
     """
     def __init__(self, message):
-        msg = '\n+'+'-'*78+'+'+'\n' + '| pySpline Error: '
+        msg = '\n+' + '-'*78 + '+' + '\n' + '| pySpline Error: '
         i = 17
         for word in message.split():
             if len(word) + i + 1 > 78: # Finish line and start new one
@@ -101,23 +101,25 @@ def writeTecplot3D(handle, name, data):
     ny = data.shape[1]
     nz = data.shape[2]
     ndim = data.shape[3]
-    handle.write('Zone T=\"%s\" I=%d J=%d K=%d\n'%(name, nx, ny, nz))
+    handle.write('Zone T=\"%s\" I=%d J=%d K=%d\n' % (name, nx, ny, nz))
     handle.write('DATAPACKING=POINT\n')
     for k in range(nz):
         for j in range(ny):
             for i in range(nx):
                 for idim in range(ndim):
-                    handle.write('%f '%(data[i, j, k, idim]))
+                    handle.write('%f ' % (data[i, j, k, idim]))
                 handle.write('\n')
 
+
 def _writeHeader(f, ndim):
-    """ Write tecplote zone header depending on spatial dimension"""
+    """ Write tecplot zone header depending on spatial dimension"""
     if ndim == 1:
-        f.write ('VARIABLES = "X"\n')
+        f.write('VARIABLES = "X"\n')
     elif ndim == 2:
-        f.write ('VARIABLES = "X", "Y"\n')
+        f.write('VARIABLES = "X", "Y"\n')
     else:
-        f.write ('VARIABLES = "X", "Y", "Z"\n')
+        f.write('VARIABLES = "X", "Y", "Z"\n')
+
 
 def openTecplot(fileName, ndim):
     """A Generic function to open a Tecplot file to write spatial data.
@@ -127,7 +129,7 @@ def openTecplot(fileName, ndim):
     fileName : str
         Tecplot filename. Should have a .dat extension.
     ndim : int
-        Number of spatial dimensions. Must be 1, 2 or 3. 
+        Number of spatial dimensions. Must be 1, 2 or 3.
 
     Returns
     -------
@@ -139,10 +141,12 @@ def openTecplot(fileName, ndim):
 
     return f
 
+
 def closeTecplot(f):
     """ Close Tecplot file opened with openTecplot()"""
     f.close()
-    
+
+
 def _assembleMatrix(data, indices, indptr, shape):
     """
     Generic assemble matrix function to create a CSR matrix
@@ -150,7 +154,7 @@ def _assembleMatrix(data, indices, indptr, shape):
     Parameters
     ----------
     data : array
-        Data values for matrx
+        Data values for matrix
     indices : int array
         CSR type indices
     indptr : int array
@@ -161,11 +165,12 @@ def _assembleMatrix(data, indices, indptr, shape):
     Returns
     -------
     M : scipy csr sparse matrix
-        The assembled matrix    
+        The assembled matrix
         """
     M = sparse.csr_matrix((data, indices, indptr), shape)
 
     return M
+
 
 def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
     """This is a generic function to check the data type and sizes of
@@ -183,23 +188,23 @@ def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
         Numpy string dtype code
     dataRank : int
         Desired rank. 0 for scalar, 1 for vector 2 for matrix etc
-    dataShape : 
+    dataShape : tuple
         The required shape of the data.
         Scalar is denoted by ()
         Vector is denoted by (n, ) where n is the shape
-        Matrix is denoted by (n, m) where n amd m are rows/columns
+        Matrix is denoted by (n, m) where n and m are rows/columns
 
     Returns
     -------
     output : various
         The input transformed to the correct type and guaranteed to
-        the desired size and shape. 
-        """ 
+        the desired size and shape.
+        """
 
     # Check the data rank:
     rank = numpy.rank(inputVal)
     if rank != dataRank:
-        raise Error('\'%s\' must have rank %d. Input was of rank %d.'%(
+        raise Error('\'%s\' must have rank %d. Input was of rank %d.' % (
             inputName, dataRank, rank))
 
     # Check the data type
@@ -207,17 +212,17 @@ def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
     tmp = inputVal.astype(dataType)
 
     # Check if the values are the same:
-    diff = (tmp-inputVal).flatten()
-    if numpy.dot(diff, diff) > 10*numpy.finfo(1.0).eps:
-        raise Error('\'%s\' could not be safely cast to required type\
- without losing information'%(inputName))
-        
+    diff = (tmp - inputVal).flatten()
+    if numpy.dot(diff, diff) > 10 * numpy.finfo(1.0).eps:
+        raise Error("'%s' could not be safely cast to required type"
+                    "without losing information" % inputName)
+
     # Finally check that the shape is correct:
     if dataShape is not None:
         if tmp.shape != tuple(dataShape):
-            raise Error('\%s\' was not the correct shape. Input was shape %s\
-            while requested dataShape was %s.'%(
-                            inputName, repr(tmp.shape), repr(dataShape)))     
+            raise Error("'%s' was not the correct shape. Input was shape "
+                        "%s while requested dataShape was '%s'." % (
+                        inputName, repr(tmp.shape), repr(dataShape)))
     if dataRank == 0:
         return tmp.squeeze()
     else:
@@ -278,7 +283,7 @@ class Curve(object):
         of -1 can be used to exactly constrain a point. By default,
         all weights are 1.0
     deriv : array, size (len(derivPtr), nDim)
-        Array containing derivitve information the
+        Array containing derivative information the
         user wants to use at a particular point. **EXPERIMENTAL**
     derivPtr : int, array, size (nDerivPtr)
         Array of indices pointing to the index of points in X (or
@@ -288,7 +293,7 @@ class Curve(object):
         Optional array of the weighting to use for
         derivatives. A value of -1 can be used to exactly constrain a
         derivative. **EXPERIMENTAL**
- 
+
     Examples
     --------
     >>> x = [0, 0.5, 1.0]
@@ -296,7 +301,7 @@ class Curve(object):
     >>> s = [0., 0.5, 1.0]
     >>> # Spatial interpolated seg
     >>> line_seg = pySpline.Curve(x=x, y=y, k=2)
-    >>> # With explict parameter values
+    >>> # With explicit parameter values
     >>> line_seg = pySpline.Curve(x=x, y=y, k=2, s=s)
     >>> #LMS parabolic curve
     >>> parabola = pySpline.Curve(x=x, y=y, k=3)
@@ -310,7 +315,7 @@ class Curve(object):
         self.sdata = None
         self.localInterp = False
         # We have provided information to create curve directly
-        if 'k' in kwargs and 't' in kwargs and 'coef' in kwargs: 
+        if 'k' in kwargs and 't' in kwargs and 'coef' in kwargs:
             self.s = None
             self.X = None
             self.N = None
@@ -319,7 +324,7 @@ class Curve(object):
             self.nCtl = self.coef.shape[0]
             self.nDim = self.coef.shape[1]
             self.t = checkInput(kwargs['t'], 't', float, 1,
-                                (self.nCtl+self.k, ))
+                                (self.nCtl + self.k, ))
             self.origData = False
             self.calcGrevillePoints()
 
@@ -327,10 +332,9 @@ class Curve(object):
             # Local, non-global interpolation. We could use this for
             # second-order (linear interpolation) but there is not
             # much point, since it would be the same as 'interp'
-            # below. 
+            # below.
             self.localInterp = True
             self.k = 4
-            
             self.origData = True
             if 'X' in kwargs:
                 self.X = numpy.atleast_2d(kwargs['X'])
@@ -349,22 +353,23 @@ class Curve(object):
 
             if 's' in kwargs:
                 self.s = checkInput(kwargs['s'], 's', float, 1, (self.N, ))
+                self.length = 1.0 # Assume it is 0->1
             else:
-                assert self.nDim > 1, 'Error, pySpline: For 1D splines, \
- the basis, s must be given'
+                if self.nDim <= 1:
+                    raise Error("For 1D splines, the basis, 's' must be given.")
                 self._getParameterization()
 
             # Now we have the data we need to generate the local
             # interpolation
-     
+
             T = numpy.zeros((self.N, self.nDim))
             # Compute tangents
             qq = numpy.zeros_like(self.X)
-            T  = numpy.zeros_like(self.X)
+            T = numpy.zeros_like(self.X)
             deltaS = numpy.zeros(self.N)
             for i in range(1, self.N):
                 deltaS[i] = self.s[i]-self.s[i-1]
-                qq[i, :] = self.X[i]-self.X[i-1] 
+                qq[i, :] = self.X[i]-self.X[i-1]
 
             for i in range(1, self.N-1):
                 a = deltaS[i]/(deltaS[i] + deltaS[i+1])
@@ -373,11 +378,10 @@ class Curve(object):
             # Do the start and end points: (eqn: 9.32, The NURBS book)
             T[0] = 2*qq[1]/deltaS[1] - T[1]
             T[-1] = 2*qq[-1]/deltaS[-1] - T[-2]
-
             # Normalize
             for i in range(self.N):
                 T[i] = T[i]/numpy.linalg.norm(T[i])
-                
+
             # Final coefficients and t
             self.coef = numpy.zeros((2*(self.N-1)+2, self.nDim))
             self.t    = numpy.zeros(len(self.coef) + self.k)
@@ -426,7 +430,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
 
             self.k = checkInput(kwargs['k'], 'k', int, 0)
             self.t = None
-            if 'nIter' in kwargs: 
+            if 'nIter' in kwargs:
                 self.nIter = checkInput(kwargs['nIter'], 'nIter', int, 0)
             else:
                 self.nIter = 1
@@ -434,10 +438,10 @@ nCtl=<number of control points> must be specified for a LMS fit'
             if 's' in kwargs:
                 self.s = checkInput(kwargs['s'], 's', float, 1, (self.N, ))
             else:
-                assert self.nDim > 1, 'Error, pySpline: For 1D splines, \
- the basis, s must be given'
+                if self.nDim <= 1:
+                    raise Error("For 1D splines, the basis, 's' must be given.")
                 self._getParameterization()
-            
+
             if 'weights' in kwargs:
                 self.weights = checkInput(
                     kwargs['weights'], 'weights', float, 1, (self.N, ))
@@ -445,9 +449,9 @@ nCtl=<number of control points> must be specified for a LMS fit'
                 self.weights = numpy.ones(self.N)
 
             if 'deriv' in kwargs and 'derivPtr' in kwargs:
-                self.deriv = checkInput(kwargs['deriv'], 'deric', float, 2)
-                self.derivPtr = checkInput(kwargs['derivPtr'], 
-                                            'derivPtr', int, 1, 
+                self.deriv = checkInput(kwargs['deriv'], 'deriv', float, 2)
+                self.derivPtr = checkInput(kwargs['derivPtr'],
+                                            'derivPtr', int, 1,
                                             (len(self.deriv), ))
             else:
                 self.deriv = None
@@ -455,7 +459,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
 
             if 'derivWeights' in kwargs and self.deriv != None:
                 self.derivWeights = checkInput(
-                    kwargs['derivWeights'], 'derivWeights', float, 1, 
+                    kwargs['derivWeights'], 'derivWeights', float, 1,
                     (len(self.derivPtr), ))
             else:
                 if self.deriv != None:
@@ -491,9 +495,9 @@ nCtl=<number of control points> must be specified for a LMS fit'
         if not self.origData or self.localInterp:
             return
 
-        # Do the sparation between the constrained and unconstrained: 
+        # Do the separation between the constrained and unconstrained:
         # u -> unconstrained
-        # s -> constrainted
+        # s -> constrained
         suSelect = numpy.where(self.weights > 0.0)
         scSelect = numpy.where(self.weights <= 0.0)
         S  = self.X[suSelect]
@@ -504,7 +508,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
 
         nu = len(S)
         nc = len(T)
-     
+
         # And the derivative info
         if self.deriv != None:
             sduSelect = numpy.where(self.derivWeights > 0.0)
@@ -523,10 +527,10 @@ nCtl=<number of control points> must be specified for a LMS fit'
             ndu = 0
             ndc = 0
 
-        W = _assembleMatrix(weights, numpy.arange(len(weights)), 
-                            numpy.arange(len(weights)+1), 
+        W = _assembleMatrix(weights, numpy.arange(len(weights)),
+                            numpy.arange(len(weights)+1),
                             (len(weights), len(weights)))
-            
+
         if self.interp:
             self.nCtl = nu+nc+ndu+ndc
             self.nIter = 1
@@ -546,7 +550,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
         self.calcGrevillePoints()
         self.coef = numpy.zeros((self.nCtl, self.nDim), 'd')
 
-        # Get the 'N' jacobain
+        # Get the 'N' jacobian
         nVals = numpy.zeros((nu+ndu)*self.k)           # |
         nRowPtr  = numpy.zeros(nu+ndu+1, 'intc')       # | -> CSR formulation
         nColInd = numpy.zeros((nu+ndu)*self.k, 'intc')# |
@@ -571,8 +575,8 @@ nCtl=<number of control points> must be specified for a LMS fit'
             if self.deriv != None:
                 sdu = self.s[self.derivPtr][sduSelect]
                 sdc = self.s[self.derivPtr][sdcSelect]
-                
-            libspline.curve_jacobian_wrap(su, sdu, self.t, self.k, self.nCtl, 
+
+            libspline.curve_jacobian_wrap(su, sdu, self.t, self.k, self.nCtl,
                                          nVals, nRowPtr, nColInd)
             NTWN = (N.transpose()*W*N).tocsc() # We need this either way
 
@@ -581,7 +585,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
                               # LMS
 
 
-                # Factorize once for efficiency                    
+                # Factorize once for efficiency
                 solve = linalg.dsolve.factorized( NTWN )
                 for idim in range(self.nDim):
                     self.coef[:, idim] = solve(N.transpose()*W*S[:, idim])
@@ -595,38 +599,38 @@ nCtl=<number of control points> must be specified for a LMS fit'
                 mRowPtr = numpy.zeros(nc+ndc+1, 'intc')       #| -> CSR
                 mColInd = numpy.zeros((nc+ndc)*self.k, 'intc')#|
 
-                libspline.curve_jacobian_wrap(sc, sdc, self.t, self.k, 
-                                              self.nCtl, mVals, mRowPtr, 
+                libspline.curve_jacobian_wrap(sc, sdc, self.t, self.k,
+                                              self.nCtl, mVals, mRowPtr,
                                               mColInd)
-                M = _assembleMatrix(mVals, mColInd, mRowPtr, 
+                M = _assembleMatrix(mVals, mColInd, mRowPtr,
                                     (nc+ndc, self.nCtl))
 
                 # Now we must assemble the constrained jacobian
                 # [ N^T*W*T      M^T][P] = [ N^T*W*S]
-                # [ M            0  ][R]   [ T      ] 
+                # [ M            0  ][R]   [ T      ]
 
                 MT   = M.transpose().tocsr()
 
                 jVal, jColInd, jRowPtr = libspline.constr_jac(
-                    NTWN.data, NTWN.indptr, NTWN.indices, MT.data, 
-                    MT.indptr, MT.indices, 
+                    NTWN.data, NTWN.indptr, NTWN.indices, MT.data,
+                    MT.indptr, MT.indices,
                     M.data, M.indptr, M.indices, self.nCtl)
 
                 # Create sparse csr matrix and factorize
-                J = _assembleMatrix(jVal, jColInd, jRowPtr, 
+                J = _assembleMatrix(jVal, jColInd, jRowPtr,
                                     (self.nCtl+nc+ndc, self.nCtl+nc+ndc))
 
                 # Factorize once for efficiency
-                solve = linalg.dsolve.factorized( J ) 
+                solve = linalg.dsolve.factorized(J)
                 for idim in range(self.nDim):
-                    rhs = numpy.hstack((N.transpose()*W*S[:, idim], 
+                    rhs = numpy.hstack((N.transpose()*W*S[:, idim],
                                         T[:, idim]))
                     self.coef[:, idim] = solve(rhs)[0:self.nCtl]
 
             # end if (constr - not constrained
 
             # Run para correction
-            libspline.curve_para_corr(self.t, self.k, self.s, 
+            libspline.curve_para_corr(self.t, self.k, self.s,
                                      self.coef.T, length, self.X.T)
         # end for (iter loop)
 
@@ -634,11 +638,11 @@ nCtl=<number of control points> must be specified for a LMS fit'
         rms = 0.0
         for idim in range(self.nDim):
             rms += numpy.linalg.norm(N*self.coef[:, idim]-S[:, idim])**2
-       
+
         rms = numpy.sqrt(rms/self.N)
 
     def _getParameterization(self):
-        """Compute a paramerization for the curve based on an
+        """Compute a parametrization for the curve based on an
         arc-length formulation
         """
         self.s = numpy.zeros(self.N, 'd')
@@ -667,7 +671,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
         u : float
             Parametric position to split at
         r : int
-            Number of time to insert. Should be > 0. 
+            Number of time to insert. Should be > 0.
 
         Returns
         -------
@@ -676,15 +680,15 @@ nCtl=<number of control points> must be specified for a LMS fit'
         breakPt : int
             Index in the knot vector of the new knot(s)
             """
-        
+
         u = checkInput(u, 'u', float, 0)
         r = checkInput(r, 'r', int, 0)
-        
+
         if u <= 0:
             return
         if u >= 1.0:
             return
-        
+
         actualR, tNew, coefNew, breakPt = libspline.insertknot(
             u, r, self.t, self.k, self.coef.T)
         self.t = tNew[0:self.nCtl+self.k+actualR]
@@ -702,7 +706,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
         Parameters
         ----------
         u : float
-            Parametric posiiton to insert knot. 
+            Parametric position to insert knot.
 
         Returns
         -------
@@ -720,12 +724,12 @@ nCtl=<number of control points> must be specified for a LMS fit'
         u = checkInput(u, 'u', float, 0)
 
         if u <= 0.0:
-            return None, Curve(t=self.t.copy(), k=self.k, 
+            return None, Curve(t=self.t.copy(), k=self.k,
                                   coef=self.coef.copy())
         if u >= 1.0:
-            return Curve(t=self.t.copy(), k=self.k, 
+            return Curve(t=self.t.copy(), k=self.k,
                                   coef=self.coef.copy()), None
-        
+
         r, breakPt = self.insertKnot(u, self.k-1)
         # Break point is now at the right so we need to adjust the
         # counter to the left
@@ -745,7 +749,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
 
     def windowCurve(self, uLow, uHigh):
         """
-        Compute the segument of the curve between the two parameter values
+        Compute the segment of the curve between the two parameter values
 
         Parameters
         ----------
@@ -754,14 +758,14 @@ nCtl=<number of control points> must be specified for a LMS fit'
         uHigh : float
             Upper bound for the clip
         """
-        dummy, c = self.splitCurve(uLow)
-        c, dummy = c.splitCurve((uHigh-uLow)/(1.0-uLow))
+        __, c = self.splitCurve(uLow)
+        c, __ = c.splitCurve((uHigh-uLow)/(1.0-uLow))
 
         return c
 
     def getLength(self):
-        """ Compute the length of the curve using the Eculdian Norm
-    
+        """ Compute the length of the curve using the Euclidean Norm
+
         Returns
         -------
         length : float
@@ -771,7 +775,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
         length = 0
         for i in range(len(points)-1):
             length += numpy.linalg.norm(points[i] - points[i+1])
-     
+
         return length
 
     def calcGrevillePoints(self):
@@ -781,10 +785,10 @@ nCtl=<number of control points> must be specified for a LMS fit'
             for n in range(self.k-1): #degree loop
                 self.gpts[i] += self.t[i+n+1]
             self.gpts[i] = self.gpts[i] / (self.k-1)
-    
+
     def calcInterpolatedGrevillePoints(self):
         """
-        Compute greville points, but with addtional interpolated knots
+        Compute greville points, but with additional interpolated knots
         """
         self.calcGrevillePoints()
         s = [self.gpts[0]]
@@ -799,13 +803,13 @@ nCtl=<number of control points> must be specified for a LMS fit'
 
     def __call__(self, s):
         """
-        Equivilant to getValue()
+        Equivalent to getValue()
         """
         return self.getValue(s)
-    
+
     def getValue(self, s):
         """
-        Evalue the spline at parametric position, s
+        Evaluate the spline at parametric position, s
 
         Parameters
         ----------
@@ -816,21 +820,21 @@ nCtl=<number of control points> must be specified for a LMS fit'
         -------
         values : array of size nDim or an array of size (N, 3)
             The evaluated points. If a single scalar s was given, the
-            result with be an array of legnth nDim (or a scalar if
+            result with be an array of length nDim (or a scalar if
             nDim=1). If a vector of s values were given it will be an
             array of size (N, 3) (or size (N) if ndim=1)
             """
-     
+
         s = numpy.array(s).T
         if self.coef.dtype == numpy.dtype('d'):
-            vals = libspline.eval_curve(numpy.atleast_1d(s), 
+            vals = libspline.eval_curve(numpy.atleast_1d(s),
                                        self.t, self.k, self.coef.T)
         else:
-            vals = libspline.eval_curve_c(numpy.atleast_1d(s), 
+            vals = libspline.eval_curve_c(numpy.atleast_1d(s),
                                          self.t, self.k, self.coef.T)
 
         return vals.squeeze().T
-        
+
     def getDerivative(self, s):
         """
         Evaluate the derivatie of the spline at parametric position, s
@@ -839,7 +843,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
         ----------
         s : float
             Parametric location for derivative
-    
+
         Returns
         -------
         ds : array
@@ -851,9 +855,9 @@ nCtl=<number of control points> must be specified for a LMS fit'
         else:
             ds = libspline.eval_curve_deriv_c(
                 s, self.t, self.k, self.coef.T).squeeze()
-   
+
         return ds
-        
+
     def getSecondDerivative(self, s):
         """
         Evaluate the second derivatie of the spline at parametric
@@ -863,7 +867,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
         ----------
         s : float
             Parametric location for derivative
-    
+
         Returns
         -------
         d2s : array
@@ -893,7 +897,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
             Maximum number of Newton iterations to perform.
         eps : float
             Desired parameter tolerance.
-            
+
         Returns
         -------
         s : float or array
@@ -904,7 +908,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
             This is simply ||curve(s) - X0||_2.
         """
         x0 = numpy.atleast_2d(x0)
-        if 's' in kwargs: 
+        if 's' in kwargs:
             s = numpy.atleast_1d(kwargs['s'])
         else:
             s = -1*numpy.ones(len(x0))
@@ -936,15 +940,15 @@ nCtl=<number of control points> must be specified for a LMS fit'
         nIter : int
             Maximum number of Newton iterations to perform.
         eps : float
-            Desired parameter tolerance. 
+            Desired parameter tolerance.
         s : float
             Initial guess for curve1 (this curve class)
         t : float
             Initial guess for inCurve (curve passed in )
-            
+
         Returns
         -------
-        s : float 
+        s : float
            Parametric position on curve1 (this class)
         t : float
             Parametric position on curve2 (inCurve)
@@ -958,7 +962,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
             s = checkInput(kwargs['s'], 's', float, 0)
         if 't' in kwargs:
             t = checkInput(kwargs['t'], 't', float, 0)
-        eps   = checkInput(eps, 'eps', float, 0)
+        eps = checkInput(eps, 'eps', float, 0)
 
         if s < 0 or s > 1 or t < 0 or t > 1:
             self.computeData()
@@ -967,11 +971,11 @@ nCtl=<number of control points> must be specified for a LMS fit'
                 self.data.T, self.sdata, inCurve.data.T, inCurve.sdata)
 
         s, t, Diff = libspline.curve_curve(
-            self.t, self.k, self.coef.T, inCurve.t, inCurve.k, 
+            self.t, self.k, self.coef.T, inCurve.t, inCurve.k,
             inCurve.coef.T, nIter, eps, s, t)
-        
+
         return s, t, Diff
-        
+
     def projectCurveMultiSol(self, inCurve, nIter=25, eps=1e-10, **kwargs):
         """
         Find the minimum distance between this curve (self) and a
@@ -985,12 +989,12 @@ nCtl=<number of control points> must be specified for a LMS fit'
         nIter : int
             Maximum number of Newton iterations to perform.
         eps : float
-            Desired parameter tolerance. 
+            Desired parameter tolerance.
         s : float
             Initial guess for curve1 (this curve class)
         t : float
             Initial guess for inCurve (curve passed in )
-            
+
         Returns
         -------
         s : array
@@ -1007,18 +1011,18 @@ nCtl=<number of control points> must be specified for a LMS fit'
             s = checkInput(kwargs['s'], 's', float, 0)
         if 't' in kwargs:
             t = checkInput(kwargs['t'], 't', float, 0)
-        eps   = checkInput(eps, 'eps', float, 0)
+        eps = checkInput(eps, 'eps', float, 0)
 
         self.computeData()
         inCurve.computeData()
 
         uSol = []
         tSol = []
-        diff  = []
+        diff = []
         for i in range(len(self.sdata)):
             for j in range(len(inCurve.sdata)):
                 s, t, Diff = libspline.curve_curve(
-                    self.t, self.k, self.coef.T, inCurve.t, inCurve.k, 
+                    self.t, self.k, self.coef.T, inCurve.t, inCurve.k,
                     inCurve.coef.T, nIter, eps, self.sdata[i], inCurve.sdata[j])
 
                 if numpy.linalg.norm(Diff) < eps:
@@ -1037,7 +1041,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
                             diff.append(Diff)
 
         return numpy.array(uSol), numpy.array(tSol), numpy.array(diff)
-        
+
     def computeData(self):
         """
         Compute discrete data that is used for the Tecplot
@@ -1049,10 +1053,10 @@ nCtl=<number of control points> must be specified for a LMS fit'
         if self.data is None:
             self.calcInterpolatedGrevillePoints()
             self.data = self.getValue(self.sdata)
-    
+
     def writeTecplot(self, fileName, curve=True, coef=True, orig=True):
         """
-        Write the cuve to a tecplot .dat file
+        Write the curve to a tecplot .dat file
 
         Parameters
         ----------
@@ -1070,10 +1074,10 @@ nCtl=<number of control points> must be specified for a LMS fit'
             self.computeData()
             writeTecplot1D(f, 'interpolated', self.data)
         if coef:
-            writeTecplot1D(f, 'control_pts', self.coef)        
+            writeTecplot1D(f, 'control_pts', self.coef)
         if orig and self.origData:
             writeTecplot1D(f, 'orig_data', self.X)
-        
+
         closeTecplot(f)
 
 class Surface(object):
@@ -1100,7 +1104,7 @@ class Surface(object):
 
       4. ``nCtlu``, ``nCtlv`` Specify number of control points. Only for
          LMS fitting.
-   
+
     Parameters
     ----------
     ku : int
@@ -1133,11 +1137,11 @@ class Surface(object):
     Notes
     -----
     The orientation of the nodes, edges and faces is the same as the
-    **bottom** surface as described in :class:`Volume` documentation. 
+    **bottom** surface as described in :class:`Volume` documentation.
     """
-    
+
     def __init__(self, recompute=True, **kwargs):
-     
+
         self.edgeCurves = [None, None, None, None]
         self.data = None
         self.udata = None
@@ -1154,9 +1158,9 @@ class Surface(object):
             self.coef = checkInput(kwargs['coef'], 'coef', float, 3)
             self.nCtlu = self.coef.shape[0]
             self.nCtlv = self.coef.shape[1]
-            self.tu = checkInput(kwargs['tu'], 'tu', float, 1, 
+            self.tu = checkInput(kwargs['tu'], 'tu', float, 1,
                                  (self.nCtlu+self.ku, ))
-            self.tv = checkInput(kwargs['tv'], 'tv', float, 1, 
+            self.tv = checkInput(kwargs['tv'], 'tv', float, 1,
                                  (self.nCtlv+self.kv, ))
             self.umin = self.tu[0]
             self.umax = self.tu[-1]
@@ -1218,7 +1222,7 @@ MUST be defined for task lms or interpolate'
                 self.nCtlu = self.Nu
                 self.nCtlv = self.Nv
                 self.interp = True
-                
+
             self.origData = True
 
             # Sanity Check on Inputs
@@ -1271,13 +1275,13 @@ MUST be defined for task lms or interpolate'
 
     def recompute(self):
         """Recompute the surface if any data has been modified"""
-        
+
         vals, rowPtr, colInd = libspline.surface_jacobian_wrap(\
-            self.U.T, self.V.T, self.tu, self.tv, self.ku, self.kv, 
+            self.U.T, self.V.T, self.tu, self.tv, self.ku, self.kv,
             self.nCtlu, self.nCtlv)
-        
-        N = _assembleMatrix(vals, colInd, rowPtr, (self.Nu*self.Nv, 
-                                                     self.nCtlu*self.nCtlv))
+
+        N = _assembleMatrix(vals, colInd, rowPtr, (self.Nu*self.Nv,
+                                                   self.nCtlu*self.nCtlv))
 
         self.coef = numpy.zeros((self.nCtlu, self.nCtlv, self.nDim))
         if self.interp:
@@ -1298,12 +1302,12 @@ MUST be defined for task lms or interpolate'
 
     def calcParameterization(self):
         """Compute a spatial parameterization"""
-        
+
         u = numpy.zeros(self.Nu, 'd')
         U = numpy.zeros((self.Nu, self.Nv), 'd')
         singularSounter = 0
-        # loop over each v, and average the 'u' parameter 
-        for j in range(self.Nv): 
+        # loop over each v, and average the 'u' parameter
+        for j in range(self.Nv):
             temp = numpy.zeros(self.Nu, 'd')
 
             for i in range(self.Nu-1):
@@ -1321,12 +1325,12 @@ MUST be defined for task lms or interpolate'
             u += temp #accumulate the u-parameter calcs for each j
 
         u = u/(self.Nv-singularSounter) #divide by the number of 'j's we had
-        
+
         v = numpy.zeros(self.Nv, 'd')
         V = numpy.zeros((self.Nu, self.Nv), 'd')
         singularSounter = 0
-        # loop over each v, and average the 'u' parameter 
-        for i in range(self.Nu): 
+        # loop over each v, and average the 'u' parameter
+        for i in range(self.Nu):
             temp = numpy.zeros(self.Nv, 'd')
             for j in range(self.Nv-1):
                 temp[j+1] = temp[j] + numpy.linalg.norm(
@@ -1350,9 +1354,9 @@ MUST be defined for task lms or interpolate'
         """ Determine the knots depending on if it is inerpolated or
         an LMS fit"""
         if self.interp:
-            self.tu = libspline.knots_interp(self.u, numpy.array([], 'd'), 
+            self.tu = libspline.knots_interp(self.u, numpy.array([], 'd'),
                                             self.ku)
-            self.tv = libspline.knots_interp(self.v, numpy.array([], 'd'), 
+            self.tv = libspline.knots_interp(self.v, numpy.array([], 'd'),
                                             self.kv)
         else:
             self.tu = libspline.knots_lms(self.u, self.nCtlu, self.ku)
@@ -1360,13 +1364,13 @@ MUST be defined for task lms or interpolate'
 
     def setEdgeCurves(self):
         """Create curve spline objects for each of the edges"""
-        self.edgeCurves[0] = Curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[0] = Curve(k=self.ku, t=self.tu,
                                     coef=self.coef[:, 0])
-        self.edgeCurves[1] = Curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[1] = Curve(k=self.ku, t=self.tu,
                                     coef=self.coef[:, -1])
-        self.edgeCurves[2] = Curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[2] = Curve(k=self.kv, t=self.tv,
                                     coef=self.coef[0, :])
-        self.edgeCurves[3] = Curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[3] = Curve(k=self.kv, t=self.tv,
                                     coef=self.coef[-1, :])
 
     def getValueCorner(self, corner):
@@ -1382,8 +1386,9 @@ MUST be defined for task lms or interpolate'
         value : float
             Spline evaluated at corner
             """
-        assert corner in [0, 1, 2, 3], 'Error, getValueCorner:\
- Corner must be in range 0->3'
+        if not corner in [0, 1, 2, 3]:
+            raise Error('Corner must be in range 0..3 inclusive')
+        
         if corner == 0:
             return self.getValue(self.umin, self.vmin)
         elif corner == 1:
@@ -1407,9 +1412,10 @@ MUST be defined for task lms or interpolate'
         value : float
             Original value at corner
             """
-        assert corner in [0, 1, 2, 3] and self.origData, \
- 'Error, getOrigValueCorner: No original data for this surface or corner\
- is not in range 0->3'
+        if not corner in range(0, 4):
+            raise Error('Corner must be in range 0..3 inclusive')
+        if not self.origData:
+            raise Error('No original data for this surface')
 
         if corner == 0:
             return self.X[0, 0]
@@ -1427,7 +1433,7 @@ MUST be defined for task lms or interpolate'
         ----------
         edge : int
             Edge index 0<=edge<=3
-            
+
         Returns
         -------
         startValue : array size nDim
@@ -1437,11 +1443,12 @@ MUST be defined for task lms or interpolate'
             Original value at mid point of edge
 
         endValue : array size nDim
-            Original value at end of endge. 
+            Original value at end of edge.
             """
-        assert edge in [0, 1, 2, 3] and self.origData, \
-'Error, getOrigValuesEdge: No original data for this surface or edge is\
- not in range 0->3'
+        if not edge in range(0, 4):
+            raise Error('Edge must be in range 0..3 inclusive')
+        if not self.origData:
+            raise Error('No original data for this surface')
 
         if edge == 0:
             if numpy.mod(self.Nu, 2) == 1: # Its odd
@@ -1489,20 +1496,20 @@ MUST be defined for task lms or interpolate'
         values : array size (nDim) or array of size (N,nDim)
             Requested spline evaluated values
         """
-        
+
         return self.edgeCurves[edge](s)
 
     def getBasisPt(self, u, v, vals, istart, colInd, lIndex):
         """This function should only be called from pyGeo
-        The purpose is to compute the basis function for 
+        The purpose is to compute the basis function for
         a u, v point and add it to pyGeo's global dPt/dCoef
-        matrix. vals, row_ptr, col_ind is the CSR data and 
-        lIndex in the local -> global mapping for this 
+        matrix. vals, row_ptr, col_ind is the CSR data and
+        lIndex in the local -> global mapping for this
         surface"""
-        return libspline.getbasisptsurface(u, v, self.tu, self.tv, self.ku, 
-                                          self.kv, vals, colInd, istart, 
+        return libspline.getbasisptsurface(u, v, self.tu, self.tv, self.ku,
+                                          self.kv, vals, colInd, istart,
                                           lIndex.T)
-                                
+
     def __call__(self, u, v):
         """
         Equivalant to getValue()
@@ -1525,22 +1532,22 @@ MUST be defined for task lms or interpolate'
         Returns
         -------
         r : int
-            The **actual** number of times the knot was inserted. 
+            The **actual** number of times the knot was inserted.
         """
-        assert direction in ['u', 'v'], 'libspline.surface.splitSurace: \
-direction must be one of \'u\' or \'v\''
+        if direction not in ['u', 'v']:
+            raise Error("Direction must be one of 'u' or 'v'")
 
         s = checkInput(s, 's', float, 0)
         r = checkInput(r, 'r', int, 0)
         if s <= 0.0:
-            return 
+            return
         if s >= 1.0:
             return
-        
+
         # This is relatively inefficient, but we'll do it for
         # simplicity just call insertknot for each slice in the
         # v-direction:
-        
+
         if direction == 'u':
             # Insert once to know how many times it was actually inserted
             # so we know how big to make the new coef:
@@ -1548,7 +1555,7 @@ direction must be one of \'u\' or \'v\''
                 s, r, self.tu, self.ku, self.coef[:, 0].T)
 
             newCoef = numpy.zeros((self.nCtlu + actualR, self.nCtlv, self.nDim))
-            
+
             for j in range(self.nCtlv):
                 actualR, tNew, coefSlice, breakPt = libspline.insertknot(
                     s, r, self.tu, self.ku, self.coef[:, j].T)
@@ -1586,7 +1593,7 @@ direction must be one of \'u\' or \'v\''
             Parameteric direction along which to split. Either 'u' or 'v'.
         s : float
             Parametric position along 'direction' to split
-            
+
         Returns
         -------
         surf1 : pySpline.surface
@@ -1595,18 +1602,17 @@ direction must be one of \'u\' or \'v\''
         surf2 : pySpline.surface
             Upper part of the surface
         """
-
-        assert direction in ['u', 'v'], 'libspline.surface.splitSurace: \
-        direction must be one of \'u\' or \'v\''
+        if direction not in ['u', 'v']:
+            raise Error("Direction must be one of 'u' or 'v'")
 
         # Special case the bounds: (same for both directions)
         if s <= 0.0:
-            return None, Surface(tu=self.tu.copy(), tv=self.tv.copy(), 
+            return None, Surface(tu=self.tu.copy(), tv=self.tv.copy(),
                                  ku=self.ku, kv=self.kv, coef=self.coef.copy())
         if s >= 1.0:
-            return Surface(tu=self.tu.copy(), tv=self.tv.copy(), 
+            return Surface(tu=self.tu.copy(), tv=self.tv.copy(),
                            ku=self.ku, kv=self.kv, coef=self.coef.copy()), None
-        
+
         if direction == 'u':
             r, breakPt = self.insertKnot(direction, s, self.ku-1)
             # Break point is now at the right so we need to adjust the
@@ -1617,7 +1623,7 @@ direction must be one of \'u\' or \'v\''
             # Process knot vectors:
             t1 = numpy.hstack((self.tu[0:breakPt+self.ku-1].copy(), tt))/tt
             t2 = (numpy.hstack((tt, self.tu[breakPt:].copy()))-tt)/(1.0-tt)
-            
+
             coef1 = self.coef[0:breakPt, :, :].copy()
             coef2 = self.coef[breakPt-1:, :, :].copy()
 
@@ -1635,7 +1641,7 @@ direction must be one of \'u\' or \'v\''
             # Process knot vectors:
             t1 = numpy.hstack((self.tv[0:breakPt+self.kv-1].copy(), tt))/tt
             t2 = (numpy.hstack((tt, self.tv[breakPt:].copy()))-tt)/(1.0-tt)
-            
+
             coef1 = self.coef[:, 0:breakPt, :].copy()
             coef2 = self.coef[:, breakPt-1:, :].copy()
 
@@ -1645,7 +1651,7 @@ direction must be one of \'u\' or \'v\''
 
     def windowSurface(self, uvLow, uvHigh):
         """Create a surface that is windowed by the rectangular
-        parametric range defined by uvLow and uvHigh. 
+        parametric range defined by uvLow and uvHigh.
 
         Parameters
         ----------
@@ -1663,19 +1669,19 @@ direction must be one of \'u\' or \'v\''
         """
 
         # Do u-low split:
-        dummy, surf = self.splitSurface('u', uvLow[0])
+        __, surf = self.splitSurface('u', uvLow[0])
 
         # Do u-high split (and re-normalize the split coordinate)
-        surf, dummy = surf.splitSurface('u', (uvHigh[0]-uvLow[0])/(1.0-uvLow[0]))
+        surf, __ = surf.splitSurface('u', (uvHigh[0]-uvLow[0])/(1.0-uvLow[0]))
 
         # Do v-low split:
-        dummy, surf = surf.splitSurface('v', uvLow[1])
+        __, surf = surf.splitSurface('v', uvLow[1])
 
         # Do v-high split (and re-normalize the split coordinate)
-        surf, dummy = surf.splitSurface('v', (uvHigh[1]-uvLow[1])/(1.0-uvLow[1]))
+        surf, __ = surf.splitSurface('v', (uvHigh[1]-uvLow[1])/(1.0-uvLow[1]))
 
         return surf
-        
+
     def getValue(self, u, v):
         """Evaluate the spline surface at parametric positions u,v. This is the
         main function for spline evaluation.
@@ -1692,19 +1698,19 @@ direction must be one of \'u\' or \'v\''
         values : varies
             Spline evaluation at all points u,v. Shape depend on the
             input. If u,v are scalars, values is array of size nDim. If
-            u,v are a 1D list, return is (N,nDim) etc. 
+            u,v are a 1D list, return is (N,nDim) etc.
             """
-        
+
         u = numpy.array(u).T
         v = numpy.array(v).T
-        assert u.shape == v.shape, 'Error, getValue: u and v must have\
- the same shape'
-        
-        vals = libspline.eval_surface(numpy.atleast_2d(u), numpy.atleast_2d(v), 
-                                     self.tu, self.tv, self.ku, self.kv, 
+        if not u.shape == v.shape:
+            raise Error("u and v must have the same shape")
+
+        vals = libspline.eval_surface(numpy.atleast_2d(u), numpy.atleast_2d(v),
+                                     self.tu, self.tv, self.ku, self.kv,
                                      self.coef.T)
         return vals.squeeze().T
-                                
+
     def getDerivative(self, u, v):
         """ Evaluate the first derivatvies of the spline surface
 
@@ -1723,20 +1729,21 @@ direction must be one of \'u\' or \'v\''
         """
         u = numpy.array(u)
         v = numpy.array(v)
-        assert u.shape == v.shape, 'Error, getDerivative: u and v\
- must have the same shape'
-        assert numpy.rank(u) == 0, 'Error: getDerivative only accepts\
- scalar arguments'
-        deriv = libspline.eval_surface_deriv(u, v, self.tu, self.tv, self.ku, 
+        if not u.shape == v.shape:
+            raise Error("u and v must have the same shape")
+        if not numpy.rank(u) == 0:
+            raise Error("getDerivative only accepts scalar arguments")
+
+        deriv = libspline.eval_surface_deriv(u, v, self.tu, self.tv, self.ku,
                                              self.kv, self.coef.T)
         return deriv.T
-        
+
     def getSecondDerivative(self, u, v):
         """ Evaluate the second derivatvies of the spline surface
 
         deriv = [ (d^2)/(du^2)    (d^2)/(dudv) ]
                 [ (d^2)/(dudv)    (d^2)/(dv^2) ]
-        
+
         Parameters
         ----------
         u : float
@@ -1752,12 +1759,12 @@ direction must be one of \'u\' or \'v\''
         """
         u = numpy.array(u)
         v = numpy.array(v)
-        assert u.shape == v.shape, 'Error, getSecondDerivative: u and v\
- must have the same shape'
-        assert numpy.rank(u) == 0, 'Erorr getSecondDerivative only accepts\
- scalar arguments'
+        if not u.shape == v.shape:
+            raise Error("u and v must have the same shape")
+        if not numpy.rank(u) == 0:
+            raise Error("getSecondDerivative only accepts scalar arguments")
 
-        deriv = libspline.eval_surface_deriv2(u, v, self.tu, self.tv, self.ku, 
+        deriv = libspline.eval_surface_deriv2(u, v, self.tu, self.tv, self.ku,
                                              self.kv, self.coef.T)
         return deriv.T
 
@@ -1771,7 +1778,9 @@ direction must be one of \'u\' or \'v\''
         xMax : array of length 3
             Upper corner of the bounding box
             """
-        assert self.nDim == 3, 'getBounds is only defined for nDim = 3'
+        if self.nDim != 3:
+            raise Error('getBounds is only defined for nDim = 3')
+        
         cx = self.coef[:, :, 0].flatten()
         cy = self.coef[:, :, 1].flatten()
         cz = self.coef[:, :, 2].flatten()
@@ -1780,7 +1789,7 @@ direction must be one of \'u\' or \'v\''
         Xmax = numpy.array([max(cx), max(cy), max(cz)])
 
         return Xmin, Xmax
-    
+
     def projectPoint(self, x0, nIter=25, eps=1e-10, **kwargs):
         """
         Perform a point inversion algorithm. Attempt to find the
@@ -1799,7 +1808,7 @@ direction must be one of \'u\' or \'v\''
             Optional initial guess for u parameter
         v : float or array of length x0
             Optional initial guess for v parameter
-                
+
         Returns
         -------
         u : float or array
@@ -1821,26 +1830,26 @@ direction must be one of \'u\' or \'v\''
             u = -1*numpy.ones(len(x0))
             v = -1*numpy.ones(len(x0))
 
-        assert len(x0) == len(u) == len(v), 'surface projectPoint: The length of \
-        x0 and u, v, w must be the same'
+        if not len(x0) == len(u) == len(v):
+            raise Error("The length of x0 and u, v must be the same")
 
         # If necessary get brute-force starting point
         if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0):
             self.computeData()
             u, v = libspline.point_surface_start(
                 x0.T, self.udata, self.vdata, self.data.T)
-       
+
         D = numpy.zeros_like(x0)
         for i in range(len(x0)):
             u[i], v[i], D[i] = libspline.point_surface(
-                x0[i], self.tu, self.tv, self.ku, self.kv, self.coef.T, 
+                x0[i], self.tu, self.tv, self.ku, self.kv, self.coef.T,
                 nIter, eps, u[i], v[i])
 
         return u.squeeze(), v.squeeze(), D.squeeze()
 
     def projectCurve(self, inCurve, nIter=25, eps=1e-10, **kwargs):
         """
-        Find the minimum distance between this surface (self) and a curve (inCurve). 
+        Find the minimum distance between this surface (self) and a curve (inCurve).
 
         Parameters
         ----------
@@ -1849,34 +1858,34 @@ direction must be one of \'u\' or \'v\''
         nIter : int
             Maximum number of Newton iterations to perform.
         eps : float
-            Desired parameter tolerance. 
+            Desired parameter tolerance.
         s : float
-            Initial solution guess for curve 
+            Initial solution guess for curve
         u : float
             Initial solution guess for parametric u position
         v : float
             Initial solution guess for parametric v position
-            
+
         Returns
         -------
-        u : float 
+        u : float
             Surface parameter u yielding min distance to point x0
-        u : float 
+        u : float
             Surface parameter v yielding min distance to point x0
-        s : float 
+        s : float
             Parametric position on curve  yielding min distance to point x0
         D : float
-            Minimum distance between this surface and curve. 
-            is equilivent to ||surface(u,v) - curve(s)||_2.
-            """      
+            Minimum distance between this surface and curve.
+            is equivalent to ||surface(u,v) - curve(s)||_2.
+            """
         u = -1.0
         v = -1.0
         s = -1.0
-        if 'u' in kwargs: 
+        if 'u' in kwargs:
             u = checkInput(kwargs['u'], 'u', float, 0)
-        if 'v' in kwargs: 
+        if 'v' in kwargs:
             v = checkInput(kwargs['v'], 'v', float, 0)
-        if 's' in kwargs: 
+        if 's' in kwargs:
             s = checkInput(kwargs['s'], 's', float, 0)
         nIter = checkInput(nIter, 'nIter', int, 0)
         eps   = checkInput(eps, 'eps', float, 0)
@@ -1886,13 +1895,13 @@ direction must be one of \'u\' or \'v\''
             self.computeData()
             inCurve.computeData()
             s, u, v = libspline.curve_surface_start(
-                inCurve.data.T, inCurve.sdata, self.data.T, 
+                inCurve.data.T, inCurve.sdata, self.data.T,
                 self.udata, self.vdata)
 
         return libspline.curve_surface(\
             inCurve.t, inCurve.k, inCurve.coef.T, self.tu, self.tv, \
                 self.ku, self.kv, self.coef.T, nIter, eps, u, v, s)
-   
+
     def computeData(self):
         """
         Compute discrete data that is used for the Tecplot
@@ -1908,7 +1917,7 @@ direction must be one of \'u\' or \'v\''
             self.vdata = self.edgeCurves[2].sdata
             [V, U] = numpy.meshgrid(self.vdata, self.udata)
             self.data = self.getValue(U, V)
-                    
+
     def writeDirections(self, handle, isurf):
         """Write out and indication of the surface direction"""
         if self.nCtlu >= 3 and self.nCtlv >= 3:
@@ -1920,7 +1929,7 @@ direction must be one of \'u\' or \'v\''
             writeTecplot1D(handle, 'surface%d direction'%(isurf), data)
         else:
             print('Not Enough control points to output direction indicator')
-            
+
     def writeTecplot(self, fileName, surf=True, coef=True, orig=True,
                      directions=False):
         """
@@ -1956,11 +1965,12 @@ direction must be one of \'u\' or \'v\''
         Write the IGES file header information (Directory Entry Section)
         for this surface
         """
-        # A simplier Calc based on cmlib definations The 13 is for the
+        # A simpler calc based on cmlib definitions The 13 is for the
         # 9 parameters at the start, and 4 at the end. See the IGES
         # 5.3 Manual paraEntries = 13 + Knotsu + Knotsv + Weights +
         # control points
-        assert self.nDim == 3, 'Must have 3 dimensions to write to IGES file'
+        if self.nDim != 3:
+            raise Error('Must have 3 dimensions to write to IGES file')
         paraEntries = 13 + (len(self.tu)) + (len(self.tv)) + \
                       self.nCtlu*self.nCtlv + 3*self.nCtlu*self.nCtlv+1
 
@@ -1973,7 +1983,7 @@ direction must be one of \'u\' or \'v\''
         Dcount += 2
         Pcount += paraLines
 
-        return Pcount , Dcount 
+        return Pcount , Dcount
 
     def writeIGES_parameters(self, handle, Pcount, counter):
         """
@@ -2016,7 +2026,7 @@ direction must be one of \'u\' or \'v\''
                 counter += 1
                 pos_counter = 0
             # end if
-        # end for 
+        # end for
 
         for j in xrange(self.nCtlv):
             for i in xrange(self.nCtlu):
@@ -2032,7 +2042,7 @@ direction must be one of \'u\' or \'v\''
                 # end for
             # end for
         # end for
-                        
+
         # Ouput the ranges
         for  i in xrange(4):
             pos_counter += 1
@@ -2089,7 +2099,7 @@ direction must be one of \'u\' or \'v\''
 
 class Volume(object):
     """
-    Create an instance of a b-spline vurface. There are two
+    Create an instance of a b-spline surface. There are two
     ways to initialize the class
 
     * **Creation**: Create an instance of the Volume class directly by
@@ -2109,7 +2119,7 @@ class Volume(object):
 
       4. ``nCtlu``, ``nCtlv``, ``nCtlw``.  Specify number of control points. Only for
          LMS fitting.
-   
+
     Parameters
     ----------
     ku : int
@@ -2149,15 +2159,15 @@ class Volume(object):
     nIter : int
        Number of Hoscheks parater corrections to run
     recompute : bool
-       Specifies whether the actual fitting is completed. 
+       Specifies whether the actual fitting is completed.
 
     Notes
     -----
     The orientation of the nodes, edges and faces for the volumes is
-    gven below::
+    given below::
 
                NODES      |           EDGES         |           FACES
-           6           7|             5          |                   
+           6           7|             5          |
            #-----------#|       #------------#  |          #-----------#
           /           / |      /|           /|  |         /|          /|
          /           /  |     / |          / |  |        / |         / |
@@ -2166,8 +2176,8 @@ class Volume(object):
       /           /     |  /    |    4  /    |  |     /    |      /    |(back)
      #-----------#      | #------------#     |  |    #-----------#     |
      4           5      | |     |      |     |  |    |     |     |     |
-                        | |     |      |     |  |    |     |     |     | <-3 
-           2           3| |     |   1  |     |  |2-> |     |     |     |  
+                        | |     |      |     |  |    |     |     |     | <-3
+           2           3| |     |   1  |     |  |2-> |     |     |     |
            #-----------#| |     #------|-----#  |    |     #-----|-----#
           /           / | |8   /       |9   /   |4 ----------    |    /
          /           /  | |   /        |   /    |    |   /       |   /
@@ -2178,10 +2188,9 @@ class Volume(object):
      0           1      |         0             |
    """
 
-
     def __init__(self, recompute=True, **kwargs):
         self.faceSurfaces = [None, None, None, None, None, None]
-        self.edgeCurves = [None, None, None, None, None, None, 
+        self.edgeCurves = [None, None, None, None, None, None,
                             None, None, None, None, None, None]
         self.data = None
         self.udata = None
@@ -2207,11 +2216,11 @@ class Volume(object):
             self.nCtlv = self.coef.shape[1]
             self.nCtlw = self.coef.shape[2]
             self.nDim  = self.coef.shape[3]
-            self.tu = checkInput(kwargs['tu'], 'tu', float, 1, 
+            self.tu = checkInput(kwargs['tu'], 'tu', float, 1,
                                  (self.nCtlu+self.ku, ))
-            self.tv = checkInput(kwargs['tv'], 'tv', float, 1, 
+            self.tv = checkInput(kwargs['tv'], 'tv', float, 1,
                                  (self.nCtlv+self.kv, ))
-            self.tw = checkInput(kwargs['tw'], 'tw', float, 1, 
+            self.tw = checkInput(kwargs['tw'], 'tw', float, 1,
                                  (self.nCtlw+self.kw, ))
 
             self.umin = self.tu[0]
@@ -2283,7 +2292,7 @@ MUST be defined for task lms or interpolate'
                 self.nCtlv = self.Nv
                 self.nCtlw = self.Nw
                 self.interp = True
-                
+
             self.origData = True
 
             # Sanity Check on Inputs
@@ -2295,17 +2304,17 @@ MUST be defined for task lms or interpolate'
                 self.nCtlw = self.Nw
 
             # Sanity check to make sure k is less than N
-            if self.Nu < self.ku: 
+            if self.Nu < self.ku:
                 self.ku = self.Nu
-            if self.Nv < self.kv: 
+            if self.Nv < self.kv:
                 self.kv = self.Nv
-            if self.Nw < self.kw: 
+            if self.Nw < self.kw:
                 self.kw = self.Nw
-            if self.nCtlu < self.ku: 
+            if self.nCtlu < self.ku:
                 self.ku = self.nCtlu
-            if self.nCtlv < self.kv: 
+            if self.nCtlv < self.kv:
                 self.kv = self.nCtlv
-            if self.nCtlw < self.kw: 
+            if self.nCtlw < self.kw:
                 self.kw = self.nCtlw
 
             if 'nIter' in kwargs:
@@ -2337,7 +2346,7 @@ MUST be defined for task lms or interpolate'
             if recompute:
                 self.recompute()
         # end if (Interpolation type)
-       
+
     def recompute(self):
         """Recompute the volume if any driving data has been modified"""
 
@@ -2346,9 +2355,9 @@ MUST be defined for task lms or interpolate'
         vals, rowPtr, colInd = libspline.volume_jacobian_wrap(\
             self.U, self.V, self.W, self.tu, self.tv, self.tw, self.ku, \
                 self.kv, self.kw, self.nCtlu, self.nCtlv, self.nCtlw)
-        
-        N = _assembleMatrix(vals, colInd, rowPtr, 
-                             (self.Nu*self.Nv*self.Nw, 
+
+        N = _assembleMatrix(vals, colInd, rowPtr,
+                             (self.Nu*self.Nv*self.Nw,
                               self.nCtlu*self.nCtlv*self.nCtlw))
         if self.interp:
             # Factorize once for efficiency
@@ -2363,13 +2372,13 @@ MUST be defined for task lms or interpolate'
                 rhs  = N.transpose()*self.X[:, :, :, idim].flatten()
                 self.coef[:, :, :, idim] = solve(rhs).reshape(
                     [self.nCtlu, self.nCtlv, self.nCtlw])
-     
+
         self.setFaceSurfaces()
         self.setEdgeCurves()
-  
+
     def setCoefSize(self):
         self.coef = numpy.zeros((self.nCtlu, self.nCtlv, self.nCtlw, self.nDim))
-   
+
     def calcParameterization(self):
         """ Compute distance based parametrization. Use the fortran
         function for this"""
@@ -2389,11 +2398,11 @@ MUST be defined for task lms or interpolate'
         """ Determine the knots depending on if it is inerpolated or
         an LMS fit"""
         if self.interp:
-            self.tu = libspline.knots_interp(self.u, numpy.array([], 'd'), 
+            self.tu = libspline.knots_interp(self.u, numpy.array([], 'd'),
                                             self.ku)
-            self.tv = libspline.knots_interp(self.v, numpy.array([], 'd'), 
+            self.tv = libspline.knots_interp(self.v, numpy.array([], 'd'),
                                             self.kv)
-            self.tw = libspline.knots_interp(self.w, numpy.array([], 'd'), 
+            self.tw = libspline.knots_interp(self.w, numpy.array([], 'd'),
                                             self.kw)
         else:
             self.tu = libspline.knots_lms(self.u, self.nCtlu, self.ku)
@@ -2401,7 +2410,7 @@ MUST be defined for task lms or interpolate'
             self.tw = libspline.knots_lms(self.w, self.nCtlw, self.kw)
 
     def getValueCorner(self, corner):
-        """Get the value of the volume spline on the corner. 
+        """Get the value of the volume spline on the corner.
 
         Parameters
         ----------
@@ -2411,10 +2420,12 @@ MUST be defined for task lms or interpolate'
         Returns
         -------
         value : float
-            Volume spline evaluation at corner. 
+            Volume spline evaluation at corner.
             """
-        assert corner in range(0, 8), 'Error, getValueCorner: Corner must\
- be in range 0->8'
+
+        if not corner in range(0, 8):
+            raise Error('Corner must be in range 0..7 inclusive8')
+
         if corner == 0:
             val = self.getValue(self.umin, self.vmin, self.wmin)
         elif corner == 1:
@@ -2435,7 +2446,7 @@ MUST be defined for task lms or interpolate'
         return val
 
     def getOrigValueCorner(self, corner):
-        """Get the value of the orignal spline data on the corner if
+        """Get the value of the original spline data on the corner if
         it exists
 
         Parameters
@@ -2446,10 +2457,11 @@ MUST be defined for task lms or interpolate'
         Returns
         -------
         value : float
-            Original data on corner. 
+            Original data on corner.
             """
-        assert corner in [0, 1, 2, 3, 4, 5, 6, 7], 'Error: corner must\
- be 0 to 7'
+        if not corner in range(0, 8):
+            raise Error('Corner must be in range 0..7 inclusive')
+
         if corner == 0:
             val = self.X[0, 0, 0]
         elif corner == 1:
@@ -2471,7 +2483,7 @@ MUST be defined for task lms or interpolate'
 
     def getOrigValuesFace(self, face):
         """ For a given face index, face, return the 4 corners and the
-        values of the midpoints of the 4 edges on that face. 
+        values of the midpoints of the 4 edges on that face.
 
         Parameters
         ----------
@@ -2482,10 +2494,11 @@ MUST be defined for task lms or interpolate'
         -------
         coords : array of size (8, ndim)
             The first 4 entries are the corner, and the last 4 are the
-            midpoints. 
+            midpoints.
             """
+        if not face in range(0, 6):
+            raise Error('Face must be in range 0..5 inclusive')
 
-        assert face in [0, 1, 2, 3, 4, 5], 'Error: face must be 0 to 5'
         if numpy.mod(self.Nu, 2) == 1:
             midu = [(self.Nu-1)/2, (self.Nu-1)/2]
         else:
@@ -2502,48 +2515,48 @@ MUST be defined for task lms or interpolate'
             midw = [self.Nw/2, self.Nw/2-1]
 
         if   face == 0:
-            values = [self.X[0, 0, 0], self.X[-1, 0, 0], self.X[0, -1, 0], 
-                      self.X[-1, -1, 0], 
-                      0.5*(self.X[midu[0], 0, 0 ] + self.X[midu[1], 0, 0]), 
-                      0.5*(self.X[midu[0], -1, 0] + self.X[midu[1], -1, 0]), 
-                      0.5*(self.X[0, midv[0], 0 ] + self.X[0, midv[1], 0]), 
+            values = [self.X[0, 0, 0], self.X[-1, 0, 0], self.X[0, -1, 0],
+                      self.X[-1, -1, 0],
+                      0.5*(self.X[midu[0], 0, 0 ] + self.X[midu[1], 0, 0]),
+                      0.5*(self.X[midu[0], -1, 0] + self.X[midu[1], -1, 0]),
+                      0.5*(self.X[0, midv[0], 0 ] + self.X[0, midv[1], 0]),
                       0.5*(self.X[-1, midv[0], 0] + self.X[-1, midv[1], 0])]
         elif face == 1:
-            values = [self.X[0, 0, -1], self.X[-1, 0, -1], self.X[0, -1, -1], 
-                      self.X[-1, -1, -1], 
-                      0.5*(self.X[midu[0], 0, -1 ] + self.X[midu[1], 0, -1]), 
-                      0.5*(self.X[midu[0], -1, -1] + self.X[midu[1], -1, -1]), 
-                      0.5*(self.X[0, midv[0], -1 ] + self.X[0, midv[1], -1]), 
+            values = [self.X[0, 0, -1], self.X[-1, 0, -1], self.X[0, -1, -1],
+                      self.X[-1, -1, -1],
+                      0.5*(self.X[midu[0], 0, -1 ] + self.X[midu[1], 0, -1]),
+                      0.5*(self.X[midu[0], -1, -1] + self.X[midu[1], -1, -1]),
+                      0.5*(self.X[0, midv[0], -1 ] + self.X[0, midv[1], -1]),
                       0.5*(self.X[-1, midv[0], -1] + self.X[-1, midv[1], -1])]
         elif face == 2:
-            values = [self.X[0, 0, 0], self.X[0, -1, 0], self.X[0, 0, -1], 
-                      self.X[0, -1, -1], 
-                      0.5*(self.X[0, midv[0], 0] + self.X[0, midv[1], 0 ]), 
-                      0.5*(self.X[0, midv[0], -1] + self.X[0, midv[1], -1]), 
-                      0.5*(self.X[0, 0, midw[0] ] + self.X[0, 0, midw[1] ]), 
+            values = [self.X[0, 0, 0], self.X[0, -1, 0], self.X[0, 0, -1],
+                      self.X[0, -1, -1],
+                      0.5*(self.X[0, midv[0], 0] + self.X[0, midv[1], 0 ]),
+                      0.5*(self.X[0, midv[0], -1] + self.X[0, midv[1], -1]),
+                      0.5*(self.X[0, 0, midw[0] ] + self.X[0, 0, midw[1] ]),
                       0.5*(self.X[0, -1, midw[0]] + self.X[0, -1, midw[1]])]
         elif face == 3:
-            values = [self.X[-1, 0, 0], self.X[-1, -1, 0], self.X[-1, 0, -1], 
-                      self.X[-1, -1, -1], 
-                      0.5*(self.X[-1, midv[0], 0] + self.X[-1, midv[1], 0 ]), 
-                      0.5*(self.X[-1, midv[0], -1] + self.X[-1, midv[1], -1]), 
-                      0.5*(self.X[-1, 0, midw[0] ] + self.X[-1, 0, midw[1] ]), 
+            values = [self.X[-1, 0, 0], self.X[-1, -1, 0], self.X[-1, 0, -1],
+                      self.X[-1, -1, -1],
+                      0.5*(self.X[-1, midv[0], 0] + self.X[-1, midv[1], 0 ]),
+                      0.5*(self.X[-1, midv[0], -1] + self.X[-1, midv[1], -1]),
+                      0.5*(self.X[-1, 0, midw[0] ] + self.X[-1, 0, midw[1] ]),
                       0.5*(self.X[-1, -1, midw[0]] + self.X[-1, -1, midw[1]])]
         elif face == 4:
-            values = [self.X[0, 0, 0], self.X[-1, 0, 0], self.X[0, 0, -1], 
-                      self.X[-1, 0, -1], 
-                      0.5*(self.X[midu[0], 0, 0 ] + self.X[midu[1], 0, 0 ]), 
-                      0.5*(self.X[midu[0], 0, -1] + self.X[midu[1], 0, -1]), 
-                      0.5*(self.X[0, 0, midw[0] ] + self.X[0, 0, midw[1] ]), 
+            values = [self.X[0, 0, 0], self.X[-1, 0, 0], self.X[0, 0, -1],
+                      self.X[-1, 0, -1],
+                      0.5*(self.X[midu[0], 0, 0 ] + self.X[midu[1], 0, 0 ]),
+                      0.5*(self.X[midu[0], 0, -1] + self.X[midu[1], 0, -1]),
+                      0.5*(self.X[0, 0, midw[0] ] + self.X[0, 0, midw[1] ]),
                       0.5*(self.X[-1, 0, midw[0]] + self.X[-1, 0, midw[1]])]
         elif face == 5:
-            values = [self.X[0, -1, 0], self.X[-1, -1, 0], self.X[0, -1, -1], 
-                      self.X[-1, -1, -1], 
-                      0.5*(self.X[midu[0], -1, 0 ] + self.X[midu[1], -1, 0 ]), 
-                      0.5*(self.X[midu[0], -1, -1] + self.X[midu[1], -1, -1]), 
-                      0.5*(self.X[0, -1, midw[0] ] + self.X[0, -1, midw[1] ]), 
+            values = [self.X[0, -1, 0], self.X[-1, -1, 0], self.X[0, -1, -1],
+                      self.X[-1, -1, -1],
+                      0.5*(self.X[midu[0], -1, 0 ] + self.X[midu[1], -1, 0 ]),
+                      0.5*(self.X[midu[0], -1, -1] + self.X[midu[1], -1, -1]),
+                      0.5*(self.X[0, -1, midw[0] ] + self.X[0, -1, midw[1] ]),
                       0.5*(self.X[-1, -1, midw[0]] + self.X[-1, -1, midw[1]])]
-  
+
         return numpy.array(values)
 
     def getMidPointEdge(self, edge):
@@ -2553,7 +2566,7 @@ MUST be defined for task lms or interpolate'
         ----------
         edge : int
             Edge index. Must be 0<edge<11.
-             
+
         Returns
         -------
         midpoint : array of length nDim
@@ -2563,7 +2576,7 @@ MUST be defined for task lms or interpolate'
             midu = [(self.Nu-1)/2, (self.Nu-1)/2]
         else:
             midu = [self.Nu/2, self.Nu/2-1]
-    
+
         if numpy.mod(self.Nv, 2) == 1:
             midv = [(self.Nv-1)/2, (self.Nv-1)/2]
         else:
@@ -2608,15 +2621,16 @@ MUST be defined for task lms or interpolate'
         ----------
         face : int
             Face index. Must be 0, 1, 2, 3, 4 or 5
-             
+
         Returns
         -------
         midpoint : array of length nDim
             Mid point of face
             """
-        assert face in [0, 1, 2, 3, 4, 5] and self.origData, 'Error, \
- getMidPointFace: No original data for this surface or face is not in\
- range 0->5'
+        if not face in range(0, 6):
+            raise Error('Face must be in range 0..5 inclusive')
+        if not self.origData:
+            raise Error('No original data for this surface')
 
         if numpy.mod(self.Nu, 2) == 1:
             midu = [(self.Nu-1)/2, (self.Nu-1)/2]
@@ -2632,7 +2646,7 @@ MUST be defined for task lms or interpolate'
             midw = [(self.Nw-1)/2, (self.Nw-1)/2]
         else:
             midw = [self.Nw/2, self.Nw/2-1]
-    
+
         if   face == 0:
             val = 0.25*(
                 self.X[midu[0], midv[0], 0] + self.X[midu[1], midv[0], 0] +
@@ -2657,70 +2671,70 @@ MUST be defined for task lms or interpolate'
             val = 0.25*(
                 self.X[midu[0], -1, midw[0]] + self.X[midu[1], -1, midw[0]] +
                 self.X[midu[0], -1, midw[1]] + self.X[midu[1], -1, midw[1]])
-    
+
         return val
- 
+
     def setFaceSurfaces(self):
         """Create face spline objects for each of the faces"""
-      
+
         self.faceSurfaces[0] = Surface(
-            ku=self.ku, kv=self.kv, tu=self.tu, tv=self.tv, 
+            ku=self.ku, kv=self.kv, tu=self.tu, tv=self.tv,
             coef=self.coef[:, :, 0, :])
         self.faceSurfaces[1] = Surface(
-            ku=self.ku, kv=self.kv, tu=self.tu, tv=self.tv, 
+            ku=self.ku, kv=self.kv, tu=self.tu, tv=self.tv,
             coef=self.coef[:, :, -1, :])
         self.faceSurfaces[2] = Surface(
-            ku=self.ku, kv=self.kw, tu=self.tu, tv=self.tw, 
+            ku=self.ku, kv=self.kw, tu=self.tu, tv=self.tw,
             coef=self.coef[:, 0, :, :])
         self.faceSurfaces[3] = Surface(
-            ku=self.ku, kv=self.kw, tu=self.tu, tv=self.tw, 
+            ku=self.ku, kv=self.kw, tu=self.tu, tv=self.tw,
             coef=self.coef[:, -1, :, :])
         self.faceSurfaces[4] = Surface(
-            ku=self.kv, kv=self.kw, tu=self.tv, tv=self.tw, 
+            ku=self.kv, kv=self.kw, tu=self.tv, tv=self.tw,
             coef=self.coef[0, :, :, :])
         self.faceSurfaces[5] = Surface(
-            ku=self.kv, kv=self.kw, tu=self.tv, tv=self.tw, 
+            ku=self.kv, kv=self.kw, tu=self.tv, tv=self.tw,
             coef=self.coef[-1, :, :, :])
-        
+
     def setEdgeCurves(self):
         """Create edge spline objects for each edge"""
-      
-        self.edgeCurves[0] = Curve(k=self.ku, t=self.tu, 
+
+        self.edgeCurves[0] = Curve(k=self.ku, t=self.tu,
                                     coef=self.coef[:, 0, 0])
-        self.edgeCurves[1] = Curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[1] = Curve(k=self.ku, t=self.tu,
                                     coef=self.coef[:, -1, 0])
-        self.edgeCurves[2] = Curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[2] = Curve(k=self.kv, t=self.tv,
                                     coef=self.coef[0, :, 0])
-        self.edgeCurves[3] = Curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[3] = Curve(k=self.kv, t=self.tv,
                                     coef=self.coef[-1, :, 0])
-        self.edgeCurves[4] = Curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[4] = Curve(k=self.ku, t=self.tu,
                                     coef=self.coef[:, 0, -1])
-        self.edgeCurves[5] = Curve(k=self.ku, t=self.tu, 
+        self.edgeCurves[5] = Curve(k=self.ku, t=self.tu,
                                     coef=self.coef[:, -1, -1])
-        self.edgeCurves[6] = Curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[6] = Curve(k=self.kv, t=self.tv,
                                     coef=self.coef[0, :, -1])
-        self.edgeCurves[7] = Curve(k=self.kv, t=self.tv, 
+        self.edgeCurves[7] = Curve(k=self.kv, t=self.tv,
                                     coef=self.coef[-1, :, -1])
-        self.edgeCurves[8] = Curve(k=self.kw, t=self.tw, 
+        self.edgeCurves[8] = Curve(k=self.kw, t=self.tw,
                                     coef=self.coef[0, 0, :])
-        self.edgeCurves[9] = Curve(k=self.kw, t=self.tw, 
+        self.edgeCurves[9] = Curve(k=self.kw, t=self.tw,
                                     coef=self.coef[-1, 0, :])
-        self.edgeCurves[10] = Curve(k=self.kw, t=self.tw, 
+        self.edgeCurves[10] = Curve(k=self.kw, t=self.tw,
                                      coef=self.coef[0, -1, :])
-        self.edgeCurves[11] = Curve(k=self.kw, t=self.tw, 
+        self.edgeCurves[11] = Curve(k=self.kw, t=self.tw,
                                      coef=self.coef[-1, -1, :])
 
     def getBasisPt(self, u, v, w, vals, istart, colInd, lIndex):
         """ This function should only be called from pyBlock The purpose
         is to compute the basis function for a u, v, w point and add
-        it to pyBlcoks's global dPt/dCoef
+        it to pyBlocks's global dPt/dCoef
         matrix. vals, rowPtr, colInd is the CSR data and lIndex in
         the local -> global mapping for this volume"""
 
-        return libspline.getbasisptvolume(u, v, w, self.tu, self.tv, self.tw, 
-                                         self.ku, self.kv, self.kw, vals, 
+        return libspline.getbasisptvolume(u, v, w, self.tu, self.tv, self.tw,
+                                         self.ku, self.kv, self.kw, vals,
                                          colInd, istart, lIndex.T)
-    
+
     def __call__(self, u, v, w):
         """
         Equivalant to getValue()
@@ -2729,7 +2743,7 @@ MUST be defined for task lms or interpolate'
 
     def getValue(self, u, v, w):
         """Get the value at the volume points(s) u, v, w. This is the
-        main evaluation routine for the volume object. 
+        main evaluation routine for the volume object.
 
         Parameters
         ----------
@@ -2739,7 +2753,7 @@ MUST be defined for task lms or interpolate'
             v position
         w : scalar, vector or matrix or tensor of values
             w position
-            
+
         Returns
         -------
         values : scalar, vector, matrix or tensor of values
@@ -2749,10 +2763,10 @@ MUST be defined for task lms or interpolate'
         v = numpy.atleast_3d(v).T
         w = numpy.atleast_3d(w).T
 
-        assert u.shape == v.shape == w.shape, 'Error, getValue: u and v must\
- have the same shape'
-
-        vals = libspline.eval_volume(u, v, w, self.tu, self.tv, self.tw, 
+        if not u.shape == v.shape == w.shape:
+            raise Error("u and v must have the same shape")
+            
+        vals = libspline.eval_volume(u, v, w, self.tu, self.tv, self.tw,
                                     self.ku, self.kv, self.kw, self.coef.T)
         return vals.squeeze().T
 
@@ -2765,7 +2779,7 @@ MUST be defined for task lms or interpolate'
              Index of edge. Must be between 0 and 11.
         s : float or array
             Parameter position(s) along edge to evaluate.
-            
+
         Returns
         -------
         values : array
@@ -2824,10 +2838,10 @@ MUST be defined for task lms or interpolate'
         v = numpy.atleast_3d(v).T
         w = numpy.atleast_3d(w).T
 
-        assert u.shape == v.shape == w.shape, 'Error, getValue: u and v\
- must have the same shape'
+        if not u.shape == v.shape == w.shape:
+            raise Error("u, v, and w must have the same shape")
 
-        vals = libspline.eval_volume(u, v, w, self.tu, self.tv, self.tw, 
+        vals = libspline.eval_volume(u, v, w, self.tu, self.tv, self.tw,
                                     self.ku, self.kv, self.kw, self.coef.T)
         return vals.squeeze().T
 
@@ -2841,7 +2855,9 @@ MUST be defined for task lms or interpolate'
         xMax : array of length 3
             Upper corner of the bounding box
             """
-        assert self.nDim == 3, 'getBounds is only defined for nDim = 3'
+        if self.nDim != 3:
+            raise Error('getBounds is only defined for nDim = 3')
+
         cx = self.coef[:, :, :, 0].flatten()
         cy = self.coef[:, :, :, 1].flatten()
         cz = self.coef[:, :, :, 2].flatten()
@@ -2889,9 +2905,9 @@ MUST be defined for task lms or interpolate'
         w : float or array of length N
             w parametric position of closest point
         D : float or array of length N
-            Distance between projected point and cloest point
+            Distance between projected point and closest point
             If the points are 'inside' the volume, D should
-            be less than eps. 
+            be less than eps.
         """
 
         x0 = numpy.atleast_2d(x0)
@@ -2904,9 +2920,9 @@ MUST be defined for task lms or interpolate'
             u = -1*numpy.ones(len(x0))
             v = -1*numpy.ones(len(x0))
             w = -1*numpy.ones(len(x0))
-
-        assert len(x0) == len(u) == len(v) == len(w), 'volume projectPoint: \
-        The length of x0 and u, v, w must be the same'
+            
+        if not len(x0) == len(u) == len(v) == len(w): 
+            raise Error("The length of x0 and u, v, w must be the same")
 
         # If necessary get brute-force starting point
         if numpy.any(u<0) or numpy.any(u>1) or numpy.any(v<0) or numpy.any(v>1):
@@ -3003,7 +3019,7 @@ def trilinearVolume(*args):
         The extreme lower corner of the box
     xmax : array of size (3)
         The extreme upper corner of the box. In this case, by
-        construction, the box will be coordinate axis alinged.
+        construction, the box will be coordinate axis aligned.
         """
     tu = [0, 0, 1, 1]
     tv = [0, 0, 1, 1]
@@ -3055,7 +3071,7 @@ def bilinearSurface(*args):
           |          |
           +----------+
           0          1
-    
+
     2. ``p1``, ``p2``, ``p3``, ``p4``. Individual corner points in CCW Ordering::
 
           3          2
@@ -3068,8 +3084,10 @@ def bilinearSurface(*args):
           """
     if len(args) == 1:
         # One argument passed in ... assume its X
-        assert len(args[0]) == 4, 'Error: a single argument passed to bilinear\
- surface must contain 4 points and be of size (4, 3)'
+        if len(args[0]) != 4:
+            raise Error("A single argument passed to bilinear "
+                        "surface must contain 4 points and be of "
+                        "size (4, 3)")
         coef = numpy.zeros((2, 2, 3))
         coef[0, 0] = args[0][0]
         coef[1, 0] = args[0][1]
@@ -3092,10 +3110,10 @@ def line(*args, **kwargs):
 
     1. ``X`` array of size(2, ndim). The two end points
     2. ``x1``, ``x2`` The two end points (each of size ndim)
-    3. ``x```, dir=dirction. A point and a displcement vector
+    3. ``x```, dir=direction. A point and a displacement vector
     4. ``x1``, dir=direction, length=length. As 3. but with a specific length
     """
-    
+
     if len(args) == 2:
         # Its a two-point type
         return Curve(coef=[args[0], args[1]], k=2, t=[0, 0, 1, 1])
@@ -3120,4 +3138,3 @@ def line(*args, **kwargs):
 if __name__ == '__main__':
     print('There are two examples in the example directory.')
     print('Look at test_curve.py and test_surf.py for more information')
-
