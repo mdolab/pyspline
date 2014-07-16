@@ -1989,12 +1989,13 @@ MUST be defined for task lms or interpolate'
         """
         Write the IGES parameter information for this surface
         """
-        handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'\
+        handle.write('%10d,%10d,%10d,%10d,%10d,          %7dP%7d\n'\
                          %(128, self.nCtlu-1, self.nCtlv-1, \
                                self.ku-1, self.kv-1, Pcount, counter))
         counter += 1
-        handle.write('%12d,%12d,%12d,%12d,%12d,%7dP%7d\n'\
+        handle.write('%10d,%10d,%10d,%10d,%10d,          %7dP%7d\n'\
                          %(0, 0, 1, 0, 0, Pcount, counter))
+
         counter += 1
         pos_counter = 0
 
