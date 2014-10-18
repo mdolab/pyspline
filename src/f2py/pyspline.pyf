@@ -176,7 +176,7 @@
      end subroutine eval_curve_deriv2
 
      subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val) ! in :test:eval_curve.f90
-       real(kind=realtype) dimension(n), intent(in) :: s
+       complex*16 dimension(n), intent(in) :: s
        real(kind=realtype) dimension(nctl+k), intent(in), depend(k, nctl) :: t
        integer intent(in) :: k
        complex*16 dimension(ndim, nctl), intent(in) :: coef

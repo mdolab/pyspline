@@ -163,7 +163,7 @@ subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val)
   implicit none
   ! Input
   integer                , intent(in)   :: k, nctl, ndim, n
-  real(kind=realType)    , intent(in)   :: s(n)
+  complex(kind=realType) , intent(in)   :: s(n)
   real(kind=realType)    , intent(in)   :: t(nctl+k)
   complex(kind=realType) , intent(in)   :: coef(ndim, nctl)
 

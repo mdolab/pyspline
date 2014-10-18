@@ -830,8 +830,9 @@ nCtl=<number of control points> must be specified for a LMS fit'
             vals = libspline.eval_curve(numpy.atleast_1d(s),
                                        self.t, self.k, self.coef.T)
         else:
-            vals = libspline.eval_curve_c(numpy.atleast_1d(s),
-                                         self.t, self.k, self.coef.T)
+            vals = libspline.eval_curve_c(
+                numpy.atleast_1d(s).astype('D'), self.t, self.k, 
+                self.coef.T)
 
         return vals.squeeze().T
 
