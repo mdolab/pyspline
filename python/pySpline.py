@@ -509,6 +509,8 @@ nCtl=<number of control points> must be specified for a LMS fit'
         nu = len(S)
         nc = len(T)
 
+        
+
         # And the derivative info
         if self.deriv != None:
             sduSelect = numpy.where(self.derivWeights > 0.0)

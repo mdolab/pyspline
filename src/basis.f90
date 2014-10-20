@@ -175,3 +175,59 @@ subroutine derivBasis(t, nctl, ku, u, ind, n, Bd)
   end do
 
 end subroutine derivBasis
+
+subroutine basis_c(t, nctl, k, u, ind, B)
+
+  !***DESCRIPTION
+  !
+  !     Written by Gaetan Kenway
+  !
+  !     Abstract: basis evaluates the standard b-spline basis
+  !               functions at a location x for knot vector t. Adapted
+  !               from The NURBS Book, algoritm A2.2
+
+  !     Description of Arguments
+  !     Input
+  !     t       - Real, Vector of knots. Size (nctl + k)
+  !     nctl    - Integer, number of knots
+  !     k       - Integer, order of B-spline 
+  !     u       - Real, location for evaluation of basis 
+  !     ind     - Integer, position in knot vector such that t(ind) <= x
+  !
+  !     Ouput 
+  !     B       - Real, Vector, The k basis vector values
+  use precision
+  implicit none
+
+  ! Input
+  real(kind=realType), intent(in)  :: t(nctl+k)
+  complex(kind=realType), intent(in) :: u
+  integer,             intent(in)  :: nctl, k, ind
+
+  ! Output
+  complex(kind=realType), intent(out) :: B(0:k-1)
+
+  ! Working
+  complex(kind=realType)              :: left(0:k-1), right(0:k-1), temp, saved
+  integer                          :: j, r, p
+
+  ! To be consistent with algorithm in The NURBS Book we will use
+  ! zero-based ordering here
+  B(0) = cmplx(1.0, 0.0)
+  p = k-1
+
+  do j=1,p
+     left(j)  = u - t(ind+1-j)
+     right(j) = t(ind+j) - u
+     saved = 0.0
+
+     do r=0,j-1
+        temp = B(r)/(right(r+1)+left(j-r))
+        B(r) = saved+right(r+1)*temp
+        saved = left(j-r)*temp
+     end do
+     
+     B(j) = saved
+  end do
+
+end subroutine basis_c

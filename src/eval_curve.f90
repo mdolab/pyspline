@@ -172,12 +172,12 @@ subroutine eval_curve_c(s, t, k, coef, nctl, ndim, n, val)
 
   ! Working
   integer                               :: i, l, istart, ileft, idim
-  real(kind=realType)                   :: basisu(k)
+  complex(kind=realType)                   :: basisu(k)
 
   val(:, :) = cmplx(0.0, 0.0)
   do i=1, n
-     call findSpan(s(i), k, t, nctl, ileft)
-     call basis(t, nctl, k, s(i), ileft, basisu)
+     call findSpan(real(s(i)), k, t, nctl, ileft)
+     call basis_c(t, nctl, k, s(i), ileft, basisu)
 
      istart = ileft - k
      do l=1, k
