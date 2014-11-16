@@ -2966,6 +2966,91 @@ MUST be defined for task lms or interpolate'
                         W[i, j, k] = self.wdata[k]
             self.data = self.getValue(U, V, W)
 
+    def insertKnot(self, direction, s, r):
+        """
+        Insert a knot into the volume along either u, v, w:
+
+        Parameters
+        ----------
+        direction : str
+            Parameteric direction to insert. Either 'u', 'v', or 'w'
+        s : float
+            Parametric position along 'direction' to insert
+        r : int
+        Desired number of times to insert.
+
+        Returns
+        -------
+        r : int
+            The **actual** number of times the knot was inserted.
+        """
+        if direction not in ['u', 'v', 'w']:
+            raise Error("Direction must be one of 'u' or 'v' or 'w'")
+
+        s = checkInput(s, 's', float, 0)
+        r = checkInput(r, 'r', int, 0)
+        if s <= 0.0:
+            return
+        if s >= 1.0:
+            return
+
+        # This is relatively inefficient, but we'll do it for
+        # simplicity just call insertknot for each slab 
+
+        if direction == 'u':
+            # Insert once to know how many times it was actually inserted
+            # so we know how big to make the new coef:
+            actualR, tNew, coefNew, breakPt = libspline.insertknot(
+                s, r, self.tu, self.ku, self.coef[:, 0, 0].T)
+
+            newCoef = numpy.zeros((self.nCtlu + actualR, self.nCtlv, 
+                                   self.nCtlw, self.nDim))
+            for k in range(self.nCtlvw):
+                for j in range(self.nCtlv):
+                    actualR, tNew, coefSlice, breakPt = libspline.insertknot(
+                        s, r, self.tu, self.ku, self.coef[:, j, k].T)
+                    newCoef[:, j, k] = coefSlice[:, 0:self.nCtlu+actualR].T
+
+            self.tu = tNew[0:self.nCtlu+self.ku+actualR]
+            self.nCtlu = self.nCtlu + actualR
+
+        elif direction == 'v':
+            actualR, tNew, coefNew, breakPt = libspline.insertknot(
+                s, r, self.tv, self.kv, self.coef[0, :, 0].T)
+
+            newCoef = numpy.zeros((self.nCtlu, self.nCtlv+actualR, 
+                                   self.nCtlw, self.nDim))
+
+            for k in range(self.nCtlw):
+                for i in range(self.nCtlu):
+                    actualR, tNew, coefSlice, breakPt = libspline.insertknot(
+                        s, r, self.tv, self.kv, self.coef[i, :, k].T)
+                    newCoef[i, :, k] = coefSlice[:, 0:self.nCtlv+actualR].T
+                    
+            self.tv = tNew[0:self.nCtlv+self.kv+actualR]
+            self.nCtlv = self.nCtlv + actualR
+
+        elif direction == 'w':
+            actualR, tNew, coefNew, breakPt = libspline.insertknot(
+                s, r, self.tw, self.kw, self.coef[0, 0, :].T)
+
+            newCoef = numpy.zeros((self.nCtlu, self.nCtlv, 
+                                   self.nCtlw+actualR, self.nDim))
+
+            for j in range(self.nCtlv):
+                for i in range(self.nCtlu):
+                    actualR, tNew, coefSlice, breakPt = libspline.insertknot(
+                        s, r, self.tw, self.kw, self.coef[i, j, :].T)
+                    newCoef[i, j, :] = coefSlice[:, 0:self.nCtlw+actualR].T
+                    
+            self.tw = tNew[0:self.nCtlw+self.kw+actualR]
+            self.nCtlw = self.nCtlw + actualR
+
+        self.coef = newCoef
+
+        # break_pt is converted to zero based ordering here!!!
+        return actualR, breakPt-1
+
     def writeTecplot(self, fileName, vols=True, coef=True, orig=False):
         """Write the volume to a tecplot data file.
 
