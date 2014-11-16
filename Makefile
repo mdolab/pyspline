@@ -13,13 +13,7 @@ default:
 	echo " ";\
 	echo "The modify this config file as required. With the config file specified, rerun "; \
 	echo "'make' and the build will start"; \
-	fi;
-# Otherwise we do the acutal make:
-	@if [ -f "config/config.mk" ]; then \
-	mkdir -p obj;\
-	ln -sf config/config.mk config.mk;\
-	make module;\
-	(cd src/f2py && make);\
+	else make module;\
 	fi;
 
 clean:
@@ -35,6 +29,8 @@ clean:
 	rm -f lib/lib* mod/*.mod obj/*
 
 module:
+	mkdir -p obj
+	ln -sf config/config.mk config.mk
 	@for subdir in $(SUBDIR_SRC) ; \
 		do \
 			echo "making $@ in $$subdir"; \
@@ -42,4 +38,4 @@ module:
 			(cd $$subdir && make) || exit 1; \
 		done
 	(cd lib && make)
-
+	(cd src/f2py && make)
