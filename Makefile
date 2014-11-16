@@ -2,24 +2,28 @@
 
 SUBDIR_SRC    = src/
 
-#      ******************************************************************
-#      *                                                                *
-#      * General targets.                                               *
-#      *                                                                *
-#      ******************************************************************
-
 default:
-	@echo "Usage: make <arch>"
-	@echo "Supported architectures: LINUX_INTEL"
-	@echo "                         LINUX_GFORTRAN"
-	@echo "                         LINUX_INTEL_SCINET"
-	@echo "                         OSX_GFORTRAN"
-
-all:	 default
+# Check if the config.mk file is in the config dir.
+	@if [ ! -f "config/config.mk" ]; then \
+	echo "Before compiling, copy an existing config file from the "; \
+	echo "config/defaults/ directory to the config/ directory and  "; \
+	echo "rename to config.mk. For example:"; \
+	echo " ";\
+	echo "  cp config/defaults/config.LINUX_INTEL.mk config/config.mk"; \
+	echo " ";\
+	echo "The modify this config file as required. With the config file specified, rerun "; \
+	echo "'make' and the build will start"; \
+	fi;
+# Otherwise we do the acutal make:
+	@if [ -f "config/config.mk" ]; then \
+	mkdir -p obj;\
+	ln -sf config/config.mk config.mk;\
+	make module;\
+	(cd src/f2py && make);\
+	fi;
 
 clean:
 	@echo " Making clean ... "
-
 	@for subdir in $(SUBDIR_SRC) ; \
 		do \
 			echo; \
@@ -30,13 +34,6 @@ clean:
 	rm -f *~ config.mk;
 	rm -f lib/lib* mod/*.mod obj/*
 
-#      ******************************************************************
-#      *                                                                *
-#      * The actual make. This is not a direct target, but is called    *
-#      * from the architectures.                                        *
-#      *                                                                *
-#      ******************************************************************
-
 module:
 	@for subdir in $(SUBDIR_SRC) ; \
 		do \
@@ -46,37 +43,3 @@ module:
 		done
 	(cd lib && make)
 
-
-#      ******************************************************************
-#      *                                                                *
-#      * Platform specific targets.                                     *
-#      *                                                                *
-#      ******************************************************************
-
-LINUX_INTEL:
-	mkdir -p obj
-	if [ ! -f "config/config.LINUX_INTEL.mk" ]; then cp "config/defaults/config.LINUX_INTEL.mk" ./config; fi
-	ln -sf config/config.LINUX_INTEL.mk config.mk
-	make module
-	(cd src/f2py && make)
-
-LINUX_GFORTRAN:
-	mkdir -p obj
-	if [ ! -f "config/config.LINUX_GFORTRAN.mk" ]; then cp "config/defaults/config.LINUX_GFORTRAN.mk" ./config; fi
-	ln -sf config/config.LINUX_GFORTRAN.mk config.mk
-	make module
-	(cd src/f2py && make)
-
-LINUX_INTEL_SCINET:
-	mkdir -p obj
-	if [ ! -f "config/config.LINUX_INTEL_SCINET.mk" ]; then cp "config/defaults/config.LINUX_INTEL_SCINET.mk" ./config; fi
-	ln -sf config/config.LINUX_INTEL_SCINET.mk config.mk
-	make module
-	(cd src/f2py && make)
-
-OSX_GFORTRAN:
-	mkdir -p obj
-	if [ ! -f "config/config.OSX_GFORTRAN.mk" ]; then cp "config/defaults/config.OSX_GFORTRAN.mk" ./config; fi
-	ln -sf config/config.OSX_GFORTRAN.mk config.mk
-	make module
-	(cd src/f2py && make)
