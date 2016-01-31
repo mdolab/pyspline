@@ -15,7 +15,7 @@ import warnings
 import numpy
 from scipy import sparse
 from scipy.sparse import linalg
-
+from matplotlib import pylab
 # ===========================================================================
 # Custom Python modules
 # ===========================================================================
@@ -1174,6 +1174,197 @@ class Surface(object):
             self.setEdgeCurves()
             self.interp =  False
             return
+        elif 'localInterp' in kwargs:
+            # Local, non-global cubic interpolation. See The Nurbs
+            # Book section 9.3.5 "Local Bicubic Surface Interpolation"
+            self.localInterp = True
+            self.ku = 4
+            self.kv = 4
+
+            # Do some checking on the number of control points
+            assert ( 'X' in kwargs or 
+                     'x' in kwargs and 'y' in kwargs and 'z' in kwargs, \
+                     'Error: X (or x, y, z \
+                     MUST be defined for task localInterp')
+
+            if 'X' in kwargs:
+                self.X  = numpy.array(kwargs['X'])
+                self.nDim = self.X.shape[2]
+            elif 'x' in kwargs and 'y' in kwargs and 'z'in kwargs:
+                self.X = numpy.zeros((
+                        kwargs['x'].shape[0], kwargs['x'].shape[1], 3))
+                self.X[:, :, 0] = kwargs['x']
+                self.X[:, :, 1] = kwargs['y']
+                self.X[:, :, 2] = kwargs['z']
+                self.nDim = 3
+
+            self.origData = True
+            self.Nu = self.X.shape[0]
+            self.Nv = self.X.shape[1]
+
+            self.u, self.v, self.U, self.V = (
+                self.calcParameterization())
+
+            # Contains the T^u_kl, T^v_kl and D^uv_kl values
+            Td = numpy.zeros((self.Nu, self.Nv, 5, 3)) 
+                        
+            def getT(Q, s):
+                N = len(Q)
+                T = numpy.zeros_like(Q)
+                qq = numpy.zeros_like(Q)
+                deltaS = numpy.zeros(N)
+                for i in range(1, N):
+                    deltaS[i] = s[i] - s[i-1]
+                    qq[i, :] = Q[i] - Q[i-1]
+
+                for i in range(1, N-1):
+                    a = deltaS[i]/(deltaS[i] + deltaS[i+1])
+                    T[i] = (1-a)*qq[i] + a*qq[i+1]
+
+                # Do the start and end points: (eqn: 9.32, The NURBS book)
+                T[0] = 2*qq[1]/deltaS[1] - T[1]
+                T[-1] = 2*qq[-1]/deltaS[-1] - T[-2]
+                for i in range(N):
+                    T[i] /= (numpy.linalg.norm(T[i]) + 1e-16)
+                return T
+
+            def interpKnots(u):
+                t = numpy.zeros(2*len(u)+2 + 2)
+                t[0:4] = 0.0
+                t[-4:] = 1.0
+
+                ii = 4
+                for i in range(1, len(u)-1):
+                    t[ii  ] = u[i]
+                    t[ii+1] = u[i]
+                    ii = ii + 2
+                return t
+
+            def bezierCoef(Q, T, length, s):
+                N = len(Q)
+                coef = numpy.zeros((3*N-2, self.nDim))
+                for i in range(N):
+                    coef[3*i] = Q[i].copy()
+
+                for i in range(N-1):
+                    a = length*(s[i+1]-s[i])
+                    coef[3*i+1] = Q[i] + a/3.0*T[i]
+                    coef[3*i+2] = Q[i+1] - a/3.0*T[i+1]
+                return coef
+
+            def getLength(Q):
+                length = 0
+                for i in range(len(Q)-1):
+                    length += numpy.linalg.norm(Q[i+1]-Q[i])
+                return length
+
+            def getD(Q, s):
+                N = len(Q)
+                D = numpy.zeros_like(Q)
+                dd = numpy.zeros_like(D)
+                deltaS = numpy.zeros(N)
+                for i in range(1, N):
+                    deltaS[i] = s[i] - s[i-1]
+                    dd[i] = (Q[i] - Q[i-1])/(deltaS[i]+1e-16)
+
+                for i in range(1, N-1):
+                    a = deltaS[i]/(deltaS[i] + deltaS[i+1])
+                    D[i] = (1-a)*dd[i] + a*dd[i+1]
+
+                D[0] = 2*dd[1] - D[1]
+                D[-1] = 2*dd[-1] - D[-2]
+                return D
+
+            # -------- Algorithm A9.5 -------------
+            
+            rowLen = numpy.zeros(self.Nv)
+            colLen = numpy.zeros(self.Nu)
+
+            for j in range(self.Nv):
+                # Compute the U-tangent values
+                Td[:, j, 0] = getT(self.X[:, j], self.u)
+                rowLen[j] = getLength(self.X[:, j])
+
+            for i in range(self.Nu):
+                # Compute the U-tangent values
+                Td[i, :, 1] = getT(self.X[i, :], self.v)
+                colLen[i] = getLength(self.X[i, :])
+
+            self.tu = interpKnots(self.u)
+            self.tv = interpKnots(self.v)
+
+            # This contains all the coef...including the ones we will
+            # eventually knock out. 
+            coef = numpy.zeros((3*self.Nu-2, 3*self.Nv-2, self.nDim))
+
+            for i in range(self.Nu):
+                coef[3*i, :] = bezierCoef(self.X[i, :], Td[i, :, 1], colLen[i], self.v)
+
+
+            for j in range(self.Nv):
+                coef[:, 3*j] = bezierCoef(self.X[:, j], Td[:, j, 0], rowLen[j], self.u)
+
+            # Now compute the cross derivatives, assuming that the uv
+            # derivates can be averaged. 
+            for j in range(self.Nv):
+                Td[:, j, 0] *= rowLen[j]
+                Td[:, j, 3] = getD(Td[:, j, 0], self.u)
+            for i in range(self.Nu):
+                Td[i, :, 1] *= colLen[i]
+                Td[i, :, 4] = getD(Td[i, :, 1], self.v)
+            Td = 0.5*(Td[:, :, 3] + Td[:, :, 4])
+            for i in range(self.Nu):
+                for j in range(self.Nv):
+                    Td[i, j] /= (numpy.linalg.norm(Td[i, j]) + 1e-16)
+         
+            for j in range(self.Nv-1):
+                for i in range(self.Nu-1):
+                    gam = (self.u[i+1] - self.u[i])*(self.v[j+1]-self.v[j])/9.0
+                    ii = 3*i 
+                    jj = 3*j 
+                    coef[ii+1, jj+1] = (gam*Td[i, j] + coef[ii, jj+1] + 
+                                        coef[ii+1, jj] - coef[ii, jj])
+
+                    coef[ii+2, jj+1] = (-gam*Td[i+1, j] + coef[ii+3, jj+1] -
+                                        coef[ii+3, jj] + coef[ii+2, jj])
+
+                    coef[ii+1, jj+2] = (-gam*Td[i, j+1] + coef[ii+1, jj+3] -
+                                        coef[ii, jj+3] + coef[ii, jj+2])
+
+                    coef[ii+2, jj+2] = (gam*Td[i+1, j+1] + coef[ii+2, jj+3] +
+                                        coef[ii+3, jj+2] - coef[ii+3, jj+3])
+
+            # Coef was just used for convience. We will now extract
+            # just the values we need. We can do this with *super*
+            # fancy indexing. 
+            def getIndex(N):
+                ind = numpy.zeros(2*(N-1)+2, 'intc')
+                ind[0] = 0
+                ind[-1] = 3*N-3
+                ii = 1
+                jj = 1
+                for i in range(N-1):
+                    ind[ii  ] = jj
+                    ind[ii+1] = jj+1
+                    ii += 2
+                    jj += 3
+                
+                return ind
+
+    
+            coef = coef[:, getIndex(self.Nv), :]
+            self.coef = coef[getIndex(self.Nu)]
+         
+            self.nCtlu = self.coef.shape[0]
+            self.nCtlv = self.coef.shape[1]
+            self.umin = self.tu[0]
+            self.umax = self.tu[-1]
+            self.vmin = self.tv[0]
+            self.vmax = self.tv[-1]
+            self.origData = True
+            self.setEdgeCurves()
+            self.interp =  True
+
         else: # We have LMS/Interpolate
             # Do some checking on the number of control points
             assert 'ku' in kwargs and 'kv' in kwargs and \
