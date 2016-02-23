@@ -15,7 +15,7 @@ import warnings
 import numpy
 from scipy import sparse
 from scipy.sparse import linalg
-from matplotlib import pylab
+
 # ===========================================================================
 # Custom Python modules
 # ===========================================================================
