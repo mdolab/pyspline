@@ -1083,6 +1083,86 @@ nCtl=<number of control points> must be specified for a LMS fit'
 
         closeTecplot(f)
 
+    def writeIGES_directory(self, handle, Dcount, Pcount, twoD=False):
+        """
+        Write the IGES file header information (Directory Entry Section)
+        for this curve.
+
+        DO NOT MODIFY ANYTHING HERE UNLESS YOU KNOW **EXACTLY** WHAT
+        YOU ARE DOING!
+
+        """
+    
+        if self.nDim != 3:
+            raise Error('Must have 3 dimensions to write to IGES file')
+        paraEntries = 6 + len(self.t) + self.nCtl + 3*self.nCtl + 5
+
+        paraLines = (paraEntries-11) // 3 + 2
+        if numpy.mod(paraEntries-11, 3) != 0:
+            paraLines += 1
+        if twoD:
+            handle.write('     126%8d       0       0       1       0       0       001010501D%7d\n'%(Pcount, Dcount))
+            handle.write('     126       0       2%8d       0                               0D%7d\n'%(paraLines, Dcount+1))
+        else:
+            handle.write('     126%8d       0       0       1       0       0       000000001D%7d\n'%(Pcount, Dcount))
+            handle.write('     126       0       2%8d       0                               0D%7d\n'%(paraLines, Dcount+1))
+
+        Dcount += 2
+        Pcount += paraLines
+
+        return Pcount , Dcount
+
+    def writeIGES_parameters(self, handle, Pcount, counter):
+        """Write the IGES parameter information for this curve. 
+        
+        DO NOT MODIFY ANYTHING HERE UNLESS YOU KNOW **EXACTLY** WHAT
+        YOU ARE DOING!
+        """
+        handle.write('%10d,%10d,%10d,0,0,0,0,                        %7dP%7d\n'\
+                     %(126, self.nCtl-1, self.k-1, Pcount, counter))
+        counter += 1
+        pos_counter = 0
+
+        for i in xrange(len(self.t)):
+            pos_counter += 1
+            handle.write('%20.12g,'%(numpy.real(self.t[i])))
+            if numpy.mod(pos_counter, 3) == 0:
+                handle.write('  %7dP%7d\n'%(Pcount, counter))
+                counter += 1
+                pos_counter = 0
+
+        for i in xrange(self.nCtl):
+            pos_counter += 1
+            handle.write('%20.12g,'%(1.0))
+            if numpy.mod(pos_counter, 3) == 0:
+                handle.write('  %7dP%7d\n'%(Pcount, counter))
+                counter += 1
+                pos_counter = 0
+
+        for i in xrange(self.nCtl):
+            for idim in xrange(3):
+                pos_counter += 1
+                handle.write('%20.12g,'%(numpy.real(self.coef[i, idim])))
+                if numpy.mod(pos_counter, 3) == 0:
+                    handle.write('  %7dP%7d\n'%(Pcount, counter))
+                    counter += 1
+                    pos_counter = 0
+        if pos_counter == 1:
+            handle.write('%s    %7dP%7d\n'%(' '*40,Pcount, counter))
+            counter += 1
+        elif pos_counter == 2:
+            handle.write('%s    %7dP%7d\n'%(' '*20,Pcount, counter))
+            counter += 1
+
+        # Ouput the ranges
+        handle.write('%20.12g,%20.12g,0.0,0.0,0.0;         '%(numpy.min(self.t),
+                                                              numpy.max(self.t)))
+        handle.write('  %7dP%7d\n'%(Pcount, counter))
+        counter += 1
+        Pcount += 2
+
+        return Pcount, counter
+
 class Surface(object):
 
     """
