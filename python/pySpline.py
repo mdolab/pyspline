@@ -202,7 +202,7 @@ def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
         """
 
     # Check the data rank:
-    rank = numpy.rank(inputVal)
+    rank = numpy.ndim(inputVal)
     if rank != dataRank:
         raise Error('\'%s\' must have rank %d. Input was of rank %d.' % (
             inputName, dataRank, rank))
@@ -338,7 +338,7 @@ class Curve(object):
             self.origData = True
             if 'X' in kwargs:
                 self.X = numpy.atleast_2d(kwargs['X'])
-                if numpy.rank(kwargs['X']) == 1:
+                if numpy.ndim(kwargs['X']) == 1:
                     self.X = numpy.transpose(self.X)
             elif 'x' in kwargs and 'y' in kwargs and 'z'in kwargs:
                 self.X = numpy.vstack([kwargs['x'], kwargs['y'], kwargs['z']]).T
@@ -415,7 +415,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
             self.origData = True
             if 'X' in kwargs:
                 self.X = numpy.atleast_2d(kwargs['X'])
-                if numpy.rank(kwargs['X']) == 1:
+                if numpy.ndim(kwargs['X']) == 1:
                     self.X = numpy.transpose(self.X)
             elif 'x' in kwargs and 'y' in kwargs and 'z'in kwargs:
                 self.X = numpy.vstack([kwargs['x'], kwargs['y'], kwargs['z']]).T
@@ -1263,7 +1263,7 @@ class Surface(object):
 
             # Do some checking on the number of control points
             assert ( 'X' in kwargs or 
-                     'x' in kwargs and 'y' in kwargs and 'z' in kwargs, \
+                     ('x' in kwargs and 'y' in kwargs and 'z' in kwargs), \
                      'Error: X (or x, y, z \
                      MUST be defined for task localInterp')
 
@@ -2005,7 +2005,7 @@ MUST be defined for task lms or interpolate'
         v = numpy.array(v)
         if not u.shape == v.shape:
             raise Error("u and v must have the same shape")
-        if not numpy.rank(u) == 0:
+        if not numpy.ndim(u) == 0:
             raise Error("getDerivative only accepts scalar arguments")
 
         deriv = libspline.eval_surface_deriv(u, v, self.tu, self.tv, self.ku,
@@ -2035,7 +2035,7 @@ MUST be defined for task lms or interpolate'
         v = numpy.array(v)
         if not u.shape == v.shape:
             raise Error("u and v must have the same shape")
-        if not numpy.rank(u) == 0:
+        if not numpy.ndim(u) == 0:
             raise Error("getSecondDerivative only accepts scalar arguments")
 
         deriv = libspline.eval_surface_deriv2(u, v, self.tu, self.tv, self.ku,
