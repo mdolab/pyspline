@@ -2775,19 +2775,19 @@ MUST be defined for task lms or interpolate'
             raise Error('Face must be in range 0..5 inclusive')
 
         if numpy.mod(self.Nu, 2) == 1:
-            midu = [(self.Nu-1)/2, (self.Nu-1)/2]
+            midu = [(self.Nu-1)//2, (self.Nu-1)//2]
         else:
-            midu = [self.Nu/2, self.Nu/2-1]
+            midu = [self.Nu//2, self.Nu//2-1]
 
         if numpy.mod(self.Nv, 2) == 1:
-            midv = [(self.Nv-1)/2, (self.Nv-1)/2]
+            midv = [(self.Nv-1)//2, (self.Nv-1)//2]
         else:
-            midv = [self.Nv/2, self.Nv/2-1]
+            midv = [self.Nv//2, self.Nv//2-1]
 
         if numpy.mod(self.Nw, 2) == 1:
-            midw = [(self.Nw-1)/2, (self.Nw-1)/2]
+            midw = [(self.Nw-1)//2, (self.Nw-1)//2]
         else:
-            midw = [self.Nw/2, self.Nw/2-1]
+            midw = [self.Nw//2, self.Nw//2-1]
 
         if   face == 0:
             values = [self.X[0, 0, 0], self.X[-1, 0, 0], self.X[0, -1, 0],
@@ -2848,19 +2848,19 @@ MUST be defined for task lms or interpolate'
             Mid point of edge
             """
         if numpy.mod(self.Nu, 2) == 1:
-            midu = [(self.Nu-1)/2, (self.Nu-1)/2]
+            midu = [(self.Nu-1)//2, (self.Nu-1)//2]
         else:
-            midu = [self.Nu/2, self.Nu/2-1]
+            midu = [self.Nu//2, self.Nu//2-1]
 
         if numpy.mod(self.Nv, 2) == 1:
-            midv = [(self.Nv-1)/2, (self.Nv-1)/2]
+            midv = [(self.Nv-1)//2, (self.Nv-1)//2]
         else:
-            midv = [self.Nv/2, self.Nv/2-1]
+            midv = [self.Nv//2, self.Nv/2-1]
 
         if numpy.mod(self.Nw, 2) == 1:
-            midw = [(self.Nw-1)/2, (self.Nw-1)/2]
+            midw = [(self.Nw-1)//2, (self.Nw-1)//2]
         else:
-            midw = [self.Nw/2, self.Nw/2-1]
+            midw = [self.Nw//2, self.Nw//2-1]
 
         if   edge == 0:
             val = (self.X[midu[0], 0, 0] + self.X[midu[1], 0, 0])
@@ -2908,19 +2908,19 @@ MUST be defined for task lms or interpolate'
             raise Error('No original data for this surface')
 
         if numpy.mod(self.Nu, 2) == 1:
-            midu = [(self.Nu-1)/2, (self.Nu-1)/2]
+            midu = [(self.Nu-1)//2, (self.Nu-1)//2]
         else:
-            midu = [self.Nu/2, self.Nu/2-1]
+            midu = [self.Nu//2, self.Nu//2-1]
 
         if numpy.mod(self.Nv, 2) == 1:
-            midv = [(self.Nv-1)/2, (self.Nv-1)/2]
+            midv = [(self.Nv-1)//2, (self.Nv-1)//2]
         else:
-            midv = [self.Nv/2, self.Nv/2-1]
+            midv = [self.Nv//2, self.Nv//2-1]
 
         if numpy.mod(self.Nw, 2) == 1:
-            midw = [(self.Nw-1)/2, (self.Nw-1)/2]
+            midw = [(self.Nw-1)//2, (self.Nw-1)//2]
         else:
-            midw = [self.Nw/2, self.Nw/2-1]
+            midw = [self.Nw//2, self.Nw//2-1]
 
         if   face == 0:
             val = 0.25*(
