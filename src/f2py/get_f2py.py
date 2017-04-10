@@ -1,3 +1,4 @@
+from __future__ import print_function
 #------------- VERY IMPORTANT ------------ 
 
 # This script is necessary since f2py INSISTS on priting crap out when
@@ -6,10 +7,9 @@
 # we temporily reassign stdout such that when we import it, the output
 # goes to stdout. Then we reassign stdout and simply puck off the
 # include  directory. 
-from __future__ import print_function
 import os,sys
 tmp = sys.stdout
 sys.stdout = sys.stderr
 import numpy.f2py
 sys.stdout = tmp
-print(os.path.dirname(os.path.abspath(numpy.f2py.__file__)))
+print (os.path.dirname(os.path.abspath(numpy.f2py.__file__)))
