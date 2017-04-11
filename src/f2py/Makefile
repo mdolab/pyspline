@@ -34,7 +34,7 @@ all:
 #       need to have f2py_f2cmap in this folder....
 	cp f2py_f2cmap.ref .f2py_f2cmap
 
-	f2py pyspline.pyf
+	$(F2PY) pyspline.pyf
 	@echo " "
 	$(CC) $(CC_FLAGS) $(PYTHON_INCLUDES) -I$(NUMPY_INCLUDES) \
 	-I$(F2PY_ROOT)/src -c libsplinemodule.c
