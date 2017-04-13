@@ -1123,7 +1123,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
         counter += 1
         pos_counter = 0
 
-        for i in xrange(len(self.t)):
+        for i in range(len(self.t)):
             pos_counter += 1
             handle.write('%20.12g,'%(numpy.real(self.t[i])))
             if numpy.mod(pos_counter, 3) == 0:
@@ -1131,7 +1131,7 @@ nCtl=<number of control points> must be specified for a LMS fit'
                 counter += 1
                 pos_counter = 0
 
-        for i in xrange(self.nCtl):
+        for i in range(self.nCtl):
             pos_counter += 1
             handle.write('%20.12g,'%(1.0))
             if numpy.mod(pos_counter, 3) == 0:
@@ -1139,8 +1139,8 @@ nCtl=<number of control points> must be specified for a LMS fit'
                 counter += 1
                 pos_counter = 0
 
-        for i in xrange(self.nCtl):
-            for idim in xrange(3):
+        for i in range(self.nCtl):
+            for idim in range(3):
                 pos_counter += 1
                 handle.write('%20.12g,'%(numpy.real(self.coef[i, idim])))
                 if numpy.mod(pos_counter, 3) == 0:
@@ -2273,7 +2273,7 @@ MUST be defined for task lms or interpolate'
         counter += 1
         pos_counter = 0
 
-        for i in xrange(len(self.tu)):
+        for i in range(len(self.tu)):
             pos_counter += 1
             handle.write('%20.12g,'%(numpy.real(self.tu[i])))
             if numpy.mod(pos_counter, 3) == 0:
@@ -2283,7 +2283,7 @@ MUST be defined for task lms or interpolate'
             # end if
         # end for
 
-        for i in xrange(len(self.tv)):
+        for i in range(len(self.tv)):
             pos_counter += 1
             handle.write('%20.12g,'%(numpy.real(self.tv[i])))
             if numpy.mod(pos_counter, 3) == 0:
@@ -2293,7 +2293,7 @@ MUST be defined for task lms or interpolate'
             # end if
         # end for
 
-        for i in xrange(self.nCtlu*self.nCtlv):
+        for i in range(self.nCtlu*self.nCtlv):
             pos_counter += 1
             handle.write('%20.12g,'%(1.0))
             if numpy.mod(pos_counter, 3) == 0:
@@ -2303,9 +2303,9 @@ MUST be defined for task lms or interpolate'
             # end if
         # end for
 
-        for j in xrange(self.nCtlv):
-            for i in xrange(self.nCtlu):
-                for idim in xrange(3):
+        for j in range(self.nCtlv):
+            for i in range(self.nCtlu):
+                for idim in range(3):
                     pos_counter += 1
                     handle.write('%20.12g,'%(numpy.real(
                                 self.coef[i, j, idim])))
@@ -2319,7 +2319,7 @@ MUST be defined for task lms or interpolate'
         # end for
 
         # Ouput the ranges
-        for  i in xrange(4):
+        for  i in range(4):
             pos_counter += 1
             if i == 0:
                 handle.write('%20.12g,'%(numpy.real(self.umin)))
@@ -2336,7 +2336,7 @@ MUST be defined for task lms or interpolate'
                 pos_counter = 0
             else: # We have to close it up anyway
                 if i == 3:
-                    for j  in xrange(3-pos_counter):
+                    for j  in range(3-pos_counter):
                         handle.write('%21s'%(' '))
                     # end for
                     pos_counter = 0
