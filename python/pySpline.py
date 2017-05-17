@@ -1214,6 +1214,9 @@ class Surface(object):
        Explict u parameters to use. Optional.
     v : array, size (Nu, Nv)
        Explict v parameters to use. Optional.
+    scaledParams : bool
+       default is to use u,v for parameterization. If true use u,v as well.
+       If false, use U,V.
     nIter : int
        Number of Hoscheks parater corrections to run
 
@@ -1224,7 +1227,8 @@ class Surface(object):
     """
 
     def __init__(self, recompute=True, **kwargs):
-
+        
+        self.name = None
         self.edgeCurves = [None, None, None, None]
         self.data = None
         self.udata = None
@@ -1377,12 +1381,20 @@ class Surface(object):
             # eventually knock out. 
             coef = numpy.zeros((3*self.Nu-2, 3*self.Nv-2, self.nDim))
 
+            scaledParams = kwargs.pop('scaledParams',True)
+
             for i in range(self.Nu):
-                coef[3*i, :] = bezierCoef(self.X[i, :], Td[i, :, 1], colLen[i], self.v)
+                if scaledParams:
+                    coef[3*i, :] = bezierCoef(self.X[i, :], Td[i, :, 1], colLen[i], self.v)
+                else:
+                    coef[3*i, :] = bezierCoef(self.X[i, :], Td[i, :, 1], colLen[i], self.V[i,:])
 
 
             for j in range(self.Nv):
-                coef[:, 3*j] = bezierCoef(self.X[:, j], Td[:, j, 0], rowLen[j], self.u)
+                if scaledParams:
+                    coef[:, 3*j] = bezierCoef(self.X[:, j], Td[:, j, 0], rowLen[j], self.u)
+                else:
+                    coef[:, 3*j] = bezierCoef(self.X[:, j], Td[:, j, 0], rowLen[j], self.U[:,j])
 
             # Now compute the cross derivatives, assuming that the uv
             # derivates can be averaged. 
