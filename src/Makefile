@@ -13,7 +13,8 @@ vpath %.o $(OBJDIR)
 # Name of files to be compiled:
 MODS = precision.o\
 
-OBJS =  evaluations.o\
+OBJS =  adtProjections.o\
+	evaluations.o\
 	basis.o\
 	knots.o\
 	insertKnot.o\
@@ -37,4 +38,3 @@ default:
 clean:
 	@echo "        Making clean in src... "
 	rm -f $(MAKE_CLEAN_ARGUMENTS)
-

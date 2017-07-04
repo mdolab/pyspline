@@ -4,10 +4,11 @@ RULES_FILE  = $(MAIN_DIR)/Rules.mk
 include ${COMMON_FILE}
 include ${RULES_FILE}
 
-LINKER_ALL_FLAGS = $(FF90_FLAGS) -L$(LIBDIR) -lspline $(LINKER_FLAGS) 
+LINKER_ALL_FLAGS = $(FF90_FLAGS) -L$(LIBDIR) -lspline $(LINKER_FLAGS)
 
 PYTHON_OBJECTS = fortranobject.o \
 		 libsplinemodule.o\
+		 libspline-f2pywrappers2.o\
 
 default: all
 
@@ -41,6 +42,9 @@ all:
 
 	$(CC) $(CC_FLAGS) $(PYTHON_INCLUDES) -I$(NUMPY_INCLUDES) -c \
 	$(F2PY_ROOT)/src/fortranobject.c -o fortranobject.o
+
+# Compiled f2py-generated wrapper file
+	$(FF90) $(FF90_ALL_FLAGS) -I./ -c libspline-f2pywrappers2.f90
 
 	$(FF90) $(SO_LINKER_FLAGS) $(PYTHON_OBJECTS) $(LINKER_ALL_FLAGS) -o libspline.so
 	$(PYTHON) importTest.py

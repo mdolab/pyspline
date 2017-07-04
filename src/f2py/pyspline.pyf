@@ -1,7 +1,7 @@
   !    -*- f90 -*-
   ! Note: the context of this file is case sensitive.
-  
-  python module libspline ! in 
+
+  python module libspline ! in
   interface  ! in :pyspline
      subroutine knots_interp(x, deriv_ptr, n, nd, k, t) ! in :test:knots_interp.f90
        real(kind=realtype) dimension(n), intent(in) :: x
@@ -221,7 +221,7 @@
        integer optional, intent(in), check(shape(u, 0)==m), depend(u) :: m=shape(u, 0)
        real(kind=realtype) dimension(ndim, m, n), intent(out), depend(ndim, m, n) :: val
      end subroutine eval_surface
-     
+
      subroutine eval_surface_deriv(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, val) ! in :test:eval_surface.f90
        real(kind=realtype) intent(in) :: u
        real(kind=realtype) intent(in) :: v
@@ -458,7 +458,7 @@
        integer dimension(n), intent(out), depend(n) :: pid
        integer intent(out) :: n_sol
      end subroutine line_plane
-     
+
      subroutine plane_line(ia, vc, p0, v1, v2, n, sol, n_sol) ! in :test:projections.f90
        real(kind=realtype) dimension(3, n), intent(in) :: ia
        real(kind=realtype) dimension(3, n), intent(in), depend(n) :: vc
@@ -541,12 +541,22 @@
        integer intent(in) :: nctl
        integer intent(out) :: ind
      end subroutine findspan
+     module adtprojections ! in :test:adtProjections.F90
+       subroutine searchquads(pts,conn,searchpts,npts,nconn,nsearchpts,faceid,uv) ! in :test:adtProjections.F90:adtmodule
+         real(kind=realtype), target,dimension(3,npts),intent(in) :: pts
+         integer, target,dimension(4,nconn),intent(in) :: conn
+         real(kind=realtype), target,dimension(3,nsearchpts),intent(in) :: searchpts
+         integer, optional,intent(in),check(shape(pts,1)==npts),depend(pts) :: npts=shape(pts,1)
+         integer, optional,intent(in),check(shape(conn,1)==nconn),depend(conn) :: nconn=shape(conn,1)
+         integer, optional,intent(in),check(shape(searchpts,1)==nsearchpts),depend(searchpts) :: nsearchpts=shape(searchpts,1)
+         integer dimension(nsearchpts),intent(out),depend(nsearchpts) :: faceid
+         real(kind=realtype) dimension(2,nsearchpts),intent(out),depend(nsearchpts) :: uv
+       end subroutine searchquads
+     end module adtprojections
   end interface
-end program
+end python module libspline
 
 
 
 ! This file was auto-generated with f2py (version:2_4422).
 ! See http://cens.ioc.ee/projects/f2py2e/
-
-
