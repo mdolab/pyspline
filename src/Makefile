@@ -12,9 +12,9 @@ vpath %.o $(OBJDIR)
 
 # Name of files to be compiled:
 MODS = precision.o\
+       adtProjections.o
 
-OBJS =  adtProjections.o\
-	evaluations.o\
+OBJS =  evaluations.o\
 	basis.o\
 	knots.o\
 	insertKnot.o\
