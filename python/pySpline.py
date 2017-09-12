@@ -2867,7 +2867,7 @@ MUST be defined for task lms or interpolate'
         if numpy.mod(self.Nv, 2) == 1:
             midv = [(self.Nv-1)//2, (self.Nv-1)//2]
         else:
-            midv = [self.Nv//2, self.Nv/2-1]
+            midv = [self.Nv//2, self.Nv//2-1]
 
         if numpy.mod(self.Nw, 2) == 1:
             midw = [(self.Nw-1)//2, (self.Nw-1)//2]
