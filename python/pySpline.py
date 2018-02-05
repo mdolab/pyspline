@@ -1214,6 +1214,9 @@ class Surface(object):
        Explict u parameters to use. Optional.
     v : array, size (Nu, Nv)
        Explict v parameters to use. Optional.
+    scaledParams : bool
+       default is to use u,v for parameterization. If true use u,v as well.
+       If false, use U,V.
     nIter : int
        Number of Hoscheks parater corrections to run
 
@@ -1224,7 +1227,8 @@ class Surface(object):
     """
 
     def __init__(self, recompute=True, **kwargs):
-
+        
+        self.name = None
         self.edgeCurves = [None, None, None, None]
         self.data = None
         self.udata = None
@@ -1377,12 +1381,20 @@ class Surface(object):
             # eventually knock out. 
             coef = numpy.zeros((3*self.Nu-2, 3*self.Nv-2, self.nDim))
 
+            scaledParams = kwargs.pop('scaledParams',True)
+
             for i in range(self.Nu):
-                coef[3*i, :] = bezierCoef(self.X[i, :], Td[i, :, 1], colLen[i], self.v)
+                if scaledParams:
+                    coef[3*i, :] = bezierCoef(self.X[i, :], Td[i, :, 1], colLen[i], self.v)
+                else:
+                    coef[3*i, :] = bezierCoef(self.X[i, :], Td[i, :, 1], colLen[i], self.V[i,:])
 
 
             for j in range(self.Nv):
-                coef[:, 3*j] = bezierCoef(self.X[:, j], Td[:, j, 0], rowLen[j], self.u)
+                if scaledParams:
+                    coef[:, 3*j] = bezierCoef(self.X[:, j], Td[:, j, 0], rowLen[j], self.u)
+                else:
+                    coef[:, 3*j] = bezierCoef(self.X[:, j], Td[:, j, 0], rowLen[j], self.U[:,j])
 
             # Now compute the cross derivatives, assuming that the uv
             # derivates can be averaged. 
@@ -1726,28 +1738,28 @@ MUST be defined for task lms or interpolate'
 
         if edge == 0:
             if numpy.mod(self.Nu, 2) == 1: # Its odd
-                mid = (self.Nu-1)/2
+                mid = (self.Nu-1)//2
                 return self.X[0, 0], self.X[mid, 0], self.X[-1, 0]
             else:
                 Xmid = 0.5 *(self.X[self.Nu/2, 0] + self.X[self.Nu/2 - 1, 0])
                 return self.X[0, 0], Xmid, self.X[-1, 0]
         elif edge == 1:
             if numpy.mod(self.Nu, 2) == 1: # Its odd
-                mid = (self.Nu-1)/2
+                mid = (self.Nu-1)//2
                 return self.X[0, -1], self.X[mid, -1], self.X[-1, -1]
             else:
                 Xmid = 0.5 *(self.X[self.Nu/2, -1] + self.X[self.Nu/2 - 1, -1])
                 return self.X[0, -1], Xmid, self.X[-1, -1]
         elif edge == 2:
             if numpy.mod(self.Nv, 2) == 1: # Its odd
-                mid = (self.Nv-1)/2
+                mid = (self.Nv-1)//2
                 return self.X[0, 0], self.X[0, mid], self.X[0, -1]
             else:
                 Xmid = 0.5 *(self.X[0, self.Nv/2] + self.X[0, self.Nv/2 - 1])
                 return self.X[0, 0], Xmid, self.X[0, -1]
         elif edge == 3:
             if numpy.mod(self.Nv, 2) == 1: # Its odd
-                mid = (self.Nv-1)/2
+                mid = (self.Nv-1)//2
                 return self.X[-1, 0], self.X[-1, mid], self.X[-1, -1]
             else:
                 Xmid = 0.5 *(self.X[-1, self.Nv/2] + self.X[-1, self.Nv/2 - 1])
@@ -2855,7 +2867,7 @@ MUST be defined for task lms or interpolate'
         if numpy.mod(self.Nv, 2) == 1:
             midv = [(self.Nv-1)//2, (self.Nv-1)//2]
         else:
-            midv = [self.Nv//2, self.Nv/2-1]
+            midv = [self.Nv//2, self.Nv//2-1]
 
         if numpy.mod(self.Nw, 2) == 1:
             midw = [(self.Nw-1)//2, (self.Nw-1)//2]
