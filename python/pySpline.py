@@ -1741,28 +1741,28 @@ MUST be defined for task lms or interpolate'
                 mid = (self.Nu-1)//2
                 return self.X[0, 0], self.X[mid, 0], self.X[-1, 0]
             else:
-                Xmid = 0.5 *(self.X[self.Nu/2, 0] + self.X[self.Nu/2 - 1, 0])
+                Xmid = 0.5 *(self.X[self.Nu//2, 0] + self.X[self.Nu//2 - 1, 0])
                 return self.X[0, 0], Xmid, self.X[-1, 0]
         elif edge == 1:
             if numpy.mod(self.Nu, 2) == 1: # Its odd
                 mid = (self.Nu-1)//2
                 return self.X[0, -1], self.X[mid, -1], self.X[-1, -1]
             else:
-                Xmid = 0.5 *(self.X[self.Nu/2, -1] + self.X[self.Nu/2 - 1, -1])
+                Xmid = 0.5 *(self.X[self.Nu//2, -1] + self.X[self.Nu//2 - 1, -1])
                 return self.X[0, -1], Xmid, self.X[-1, -1]
         elif edge == 2:
             if numpy.mod(self.Nv, 2) == 1: # Its odd
                 mid = (self.Nv-1)//2
                 return self.X[0, 0], self.X[0, mid], self.X[0, -1]
             else:
-                Xmid = 0.5 *(self.X[0, self.Nv/2] + self.X[0, self.Nv/2 - 1])
+                Xmid = 0.5 *(self.X[0, self.Nv//2] + self.X[0, self.Nv//2 - 1])
                 return self.X[0, 0], Xmid, self.X[0, -1]
         elif edge == 3:
             if numpy.mod(self.Nv, 2) == 1: # Its odd
                 mid = (self.Nv-1)//2
                 return self.X[-1, 0], self.X[-1, mid], self.X[-1, -1]
             else:
-                Xmid = 0.5 *(self.X[-1, self.Nv/2] + self.X[-1, self.Nv/2 - 1])
+                Xmid = 0.5 *(self.X[-1, self.Nv//2] + self.X[-1, self.Nv//2 - 1])
                 return self.X[-1, 0], Xmid, self.X[-1, -1]
 
     def getValueEdge(self, edge, s):
