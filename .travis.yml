@@ -44,6 +44,7 @@ install:
 
 script:
 - export PYTHONPATH=$PYTHONPATH:$PWD
+- ls python/
 - cd python/reg_tests
 - ls
 - python run_reg_tests.py -nodiff
