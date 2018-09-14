@@ -61,6 +61,9 @@ elif res == 1: #reg.REG_FILES_DO_NOT_MATCH
     print('%s: Failure!'%(module_name))
     if not nodiff:
         os.system('%s %s_reg.ref %s_reg'%(diff_cmd, module_name, module_name))
+    else:
+        os.system('cat %s_reg'%(module_name))
+   
 elif res == -1: #reg.REG_ERROR
     print('%s: Error in regression. Missing files.'%(module_name))
 # end if
