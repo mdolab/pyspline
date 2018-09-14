@@ -31,7 +31,6 @@ before_install:
 install:
 - conda install --yes python=$PY numpy scipy nose sphinx mock swig pip;
 - pip install --upgrade pip;
-- pip install mpi4py;
 
 # install pyspline
 - git clone https://github.com/mdolab/pyspline.git;
@@ -44,5 +43,6 @@ install:
 script:
 - export PYTHONPATH=$PYTHONPATH:$PWD
 - cd python/reg_tests
+- ls
 - python run_reg_tests.py -nodiff
 
