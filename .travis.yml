@@ -21,8 +21,6 @@ addons:
     - openmpi-bin
 
 before_install:
-- sudo apt-get update
-- sudo apt-get install xxdiff 
 - if [ "$PY" = "2.7" ];  then wget "https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh" -O miniconda.sh; fi
 - if [ "$PY" = "3.6" ];  then wget "https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh" -O miniconda.sh; fi
 - chmod +x miniconda.sh;
@@ -45,5 +43,5 @@ install:
 script:
 - export PYTHONPATH=$PYTHONPATH:$PWD
 - cd python/reg_tests
-- python run_reg_tests.py
+- python run_reg_tests.py -nodiff
 
