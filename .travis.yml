@@ -41,11 +41,13 @@ install:
 - ls python/
 - export PATH=$HOME/.local/bin:$PATH;
 - export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/
+- export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/pyspline/python
 
 script:
 - export PYTHONPATH=$PYTHONPATH:$PWD
 - ls python/
 - cd python/reg_tests
 - ls
+- echo $PYTHONPATH
 - python run_reg_tests.py -nodiff
 
