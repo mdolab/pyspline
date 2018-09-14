@@ -37,6 +37,8 @@ install:
 - cd pyspline;
 - cp config/defaults/config.LINUX_GFORTRAN.mk config/config.mk;
 - make;
+- ls
+- ls python/
 - export PATH=$HOME/.local/bin:$PATH;
 - export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/
 
