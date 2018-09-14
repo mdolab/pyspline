@@ -19,7 +19,6 @@ addons:
     - liblapack-dev
     - libopenmpi-dev
     - openmpi-bin
-    - xxdiff
 
 before_install:
 - sudo apt-get update
