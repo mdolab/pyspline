@@ -7,7 +7,7 @@ language: generic
 
 env:
 - PY=2.7
-- PY=3.6
+
 
 addons:
   apt:
@@ -29,25 +29,21 @@ before_install:
 
 
 install:
-- conda install --yes python=$PY numpy scipy nose sphinx mock swig pip;
-- pip install --upgrade pip;
+- conda install --yes python=$PY numpy scipy nose mock pip;
 
 # install pyspline
 - git clone https://github.com/mdolab/pyspline.git;
 - cd pyspline;
+- export PATH=$HOME/.local/bin:$PATH;
+- export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/
+
+script:
 - cp config/defaults/config.LINUX_GFORTRAN.mk config/config.mk;
 - make;
 - ls
 - ls python/
-- export PATH=$HOME/.local/bin:$PATH;
-- export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/
-- export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/pyspline/python/
-
-script:
-- export PYTHONPATH=$PYTHONPATH:$PWD
-- ls python/
+- ls python/reg_tests
 - cd python/reg_tests
-- ls
 - echo $PYTHONPATH
 - python run_reg_tests.py -nodiff
 
