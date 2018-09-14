@@ -41,7 +41,7 @@ install:
 - ls python/
 - export PATH=$HOME/.local/bin:$PATH;
 - export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/
-- export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/pyspline/python
+- export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/pyspline/python/
 
 script:
 - export PYTHONPATH=$PYTHONPATH:$PWD
