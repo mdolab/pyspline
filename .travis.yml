@@ -19,6 +19,7 @@ addons:
     - liblapack-dev
     - libopenmpi-dev
     - openmpi-bin
+    - xxdiff
 
 before_install:
 - if [ "$PY" = "2.7" ];  then wget "https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh" -O miniconda.sh; fi
