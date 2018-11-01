@@ -34,12 +34,14 @@ install:
 # install pyspline
 - git clone https://github.com/mdolab/pyspline.git;
 - cd pyspline;
-- export PATH=$HOME/.local/bin:$PATH;
-- export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/
 
-script:
+# - export PATH=$HOME/.local/bin:$PATH;
+# - export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/
+
 - cp config/defaults/config.LINUX_GFORTRAN.mk config/config.mk;
 - make;
+
+script:
 - ls
 - ls python/
 - ls python/reg_tests
