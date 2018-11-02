@@ -40,6 +40,7 @@ install:
 - export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/
 
 script:
+-  cd python/reg_tests
 
 # run tests
 - python run_reg_tests.py -nodiff
