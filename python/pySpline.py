@@ -1266,10 +1266,10 @@ class Surface(object):
             self.kv = 4
 
             # Do some checking on the number of control points
-            #assert ( 'X' in kwargs or 
-            #        ('x' in kwargs and 'y' in kwargs and 'z' in kwargs), \
-            #        'Error: X (or x, y, z \
-            #        MUST be defined for task localInterp')
+            assert ( 'X' in kwargs or 
+                   ('x' in kwargs and 'y' in kwargs and 'z' in kwargs), \
+                   'Error: X (or x, y, z \
+                   MUST be defined for task localInterp')
 
             if 'X' in kwargs:
                 self.X  = numpy.array(kwargs['X'])
