@@ -32,7 +32,6 @@ install:
 - conda install --yes python=$PY numpy=1.11.2 scipy nose mock pip;
 
 # install pyspline
-#- git clone https://github.com/mdolab/pyspline.git;
 - cd $HOME/build/mdolab/pyspline;
 - cp config/defaults/config.LINUX_GFORTRAN.mk config/config.mk;
 - make;
@@ -41,12 +40,6 @@ install:
 - export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/
 
 script:
-# print the files for debugging
-- ls
-- ls python/
-- ls python/reg_tests
-- cd python/reg_tests
-- echo $PYTHONPATH
 
 # run tests
 - python run_reg_tests.py -nodiff
