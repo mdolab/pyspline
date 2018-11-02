@@ -32,8 +32,8 @@ install:
 - conda install --yes python=$PY numpy=1.11.2 scipy nose mock pip;
 
 # install pyspline
-- git clone https://github.com/mdolab/pyspline.git;
-- cd pyspline;
+#- git clone https://github.com/mdolab/pyspline.git;
+- cd $HOME/build/mdolab/pyspline;
 - cp config/defaults/config.LINUX_GFORTRAN.mk config/config.mk;
 - make;
 
