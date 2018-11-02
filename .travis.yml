@@ -29,7 +29,7 @@ before_install:
 
 
 install:
-- conda install --yes python=$PY numpy scipy nose mock pip;
+- conda install --yes python=$PY numpy=1.11.2 scipy nose mock pip;
 
 # install pyspline
 - git clone https://github.com/mdolab/pyspline.git;
