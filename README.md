@@ -12,7 +12,7 @@ module.
 Documentation
 -------------
 
-Please see the [documentation](http://mdolab.engin.umich.edu/doc/packages/pyspline/doc/index.html) for installation details and API documentation.
+Please see the [documentation](http://mdolab.engin.umich.edu/docs/packages/pyspline/doc/index.html) for installation details and API documentation.
 This link requires credentials currently only available to MDO Lab members.
 
 To locally build the documentation, enter the `doc` folder and enter `make html` in terminal.
