@@ -8,58 +8,33 @@ library for doing the time consuming computational operators. It is
 therefore necessary to build this library before using
 :ref:`pySpline`.
 
-To see a list of architectures that :ref:`pySpline` has been known to
-compile on run::
-   
-   make
+pySpline follows the standard MDO Lab build procedure.
+To start, find a configuration file close to your current setup in::
 
-from the root directory. 
+    $ config/defaults
 
-The easiest approach to to try the cloest one to your system and
-attempt a build using (for example)::
+and copy it to ''config/config.mk''. For example::
 
-   make LINUX_INTEL
+    $ cp config/defaults/config.LINUX_GFORTRAN.mk config/config.mk
+
+If you are a beginner user installing the packages on a linux desktop, 
+you should use the ``config.LINUX_GFORTRAN.mk`` versions of the configuration 
+files. The ``config.LINUX_INTEL.mk`` versions are usually used on clusters.
+
+Once you have copied the config file, compile :ref:`pySpline` by running::
+
+    $ make
 
 If everything was successful, the following lines will be printed to
 the screen (near the end)::
 
    Testing if module pyspline can be imported...
-   Module libspline was successfully imported.
+   Module pyspline was successfully imported.
 
 If you don't see this, it will be necessary to configure the build
-manually. To configure manually, first copy a default configuration
-file from the defaults folder like this (run this in the root
-direcotry)::
-  
-   cp config/defaults/config.LINUX_INTEL.mk config
-
-Now open ``config/config.LINUX_INTEL.mk`` which should look like::
-
-  # Config File for LINUX and INTEL Compiler
-  AR       = ar
-  AR_FLAGS = -rvs
-  RM       = /bin/rm -rf
-
-  # Fortran compiler and flags
-  FF90        = ifort
-  FF90_FLAGS  = -r8 -O2 -fPIC
-
-  # C compiler and flags
-  CC       = gcc
-  CC_FLAGS   = -O2 -fPIC
-
-  # Define potentially different python, python-config and f2py executables:
-  PYTHON = python
-  PYTHON-CONFIG = python-config
-  F2PY = f2py
-
-  # Define additional flags for linking
-  LINKER_FLAGS = -nofor_main -lifport
-  SO_LINKER_FLAGS =-fPIC -shared
-
-Modify these parameters are required and attempt the build again. If
-you have sucessfully compiled the code on a new system, please contact
-the developpers such that a new default configuration file can be
+manually. To configure manually, open ``config/config.mk`` and modify options as necessary.
+If you have successfully compiled the code on a new system, please contact
+the developers such that a new default configuration file can be
 added.
 
 
