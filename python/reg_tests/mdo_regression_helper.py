@@ -147,4 +147,3 @@ if __name__ == '__main__':
     str2 = "@value    3.141592999999999 1e-12 1e-12"
 
     print('This comp should be False: ', _reg_str_comp(str1, str2))
-

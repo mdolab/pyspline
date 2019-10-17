@@ -142,5 +142,3 @@ for k in [2,3,4]:
     curve = pySpline.Curve(x=x,y=y,z=z,k=k)
     run_curve_test(curve)
     run_project_test(curve)
-
-
