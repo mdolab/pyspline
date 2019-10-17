@@ -30,7 +30,38 @@ def eval_test(crv, handler, solve):
         print('Second Derivative')
         handler.root_add_val(crv.getSecondDerivative(pt),1e-10,1e-10)
 
+def run_curve_test(crv, handler, solve): 
+    ''' This function is used to test the functions that are apart of
+    the curve class. They operate on the 'crv' that is passed. '''
 
+    # Test the evaluations
+    eval_test(crv, handler, solve)
+
+    # Inset a knot at 0.25 with multiplicity of k-1 and retest
+    crv.insertKnot(0.25,crv.k-1)
+    print('------- Cruve with inserted knots ----------')
+    eval_test(crv, handler, solve)
+    
+    print('Curve length:')
+    handler.root_add_val(crv.getLength())
+
+    curve_windowed = crv.windowCurve(0.1, 0.90)
+    print('These points should be the same (window curve test)')
+    handler.root_add_val(crv(0.2))
+    handler.root_add_val(curve_windowed((0.2-0.1)/(0.90-0.1)))
+
+    # Split the curve in two:
+    curve1, curve2 = crv.splitCurve(0.5)
+    print('These three points should be the same (split curve test)')
+    handler.root_add_val(curve1(1.0))
+    handler.root_add_val(curve2(0.0))
+    handler.root_add_val(crv(0.5))
+
+    # Reverse test:
+    print('These two points should be the same (reverse test)')
+    handler.root_add_val(crv(0.4))
+    crv.reverse()
+    handler.root_add_val(crv(0.6))
 
 def run_project_test(crv, handler, solve):
     # Run point projection and curve projection tests'
@@ -63,38 +94,7 @@ class Test(unittest.TestCase):
         with BaseRegTest(self.ref_file, train=False) as handler:
             self.regression_test(handler)
     
-    def run_curve_test(self, crv, handler, solve): 
-        ''' This function is used to test the functions that are apart of
-        the curve class. They operate on the 'crv' that is passed. '''
 
-        # Test the evaluations
-        eval_test(crv, handler, solve)
-
-        # Inset a knot at 0.25 with multiplicity of k-1 and retest
-        crv.insertKnot(0.25,crv.k-1)
-        print('------- Cruve with inserted knots ----------')
-        eval_test(crv, handler, solve)
-        
-        print('Curve length:')
-        handler.root_add_val(crv.getLength())
-
-        curve_windowed = crv.windowCurve(0.1, 0.90)
-        print('These points should be the same (window curve test)')
-        handler.root_add_val(crv(0.2))
-        handler.root_add_val(curve_windowed((0.2-0.1)/(0.90-0.1)))
-
-        # Split the curve in two:
-        curve1, curve2 = crv.splitCurve(0.5)
-        print('These three points should be the same (split curve test)')
-        handler.root_add_val(curve1(1.0))
-        handler.root_add_val(curve2(0.0))
-        handler.root_add_val(crv(0.5))
-
-        # Reverse test:
-        print('These two points should be the same (reverse test)')
-        handler.root_add_val(crv(0.4))
-        crv.reverse()
-        handler.root_add_val(crv(0.6))
 
     def regression_test(self, handler, solve=False):
         
@@ -109,7 +109,7 @@ class Test(unittest.TestCase):
         coef[1] = [1.1,1.4]
         coef[2] = [2.6,5.1]
         curve = pySpline.Curve(t=t,k=k,coef=coef)
-        self.run_curve_test(curve, handler, solve)
+        run_curve_test(curve, handler, solve)
         io_test(curve)
 
         print('-----------  2D k=3 test ----------')
@@ -121,7 +121,7 @@ class Test(unittest.TestCase):
         coef[2] = [2.5,5.9]
         coef[3] = [4,-2]
         curve = pySpline.Curve(t=t,k=k,coef=coef)
-        eval_test(curve, handler, solve)
+        run_curve_test(curve, handler, solve)
         io_test(curve)
 
         print('-----------  2D k=4 test ----------')
@@ -134,7 +134,7 @@ class Test(unittest.TestCase):
         coef[3] = [4.2,-2.24]
         coef[4] = [2.9,6.2]
         curve = pySpline.Curve(t=t,k=k,coef=coef)
-        eval_test(curve, handler, solve)
+        run_curve_test(curve, handler, solve)
         io_test(curve)
 
 
@@ -151,7 +151,7 @@ class Test(unittest.TestCase):
         for k in [2,3,4]:
             print('--------- Test helix data with k=%d-------'%(k))
             curve = pySpline.Curve(x=x,y=y,z=z,k=k,nCtl=16,niter=50)
-            eval_test(curve, handler, solve)
+            run_curve_test(curve, handler, solve)
             run_project_test(curve, handler, solve)
 
         print('+--------------------------------------+')
@@ -160,5 +160,5 @@ class Test(unittest.TestCase):
         for k in [2,3,4]:
             print('--------- Test helix data with k=%d-------'%(k))
             curve = pySpline.Curve(x=x,y=y,z=z,k=k)
-            eval_test(curve, handler, solve)
+            run_curve_test(curve, handler, solve)
             run_project_test(curve, handler, solve)
