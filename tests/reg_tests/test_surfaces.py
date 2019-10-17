@@ -25,29 +25,29 @@ def eval_test(surface, handler):
     #----------- Evaluation and derivative functions ---------------
     pts = [[0,0],[1,0],[0,1],[1,1],[.25,.25],[.75,.25]]
     for pt in pts:
-        print('Testing pt (%f %f)'%(pt[0],pt[1]))
-        print('Value:')
+        # print('Testing pt (%f %f)'%(pt[0],pt[1]))
+        # print('Value:')
         handler.root_add_val(surface(pt[0],pt[1]),1e-10,1e-10)
-        print('Deriv:')
+        # print('Deriv:')
         handler.root_add_val(surface.getDerivative(pt[0],pt[1]),1e-10,1e-10)
-        print('Second Derivative')
+        # print('Second Derivative')
         handler.root_add_val(surface.getSecondDerivative(pt[0],pt[1]),1e-8,1e-8)
 
-    print('Orig values at each corner')
+    # print('Orig values at each corner')
     if surface.origData:
         handler.root_add_val(surface.getOrigValueCorner(0))
         handler.root_add_val(surface.getOrigValueCorner(1))
         handler.root_add_val(surface.getOrigValueCorner(2))
         handler.root_add_val(surface.getOrigValueCorner(3))
         
-    print('Orig values on edges')
+    # print('Orig values on edges')
     if surface.origData:
         handler.root_add_val(surface.getOrigValuesEdge(0))
         handler.root_add_val(surface.getOrigValuesEdge(1))
         handler.root_add_val(surface.getOrigValuesEdge(2))
         handler.root_add_val(surface.getOrigValuesEdge(3))
 
-    print('getValueEdge:')
+    # print('getValueEdge:')
     handler.root_add_val(surface.getValueEdge(0, 0.25))
     handler.root_add_val(surface.getValueEdge(0, 0.75))
     handler.root_add_val(surface.getValueEdge(1, 0.25))
@@ -68,71 +68,71 @@ def run_surface_test(surface, handler):
     # Test the windowing (same surface)
     surf2 = surface.windowSurface([0,0],[1,1])
 
-    print('Evaluations on surf2 should be same as original:')
+    # print('Evaluations on surf2 should be same as original:')
     eval_test(surf2, handler)
 
     surf2 = surface.windowSurface([0.25,.25],[.75,.5])
 
-    print('These points should be the same:')
+    # print('These points should be the same:')
     handler.root_add_val(surface(0.25,.25))
     handler.root_add_val(surf2(0,0))
 
-    print('These points should be the same:')
+    # print('These points should be the same:')
     handler.root_add_val(surface(0.75,.5))
     handler.root_add_val(surf2(1,1))
 
-    print('Test get bounds')
+    # print('Test get bounds')
     handler.root_add_val(surface.getBounds())
 
 def run_project_test(surface, handler):
     # Run a bunch of point projections: Only try to match to 1e-8
     eps = 1e-8
 
-    print('------------- These points should be fully inside of domain')
+    # print('------------- These points should be fully inside of domain')
     pts= [[0,0,0],[2,3,-1],[3,2.5,-.1]]
     for pt in pts:
-        print('Projecting point (%f %f %f)'%(pt[0],pt[1],pt[2]))
+        # print('Projecting point (%f %f %f)'%(pt[0],pt[1],pt[2]))
         u,v,D = surface.projectPoint(pt,eps=1e-12)
-        print('u:')
+        # print('u:')
         handler.root_add_val(u, eps, eps)
-        print('v:')
+        # print('v:')
         handler.root_add_val(v, eps, eps)
-        print('D:')
+        # print('D:')
         handler.root_add_val(D, eps*10, eps*10)
 
-    print(' ----------- This should be (0,0) corner')
+    # print(' ----------- This should be (0,0) corner')
     u,v,D = surface.projectPoint([-1,-1,0],eps=1e-12)
-    print('u:')
+    # print('u:')
     handler.root_add_val(u, eps, eps)
-    print('v:')
+    # print('v:')
     handler.root_add_val(v, eps, eps)
 
-    print(' ---------- This should be (0,1) corner')
+    # print(' ---------- This should be (0,1) corner')
     u,v,D = surface.projectPoint([-1,5,0],eps=1e-12)
-    print('u:')
+    # print('u:')
     handler.root_add_val(u, eps, eps)
-    print('v:')
+    # print('v:')
     handler.root_add_val(v, eps, eps)
 
-    print(' ---------- This should be (1,0) corner')
+    # print(' ---------- This should be (1,0) corner')
     u,v,D = surface.projectPoint([6,-1,0],eps=1e-12)
-    print('u:')
+    # print('u:')
     handler.root_add_val(u, eps, eps)
-    print('v:')
+    # print('v:')
     handler.root_add_val(v, eps, eps)
 
-    print(' ---------- This should be (1,1) corner')
+    # print(' ---------- This should be (1,1) corner')
     u,v,D = surface.projectPoint([6,6,0],eps=1e-12)
-    print('u:')
+    # print('u:')
     handler.root_add_val(u, eps, eps)
-    print('v:')
+    # print('v:')
     handler.root_add_val(v, eps, eps)
 
-    print(' ---------- This should be  edge zero (*,0)')
+    # print(' ---------- This should be  edge zero (*,0)')
     u,v,D = surface.projectPoint([2.54,-1,0],eps=1e-12)
-    print('u:')
+    # print('u:')
     handler.root_add_val(u, eps, eps)
-    print('v:')
+    # print('v:')
     handler.root_add_val(v,eps, eps)
 
 
@@ -144,14 +144,14 @@ def run_project_test(surface, handler):
 
         curve = pySpline.Curve(k=kc,x=x,y=y,z=z)
         u,v,s,D = surface.projectCurve(curve)
-        print(' ---------- surface-curve projection with kc=%d'%(kc))
-        print('u:')
+        # print(' ---------- surface-curve projection with kc=%d'%(kc))
+        # print('u:')
         handler.root_add_val(u, eps, eps)
-        print('v:')
+        # print('v:')
         handler.root_add_val(v, eps, eps)
-        print('s:')
+        # print('s:')
         handler.root_add_val(s, eps, eps)
-        print('D:')
+        # print('D:')
         handler.root_add_val(D, eps*10, eps*10)
 
 
@@ -200,10 +200,10 @@ class Test(unittest.TestCase):
             for kv in [2, 3, 4]:
                 for nCtlu in [5, 10]:
                     for nCtlv in [5, 10]:
-                        print('+'+'-'*78+'+')
-                        print(' '*20 + 'Testing Surface with ku=%d, kv=%d, nCtlu=%d,\
-         nCtlv=%d'%(ku,kv,nCtlu,nCtlv))
-                        print('+'+'-'*78+'+')
+                        # print('+'+'-'*78+'+')
+                        # print(' '*20 + 'Testing Surface with ku=%d, kv=%d, nCtlu=%d,\
+         # nCtlv=%d'%(ku,kv,nCtlu,nCtlv))
+                        # print('+'+'-'*78+'+')
                         surface = pySpline.Surface(x=U, y=V, z=Z, ku=ku, kv=kv, 
                                                    nCtlu=nCtlu, nCtlv=nCtlv)
                         surface.recompute()
