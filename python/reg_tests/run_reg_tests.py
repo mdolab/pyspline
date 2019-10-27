@@ -70,4 +70,3 @@ elif res == -1: #reg.REG_ERROR
 
 # Exit with code from reg_file_comp:
 sys.exit(res)
-
