@@ -1,47 +1,36 @@
-sudo: true
-
+ 
 os:
   - linux
 
 language: generic
 
+services:
+  - docker
 env:
-- PY=2.7
-
-
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gfortran
-    - libblas-dev
-    - liblapack-dev
-    - libopenmpi-dev
-    - openmpi-bin
+  global:
+    - REPO_NAME=pyspline
+    - DOCKER_WORKING_DIR=/home/mdolabuser/repos/$REPO_NAME
+    - DOCKER_MOUNT_DIR=/home/mdolabuser/travis/$REPO_NAME
+  jobs:
+    - DOCKER_TAG=py2
 
 before_install:
-- if [ "$PY" = "2.7" ];  then wget "https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh" -O miniconda.sh; fi
-- if [ "$PY" = "3.6" ];  then wget "https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh" -O miniconda.sh; fi
-- chmod +x miniconda.sh;
-- ./miniconda.sh -b  -p /home/travis/miniconda;
-- export PATH=/home/travis/miniconda/bin:$PATH;
-
+  - docker pull mdolab/public:$DOCKER_TAG
+  # run Docker, key is we mount the current Travis directory into Docker to access content of repo
+  - docker run -t -d 
+        --name app
+        --mount "type=bind,src=$(pwd),target=$DOCKER_MOUNT_DIR"
+        mdolab/public:$DOCKER_TAG
+        /bin/bash
 
 install:
-- conda install --yes python=$PY numpy=1.16.1 scipy nose mock pip;
-
-# install pyspline
-- cd $HOME/build/mdolab/pyspline;
-- cp config/defaults/config.LINUX_GFORTRAN.mk config/config.mk;
-- make;
-
-# add parent directory of pyspline to python path
-- export PYTHONPATH=$PYTHONPATH:$HOME/build/mdolab/
+  # We thrown away the existing repo in Docker, and copy the new one in-place
+  - docker exec -it app /bin/bash -c "rm -rf $DOCKER_WORKING_DIR && cp -r $DOCKER_MOUNT_DIR $DOCKER_WORKING_DIR"
+  - docker exec -it app /bin/bash -c ". \$HOME/.bashrc_mdolab && cd $DOCKER_WORKING_DIR && cp config/defaults/config.LINUX_GFORTRAN.mk config/config.mk && make"
 
 script:
-- cd python/reg_tests
+  # We need to source the mdolab bashrc before running anything
+  - docker exec -it app /bin/bash -c ". \$HOME/.bashrc_mdolab && cd $DOCKER_WORKING_DIR/python/reg_tests && python run_reg_tests.py -nodiff"
 
-# run tests
-- python run_reg_tests.py -nodiff
-
+after_script:
+  - docker rm -f app
