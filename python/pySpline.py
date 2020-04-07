@@ -5,8 +5,6 @@ pySpline
 Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
 :class:`Volume`
 """
-from __future__ import print_function
-from __future__ import division
 
 # ===========================================================================
 # External Python modules

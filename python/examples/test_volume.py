@@ -1,4 +1,3 @@
-from __future__ import print_function
  # This simple script test some of the volume functionality in pySpline
 import numpy
 from pyspline import pySpline
