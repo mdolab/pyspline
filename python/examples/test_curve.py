@@ -1,4 +1,3 @@
-from __future__ import print_function
 # This is a test script to test the functionality of the 
 # pySpline curve class
 
