@@ -1264,11 +1264,6 @@ class Surface(object):
             self.kv = 4
 
             # Do some checking on the number of control points
-            assert ( 'X' in kwargs or 
-                   ('x' in kwargs and 'y' in kwargs and 'z' in kwargs), \
-                   'Error: X (or x, y, z \
-                   MUST be defined for task localInterp')
-
             if 'X' in kwargs:
                 self.X  = numpy.array(kwargs['X'])
                 self.nDim = self.X.shape[2]
@@ -1279,6 +1274,8 @@ class Surface(object):
                 self.X[:, :, 1] = kwargs['y']
                 self.X[:, :, 2] = kwargs['z']
                 self.nDim = 3
+            else:
+                raise Error('Error: X (or x, y, z)  MUST be defined for task localInterp!')
 
             self.origData = True
             self.Nu = self.X.shape[0]
