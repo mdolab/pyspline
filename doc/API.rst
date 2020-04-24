@@ -2,10 +2,9 @@
 
 API
 ---
-.. currentmodule:: pyspline.python.pySpline
+.. currentmodule:: python.pySpline
 
-.. automodule:: pyspline.python.pySpline
+.. automodule:: python.pySpline
     :members: Curve, Surface, Volume, openTecplot, writeTecplot1D,
               writeTecplot2D, writeTecplot3D, closeTecplot,
               checkInput, line, bilinearSurface, trilinearVolume
-
