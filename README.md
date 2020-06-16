@@ -2,7 +2,7 @@ pySpline
 ====================================================
 
 [![Build Status](https://travis-ci.com/mdolab/pyspline.svg?token=Kdy3JowvEtkKSPpqvdLj&branch=pySpline)](https://travis-ci.com/mdolab/pyspline)
-
+[![Documentation Status](https://readthedocs.com/projects/mdolab-pyspline/badge/?version=latest)](https://mdolab-pyspline.readthedocs-hosted.com/en/latest/?badge=latest)
 
 ``pySpline`` is a package containing code for wiking with b-spline
 ``curve``, ``surface``, and ``volume`` objects. The
@@ -12,7 +12,7 @@ module.
 Documentation
 -------------
 
-Please see the [documentation](http://mdolab.engin.umich.edu/docs/packages/pyspline/doc/index.html) for installation details and API documentation.
+Please see the [documentation](https://mdolab-pyspline.readthedocs-hosted.com/en/latest/) for installation details and API documentation.
 This link requires credentials currently only available to MDO Lab members.
 
 To locally build the documentation, enter the `doc` folder and enter `make html` in terminal.

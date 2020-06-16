@@ -48,7 +48,7 @@ all:
 
 	$(FF90) $(SO_LINKER_FLAGS) $(PYTHON_OBJECTS) $(LINKER_ALL_FLAGS) -o libspline.so
 	$(PYTHON) importTest.py
-	mv libspline.so ../../python
+	mv libspline.so ../../pyspline
 
 # Clean up temporary files
 	-rm *.o
