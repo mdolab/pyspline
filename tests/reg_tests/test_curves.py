@@ -7,6 +7,7 @@ import os
 # External Python modules
 # =============================================================================
 import numpy
+from numpy.testing import assert_allclose
 import unittest
 
 # =============================================================================
@@ -16,61 +17,65 @@ from pyspline import pySpline
 from baseclasses import BaseRegTest
 
 
-def eval_test(crv, handler, solve):
+def eval_test(crv, handler, test_name):
     '''Eval fixed points from the curve'''
     # ----------- Evaluation and derivative functions ---------------
     pts = [0.0, 0.5, 0.75, 1.0]
     for pt in pts:
         # print('Testing pt %f'%(pt))
         # print('Value:')
-        handler.root_add_val(crv(pt))
+        handler.root_add_val(crv(pt), '{} curve evaluated at {}'.format(test_name, pt))
         # print('Deriv:')
-        handler.root_add_val(crv.getDerivative(pt))
+        handler.root_add_val(crv.getDerivative(pt), '{} curve derivative evaluated at {}'.format(test_name, pt))
         # print('Second Derivative')
-        handler.root_add_val(crv.getSecondDerivative(pt),1e-10,1e-10)
+        handler.root_add_val(crv.getSecondDerivative(pt), '{} curve second derivative evaluated at {}'.format(test_name, pt), rel_tol=1e-10,abs_tol=1e-10)
 
-def run_curve_test(crv, handler, solve): 
+def run_curve_test(crv, handler, test_name): 
     ''' This function is used to test the functions that are apart of
     the curve class. They operate on the 'crv' that is passed. '''
 
     # Test the evaluations
-    eval_test(crv, handler, solve)
+    eval_test(crv, handler, '{} initial'.format(test_name))
 
     # Inset a knot at 0.25 with multiplicity of k-1 and retest
     crv.insertKnot(0.25,crv.k-1)
     # print('------- Cruve with inserted knots ----------')
-    eval_test(crv, handler, solve)
-    
-    # print('Curve length:')
-    handler.root_add_val(crv.getLength())
+    eval_test(crv, handler, '{} inserted knots'.format(test_name))
 
-    curve_windowed = crv.windowCurve(0.1, 0.90)
+    handler.root_add_val(crv.getLength(), '{} curve length'.format(test_name))
+
+    a = 0.1
+    b = 0.9
+    curve_windowed = crv.windowCurve(a, b)
     # print('These points should be the same (window curve test)')
-    handler.root_add_val(crv(0.2))
-    handler.root_add_val(curve_windowed((0.2-0.1)/(0.90-0.1)))
+    c = 0.2
+    assert_allclose(crv(c), curve_windowed((c - a)/(b - a)))
 
     # Split the curve in two:
     curve1, curve2 = crv.splitCurve(0.5)
-    # print('These three points should be the same (split curve test)')
-    handler.root_add_val(curve1(1.0))
-    handler.root_add_val(curve2(0.0))
-    handler.root_add_val(crv(0.5))
+    c1 = curve1(1.0)
+    c2 = curve2(0.0)
+    c3 = crv(0.5)
+    # These three points should be the same (split curve test)
+    assert_allclose(c1, c2)
+    assert_allclose(c1, c3)
 
     # Reverse test:
     # print('These two points should be the same (reverse test)')
-    handler.root_add_val(crv(0.4))
+    c1 = crv(0.4)
     crv.reverse()
-    handler.root_add_val(crv(0.6))
+    c2 = crv(0.6)
+    assert_allclose(c1, c2)
 
-def run_project_test(crv, handler, solve):
+def run_project_test(crv, handler, test_name):
     # Run point projection and curve projection tests'
     pts = [[0.4,1.5,1.5],[-.1,0.5,1.8], crv(0.75)]
     # Default tolerance is 1e-10. so only check to 1e-9
     s, D = crv.projectPoint(pts)
     for i in range(len(s)):
         # print('Project point %f %f %f'%(pts[i][0],pts[i][1],pts[i][2]))
-        handler.root_add_val(s[i],1e-9,1e-9)
-        handler.root_add_val(D[i],1e-9,1e-9)
+        handler.root_add_val(s[i], '{} projection test for point {} solution'.format(test_name, i), 1e-9,1e-9)
+        handler.root_add_val(D[i], '{} projection test for point {} distance'.format(test_name, i), 1e-9,1e-9)
 
 
 def io_test(crv):
@@ -88,6 +93,7 @@ class Test(unittest.TestCase):
     def train(self):
         with BaseRegTest(self.ref_file, train=True) as handler:
             self.regression_test(handler)
+            handler.writeRef()
 
     def test(self):
         with BaseRegTest(self.ref_file, train=False) as handler:
@@ -95,7 +101,7 @@ class Test(unittest.TestCase):
     
 
 
-    def regression_test(self, handler, solve=False):
+    def regression_test(self, handler):
         
         # print('+--------------------------------------+')
         # print('           Create Tests   ')
@@ -108,7 +114,7 @@ class Test(unittest.TestCase):
         coef[1] = [1.1,1.4]
         coef[2] = [2.6,5.1]
         curve = pySpline.Curve(t=t,k=k,coef=coef)
-        run_curve_test(curve, handler, solve)
+        run_curve_test(curve, handler, '2D k={}'.format(k))
         io_test(curve)
 
         # print('-----------  2D k=3 test ----------')
@@ -120,7 +126,7 @@ class Test(unittest.TestCase):
         coef[2] = [2.5,5.9]
         coef[3] = [4,-2]
         curve = pySpline.Curve(t=t,k=k,coef=coef)
-        run_curve_test(curve, handler, solve)
+        run_curve_test(curve, handler, '2D k={}'.format(k))
         io_test(curve)
 
         # print('-----------  2D k=4 test ----------')
@@ -133,7 +139,7 @@ class Test(unittest.TestCase):
         coef[3] = [4.2,-2.24]
         coef[4] = [2.9,6.2]
         curve = pySpline.Curve(t=t,k=k,coef=coef)
-        run_curve_test(curve, handler, solve)
+        run_curve_test(curve, handler, '2D k={}'.format(k))
         io_test(curve)
 
 
@@ -148,16 +154,18 @@ class Test(unittest.TestCase):
         # print('              LMS Tests   ')
         # print('+--------------------------------------+')
         for k in [2,3,4]:
+            test_name = 'LMS test k={}'.format(k)
             # print('--------- Test helix data with k=%d-------'%(k))
             curve = pySpline.Curve(x=x,y=y,z=z,k=k,nCtl=16,niter=50)
-            run_curve_test(curve, handler, solve)
-            run_project_test(curve, handler, solve)
+            run_curve_test(curve, handler, test_name)
+            run_project_test(curve, handler, test_name)
 
         # print('+--------------------------------------+')
         # print('           Interp Tests   ')
         # print('+--------------------------------------+')
         for k in [2,3,4]:
+            test_name = 'interpolation test k={}'.format(k)
             # print('--------- Test helix data with k=%d-------'%(k))
             curve = pySpline.Curve(x=x,y=y,z=z,k=k)
-            run_curve_test(curve, handler, solve)
-            run_project_test(curve, handler, solve)
+            run_curve_test(curve, handler, test_name)
+            run_project_test(curve, handler, test_name)
