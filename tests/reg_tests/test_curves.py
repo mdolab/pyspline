@@ -28,7 +28,7 @@ def eval_test(crv, handler, test_name):
         # print('Deriv:')
         handler.root_add_val(crv.getDerivative(pt), '{} curve derivative evaluated at {}'.format(test_name, pt))
         # print('Second Derivative')
-        handler.root_add_val(crv.getSecondDerivative(pt), '{} curve second derivative evaluated at {}'.format(test_name, pt), rel_tol=1e-10,abs_tol=1e-10)
+        handler.root_add_val(crv.getSecondDerivative(pt), '{} curve second derivative evaluated at {}'.format(test_name, pt), tol=1e-10)
 
 def run_curve_test(crv, handler, test_name): 
     ''' This function is used to test the functions that are apart of
@@ -74,8 +74,8 @@ def run_project_test(crv, handler, test_name):
     s, D = crv.projectPoint(pts)
     for i in range(len(s)):
         # print('Project point %f %f %f'%(pts[i][0],pts[i][1],pts[i][2]))
-        handler.root_add_val(s[i], '{} projection test for point {} solution'.format(test_name, i), 1e-9,1e-9)
-        handler.root_add_val(D[i], '{} projection test for point {} distance'.format(test_name, i), 1e-9,1e-9)
+        handler.root_add_val(s[i], '{} projection test for point {} solution'.format(test_name, i), tol=1e-9)
+        handler.root_add_val(D[i], '{} projection test for point {} distance'.format(test_name, i), tol=1e-9)
 
 
 def io_test(crv):

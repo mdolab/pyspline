@@ -26,9 +26,9 @@ def eval_test(surface, handler, test_name):
     pts = [[0,0],[1,0],[0,1],[1,1],[.25,.25],[.75,.25]]
     for pt in pts:
         # print('Testing pt (%f %f)'%(pt[0],pt[1]))
-        handler.root_add_val(surface(pt[0],pt[1]), '{} evaluate point at {}'.format(test_name, pt), 1e-10,1e-10)
-        handler.root_add_val(surface.getDerivative(pt[0], pt[1]), '{} evaluate point deriv at {}'.format(test_name, pt), 1e-10,1e-10)
-        handler.root_add_val(surface.getSecondDerivative(pt[0], pt[1]), '{} evaluate point second deriv at {}'.format(test_name, pt), 1e-8,1e-8)
+        handler.root_add_val(surface(pt[0],pt[1]), '{} evaluate point at {}'.format(test_name, pt), tol=1e-10)
+        handler.root_add_val(surface.getDerivative(pt[0], pt[1]), '{} evaluate point deriv at {}'.format(test_name, pt), tol=1e-10)
+        handler.root_add_val(surface.getSecondDerivative(pt[0], pt[1]), '{} evaluate point second deriv at {}'.format(test_name, pt), tol=1e-8)
 
     # Orig values at each corner
     if surface.origData:
@@ -76,34 +76,34 @@ def run_project_test(surface, handler, test_name):
     for pt in pts:
         # print('Projecting point (%f %f %f)'%(pt[0],pt[1],pt[2]))
         u,v,D = surface.projectPoint(pt,eps=1e-12)
-        handler.root_add_val(u, '{} point {} projection u'.format(test_name, pt), eps, eps)
-        handler.root_add_val(v, '{} point {} projection v'.format(test_name, pt), eps, eps)
-        handler.root_add_val(D, '{} point {} projection D'.format(test_name, pt), eps*10, eps*10)
+        handler.root_add_val(u, '{} point {} projection u'.format(test_name, pt), tol=eps)
+        handler.root_add_val(v, '{} point {} projection v'.format(test_name, pt), tol=eps)
+        handler.root_add_val(D, '{} point {} projection D'.format(test_name, pt), tol=eps*10)
 
     # ----------- This should be (0,0) corner
     u,v,D = surface.projectPoint([-1,-1,0],eps=1e-12)
-    handler.root_add_val(u, '{} projected u for (0,0) corner'.format(test_name), eps, eps)
-    handler.root_add_val(v, '{} projected v for (0,0) corner'.format(test_name), eps, eps)
+    handler.root_add_val(u, '{} projected u for (0,0) corner'.format(test_name), tol=eps)
+    handler.root_add_val(v, '{} projected v for (0,0) corner'.format(test_name), tol=eps)
 
     # ---------- This should be (0,1) corner
     u,v,D = surface.projectPoint([-1,5,0],eps=1e-12)
-    handler.root_add_val(u, '{} projected u for (0,1) corner'.format(test_name), eps, eps)
-    handler.root_add_val(v, '{} projected v for (0,1) corner'.format(test_name), eps, eps)
+    handler.root_add_val(u, '{} projected u for (0,1) corner'.format(test_name), tol=eps)
+    handler.root_add_val(v, '{} projected v for (0,1) corner'.format(test_name), tol=eps)
 
     # ---------- This should be (1,0) corner
     u,v,D = surface.projectPoint([6,-1,0],eps=1e-12)
-    handler.root_add_val(u, '{} projected u for (1,0) corner'.format(test_name), eps, eps)
-    handler.root_add_val(v, '{} projected v for (1,0) corner'.format(test_name), eps, eps)
+    handler.root_add_val(u, '{} projected u for (1,0) corner'.format(test_name), tol=eps)
+    handler.root_add_val(v, '{} projected v for (1,0) corner'.format(test_name), tol=eps)
 
     # ---------- This should be (1,1) corner
     u,v,D = surface.projectPoint([6,6,0],eps=1e-12)
-    handler.root_add_val(u, '{} projected u for (1,1) corner'.format(test_name), eps, eps)
-    handler.root_add_val(v, '{} projected v for (1,1) corner'.format(test_name), eps, eps)
+    handler.root_add_val(u, '{} projected u for (1,1) corner'.format(test_name), tol=eps)
+    handler.root_add_val(v, '{} projected v for (1,1) corner'.format(test_name), tol=eps)
 
     # ---------- This should be edge zero (*,0)
     u,v,D = surface.projectPoint([2.54,-1,0],eps=1e-12)
-    handler.root_add_val(u, '{} projected u for (*,0) edge'.format(test_name), eps, eps)
-    handler.root_add_val(v, '{} projected v for (*,0) edge'.format(test_name), eps, eps)
+    handler.root_add_val(u, '{} projected u for (*,0) edge'.format(test_name), tol=eps)
+    handler.root_add_val(v, '{} projected v for (*,0) edge'.format(test_name), tol=eps)
 
 
     # Curve projection
@@ -115,10 +115,10 @@ def run_project_test(surface, handler, test_name):
         curve = pySpline.Curve(k=kc,x=x,y=y,z=z)
         u,v,s,D = surface.projectCurve(curve)
         # ---------- surface-curve projection with kc = kc
-        handler.root_add_val(u, '{} projected curve u with kc={}'.format(test_name, kc), eps, eps)
-        handler.root_add_val(v, '{} projected curve v with kc={}'.format(test_name, kc), eps, eps)
-        handler.root_add_val(s, '{} projected curve s with kc={}'.format(test_name, kc), eps, eps)
-        handler.root_add_val(D, '{} projected curve D with kc={}'.format(test_name, kc), eps*10, eps*10)
+        handler.root_add_val(u, '{} projected curve u with kc={}'.format(test_name, kc), tol=eps)
+        handler.root_add_val(v, '{} projected curve v with kc={}'.format(test_name, kc), tol=eps)
+        handler.root_add_val(s, '{} projected curve s with kc={}'.format(test_name, kc), tol=eps)
+        handler.root_add_val(D, '{} projected curve D with kc={}'.format(test_name, kc), tol=eps*10)
 
 
 def io_test(surface, handler):

@@ -25,7 +25,7 @@ def run_volume_test(volume, handler, test_name):
     pts = [[0,0,0],[1,1,1],[.25,.5,.95]]
     for pt in pts:
         # Value
-        handler.root_add_val(volume(pt[0], pt[1], pt[2]),'{} evaluate point {}'.format(test_name, pt), 1e-10,1e-10)
+        handler.root_add_val(volume(pt[0], pt[1], pt[2]),'{} evaluate point {}'.format(test_name, pt), tol=1e-10)
 
     # Get value corner
     for i in range(8):
@@ -62,10 +62,10 @@ def run_project_test(volume, handler, test_name):
     pts= [[0,0,0],[.025,.09,.3],[.2,.3,.1]]
     for pt in pts:
         u,v,w,D = volume.projectPoint(pt)
-        handler.root_add_val(u, '{} project point u for pt={}'.format(test_name, pt), eps, eps)
-        handler.root_add_val(v, '{} project point v for pt={}'.format(test_name, pt), eps, eps)
-        handler.root_add_val(w, '{} project point w for pt={}'.format(test_name, pt), eps, eps)
-        handler.root_add_val(D, '{} project point D for pt={}'.format(test_name, pt), eps, eps)
+        handler.root_add_val(u, '{} project point u for pt={}'.format(test_name, pt), tol=eps)
+        handler.root_add_val(v, '{} project point v for pt={}'.format(test_name, pt), tol=eps)
+        handler.root_add_val(w, '{} project point w for pt={}'.format(test_name, pt), tol=eps)
+        handler.root_add_val(D, '{} project point D for pt={}'.format(test_name, pt), tol=eps)
 
 def io_test(volume, handler):
     '''Test the writing functions'''
