@@ -80,9 +80,9 @@ def run_project_test(crv, handler, test_name):
 
 def io_test(crv):
     '''Test the writing functions'''
-    crv.writeTecplot('tmp.dat')
-    crv.writeTecplot('tmp.dat',coef=False, orig=False)
-    os.remove('tmp.dat')
+    crv.writeTecplot('tmp_curves.dat')
+    crv.writeTecplot('tmp_curves.dat',coef=False, orig=False)
+    os.remove('tmp_curves.dat')
 
 
 class Test(unittest.TestCase):

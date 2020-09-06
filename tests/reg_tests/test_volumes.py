@@ -69,14 +69,8 @@ def run_project_test(volume, handler, test_name):
 
 def io_test(volume, handler):
     '''Test the writing functions'''
-    volume.writeTecplot('tmp.dat', vols=True, coef=True, orig=True)
-
-    f = open('tmp.dat','w')
-    # These three calls, are private functions normally only called
-    # from pyGeo. We are not checking their output, rather just making
-    # sure they run. 
-
-    os.remove('tmp.dat')
+    volume.writeTecplot('tmp_volume.dat', vols=True, coef=True, orig=True)
+    os.remove('tmp_volume.dat')
 
     return
 
