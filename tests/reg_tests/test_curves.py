@@ -15,7 +15,7 @@ import unittest
 # =============================================================================
 from pyspline import pySpline
 from baseclasses import BaseRegTest
-
+baseDir = os.path.dirname(os.path.abspath(__file__))
 
 def eval_test(crv, handler, test_name):
     '''Eval fixed points from the curve'''
@@ -88,7 +88,7 @@ def io_test(crv):
 class Test(unittest.TestCase):
     
     def setUp(self):
-        self.ref_file = 'ref/test_curves.ref'
+        self.ref_file = os.path.join(baseDir, 'ref/test_curves.ref')
 
     def train(self):
         with BaseRegTest(self.ref_file, train=True) as handler:

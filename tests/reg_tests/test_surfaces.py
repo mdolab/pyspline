@@ -15,7 +15,7 @@ import unittest
 # =============================================================================
 from pyspline import pySpline
 from baseclasses import BaseRegTest
-
+baseDir = os.path.dirname(os.path.abspath(__file__))
 
 def eval_test(surface, handler, test_name):
     '''Eval fixed points from the surface'''
@@ -140,7 +140,7 @@ def io_test(surface, handler):
 class Test(unittest.TestCase):
     
     def setUp(self):
-        self.ref_file = 'ref/test_surfaces.ref'
+        self.ref_file = os.path.join(baseDir, 'ref/test_surfaces.ref')
 
     def train(self):
         with BaseRegTest(self.ref_file, train=True) as handler:

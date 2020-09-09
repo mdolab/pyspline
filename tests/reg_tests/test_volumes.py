@@ -15,7 +15,7 @@ import unittest
 # =============================================================================
 from pyspline import pySpline
 from baseclasses import BaseRegTest
-
+baseDir = os.path.dirname(os.path.abspath(__file__))
 
 def run_volume_test(volume, handler, test_name):
     ''' This function is used to test the functions that are apart of
@@ -78,7 +78,7 @@ def io_test(volume, handler):
 class Test(unittest.TestCase):
     
     def setUp(self):
-        self.ref_file = 'ref/test_volumes.ref'
+        self.ref_file = os.path.join(baseDir, 'ref/test_volumes.ref')
 
     def train(self):
         with BaseRegTest(self.ref_file, train=True) as handler:
