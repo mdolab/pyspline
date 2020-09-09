@@ -7,7 +7,6 @@ import os
 # External Python modules
 # =============================================================================
 import numpy
-from numpy.testing import assert_allclose
 import unittest
 
 # =============================================================================

@@ -47,9 +47,8 @@ def run_curve_test(crv, handler, test_name):
     a = 0.1
     b = 0.9
     curve_windowed = crv.windowCurve(a, b)
-    # print('These points should be the same (window curve test)')
     c = 0.2
-    assert_allclose(crv(c), curve_windowed((c - a)/(b - a)))
+    assert_allclose(crv(c), curve_windowed((c - a)/(b - a)), err_msg="points do not match after windowing!")
 
     # Split the curve in two:
     curve1, curve2 = crv.splitCurve(0.5)
@@ -57,15 +56,14 @@ def run_curve_test(crv, handler, test_name):
     c2 = curve2(0.0)
     c3 = crv(0.5)
     # These three points should be the same (split curve test)
-    assert_allclose(c1, c2)
-    assert_allclose(c1, c3)
+    assert_allclose(c1, c2, err_msg="points do not match after splitting curve")
+    assert_allclose(c1, c3, err_msg="points do not match after splitting curve")
 
     # Reverse test:
-    # print('These two points should be the same (reverse test)')
     c1 = crv(0.4)
     crv.reverse()
     c2 = crv(0.6)
-    assert_allclose(c1, c2)
+    assert_allclose(c1, c2, err_msg="points do not match after reversing curve")
 
 def run_project_test(crv, handler, test_name):
     # Run point projection and curve projection tests'
