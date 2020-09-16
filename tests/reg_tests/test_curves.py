@@ -24,11 +24,11 @@ def eval_test(crv, handler, test_name):
     for pt in pts:
         # print('Testing pt %f'%(pt))
         # print('Value:')
-        handler.root_add_val(crv(pt), '{} curve evaluated at {}'.format(test_name, pt))
+        handler.root_add_val('{} curve evaluated at {}'.format(test_name, pt), crv(pt))
         # print('Deriv:')
-        handler.root_add_val(crv.getDerivative(pt), '{} curve derivative evaluated at {}'.format(test_name, pt))
+        handler.root_add_val('{} curve derivative evaluated at {}'.format(test_name, pt), crv.getDerivative(pt))
         # print('Second Derivative')
-        handler.root_add_val(crv.getSecondDerivative(pt), '{} curve second derivative evaluated at {}'.format(test_name, pt), tol=1e-10)
+        handler.root_add_val('{} curve second derivative evaluated at {}'.format(test_name, pt), crv.getSecondDerivative(pt), tol=1e-10)
 
 def run_curve_test(crv, handler, test_name): 
     ''' This function is used to test the functions that are apart of
@@ -42,7 +42,7 @@ def run_curve_test(crv, handler, test_name):
     # print('------- Cruve with inserted knots ----------')
     eval_test(crv, handler, '{} inserted knots'.format(test_name))
 
-    handler.root_add_val(crv.getLength(), '{} curve length'.format(test_name))
+    handler.root_add_val('{} curve length'.format(test_name), crv.getLength())
 
     a = 0.1
     b = 0.9
@@ -72,8 +72,8 @@ def run_project_test(crv, handler, test_name):
     s, D = crv.projectPoint(pts)
     for i in range(len(s)):
         # print('Project point %f %f %f'%(pts[i][0],pts[i][1],pts[i][2]))
-        handler.root_add_val(s[i], '{} projection test for point {} solution'.format(test_name, i), tol=1e-9)
-        handler.root_add_val(D[i], '{} projection test for point {} distance'.format(test_name, i), tol=1e-9)
+        handler.root_add_val('{} projection test for point {} solution'.format(test_name, i), s[i], tol=1e-9)
+        handler.root_add_val('{} projection test for point {} distance'.format(test_name, i), D[i], tol=1e-9)
 
 
 def io_test(crv):

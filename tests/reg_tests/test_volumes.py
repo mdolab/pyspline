@@ -24,33 +24,33 @@ def run_volume_test(volume, handler, test_name):
     pts = [[0,0,0],[1,1,1],[.25,.5,.95]]
     for pt in pts:
         # Value
-        handler.root_add_val(volume(pt[0], pt[1], pt[2]),'{} evaluate point {}'.format(test_name, pt), tol=1e-10)
+        handler.root_add_val('{} evaluate point {}'.format(test_name, pt), volume(pt[0], pt[1], pt[2]), tol=1e-10)
 
     # Get value corner
     for i in range(8):
-        handler.root_add_val(volume.getOrigValueCorner(i), '{} getOrigValueCorner({})'.format(test_name, i))
+        handler.root_add_val('{} getOrigValueCorner({})'.format(test_name, i), volume.getOrigValueCorner(i))
 
     # Get Value edge
     for i in range(12):
-        handler.root_add_val(volume.getValueEdge(i, 0.25), '{} getValueEdge({}, 0.25)'.format(test_name, i))
-        handler.root_add_val(volume.getValueEdge(i, 0.75), '{} getValueEdge({}, 0.75)'.format(test_name, i))
+        handler.root_add_val('{} getValueEdge({}, 0.25)'.format(test_name, i), volume.getValueEdge(i, 0.25))
+        handler.root_add_val('{} getValueEdge({}, 0.75)'.format(test_name, i), volume.getValueEdge(i, 0.75))
 
     if volume.origData:
         for i in range(8):
-            handler.root_add_val(volume.getOrigValueCorner(i), '{} getOrigValueCorner({})'.format(test_name, i))
+            handler.root_add_val('{} getOrigValueCorner({})'.format(test_name, i), volume.getOrigValueCorner(i))
 
         for i in range(6):
-            handler.root_add_val(volume.getOrigValuesFace(i), '{} getOrigValuesFace({})'.format(test_name, i))
+            handler.root_add_val('{} getOrigValuesFace({})'.format(test_name, i), volume.getOrigValuesFace(i))
 
         for i in range(12):
-            handler.root_add_val(volume.getMidPointEdge(i), '{} getMidPointEdge({})'.format(test_name, i))
+            handler.root_add_val('{} getMidPointEdge({})'.format(test_name, i), volume.getMidPointEdge(i))
 
         for i in range(6):
-            handler.root_add_val(volume.getMidPointFace(i), '{} getMidPointFace({})'.format(test_name, i))
+            handler.root_add_val('{} getMidPointFace({})'.format(test_name, i), volume.getMidPointFace(i))
 
 
     # Test get bounds
-    handler.root_add_val(volume.getBounds(), '{} bounds'.format(test_name))
+    handler.root_add_val('{} bounds'.format(test_name), volume.getBounds())
 
 def run_project_test(volume, handler, test_name):
     # Run a bunch of point projections: Tolerance for projections is
@@ -61,10 +61,10 @@ def run_project_test(volume, handler, test_name):
     pts= [[0,0,0],[.025,.09,.3],[.2,.3,.1]]
     for pt in pts:
         u,v,w,D = volume.projectPoint(pt)
-        handler.root_add_val(u, '{} project point u for pt={}'.format(test_name, pt), tol=eps)
-        handler.root_add_val(v, '{} project point v for pt={}'.format(test_name, pt), tol=eps)
-        handler.root_add_val(w, '{} project point w for pt={}'.format(test_name, pt), tol=eps)
-        handler.root_add_val(D, '{} project point D for pt={}'.format(test_name, pt), tol=eps)
+        handler.root_add_val('{} project point u for pt={}'.format(test_name, pt), u, tol=eps)
+        handler.root_add_val('{} project point v for pt={}'.format(test_name, pt), v, tol=eps)
+        handler.root_add_val('{} project point w for pt={}'.format(test_name, pt), w, tol=eps)
+        handler.root_add_val('{} project point D for pt={}'.format(test_name, pt), D, tol=eps)
 
 def io_test(volume, handler):
     '''Test the writing functions'''
