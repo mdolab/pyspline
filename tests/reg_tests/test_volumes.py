@@ -14,52 +14,45 @@ import unittest
 # =============================================================================
 from pyspline import pySpline
 from baseclasses import BaseRegTest
+baseDir = os.path.dirname(os.path.abspath(__file__))
 
-
-def run_volume_test(volume, handler):
+def run_volume_test(volume, handler, test_name):
     ''' This function is used to test the functions that are apart of
     the curve class. They operate on the 'curve' that is passed. '''
 
     # ----------- Evaluation and derivative functions ---------------
     pts = [[0,0,0],[1,1,1],[.25,.5,.95]]
     for pt in pts:
-        # print('Testing pt (%f %f)'%(pt[0],pt[1]))
-        # print('Value:')
-        handler.root_add_val(volume(pt[0], pt[1], pt[2]),1e-10,1e-10)
+        # Value
+        handler.root_add_val('{} evaluate point {}'.format(test_name, pt), volume(pt[0], pt[1], pt[2]), tol=1e-10)
 
-    # print('Get value corner')
+    # Get value corner
     for i in range(8):
-        # print('Pt %d'%(i))
-        handler.root_add_val(volume.getOrigValueCorner(i))
+        handler.root_add_val('{} getOrigValueCorner({})'.format(test_name, i), volume.getOrigValueCorner(i))
 
-    # print('Get Value edge:')
+    # Get Value edge
     for i in range(12):
-        # print('Edge %d'%(i))
-        handler.root_add_val(volume.getValueEdge(i, 0.25))
-        handler.root_add_val(volume.getValueEdge(i, 0.75))
+        handler.root_add_val('{} getValueEdge({}, 0.25)'.format(test_name, i), volume.getValueEdge(i, 0.25))
+        handler.root_add_val('{} getValueEdge({}, 0.75)'.format(test_name, i), volume.getValueEdge(i, 0.75))
 
     if volume.origData:
-        # print('Orig values at each corner')
         for i in range(8):
-            handler.root_add_val(volume.getOrigValueCorner(i))
+            handler.root_add_val('{} getOrigValueCorner({})'.format(test_name, i), volume.getOrigValueCorner(i))
 
-        # print('GetOrigValuesFace')
         for i in range(6):
-            handler.root_add_val(volume.getOrigValuesFace(i))
+            handler.root_add_val('{} getOrigValuesFace({})'.format(test_name, i), volume.getOrigValuesFace(i))
 
-        # print('getMidPointEdge')
         for i in range(12):
-            handler.root_add_val(volume.getMidPointEdge(i))
+            handler.root_add_val('{} getMidPointEdge({})'.format(test_name, i), volume.getMidPointEdge(i))
 
-        # print('getMidPointFace')
         for i in range(6):
-            handler.root_add_val(volume.getMidPointFace(i))
+            handler.root_add_val('{} getMidPointFace({})'.format(test_name, i), volume.getMidPointFace(i))
 
 
-    # print('Test get bounds')
-    handler.root_add_val(volume.getBounds())
+    # Test get bounds
+    handler.root_add_val('{} bounds'.format(test_name), volume.getBounds())
 
-def run_project_test(volume, handler):
+def run_project_test(volume, handler, test_name):
     # Run a bunch of point projections: Tolerance for projections is
     # 1e-10, so only enforce that things match to 1e-8 or 100*eps
     eps = 1e-8
@@ -67,27 +60,16 @@ def run_project_test(volume, handler):
     # print('------------- These points should be fully inside of domain')
     pts= [[0,0,0],[.025,.09,.3],[.2,.3,.1]]
     for pt in pts:
-        # print('Projecting point (%f %f %f)'%(pt[0],pt[1],pt[2]))
         u,v,w,D = volume.projectPoint(pt)
-        # print('u:')
-        handler.root_add_val(u, eps, eps)
-        # print('v:')
-        handler.root_add_val(v, eps, eps)
-        # print('w:')
-        handler.root_add_val(w, eps, eps)
-        # print('D:')
-        handler.root_add_val(D, eps, eps)
+        handler.root_add_val('{} project point u for pt={}'.format(test_name, pt), u, tol=eps)
+        handler.root_add_val('{} project point v for pt={}'.format(test_name, pt), v, tol=eps)
+        handler.root_add_val('{} project point w for pt={}'.format(test_name, pt), w, tol=eps)
+        handler.root_add_val('{} project point D for pt={}'.format(test_name, pt), D, tol=eps)
 
 def io_test(volume, handler):
     '''Test the writing functions'''
-    volume.writeTecplot('tmp.dat', vols=True, coef=True, orig=True)
-
-    f = open('tmp.dat','w')
-    # These three calls, are private functions normally only called
-    # from pyGeo. We are not checking their output, rather just making
-    # sure they run. 
-
-    os.remove('tmp.dat')
+    volume.writeTecplot('tmp_volume.dat', vols=True, coef=True, orig=True)
+    os.remove('tmp_volume.dat')
 
     return
 
@@ -95,11 +77,12 @@ def io_test(volume, handler):
 class Test(unittest.TestCase):
     
     def setUp(self):
-        self.ref_file = 'ref/test_volumes.ref'
+        self.ref_file = os.path.join(baseDir, 'ref/test_volumes.ref')
 
     def train(self):
         with BaseRegTest(self.ref_file, train=True) as handler:
             self.regression_test(handler)
+            handler.writeRef()
 
     def test(self):
         with BaseRegTest(self.ref_file, train=False) as handler:
@@ -812,21 +795,18 @@ class Test(unittest.TestCase):
         X[:,:,:,1] = data[1*nval:2*nval].reshape((9,7,11),order='f')
         X[:,:,:,2] = data[2*nval:3*nval].reshape((9,7,11),order='f')
 
+        # Testing Volume with ku, kv, kw, nCtlu, nCtlv, nCtlw
         for ku in [2,4]:
             for kv in [3,4]:
                 for kw in [2,4]:
                     for nCtlu in [4,6]:
                         for nCtlv in [8]:
                             for nCtlw in [5,7]:
-                                # print('+'+'-'*78+'+')
-                                # print(' '*10 + 'Testing Volume with ku=%d, kv=%d, \
-        # kw=%d, nCtlu=%d, nCtlv=%d, nCtlw=%d'%(ku, kv, kw, nCtlu, nCtlv, nCtlw))
-                                # print('+'+'-'*78+'+')
-
+                                test_name = 'volume with ku={}, kv={}, kw={}, nCtlu={}, nCtlv={}, nCtlw={}'.format(ku,kv,kw,nCtlu,nCtlv,nCtlw)
                                 volume = pySpline.Volume(
                                     X=X, ku=ku, kv=kv, kw=kw,
                                     nCtlu=nCtlu, nCtlv=nCtlv, nCtlw=nCtlw)
                                 volume.recompute()
-                                run_volume_test(volume, handler)
-                                run_project_test(volume, handler)
+                                run_volume_test(volume, handler, test_name)
+                                run_project_test(volume, handler, test_name)
                                 io_test(volume, handler)
