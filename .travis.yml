@@ -1,9 +1,8 @@
 import:
   - mdolab/.github:travis-env.yml
   - mdolab/.github:travis-before-install.yml
+  - mdolab/.github:travis-install-make.yml
   - mdolab/.github:travis-install-config.yml
-  - source: mdolab/.github:travis-install-make.yml
-    mode: deep_merge_prepend
 
 env:
   global:
