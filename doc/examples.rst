@@ -9,6 +9,6 @@ here for reference.
 .. toctree::
    :maxdepth: 1
 
-   test_curve
-   test_surface
-   test_volume
+   example_curve
+   example_surface
+   example_volume
