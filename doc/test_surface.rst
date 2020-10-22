@@ -1,4 +1,4 @@
 Surface example
 ---------------
 
-   .. literalinclude:: ../examples/test_surf.py
+   .. literalinclude:: ../examples/example_surf.py

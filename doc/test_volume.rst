@@ -1,4 +1,4 @@
 Volume example
 --------------
 
-   .. literalinclude:: ../examples/test_volume.py
+   .. literalinclude:: ../examples/example_volume.py

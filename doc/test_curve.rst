@@ -1,4 +1,4 @@
 Curve example
 -------------
 
-   .. literalinclude:: ../examples/test_curve.py
+   .. literalinclude:: ../examples/example_curve.py
