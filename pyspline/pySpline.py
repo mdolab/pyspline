@@ -456,19 +456,19 @@ nCtl=<number of control points> must be specified for a LMS fit"
                 self.deriv = None
                 self.derivPtr = numpy.array([])
 
-            if "derivWeights" in kwargs and self.deriv != None:
+            if "derivWeights" in kwargs and self.deriv is not None:
                 self.derivWeights = checkInput(kwargs["derivWeights"], "derivWeights", float, 1, (len(self.derivPtr),))
             else:
-                if self.deriv != None:
+                if self.deriv is not None:
                     self.derivWeights = numpy.ones(len(self.deriv))
                 else:
                     self.derivWeights = None
 
             # We are doing an interpolation...set all weights to 1
-            if not "nCtl" in kwargs:
+            if "nCtl" not in kwargs:
                 self.interp = True
                 self.weights[:] = 1
-                if self.derivWeights != None:
+                if self.derivWeights is not None:
                     self.derivWeights[:] = 1
             else:
                 self.interp = False
@@ -507,7 +507,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
         nc = len(T)
 
         # And the derivative info
-        if self.deriv != None:
+        if self.deriv is not None:
             sduSelect = numpy.where(self.derivWeights > 0.0)
             sdcSelect = numpy.where(self.derivWeights <= 0.0)
             S = numpy.vstack((S, self.deriv[sduSelect]))
@@ -566,7 +566,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
         for i in range(nIter):
             su = self.s[suSelect]
             sc = self.s[scSelect]
-            if self.deriv != None:
+            if self.deriv is not None:
                 sdu = self.s[self.derivPtr][sduSelect]
                 sdc = self.s[self.derivPtr][sdcSelect]
 
@@ -1102,8 +1102,8 @@ nCtl=<number of control points> must be specified for a LMS fit"
         return Pcount, Dcount
 
     def writeIGES_parameters(self, handle, Pcount, counter):
-        """Write the IGES parameter information for this curve. 
-        
+        """Write the IGES parameter information for this curve.
+
         DO NOT MODIFY ANYTHING HERE UNLESS YOU KNOW **EXACTLY** WHAT
         YOU ARE DOING!
         """
@@ -1641,7 +1641,7 @@ MUST be defined for task lms or interpolate"
         value : float
             Spline evaluated at corner
             """
-        if not corner in [0, 1, 2, 3]:
+        if corner not in [0, 1, 2, 3]:
             raise Error("Corner must be in range 0..3 inclusive")
 
         if corner == 0:
@@ -1667,7 +1667,7 @@ MUST be defined for task lms or interpolate"
         value : float
             Original value at corner
             """
-        if not corner in range(0, 4):
+        if corner not in range(0, 4):
             raise Error("Corner must be in range 0..3 inclusive")
         if not self.origData:
             raise Error("No original data for this surface")
@@ -1700,7 +1700,7 @@ MUST be defined for task lms or interpolate"
         endValue : array size nDim
             Original value at end of edge.
             """
-        if not edge in range(0, 4):
+        if edge not in range(0, 4):
             raise Error("Edge must be in range 0..3 inclusive")
         if not self.origData:
             raise Error("No original data for this surface")
@@ -2680,7 +2680,7 @@ MUST be defined for task lms or interpolate"
             Volume spline evaluation at corner.
             """
 
-        if not corner in range(0, 8):
+        if corner not in range(0, 8):
             raise Error("Corner must be in range 0..7 inclusive8")
 
         if corner == 0:
@@ -2716,7 +2716,7 @@ MUST be defined for task lms or interpolate"
         value : float
             Original data on corner.
             """
-        if not corner in range(0, 8):
+        if corner not in range(0, 8):
             raise Error("Corner must be in range 0..7 inclusive")
 
         if corner == 0:
@@ -2753,7 +2753,7 @@ MUST be defined for task lms or interpolate"
             The first 4 entries are the corner, and the last 4 are the
             midpoints.
             """
-        if not face in range(0, 6):
+        if face not in range(0, 6):
             raise Error("Face must be in range 0..5 inclusive")
 
         if numpy.mod(self.Nu, 2) == 1:
@@ -2908,7 +2908,7 @@ MUST be defined for task lms or interpolate"
         midpoint : array of length nDim
             Mid point of face
             """
-        if not face in range(0, 6):
+        if face not in range(0, 6):
             raise Error("Face must be in range 0..5 inclusive")
         if not self.origData:
             raise Error("No original data for this surface")
