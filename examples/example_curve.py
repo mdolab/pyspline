@@ -1,7 +1,6 @@
 # This is a test script to test the functionality of the
 # pySpline curve class
 
-import sys, time
 import numpy
 from pyspline import pySpline
 

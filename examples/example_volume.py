@@ -1,6 +1,7 @@
 # This simple script test some of the volume functionality in pySpline
 import numpy
 from pyspline import pySpline
+import time
 
 X = numpy.zeros((2, 2, 2, 3))
 X[0, 0, 0, :] = [0, 0, 0]
@@ -24,7 +25,6 @@ for i in range(M):
     Y[i, 1] = numpy.random.random() * 0.5 + 0.25
     Y[i, 2] = numpy.random.random() * 0.5 + 0.25
 
-import time
 
 timeA = time.time()
 u, v, w, D = vol.projectPoint(Y)
