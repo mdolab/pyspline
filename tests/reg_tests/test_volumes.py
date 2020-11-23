@@ -19,8 +19,8 @@ baseDir = os.path.dirname(os.path.abspath(__file__))
 
 
 def run_volume_test(volume, handler, test_name):
-    """ This function is used to test the functions that are apart of
-    the curve class. They operate on the 'curve' that is passed. """
+    """This function is used to test the functions that are apart of
+    the curve class. They operate on the 'curve' that is passed."""
 
     # ----------- Evaluation and derivative functions ---------------
     pts = [[0, 0, 0], [1, 1, 1], [0.25, 0.5, 0.95]]

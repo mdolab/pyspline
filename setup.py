@@ -1,7 +1,10 @@
 from setuptools import setup
 import re
 
-__version__ = re.findall(r"""__version__ = ["']+([0-9\.]*)["']+""", open("pyspline/__init__.py").read(),)[0]
+__version__ = re.findall(
+    r"""__version__ = ["']+([0-9\.]*)["']+""",
+    open("pyspline/__init__.py").read(),
+)[0]
 
 setup(
     name="pyspline",
@@ -37,8 +40,13 @@ setup(
     author_email="",
     url="https://github.com/mdolab/pyspline",
     license="Apache License Version 2.0",
-    packages=["pyspline",],
+    packages=[
+        "pyspline",
+    ],
     package_data={"pyspline": ["*.so"]},
-    install_requires=["numpy>=1.16", "scipy>=1.2",],
+    install_requires=[
+        "numpy>=1.16",
+        "scipy>=1.2",
+    ],
     classifiers=["Operating System :: Linux", "Programming Language :: Python, Fortran"],
 )

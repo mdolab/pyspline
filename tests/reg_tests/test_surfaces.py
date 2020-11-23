@@ -55,8 +55,8 @@ def eval_test(surface, handler, test_name):
 
 
 def run_surface_test(surface, handler, test_name):
-    """ This function is used to test the functions that are apart of
-    the curve class. They operate on the 'curve' that is passed. """
+    """This function is used to test the functions that are apart of
+    the curve class. They operate on the 'curve' that is passed."""
 
     # Test the evaluations
     eval_test(surface, handler, test_name)

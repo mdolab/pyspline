@@ -36,8 +36,8 @@ def eval_test(crv, handler, test_name):
 
 
 def run_curve_test(crv, handler, test_name):
-    """ This function is used to test the functions that are apart of
-    the curve class. They operate on the 'crv' that is passed. """
+    """This function is used to test the functions that are apart of
+    the curve class. They operate on the 'crv' that is passed."""
 
     # Test the evaluations
     eval_test(crv, handler, "{} initial".format(test_name))

@@ -168,7 +168,7 @@ def _assembleMatrix(data, indices, indptr, shape):
     -------
     M : scipy csr sparse matrix
         The assembled matrix
-        """
+    """
     M = sparse.csr_matrix((data, indices, indptr), shape)
 
     return M
@@ -201,7 +201,7 @@ def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
     output : various
         The input transformed to the correct type and guaranteed to
         the desired size and shape.
-        """
+    """
 
     # Check the data rank:
     rank = numpy.ndim(inputVal)
@@ -486,7 +486,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
             The number of parameter correction iterations to run
         computeKnots : bool
             Flag whether or not the knots should be recomputed
-            """
+        """
 
         # Return if we don't have original data to fit
         if not self.origData or self.localInterp:
@@ -673,7 +673,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
             The number of times the knot was **actually** inserted
         breakPt : int
             Index in the knot vector of the new knot(s)
-            """
+        """
 
         u = checkInput(u, "u", float, 0)
         r = checkInput(r, "r", int, 0)
@@ -753,7 +753,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
         return c
 
     def getLength(self):
-        """ Compute the length of the curve using the Euclidean Norm
+        """Compute the length of the curve using the Euclidean Norm
 
         Returns
         -------
@@ -811,7 +811,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
             result with be an array of length nDim (or a scalar if
             nDim=1). If a vector of s values were given it will be an
             array of size (N, 3) (or size (N) if ndim=1)
-            """
+        """
 
         s = numpy.array(s).T
         if self.coef.dtype == numpy.dtype("d"):
@@ -834,7 +834,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
         -------
         ds : array
             The first derivative. This is an array of size nDim
-            """
+        """
         if self.coef.dtype == numpy.dtype("d"):
             ds = libspline.eval_curve_deriv(s, self.t, self.k, self.coef.T).squeeze()
         else:
@@ -935,7 +935,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
         D : float
             Minimum distance between this curve and inCurve. It
             is equilivent to ||self(s) - inCurve(t)||_2.
-            """
+        """
         s = -1
         t = -1
         if "s" in kwargs:
@@ -983,7 +983,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
         D : float
             Minimum distance(s) between this curve and inCurve. It
             is equilivent to ||self(s) - inCurve(t)||_2.
-            """
+        """
         s = -1
         t = -1
         if "s" in kwargs:
@@ -1056,7 +1056,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
             Flag to write b-spline coefficients
         orig : bool
             Flag to write original data (used for fitting) if it exists
-            """
+        """
         f = openTecplot(fileName, self.nDim)
         if curve:
             self.computeData()
@@ -1612,7 +1612,7 @@ MUST be defined for task lms or interpolate"
         return u, v, U, V
 
     def calcKnots(self):
-        """ Determine the knots depending on if it is inerpolated or
+        """Determine the knots depending on if it is inerpolated or
         an LMS fit"""
         if self.interp:
             self.tu = libspline.knots_interp(self.u, numpy.array([], "d"), self.ku)
@@ -1640,7 +1640,7 @@ MUST be defined for task lms or interpolate"
         -------
         value : float
             Spline evaluated at corner
-            """
+        """
         if corner not in [0, 1, 2, 3]:
             raise Error("Corner must be in range 0..3 inclusive")
 
@@ -1666,7 +1666,7 @@ MUST be defined for task lms or interpolate"
         -------
         value : float
             Original value at corner
-            """
+        """
         if corner not in range(0, 4):
             raise Error("Corner must be in range 0..3 inclusive")
         if not self.origData:
@@ -1699,7 +1699,7 @@ MUST be defined for task lms or interpolate"
 
         endValue : array size nDim
             Original value at end of edge.
-            """
+        """
         if edge not in range(0, 4):
             raise Error("Edge must be in range 0..3 inclusive")
         if not self.origData:
@@ -1948,7 +1948,7 @@ MUST be defined for task lms or interpolate"
             Spline evaluation at all points u,v. Shape depend on the
             input. If u,v are scalars, values is array of size nDim. If
             u,v are a 1D list, return is (N,nDim) etc.
-            """
+        """
 
         u = numpy.array(u).T
         v = numpy.array(v).T
@@ -1961,7 +1961,7 @@ MUST be defined for task lms or interpolate"
         return vals.squeeze().T
 
     def getDerivative(self, u, v):
-        """ Evaluate the first derivatvies of the spline surface
+        """Evaluate the first derivatvies of the spline surface
 
         Parameters
         ----------
@@ -1987,7 +1987,7 @@ MUST be defined for task lms or interpolate"
         return deriv.T
 
     def getSecondDerivative(self, u, v):
-        """ Evaluate the second derivatvies of the spline surface
+        """Evaluate the second derivatvies of the spline surface
 
         deriv = [ (d^2)/(du^2)    (d^2)/(dudv) ]
                 [ (d^2)/(dudv)    (d^2)/(dv^2) ]
@@ -2024,7 +2024,7 @@ MUST be defined for task lms or interpolate"
             Lower corner of the bounding box
         xMax : array of length 3
             Upper corner of the bounding box
-            """
+        """
         if self.nDim != 3:
             raise Error("getBounds is only defined for nDim = 3")
 
@@ -2123,7 +2123,7 @@ MUST be defined for task lms or interpolate"
         D : float
             Minimum distance between this surface and curve.
             is equivalent to ||surface(u,v) - curve(s)||_2.
-            """
+        """
         u = -1.0
         v = -1.0
         s = -1.0
@@ -2190,7 +2190,7 @@ MUST be defined for task lms or interpolate"
             Flag to write original data (used for fitting) if it exists
         directions : bool
             Flag to write surface direction visualization
-            """
+        """
         f = openTecplot(fileName, self.nDim)
         if surf:
             self.computeData()
@@ -2431,7 +2431,7 @@ class Volume(object):
       /           /     | |/           |/       |    |/          |/
      #-----------#      | #------------#        |    #-----------#
      0           1      |         0             |
-   """
+    """
 
     def __init__(self, recompute=True, **kwargs):
         self.faceSurfaces = [None, None, None, None, None, None]
@@ -2640,7 +2640,7 @@ MUST be defined for task lms or interpolate"
         self.coef = numpy.zeros((self.nCtlu, self.nCtlv, self.nCtlw, self.nDim))
 
     def calcParameterization(self):
-        """ Compute distance based parametrization. Use the fortran
+        """Compute distance based parametrization. Use the fortran
         function for this"""
         S, u, v, w = libspline.para3d(self.X.T)
         S = S.T
@@ -2655,7 +2655,7 @@ MUST be defined for task lms or interpolate"
         return
 
     def calcKnots(self):
-        """ Determine the knots depending on if it is inerpolated or
+        """Determine the knots depending on if it is inerpolated or
         an LMS fit"""
         if self.interp:
             self.tu = libspline.knots_interp(self.u, numpy.array([], "d"), self.ku)
@@ -2678,7 +2678,7 @@ MUST be defined for task lms or interpolate"
         -------
         value : float
             Volume spline evaluation at corner.
-            """
+        """
 
         if corner not in range(0, 8):
             raise Error("Corner must be in range 0..7 inclusive8")
@@ -2715,7 +2715,7 @@ MUST be defined for task lms or interpolate"
         -------
         value : float
             Original data on corner.
-            """
+        """
         if corner not in range(0, 8):
             raise Error("Corner must be in range 0..7 inclusive")
 
@@ -2739,7 +2739,7 @@ MUST be defined for task lms or interpolate"
         return val
 
     def getOrigValuesFace(self, face):
-        """ For a given face index, face, return the 4 corners and the
+        """For a given face index, face, return the 4 corners and the
         values of the midpoints of the 4 edges on that face.
 
         Parameters
@@ -2752,7 +2752,7 @@ MUST be defined for task lms or interpolate"
         coords : array of size (8, ndim)
             The first 4 entries are the corner, and the last 4 are the
             midpoints.
-            """
+        """
         if face not in range(0, 6):
             raise Error("Face must be in range 0..5 inclusive")
 
@@ -2852,7 +2852,7 @@ MUST be defined for task lms or interpolate"
         -------
         midpoint : array of length nDim
             Mid point of edge
-            """
+        """
         if numpy.mod(self.Nu, 2) == 1:
             midu = [(self.Nu - 1) // 2, (self.Nu - 1) // 2]
         else:
@@ -2907,7 +2907,7 @@ MUST be defined for task lms or interpolate"
         -------
         midpoint : array of length nDim
             Mid point of face
-            """
+        """
         if face not in range(0, 6):
             raise Error("Face must be in range 0..5 inclusive")
         if not self.origData:
@@ -3000,7 +3000,7 @@ MUST be defined for task lms or interpolate"
         self.edgeCurves[11] = Curve(k=self.kw, t=self.tw, coef=self.coef[-1, -1, :])
 
     def getBasisPt(self, u, v, w, vals, istart, colInd, lIndex):
-        """ This function should only be called from pyBlock The purpose
+        """This function should only be called from pyBlock The purpose
         is to compute the basis function for a u, v, w point and add
         it to pyBlocks's global dPt/dCoef
         matrix. vals, rowPtr, colInd is the CSR data and lIndex in
@@ -3033,7 +3033,7 @@ MUST be defined for task lms or interpolate"
         -------
         values : scalar, vector, matrix or tensor of values
            The spline evaluation at (u, v, w)
-           """
+        """
         u = numpy.atleast_3d(u).T
         v = numpy.atleast_3d(v).T
         w = numpy.atleast_3d(w).T
@@ -3058,7 +3058,7 @@ MUST be defined for task lms or interpolate"
         -------
         values : array
             Array of values evaluated along edge.
-            """
+        """
         if edge == 0:
             u = s
             v = self.vmin
@@ -3127,7 +3127,7 @@ MUST be defined for task lms or interpolate"
             Lower corner of the bounding box
         xMax : array of length 3
             Upper corner of the bounding box
-            """
+        """
         if self.nDim != 3:
             raise Error("getBounds is only defined for nDim = 3")
 
@@ -3345,7 +3345,7 @@ MUST be defined for task lms or interpolate"
             Flag specifiying if original data (used for fitting) is
             to be included. If on original data exists, this argument
             is ignored.
-            """
+        """
         f = openTecplot(fileName, self.nDim)
         if vols:
             self.computeData()
@@ -3392,7 +3392,7 @@ def trilinearVolume(*args):
     xmax : array of size (3)
         The extreme upper corner of the box. In this case, by
         construction, the box will be coordinate axis aligned.
-        """
+    """
     tu = [0, 0, 1, 1]
     tv = [0, 0, 1, 1]
     tw = [0, 0, 1, 1]
@@ -3456,7 +3456,7 @@ def bilinearSurface(*args):
           |          |
           +----------+
           0          1
-          """
+    """
     if len(args) == 1:
         # One argument passed in ... assume its X
         if len(args[0]) != 4:
