@@ -2,7 +2,7 @@ trigger:
   - master
 
 pr:
-  -master
+  - master
 
 resources:
   repositories:
