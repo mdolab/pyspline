@@ -6,7 +6,7 @@ pr:
 
 resources:
   repositories:
-    - repository: azure_template
+  - repository: azure_template
     type: github
     name: mdolab/.github
     endpoint: mdolab
