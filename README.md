@@ -1,7 +1,5 @@
 pySpline
 ====================================================
-
-[![Build Status](https://travis-ci.com/mdolab/pyspline.svg?token=Kdy3JowvEtkKSPpqvdLj&branch=pySpline)](https://travis-ci.com/mdolab/pyspline)
 [![Build Status](https://dev.azure.com/mdolab/Public/_apis/build/status/mdolab.pyspline?branchName=master)](https://dev.azure.com/mdolab/Public/_build/latest?definitionId=20&branchName=master)
 [![Documentation Status](https://readthedocs.com/projects/mdolab-pyspline/badge/?version=latest)](https://mdolab-pyspline.readthedocs-hosted.com/en/latest/?badge=latest)
 
