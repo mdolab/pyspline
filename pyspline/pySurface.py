@@ -293,7 +293,7 @@ class Surface(object):
 
         else:  # We have LMS/Interpolate
             # Do some checking on the number of control points
-            assert (
+            if not (
                 "ku" in kwargs
                 and "kv" in kwargs
                 and (
@@ -302,8 +302,10 @@ class Surface(object):
                     or ("x" in kwargs and "y" in kwargs)
                     or ("x" in kwargs and "y" in kwargs and "z" in kwargs)
                 )
-            ), "Error: ku, kv, and X (or x or x and y or x and y and z \
-MUST be defined for task lms or interpolate"
+            ):
+                raise ValueError(
+                    "ku, kv, and X (or x or x and y or x and y and z MUST be defined for task lms or interpolate"
+                )
 
             if "X" in kwargs:
                 self.X = numpy.array(kwargs["X"])
@@ -377,9 +379,8 @@ MUST be defined for task lms or interpolate"
                     self.u, self.v, self.U, self.V = self.calcParameterization()
                 else:
                     raise Error(
-                        "Automatic parameterization of ONLY available\
- for spatial data in 3 dimensions. Please supply u and v key word arguments\
- otherwise."
+                        "Automatic parameterization of ONLY available for spatial data in 3 dimensions. "
+                        + "Please supply u and v key word arguments otherwise."
                     )
 
             self.umin = 0

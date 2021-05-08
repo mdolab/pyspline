@@ -92,10 +92,7 @@ def trilinearVolume(*args):
 
         return Volume(coef=coef, tu=tu, tv=tv, tw=tw, ku=ku, kv=kv, kw=kw)
     else:
-        raise Error(
-            "An unknown number of arguments was passed to\
- trilinear  Volume"
-        )
+        raise Error("An unknown number of arguments was passed to trilinear  Volume")
 
 
 def bilinearSurface(*args):
