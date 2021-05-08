@@ -1,7 +1,10 @@
+# External modules
 import numpy as np
 from scipy.sparse import linalg
+
+# Local modules
 from . import libspline
-from .utils import checkInput, Error, _assembleMatrix, openTecplot, writeTecplot1D, closeTecplot
+from .utils import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot, writeTecplot1D
 
 
 class Curve(object):

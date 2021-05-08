@@ -1,8 +1,11 @@
+# External modules
 import numpy as np
-from . import libspline
-from .utils import checkInput, Error, _assembleMatrix, openTecplot, closeTecplot, writeTecplot2D, writeTecplot1D
-from .pyCurve import Curve
 from scipy.sparse import linalg
+
+# Local modules
+from . import libspline
+from .pyCurve import Curve
+from .utils import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot, writeTecplot1D, writeTecplot2D
 
 
 class Surface(object):

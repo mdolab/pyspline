@@ -1,9 +1,12 @@
+# External modules
 import numpy as np
 from scipy.sparse import linalg
+
+# Local modules
 from . import libspline
-from .utils import checkInput, Error, _assembleMatrix, writeTecplot3D, openTecplot, closeTecplot
-from .pySurface import Surface
 from .pyCurve import Curve
+from .pySurface import Surface
+from .utils import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot, writeTecplot3D
 
 
 class Volume(object):

@@ -1,11 +1,12 @@
-# This is a test script to test the functionality of the
-# pySpline curve class
+"""This is a test script to test the functionality of the pySpline curve class"""
 
+# External modules
 import numpy as np
+
+# First party modules
 from pyspline import pySpline
 
 # Get some Helix-like data
-
 n = 100
 theta = np.linspace(0.0000, 2 * np.pi, n)
 x = np.cos(theta)

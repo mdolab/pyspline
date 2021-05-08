@@ -6,8 +6,11 @@
 # we temporily reassign stdout such that when we import it, the output
 # goes to stdout. Then we reassign stdout and simply puck off the
 # include  directory.
+# Standard Python modules
 import os
 import sys
+
+# External modules
 import numpy.f2py
 
 tmp = sys.stdout

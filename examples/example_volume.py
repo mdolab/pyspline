@@ -1,7 +1,12 @@
-# This simple script test some of the volume functionality in pySpline
-import numpy as np
-from pyspline import pySpline
+"""This simple script test some of the volume functionality in pySpline"""
+# Standard Python modules
 import time
+
+# External modules
+import numpy as np
+
+# First party modules
+from pyspline import pySpline
 
 X = np.zeros((2, 2, 2, 3))
 X[0, 0, 0, :] = [0, 0, 0]

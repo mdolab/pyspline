@@ -6,23 +6,18 @@ Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
 :class:`Volume`
 """
 
-# ===========================================================================
-# External Python modules
-# ===========================================================================
+# Standard Python modules
 import warnings
+
+# External modules
 import numpy as np
 
-# ===========================================================================
-# Custom Python modules
-# ===========================================================================
+# Local modules
 from .pyCurve import Curve
 from .pySurface import Surface
 from .pyVolume import Volume
 from .utils import Error
 
-# =============================================================================
-# pySpline classes
-# =============================================================================
 
 # For backwards compatibility, the old curve, surface and volume definitions:
 def curve(*args, **kwargs):
@@ -170,11 +165,3 @@ def line(*args, **kwargs):
             return Curve(coef=[args[0], x2], k=2, t=[0, 0, 1, 1])
         else:
             Error("Error: dir must be specified if only 1 argument is given")
-
-
-# ==============================================================================
-# Class Test
-# ==============================================================================
-if __name__ == "__main__":
-    print("There are two examples in the example directory.")
-    print("Look at test_curve.py and test_surf.py for more information")
