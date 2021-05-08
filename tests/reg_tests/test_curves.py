@@ -6,7 +6,7 @@ import os
 # =============================================================================
 # External Python modules
 # =============================================================================
-import numpy
+import numpy as np
 from numpy.testing import assert_allclose
 import unittest
 
@@ -110,7 +110,7 @@ class Test(unittest.TestCase):
         # print('-----------  2D k=2 test ----------')
         k = 2
         t = [0, 0, 0.5, 1, 1]
-        coef = numpy.zeros((3, 2))
+        coef = np.zeros((3, 2))
         coef[0] = [0, 0.6]
         coef[1] = [1.1, 1.4]
         coef[2] = [2.6, 5.1]
@@ -121,7 +121,7 @@ class Test(unittest.TestCase):
         # print('-----------  2D k=3 test ----------')
         k = 3
         t = [0, 0, 0, 0.5, 1, 1, 1]
-        coef = numpy.zeros((4, 2))
+        coef = np.zeros((4, 2))
         coef[0] = [0, 0.45]
         coef[1] = [0.71, 1.5]
         coef[2] = [2.5, 5.9]
@@ -133,7 +133,7 @@ class Test(unittest.TestCase):
         # print('-----------  2D k=4 test ----------')
         k = 4
         t = [0, 0, 0, 0, 0.5, 1, 1, 1, 1]
-        coef = numpy.zeros((5, 2))
+        coef = np.zeros((5, 2))
         coef[0] = [0, -0.60]
         coef[1] = [0.9, 1.6]
         coef[2] = [1.6, 5.2]
@@ -145,10 +145,10 @@ class Test(unittest.TestCase):
 
         # Get helix data
         n = 100
-        theta = numpy.linspace(0.0, numpy.pi * 2, n)
-        x = numpy.cos(theta)
-        y = numpy.sin(theta)
-        z = numpy.linspace(0, 1, n)
+        theta = np.linspace(0.0, np.pi * 2, n)
+        x = np.cos(theta)
+        y = np.sin(theta)
+        z = np.linspace(0, 1, n)
 
         # print('+--------------------------------------+')
         # print('              LMS Tests   ')

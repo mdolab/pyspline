@@ -6,7 +6,7 @@ import os
 # =============================================================================
 # External Python modules
 # =============================================================================
-import numpy
+import numpy as np
 from numpy.testing import assert_allclose
 import unittest
 
@@ -163,10 +163,10 @@ class Test(unittest.TestCase):
         # Create a generic surface
         nu = 10
         nv = 10
-        u = numpy.linspace(0, 4, nu)
-        v = numpy.linspace(0, 4, nv)
-        [V, U] = numpy.meshgrid(v, u)
-        Z = numpy.cos(U) * numpy.sin(V)
+        u = np.linspace(0, 4, nu)
+        v = np.linspace(0, 4, nv)
+        [V, U] = np.meshgrid(v, u)
+        Z = np.cos(U) * np.sin(V)
 
         # Testing Surface with ku, kv, nCtlu, nCtlv
         for ku in [2, 3, 4]:
