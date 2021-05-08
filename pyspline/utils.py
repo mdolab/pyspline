@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from scipy import sparse
 
 
@@ -186,17 +186,17 @@ def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
     """
 
     # Check the data rank:
-    rank = numpy.ndim(inputVal)
+    rank = np.ndim(inputVal)
     if rank != dataRank:
         raise Error("'%s' must have rank %d. Input was of rank %d." % (inputName, dataRank, rank))
 
     # Check the data type
-    inputVal = numpy.array(inputVal)
+    inputVal = np.array(inputVal)
     tmp = inputVal.astype(dataType)
 
     # Check if the values are the same:
     diff = (tmp - inputVal).flatten()
-    if numpy.dot(diff, diff) > 10 * numpy.finfo(1.0).eps:
+    if np.dot(diff, diff) > 10 * np.finfo(1.0).eps:
         raise Error("'%s' could not be safely cast to required type" "without losing information" % inputName)
 
     # Finally check that the shape is correct:
