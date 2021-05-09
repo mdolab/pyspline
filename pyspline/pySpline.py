@@ -34,9 +34,10 @@ def volume(*args, **kwargs):
     warnings.warn("pySpline.volume has been changed to Volume()")
     return Volume(*args, **kwargs)
 
-    # ----------------------------------------------------------------------
-    #                     Misc Helper Functions
-    # ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+#                     Misc Helper Functions
+# ----------------------------------------------------------------------
 
 
 def trilinearVolume(*args):

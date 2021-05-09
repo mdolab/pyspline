@@ -10,9 +10,8 @@ pySpline
 ========
 
 ``pySpline`` is a package containing code for wiking with b-spline
-:class:`curve`, :class:`surface`, and :class:`volume` objects. The
-Python interface to all functionality is found in the pySpline.py
-module. The documentation for this package is summarized below:
+:class:`Curve <pyspline.pyCurve.Curve>`, :class:`Surface <pyspline.pySurface.Surface>`, and :class:`Volume <pyspline.pyVolume.Volume>` objects.
+The documentation for this package is summarized below:
 
 .. toctree::
    :maxdepth: 1
@@ -20,13 +19,13 @@ module. The documentation for this package is summarized below:
    building
    regression
    examples
-   API
 
 
-Indices and tables
-==================
+.. toctree::
+   :caption: API Reference
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   pySpline
+   Curve
+   Surface
+   Volume
+   utils

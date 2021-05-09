@@ -1,6 +1,5 @@
 # use glob syntax.
 syntax: glob
-doc/*
 *.o
 *.pyc
 *.~
