@@ -1,6 +1,7 @@
 # use glob syntax.
 syntax: glob
 *.o
+doc/_build/*
 *.pyc
 *.~
 *.dat
