@@ -1,14 +1,3 @@
-"""
-pySpline
---------
-
-Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
-:class:`Volume`
-"""
-
-# Standard Python modules
-import warnings
-
 # External modules
 import numpy as np
 
@@ -18,28 +7,9 @@ from .pySurface import Surface
 from .pyVolume import Volume
 from .utils import Error
 
-
-# For backwards compatibility, the old curve, surface and volume definitions:
-def curve(*args, **kwargs):
-    warnings.warn("pySpline.curve has been changed to Curve()")
-    return Curve(*args, **kwargs)
-
-
-def surface(*args, **kwargs):
-    warnings.warn("pySpline.surface has been changed to Surface()")
-    return Surface(*args, **kwargs)
-
-
-def volume(*args, **kwargs):
-    warnings.warn("pySpline.volume has been changed to Volume()")
-    return Volume(*args, **kwargs)
-
-
 # ----------------------------------------------------------------------
 #                     Misc Helper Functions
 # ----------------------------------------------------------------------
-
-
 def trilinearVolume(*args):
     """This is a short-cut function to create a trilinear b-spline
     volume. It can be created with ``x`` **OR** with ``xmin`` and
@@ -120,9 +90,7 @@ def bilinearSurface(*args):
     if len(args) == 1:
         # One argument passed in ... assume its X
         if len(args[0]) != 4:
-            raise Error(
-                "A single argument passed to bilinear " "surface must contain 4 points and be of " "size (4, 3)"
-            )
+            raise Error("A single argument passed to bilinear surface must contain 4 points and be of size (4, 3)")
         coef = np.zeros((2, 2, 3))
         coef[0, 0] = args[0][0]
         coef[1, 0] = args[0][1]
