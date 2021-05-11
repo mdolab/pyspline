@@ -1130,9 +1130,7 @@ def bilinearSurface(*args):
     if len(args) == 1:
         # One argument passed in ... assume its X
         if len(args[0]) != 4:
-            raise Error(
-                "A single argument passed to bilinear " "surface must contain 4 points and be of " "size (4, 3)"
-            )
+            raise Error("A single argument passed to bilinear surface must contain 4 points and be of size (4, 3)")
         coef = numpy.zeros((2, 2, 3))
         coef[0, 0] = args[0][0]
         coef[1, 0] = args[0][1]

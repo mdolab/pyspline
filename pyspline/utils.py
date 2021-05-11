@@ -198,7 +198,7 @@ def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
     # Check if the values are the same:
     diff = (tmp - inputVal).flatten()
     if numpy.dot(diff, diff) > 10 * numpy.finfo(1.0).eps:
-        raise Error("'%s' could not be safely cast to required type" "without losing information" % inputName)
+        raise Error("'%s' could not be safely cast to required type without losing information" % inputName)
 
     # Finally check that the shape is correct:
     if dataShape is not None:
