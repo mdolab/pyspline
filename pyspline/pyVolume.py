@@ -1,22 +1,10 @@
-"""
-pySpline
---------
-
-Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
-:class:`Volume`
-"""
-
-# ===========================================================================
-# External Python modules
-# ===========================================================================
 import warnings
 import numpy
 from scipy.sparse import linalg
-
-# ===========================================================================
-# Custom Python modules
-# ===========================================================================
 from . import libspline
+from .pyCurve import Curve
+from .pySurface import Surface
+from .utils import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot, writeTecplot3D
 
 
 class Volume(object):

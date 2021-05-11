@@ -1,21 +1,5 @@
-"""
-pySpline
---------
-
-Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
-:class:`Volume`
-"""
-
-# ===========================================================================
-# External Python modules
-# ===========================================================================
 import numpy
 from scipy import sparse
-
-# ===========================================================================
-# Custom Python modules
-# ===========================================================================
-from . import libspline
 
 
 class Error(Exception):
