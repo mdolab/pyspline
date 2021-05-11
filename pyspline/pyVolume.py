@@ -181,14 +181,14 @@ MUST be defined for task lms or interpolate"
                 self.X[:, :, :, 2] = z
                 self.nDim = 3
             elif "x" in kwargs and "y" in kwargs:
-                x = checkInput(x, "x", float, 3)
-                y = checkInput(x, "y", float, 3)
+                x = checkInput(kwargs["x"], "x", float, 3)
+                y = checkInput(kwargs["y"], "y", float, 3)
                 self.X = numpy.zeros((x.shape[0], x.shape[1], x.shape[3], 3))
                 self.X[:, :, :, 0] = x
                 self.X[:, :, :, 1] = y
                 self.nDim = 2
             elif "x" in kwargs:
-                x = checkInput(x, "x", float, 3)
+                x = checkInput(kwargs["x"], "x", float, 3)
                 self.X = numpy.zeros((x.shape[0], x.shape[1], x.shape[3], 3))
                 self.X[:, :, :, 0] = kwargs["x"]
                 self.nDim = 1
