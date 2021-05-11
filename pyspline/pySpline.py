@@ -6,8 +6,13 @@ Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
 :class:`Volume`
 """
 
+# Standard Python modules
 import warnings
+
+# External modules
 import numpy
+
+# Local modules
 from .pyCurve import Curve
 from .pySurface import Surface
 from .pyVolume import Volume

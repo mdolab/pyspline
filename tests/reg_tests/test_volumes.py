@@ -1,19 +1,23 @@
 # =============================================================================
 # Standard Python modules
 # =============================================================================
+# Standard Python modules
 import os
+import unittest
+
+# External modules
+from baseclasses import BaseRegTest
 
 # =============================================================================
 # External Python modules
 # =============================================================================
 import numpy
-import unittest
 
+# First party modules
 # =============================================================================
 # Extension modules
 # =============================================================================
 from pyspline import pySpline
-from baseclasses import BaseRegTest
 
 baseDir = os.path.dirname(os.path.abspath(__file__))
 

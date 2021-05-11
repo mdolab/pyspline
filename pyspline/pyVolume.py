@@ -1,6 +1,11 @@
+# Standard Python modules
 import warnings
+
+# External modules
 import numpy
 from scipy.sparse import linalg
+
+# Local modules
 from . import libspline
 from .pyCurve import Curve
 from .pySurface import Surface

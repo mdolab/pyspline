@@ -1,6 +1,9 @@
 # This is a test script to test the functionality of the
 # pySpline surface
+# External modules
 import numpy
+
+# First party modules
 from pyspline import pySpline
 
 # Create a generic surface
