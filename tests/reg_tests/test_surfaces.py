@@ -1,20 +1,14 @@
-# =============================================================================
 # Standard Python modules
-# =============================================================================
 import os
-
-# =============================================================================
-# External Python modules
-# =============================================================================
-import numpy
-from numpy.testing import assert_allclose
 import unittest
 
-# =============================================================================
-# Extension modules
-# =============================================================================
-from pyspline import pySpline
+# External modules
 from baseclasses import BaseRegTest
+import numpy
+from numpy.testing import assert_allclose
+
+# First party modules
+from pyspline import pySpline
 
 baseDir = os.path.dirname(os.path.abspath(__file__))
 

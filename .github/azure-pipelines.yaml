@@ -6,10 +6,10 @@ pr:
 
 resources:
   repositories:
-  - repository: azure_template
-    type: github
-    name: mdolab/.github
-    endpoint: mdolab
+    - repository: azure_template
+      type: github
+      name: mdolab/.github
+      endpoint: mdolab
 
 extends:
   template: azure/azure_template.yaml@azure_template
@@ -17,3 +17,4 @@ extends:
     REPO_NAME: pyspline
     GCC_CONFIG: config/defaults/config.LINUX_GFORTRAN.mk
     INTEL_CONFIG: config/defaults/config.LINUX_INTEL.mk
+    ISORT: true
