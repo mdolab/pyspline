@@ -19,7 +19,7 @@ class Volume(object):
 
     * **Creation**: Create an instance of the Volume class directly by
       supplying the required information: kwargs MUST contain the
-      folloiwng information: ``ku, kv, kw, tu, tv, tw, coef``.
+      following information: ``ku, kv, kw, tu, tv, tw, coef``.
 
     * **LMS/Interpolation**: Create an instance of the Volume class by
       using an interpolating spline to given data points or a LMS
@@ -27,7 +27,7 @@ class Volume(object):
 
       1. ``ku`` and ``kv`` and ``kw`` Spline Orders
 
-      2. ``X`` real arry size (Nu, Nv, Nw, nDim) of data to fit. **OR**
+      2. ``X`` real array size (Nu, Nv, Nw, nDim) of data to fit. **OR**
           1. ``x`` (3D) and ``y`` (3D)  ``z`` (3D) 3D volume interpolation/fitting
 
       3. ``u``, ``v``, ``w`` real array of size (Nu, Nv, Nw). Optional

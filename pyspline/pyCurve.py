@@ -14,7 +14,7 @@ class Curve(object):
 
     * **Creation**: Create an instance of the spline class
       directly by supplying the required information. kwargs MUST
-      contain the folloiwng information: ``k, t, coef``.
+      contain the following information: ``k, t, coef``.
 
 
     * **LMS/Interpolation**: Create an instance of the spline class by
@@ -23,7 +23,7 @@ class Curve(object):
 
       1. ``k`` Spline Order
 
-      2. ``X`` real arry size (N, nDim) of data to fit. **OR**
+      2. ``X`` real array size (N, nDim) of data to fit. **OR**
           1. ``x`` (1D) and ``s`` for 1D
           2. ``x`` (1D) and ``y`` (1D) for 2D spatial curve
           3. ``x`` (1D) and ``y``` (1D) and ``z`` 1D for 3D spatial curve
@@ -706,7 +706,7 @@ class Curve(object):
             Parametric position on curve2 (inCurve)
         D : float
             Minimum distance between this curve and inCurve. It
-            is equilivent to ||self(s) - inCurve(t)||_2.
+            is equivalent to ||self(s) - inCurve(t)||_2.
         """
         s = -1
         t = -1
@@ -754,7 +754,7 @@ class Curve(object):
             Parametric position)s_ on curve2 (inCurve)
         D : float
             Minimum distance(s) between this curve and inCurve. It
-            is equilivent to ||self(s) - inCurve(t)||_2.
+            is equivalent to ||self(s) - inCurve(t)||_2.
         """
         s = -1
         t = -1

@@ -16,7 +16,7 @@ class Surface(object):
 
     * **Creation**: Create an instance of the Surface class
       directly by supplying the required information: kwargs MUST
-      contain the folloiwng information: ``ku, kv, tu, tv, coef``.
+      contain the following information: ``ku, kv, tu, tv, coef``.
 
     * **LMS/Interpolation**: Create an instance of the Surface class by
       using an interpolating spline to given data points or a LMS
@@ -24,7 +24,7 @@ class Surface(object):
 
       1. ``ku`` and ``kv`` Spline Orders
 
-      2. ``X`` real arry size (Nu, Nv, nDim) of data to fit. **OR**
+      2. ``X`` real array size (Nu, Nv, nDim) of data to fit. **OR**
           1. ``x`` (2D) and ``y`` (2D)  for 2D surface interpolation
           2. ``x`` (3D) and ``y`` (3D) and ``z`` (3) for 3D surface
 

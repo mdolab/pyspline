@@ -34,7 +34,7 @@ def writeTecplot1D(handle, name, data):
     name : str
         Name of the zone to use
     data : array of size (N, ndim)
-        1D aray of data to write to file
+        1D array of data to write to file
     """
     nx = data.shape[0]
     ndim = data.shape[1]
@@ -55,8 +55,8 @@ def writeTecplot2D(handle, name, data):
         Open file handle
     name : str
         Name of the zone to use
-    data : 2D np array of sive (nx, ny, ndim)
-        2D aray of data to write to file
+    data : 2D np array of size (nx, ny, ndim)
+        2D array of data to write to file
     """
     nx = data.shape[0]
     ny = data.shape[1]
@@ -79,8 +79,8 @@ def writeTecplot3D(handle, name, data):
         Open file handle
     name : str
         Name of the zone to use
-    data : 3D np array of sive (nx, ny, nz, ndim)
-        3D aray of data to write to file
+    data : 3D np array of size (nx, ny, nz, ndim)
+        3D array of data to write to file
     """
     nx = data.shape[0]
     ny = data.shape[1]
