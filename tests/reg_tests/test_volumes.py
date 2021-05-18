@@ -4,7 +4,7 @@ import unittest
 
 # External modules
 from baseclasses import BaseRegTest
-import numpy
+import numpy as np
 
 # First party modules
 from pyspline import pySpline
@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
     def regression_test(self, handler, solve=False):
 
         # Define raw data for a volume:
-        data = numpy.array(
+        data = np.array(
             [
                 -0.3820033967,
                 -0.317065736,
@@ -2171,7 +2171,7 @@ class Test(unittest.TestCase):
             ]
         )
 
-        X = numpy.zeros((9, 7, 11, 3))
+        X = np.zeros((9, 7, 11, 3))
         nval = 9 * 7 * 11
         X[:, :, :, 0] = data[0 * nval : 1 * nval].reshape((9, 7, 11), order="f")
         X[:, :, :, 1] = data[1 * nval : 2 * nval].reshape((9, 7, 11), order="f")

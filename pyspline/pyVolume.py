@@ -2,7 +2,7 @@
 import warnings
 
 # External modules
-import numpy
+import numpy as np
 from scipy.sparse import linalg
 
 # Local modules
@@ -166,7 +166,7 @@ class Volume(object):
 MUST be defined for task lms or interpolate"
 
             if "X" in kwargs:
-                self.X = numpy.array(kwargs["X"])
+                self.X = np.array(kwargs["X"])
                 if len(self.X.shape) == 1:
                     self.nDim = 1
                 else:
@@ -175,7 +175,7 @@ MUST be defined for task lms or interpolate"
                 x = checkInput(kwargs["x"], "x", float, 3)
                 y = checkInput(kwargs["y"], "y", float, 3)
                 z = checkInput(kwargs["z"], "z", float, 3)
-                self.X = numpy.zeros((x.shape[0], x.shape[1], x.shape[2], 3))
+                self.X = np.zeros((x.shape[0], x.shape[1], x.shape[2], 3))
                 self.X[:, :, :, 0] = x
                 self.X[:, :, :, 1] = y
                 self.X[:, :, :, 2] = z
@@ -183,13 +183,13 @@ MUST be defined for task lms or interpolate"
             elif "x" in kwargs and "y" in kwargs:
                 x = checkInput(kwargs["x"], "x", float, 3)
                 y = checkInput(kwargs["y"], "y", float, 3)
-                self.X = numpy.zeros((x.shape[0], x.shape[1], x.shape[3], 3))
+                self.X = np.zeros((x.shape[0], x.shape[1], x.shape[3], 3))
                 self.X[:, :, :, 0] = x
                 self.X[:, :, :, 1] = y
                 self.nDim = 2
             elif "x" in kwargs:
                 x = checkInput(kwargs["x"], "x", float, 3)
-                self.X = numpy.zeros((x.shape[0], x.shape[1], x.shape[3], 3))
+                self.X = np.zeros((x.shape[0], x.shape[1], x.shape[3], 3))
                 self.X[:, :, :, 0] = kwargs["x"]
                 self.nDim = 1
             # enf if
@@ -307,7 +307,7 @@ MUST be defined for task lms or interpolate"
         self.setEdgeCurves()
 
     def setCoefSize(self):
-        self.coef = numpy.zeros((self.nCtlu, self.nCtlv, self.nCtlw, self.nDim))
+        self.coef = np.zeros((self.nCtlu, self.nCtlv, self.nCtlw, self.nDim))
 
     def calcParameterization(self):
         """Compute distance based parametrization. Use the fortran
@@ -318,9 +318,9 @@ MUST be defined for task lms or interpolate"
         self.v = v
         self.w = w
 
-        self.U = numpy.asarray(S[:, :, :, 0], order="c")
-        self.V = numpy.asarray(S[:, :, :, 1], order="c")
-        self.W = numpy.asarray(S[:, :, :, 2], order="c")
+        self.U = np.asarray(S[:, :, :, 0], order="c")
+        self.V = np.asarray(S[:, :, :, 1], order="c")
+        self.W = np.asarray(S[:, :, :, 2], order="c")
 
         return
 
@@ -328,9 +328,9 @@ MUST be defined for task lms or interpolate"
         """Determine the knots depending on if it is inerpolated or
         an LMS fit"""
         if self.interp:
-            self.tu = libspline.knots_interp(self.u, numpy.array([], "d"), self.ku)
-            self.tv = libspline.knots_interp(self.v, numpy.array([], "d"), self.kv)
-            self.tw = libspline.knots_interp(self.w, numpy.array([], "d"), self.kw)
+            self.tu = libspline.knots_interp(self.u, np.array([], "d"), self.ku)
+            self.tv = libspline.knots_interp(self.v, np.array([], "d"), self.kv)
+            self.tw = libspline.knots_interp(self.w, np.array([], "d"), self.kw)
         else:
             self.tu = libspline.knots_lms(self.u, self.nCtlu, self.ku)
             self.tv = libspline.knots_lms(self.v, self.nCtlv, self.kv)
@@ -426,17 +426,17 @@ MUST be defined for task lms or interpolate"
         if face not in range(0, 6):
             raise Error("Face must be in range 0..5 inclusive")
 
-        if numpy.mod(self.Nu, 2) == 1:
+        if np.mod(self.Nu, 2) == 1:
             midu = [(self.Nu - 1) // 2, (self.Nu - 1) // 2]
         else:
             midu = [self.Nu // 2, self.Nu // 2 - 1]
 
-        if numpy.mod(self.Nv, 2) == 1:
+        if np.mod(self.Nv, 2) == 1:
             midv = [(self.Nv - 1) // 2, (self.Nv - 1) // 2]
         else:
             midv = [self.Nv // 2, self.Nv // 2 - 1]
 
-        if numpy.mod(self.Nw, 2) == 1:
+        if np.mod(self.Nw, 2) == 1:
             midw = [(self.Nw - 1) // 2, (self.Nw - 1) // 2]
         else:
             midw = [self.Nw // 2, self.Nw // 2 - 1]
@@ -508,7 +508,7 @@ MUST be defined for task lms or interpolate"
                 0.5 * (self.X[-1, -1, midw[0]] + self.X[-1, -1, midw[1]]),
             ]
 
-        return numpy.array(values)
+        return np.array(values)
 
     def getMidPointEdge(self, edge):
         """Get the midpoint of the edge using the original data.
@@ -523,17 +523,17 @@ MUST be defined for task lms or interpolate"
         midpoint : array of length nDim
             Mid point of edge
         """
-        if numpy.mod(self.Nu, 2) == 1:
+        if np.mod(self.Nu, 2) == 1:
             midu = [(self.Nu - 1) // 2, (self.Nu - 1) // 2]
         else:
             midu = [self.Nu // 2, self.Nu // 2 - 1]
 
-        if numpy.mod(self.Nv, 2) == 1:
+        if np.mod(self.Nv, 2) == 1:
             midv = [(self.Nv - 1) // 2, (self.Nv - 1) // 2]
         else:
             midv = [self.Nv // 2, self.Nv // 2 - 1]
 
-        if numpy.mod(self.Nw, 2) == 1:
+        if np.mod(self.Nw, 2) == 1:
             midw = [(self.Nw - 1) // 2, (self.Nw - 1) // 2]
         else:
             midw = [self.Nw // 2, self.Nw // 2 - 1]
@@ -583,17 +583,17 @@ MUST be defined for task lms or interpolate"
         if not self.origData:
             raise Error("No original data for this surface")
 
-        if numpy.mod(self.Nu, 2) == 1:
+        if np.mod(self.Nu, 2) == 1:
             midu = [(self.Nu - 1) // 2, (self.Nu - 1) // 2]
         else:
             midu = [self.Nu // 2, self.Nu // 2 - 1]
 
-        if numpy.mod(self.Nv, 2) == 1:
+        if np.mod(self.Nv, 2) == 1:
             midv = [(self.Nv - 1) // 2, (self.Nv - 1) // 2]
         else:
             midv = [self.Nv // 2, self.Nv // 2 - 1]
 
-        if numpy.mod(self.Nw, 2) == 1:
+        if np.mod(self.Nw, 2) == 1:
             midw = [(self.Nw - 1) // 2, (self.Nw - 1) // 2]
         else:
             midw = [self.Nw // 2, self.Nw // 2 - 1]
@@ -704,9 +704,9 @@ MUST be defined for task lms or interpolate"
         values : scalar, vector, matrix or tensor of values
            The spline evaluation at (u, v, w)
         """
-        u = numpy.atleast_3d(u).T
-        v = numpy.atleast_3d(v).T
-        w = numpy.atleast_3d(w).T
+        u = np.atleast_3d(u).T
+        v = np.atleast_3d(v).T
+        w = np.atleast_3d(w).T
 
         if not u.shape == v.shape == w.shape:
             raise Error("u and v must have the same shape")
@@ -778,9 +778,9 @@ MUST be defined for task lms or interpolate"
             v = self.vmax
             w = s
 
-        u = numpy.atleast_3d(u).T
-        v = numpy.atleast_3d(v).T
-        w = numpy.atleast_3d(w).T
+        u = np.atleast_3d(u).T
+        v = np.atleast_3d(v).T
+        w = np.atleast_3d(w).T
 
         if not u.shape == v.shape == w.shape:
             raise Error("u, v, and w must have the same shape")
@@ -805,12 +805,12 @@ MUST be defined for task lms or interpolate"
         cy = self.coef[:, :, :, 1].flatten()
         cz = self.coef[:, :, :, 2].flatten()
 
-        Xmin = numpy.zeros(self.nDim)
+        Xmin = np.zeros(self.nDim)
         Xmin[0] = min(cx)
         Xmin[1] = min(cy)
         Xmin[2] = min(cz)
 
-        Xmax = numpy.zeros(self.nDim)
+        Xmax = np.zeros(self.nDim)
         Xmax[0] = max(cx)
         Xmax[1] = max(cy)
         Xmax[2] = max(cz)
@@ -853,25 +853,25 @@ MUST be defined for task lms or interpolate"
             be less than eps.
         """
 
-        x0 = numpy.atleast_2d(x0)
+        x0 = np.atleast_2d(x0)
 
         if "u" in kwargs and "v" in kwargs and "w" in kwargs:
-            u = numpy.atleast_1d(kwargs["u"])
-            v = numpy.atleast_1d(kwargs["v"])
-            w = numpy.atleast_1d(kwargs["w"])
+            u = np.atleast_1d(kwargs["u"])
+            v = np.atleast_1d(kwargs["v"])
+            w = np.atleast_1d(kwargs["w"])
         else:
-            u = -1 * numpy.ones(len(x0))
-            v = -1 * numpy.ones(len(x0))
-            w = -1 * numpy.ones(len(x0))
+            u = -1 * np.ones(len(x0))
+            v = -1 * np.ones(len(x0))
+            w = -1 * np.ones(len(x0))
 
         if not len(x0) == len(u) == len(v) == len(w):
             raise Error("The length of x0 and u, v, w must be the same")
 
         # If necessary get brute-force starting point
-        if numpy.any(u < 0) or numpy.any(u > 1) or numpy.any(v < 0) or numpy.any(v > 1):
+        if np.any(u < 0) or np.any(u > 1) or np.any(v < 0) or np.any(v > 1):
             self.computeData()
             u, v, w = libspline.point_volume_start(x0.real.T, self.udata, self.vdata, self.wdata, self.data.T)
-        D = numpy.zeros_like(x0)
+        D = np.zeros_like(x0)
         for i in range(len(x0)):
             u[i], v[i], w[i], D[i] = libspline.point_volume(
                 x0[i].real,
@@ -905,9 +905,9 @@ MUST be defined for task lms or interpolate"
             self.vdata = self.edgeCurves[2].sdata
             self.edgeCurves[8].calcInterpolatedGrevillePoints()
             self.wdata = self.edgeCurves[8].sdata
-            U = numpy.zeros((len(self.udata), len(self.vdata), len(self.wdata)))
-            V = numpy.zeros((len(self.udata), len(self.vdata), len(self.wdata)))
-            W = numpy.zeros((len(self.udata), len(self.vdata), len(self.wdata)))
+            U = np.zeros((len(self.udata), len(self.vdata), len(self.wdata)))
+            V = np.zeros((len(self.udata), len(self.vdata), len(self.wdata)))
+            W = np.zeros((len(self.udata), len(self.vdata), len(self.wdata)))
             for i in range(len(self.udata)):
                 for j in range(len(self.vdata)):
                     for k in range(len(self.wdata)):
@@ -952,7 +952,7 @@ MUST be defined for task lms or interpolate"
             # so we know how big to make the new coef:
             actualR, tNew, coefNew, breakPt = libspline.insertknot(s, r, self.tu, self.ku, self.coef[:, 0, 0].T)
 
-            newCoef = numpy.zeros((self.nCtlu + actualR, self.nCtlv, self.nCtlw, self.nDim))
+            newCoef = np.zeros((self.nCtlu + actualR, self.nCtlv, self.nCtlw, self.nDim))
             for k in range(self.nCtlvw):
                 for j in range(self.nCtlv):
                     actualR, tNew, coefSlice, breakPt = libspline.insertknot(
@@ -966,7 +966,7 @@ MUST be defined for task lms or interpolate"
         elif direction == "v":
             actualR, tNew, coefNew, breakPt = libspline.insertknot(s, r, self.tv, self.kv, self.coef[0, :, 0].T)
 
-            newCoef = numpy.zeros((self.nCtlu, self.nCtlv + actualR, self.nCtlw, self.nDim))
+            newCoef = np.zeros((self.nCtlu, self.nCtlv + actualR, self.nCtlw, self.nDim))
 
             for k in range(self.nCtlw):
                 for i in range(self.nCtlu):
@@ -981,7 +981,7 @@ MUST be defined for task lms or interpolate"
         elif direction == "w":
             actualR, tNew, coefNew, breakPt = libspline.insertknot(s, r, self.tw, self.kw, self.coef[0, 0, :].T)
 
-            newCoef = numpy.zeros((self.nCtlu, self.nCtlv, self.nCtlw + actualR, self.nDim))
+            newCoef = np.zeros((self.nCtlu, self.nCtlv, self.nCtlw + actualR, self.nDim))
 
             for j in range(self.nCtlv):
                 for i in range(self.nCtlu):
@@ -1073,8 +1073,8 @@ def trilinearVolume(*args):
     if len(args) == 1:
         return Volume(coef=args[0], tu=tu, tv=tv, tw=tw, ku=ku, kv=kv, kw=kw)
     elif len(args) == 2:
-        xmin = numpy.array(args[0]).astype("d")
-        xmax = numpy.array(args[1]).astype("d")
+        xmin = np.array(args[0]).astype("d")
+        xmax = np.array(args[1]).astype("d")
 
         xLow = xmin[0]
         xHigh = xmax[0]
@@ -1083,7 +1083,7 @@ def trilinearVolume(*args):
         zLow = xmin[2]
         zHigh = xmax[2]
 
-        coef = numpy.zeros((2, 2, 2, 3))
+        coef = np.zeros((2, 2, 2, 3))
         coef[0, 0, 0, :] = [xLow, yLow, zLow]
         coef[1, 0, 0, :] = [xHigh, yLow, zLow]
         coef[0, 1, 0, :] = [xLow, yHigh, zLow]
@@ -1131,7 +1131,7 @@ def bilinearSurface(*args):
         # One argument passed in ... assume its X
         if len(args[0]) != 4:
             raise Error("A single argument passed to bilinear surface must contain 4 points and be of size (4, 3)")
-        coef = numpy.zeros((2, 2, 3))
+        coef = np.zeros((2, 2, 3))
         coef[0, 0] = args[0][0]
         coef[1, 0] = args[0][1]
         coef[0, 1] = args[0][2]
@@ -1139,7 +1139,7 @@ def bilinearSurface(*args):
         return Surface(coef=coef, tu=[0, 0, 1, 1], tv=[0, 0, 1, 1], ku=2, kv=2)
     else:
         # Assume 4 arguments
-        coef = numpy.zeros([2, 2, 3])
+        coef = np.zeros([2, 2, 3])
         coef[0, 0] = args[0]
         coef[1, 0] = args[1]
         coef[0, 1] = args[3]
@@ -1167,7 +1167,7 @@ def line(*args, **kwargs):
         elif "dir" in kwargs:
             # We have point and direction
             if "length" in kwargs:
-                x2 = args[0] + kwargs["dir"] / numpy.linalg.norm(kwargs["dir"]) * kwargs["length"]
+                x2 = args[0] + kwargs["dir"] / np.linalg.norm(kwargs["dir"]) * kwargs["length"]
             else:
                 x2 = args[0] + kwargs["dir"]
 

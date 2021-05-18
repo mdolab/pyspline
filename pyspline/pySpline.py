@@ -10,7 +10,7 @@ Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
 import warnings
 
 # External modules
-import numpy
+import numpy as np
 
 # Local modules
 from .pyCurve import Curve
@@ -65,8 +65,8 @@ def trilinearVolume(*args):
     if len(args) == 1:
         return Volume(coef=args[0], tu=tu, tv=tv, tw=tw, ku=ku, kv=kv, kw=kw)
     elif len(args) == 2:
-        xmin = numpy.array(args[0]).astype("d")
-        xmax = numpy.array(args[1]).astype("d")
+        xmin = np.array(args[0]).astype("d")
+        xmax = np.array(args[1]).astype("d")
 
         xLow = xmin[0]
         xHigh = xmax[0]
@@ -75,7 +75,7 @@ def trilinearVolume(*args):
         zLow = xmin[2]
         zHigh = xmax[2]
 
-        coef = numpy.zeros((2, 2, 2, 3))
+        coef = np.zeros((2, 2, 2, 3))
         coef[0, 0, 0, :] = [xLow, yLow, zLow]
         coef[1, 0, 0, :] = [xHigh, yLow, zLow]
         coef[0, 1, 0, :] = [xLow, yHigh, zLow]
@@ -123,7 +123,7 @@ def bilinearSurface(*args):
         # One argument passed in ... assume its X
         if len(args[0]) != 4:
             raise Error("A single argument passed to bilinear surface must contain 4 points and be of size (4, 3)")
-        coef = numpy.zeros((2, 2, 3))
+        coef = np.zeros((2, 2, 3))
         coef[0, 0] = args[0][0]
         coef[1, 0] = args[0][1]
         coef[0, 1] = args[0][2]
@@ -131,7 +131,7 @@ def bilinearSurface(*args):
         return Surface(coef=coef, tu=[0, 0, 1, 1], tv=[0, 0, 1, 1], ku=2, kv=2)
     else:
         # Assume 4 arguments
-        coef = numpy.zeros([2, 2, 3])
+        coef = np.zeros([2, 2, 3])
         coef[0, 0] = args[0]
         coef[1, 0] = args[1]
         coef[0, 1] = args[3]
@@ -159,7 +159,7 @@ def line(*args, **kwargs):
         elif "dir" in kwargs:
             # We have point and direction
             if "length" in kwargs:
-                x2 = args[0] + kwargs["dir"] / numpy.linalg.norm(kwargs["dir"]) * kwargs["length"]
+                x2 = args[0] + kwargs["dir"] / np.linalg.norm(kwargs["dir"]) * kwargs["length"]
             else:
                 x2 = args[0] + kwargs["dir"]
 

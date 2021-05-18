@@ -3,12 +3,12 @@
 import time
 
 # External modules
-import numpy
+import numpy as np
 
 # First party modules
 from pyspline import pySpline
 
-X = numpy.zeros((2, 2, 2, 3))
+X = np.zeros((2, 2, 2, 3))
 X[0, 0, 0, :] = [0, 0, 0]
 X[1, 0, 0, :] = [1.1, -0.1, -0.1]
 X[1, 1, 0, :] = [0.9, 1.05, 0.2]
@@ -24,11 +24,11 @@ vol.writeTecplot("vol.dat", orig=True)
 
 # Generate random data
 M = 10000
-Y = numpy.zeros((M, 3))
+Y = np.zeros((M, 3))
 for i in range(M):
-    Y[i, 0] = numpy.random.random() * 0.5 + 0.25
-    Y[i, 1] = numpy.random.random() * 0.5 + 0.25
-    Y[i, 2] = numpy.random.random() * 0.5 + 0.25
+    Y[i, 0] = np.random.random() * 0.5 + 0.25
+    Y[i, 1] = np.random.random() * 0.5 + 0.25
+    Y[i, 2] = np.random.random() * 0.5 + 0.25
 
 
 timeA = time.time()
