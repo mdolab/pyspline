@@ -183,11 +183,11 @@ class Curve(object):
                 self.t[2 * i + 3] = u[i] / u[self.N - 1]
 
         else:  # lms or interpolate function
-            assert "k" in kwargs and (
-                "X" in kwargs or "x" in kwargs
-            ), "Error: At least spline order, k and X (or x=, y=) \
-MUST be defined for (interpolation) spline creation.\
-nCtl=<number of control points> must be specified for a LMS fit"
+            if not ("k" in kwargs and ("X" in kwargs or "x" in kwargs)):
+                raise ValueError(
+                    "At least spline order, k and X (or x=, y=) MUST be defined for (interpolation) spline creation. "
+                    + "nCtl=<number of control points> must be specified for a LMS fit"
+                )
             self.origData = True
             if "X" in kwargs:
                 self.X = np.atleast_2d(kwargs["X"])
