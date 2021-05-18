@@ -20,13 +20,12 @@ module. The documentation for this package is summarized below:
    building
    regression
    examples
-   API
 
+.. toctree::
+   :caption: API Reference
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   API/pySpline
+   API/curve
+   API/surface
+   API/volume
+   API/utils
