@@ -6,9 +6,6 @@ Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
 :class:`Volume`
 """
 
-# Standard Python modules
-import warnings
-
 # External modules
 import numpy as np
 
@@ -18,25 +15,9 @@ from .pySurface import Surface
 from .pyVolume import Volume
 from .utils import Error
 
-
-# For backwards compatibility, the old curve, surface and volume definitions:
-def curve(*args, **kwargs):
-    warnings.warn("pySpline.curve has been changed to Curve()")
-    return Curve(*args, **kwargs)
-
-
-def surface(*args, **kwargs):
-    warnings.warn("pySpline.surface has been changed to Surface()")
-    return Surface(*args, **kwargs)
-
-
-def volume(*args, **kwargs):
-    warnings.warn("pySpline.volume has been changed to Volume()")
-    return Volume(*args, **kwargs)
-
-    # ----------------------------------------------------------------------
-    #                     Misc Helper Functions
-    # ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+#                     Misc Helper Functions
+# ----------------------------------------------------------------------
 
 
 def trilinearVolume(*args):
