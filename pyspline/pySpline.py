@@ -13,7 +13,7 @@ import warnings
 import numpy
 
 # Local modules
-from . import libspline
+from . import libspline  # noqa: F401
 from .pyCurve import Curve
 from .pySurface import Surface
 from .pyVolume import Volume
