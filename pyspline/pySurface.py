@@ -5,7 +5,7 @@ from scipy.sparse import linalg
 # Local modules
 from . import libspline
 from .pyCurve import Curve
-from .utils import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot, writeTecplot1D, writeTecplot2D
+from .pySpline import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot, writeTecplot1D, writeTecplot2D
 
 
 class Surface(object):

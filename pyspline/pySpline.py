@@ -1,6 +1,20 @@
+"""
+pySpline
+--------
+
+Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
+:class:`Volume`
+"""
+
 # External modules
 import numpy as np
 from scipy import sparse
+
+# Local modules
+from . import libspline  # noqa: F401
+from .pyCurve import Curve
+from .pySurface import Surface
+from .pyVolume import Volume
 
 
 class Error(Exception):
@@ -211,27 +225,6 @@ def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
         return tmp.squeeze()
     else:
         return tmp
-"""
-pySpline
---------
-
-Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
-:class:`Volume`
-"""
-
-# External modules
-import numpy as np
-
-# Local modules
-from . import libspline  # noqa: F401
-from .pyCurve import Curve
-from .pySurface import Surface
-from .pyVolume import Volume
-from .utils import Error
-
-# ----------------------------------------------------------------------
-#                     Misc Helper Functions
-# ----------------------------------------------------------------------
 
 
 def trilinearVolume(*args):

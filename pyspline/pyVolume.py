@@ -5,8 +5,8 @@ from scipy.sparse import linalg
 # Local modules
 from . import libspline
 from .pyCurve import Curve
+from .pySpline import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot, writeTecplot3D
 from .pySurface import Surface
-from .utils import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot, writeTecplot3D
 
 
 class Volume(object):

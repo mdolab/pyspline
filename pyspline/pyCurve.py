@@ -4,7 +4,7 @@ from scipy.sparse import linalg
 
 # Local modules
 from . import libspline
-from .utils import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot, writeTecplot1D
+from .pySpline import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot, writeTecplot1D
 
 
 class Curve(object):
