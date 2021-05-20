@@ -1,5 +1,5 @@
 # External modules
-import numpy
+import numpy as np
 from scipy.sparse import linalg
 
 # Local modules
@@ -16,7 +16,7 @@ class Surface(object):
 
     * **Creation**: Create an instance of the Surface class
       directly by supplying the required information: kwargs MUST
-      contain the folloiwng information: ``ku, kv, tu, tv, coef``.
+      contain the following information: ``ku, kv, tu, tv, coef``.
 
     * **LMS/Interpolation**: Create an instance of the Surface class by
       using an interpolating spline to given data points or a LMS
@@ -24,7 +24,7 @@ class Surface(object):
 
       1. ``ku`` and ``kv`` Spline Orders
 
-      2. ``X`` real arry size (Nu, Nv, nDim) of data to fit. **OR**
+      2. ``X`` real array size (Nu, Nv, nDim) of data to fit. **OR**
           1. ``x`` (2D) and ``y`` (2D)  for 2D surface interpolation
           2. ``x`` (3D) and ``y`` (3D) and ``z`` (3) for 3D surface
 
@@ -109,10 +109,10 @@ class Surface(object):
 
             # Do some checking on the number of control points
             if "X" in kwargs:
-                self.X = numpy.array(kwargs["X"])
+                self.X = np.array(kwargs["X"])
                 self.nDim = self.X.shape[2]
             elif "x" in kwargs and "y" in kwargs and "z" in kwargs:
-                self.X = numpy.zeros((kwargs["x"].shape[0], kwargs["x"].shape[1], 3))
+                self.X = np.zeros((kwargs["x"].shape[0], kwargs["x"].shape[1], 3))
                 self.X[:, :, 0] = kwargs["x"]
                 self.X[:, :, 1] = kwargs["y"]
                 self.X[:, :, 2] = kwargs["z"]
@@ -127,13 +127,13 @@ class Surface(object):
             self.u, self.v, self.U, self.V = self.calcParameterization()
 
             # Contains the T^u_kl, T^v_kl and D^uv_kl values
-            Td = numpy.zeros((self.Nu, self.Nv, 5, 3))
+            Td = np.zeros((self.Nu, self.Nv, 5, 3))
 
             def getT(Q, s):
                 N = len(Q)
-                T = numpy.zeros_like(Q)
-                qq = numpy.zeros_like(Q)
-                deltaS = numpy.zeros(N)
+                T = np.zeros_like(Q)
+                qq = np.zeros_like(Q)
+                deltaS = np.zeros(N)
                 for i in range(1, N):
                     deltaS[i] = s[i] - s[i - 1]
                     qq[i, :] = Q[i] - Q[i - 1]
@@ -146,11 +146,11 @@ class Surface(object):
                 T[0] = 2 * qq[1] / deltaS[1] - T[1]
                 T[-1] = 2 * qq[-1] / deltaS[-1] - T[-2]
                 for i in range(N):
-                    T[i] /= numpy.linalg.norm(T[i]) + 1e-16
+                    T[i] /= np.linalg.norm(T[i]) + 1e-16
                 return T
 
             def interpKnots(u):
-                t = numpy.zeros(2 * len(u) + 2 + 2)
+                t = np.zeros(2 * len(u) + 2 + 2)
                 t[0:4] = 0.0
                 t[-4:] = 1.0
 
@@ -163,7 +163,7 @@ class Surface(object):
 
             def bezierCoef(Q, T, length, s):
                 N = len(Q)
-                coef = numpy.zeros((3 * N - 2, self.nDim))
+                coef = np.zeros((3 * N - 2, self.nDim))
                 for i in range(N):
                     coef[3 * i] = Q[i].copy()
 
@@ -176,14 +176,14 @@ class Surface(object):
             def getLength(Q):
                 length = 0
                 for i in range(len(Q) - 1):
-                    length += numpy.linalg.norm(Q[i + 1] - Q[i])
+                    length += np.linalg.norm(Q[i + 1] - Q[i])
                 return length
 
             def getD(Q, s):
                 N = len(Q)
-                D = numpy.zeros_like(Q)
-                dd = numpy.zeros_like(D)
-                deltaS = numpy.zeros(N)
+                D = np.zeros_like(Q)
+                dd = np.zeros_like(D)
+                deltaS = np.zeros(N)
                 for i in range(1, N):
                     deltaS[i] = s[i] - s[i - 1]
                     dd[i] = (Q[i] - Q[i - 1]) / (deltaS[i] + 1e-16)
@@ -198,8 +198,8 @@ class Surface(object):
 
             # -------- Algorithm A9.5 -------------
 
-            rowLen = numpy.zeros(self.Nv)
-            colLen = numpy.zeros(self.Nu)
+            rowLen = np.zeros(self.Nv)
+            colLen = np.zeros(self.Nu)
 
             for j in range(self.Nv):
                 # Compute the U-tangent values
@@ -216,7 +216,7 @@ class Surface(object):
 
             # This contains all the coef...including the ones we will
             # eventually knock out.
-            coef = numpy.zeros((3 * self.Nu - 2, 3 * self.Nv - 2, self.nDim))
+            coef = np.zeros((3 * self.Nu - 2, 3 * self.Nv - 2, self.nDim))
 
             scaledParams = kwargs.pop("scaledParams", True)
 
@@ -243,7 +243,7 @@ class Surface(object):
             Td = 0.5 * (Td[:, :, 3] + Td[:, :, 4])
             for i in range(self.Nu):
                 for j in range(self.Nv):
-                    Td[i, j] /= numpy.linalg.norm(Td[i, j]) + 1e-16
+                    Td[i, j] /= np.linalg.norm(Td[i, j]) + 1e-16
 
             for j in range(self.Nv - 1):
                 for i in range(self.Nu - 1):
@@ -268,7 +268,7 @@ class Surface(object):
             # just the values we need. We can do this with *super*
             # fancy indexing.
             def getIndex(N):
-                ind = numpy.zeros(2 * (N - 1) + 2, "intc")
+                ind = np.zeros(2 * (N - 1) + 2, "intc")
                 ind[0] = 0
                 ind[-1] = 3 * N - 3
                 ii = 1
@@ -296,7 +296,7 @@ class Surface(object):
 
         else:  # We have LMS/Interpolate
             # Do some checking on the number of control points
-            assert (
+            if not (
                 "ku" in kwargs
                 and "kv" in kwargs
                 and (
@@ -305,28 +305,30 @@ class Surface(object):
                     or ("x" in kwargs and "y" in kwargs)
                     or ("x" in kwargs and "y" in kwargs and "z" in kwargs)
                 )
-            ), "Error: ku, kv, and X (or x or x and y or x and y and z \
-MUST be defined for task lms or interpolate"
+            ):
+                raise ValueError(
+                    "ku, kv, and X (or x, or x and y, or x and y and z MUST be defined for task lms or interpolate"
+                )
 
             if "X" in kwargs:
-                self.X = numpy.array(kwargs["X"])
+                self.X = np.array(kwargs["X"])
                 if len(self.X.shape) == 1:
                     self.nDim = 1
                 else:
                     self.nDim = self.X.shape[2]
             elif "x" in kwargs and "y" in kwargs and "z" in kwargs:
-                self.X = numpy.zeros((kwargs["x"].shape[0], kwargs["x"].shape[1], 3))
+                self.X = np.zeros((kwargs["x"].shape[0], kwargs["x"].shape[1], 3))
                 self.X[:, :, 0] = kwargs["x"]
                 self.X[:, :, 1] = kwargs["y"]
                 self.X[:, :, 2] = kwargs["z"]
                 self.nDim = 3
             elif "x" in kwargs and "y" in kwargs:
-                self.X = numpy.zeros((kwargs["x"].shape[0], kwargs["x"].shape[1], 2))
+                self.X = np.zeros((kwargs["x"].shape[0], kwargs["x"].shape[1], 2))
                 self.X[:, :, 0] = kwargs["x"]
                 self.X[:, :, 1] = kwargs["y"]
                 self.nDim = 2
             elif "x" in kwargs:
-                self.X = numpy.zeros((kwargs["x"].shape[0], kwargs["x"].shape[1], 1))
+                self.X = np.zeros((kwargs["x"].shape[0], kwargs["x"].shape[1], 1))
                 self.X[:, :, 0] = kwargs["x"]
                 self.nDim = 1
             # enf if
@@ -374,15 +376,14 @@ MUST be defined for task lms or interpolate"
                 self.v = checkInput(kwargs["v"], "v", float, 1, (self.Nv,))
                 self.u = self.u / self.u[-1]
                 self.v = self.v / self.v[-1]
-                [self.V, self.U] = numpy.meshgrid(self.v, self.u)
+                [self.V, self.U] = np.meshgrid(self.v, self.u)
             else:
                 if self.nDim == 3:
                     self.u, self.v, self.U, self.V = self.calcParameterization()
                 else:
                     raise Error(
-                        "Automatic parameterization of ONLY available\
- for spatial data in 3 dimensions. Please supply u and v key word arguments\
- otherwise."
+                        "Automatic parameterization of ONLY available for spatial data in 3 dimensions. "
+                        + "Please supply u and v key word arguments otherwise."
                     )
 
             self.umin = 0
@@ -390,7 +391,7 @@ MUST be defined for task lms or interpolate"
             self.vmin = 0
             self.vmax = 1
             self.calcKnots()
-            self.coef = numpy.zeros((self.nCtlu, self.nCtlv, self.nDim))
+            self.coef = np.zeros((self.nCtlu, self.nCtlv, self.nDim))
             if recompute:
                 self.recompute()
 
@@ -403,7 +404,7 @@ MUST be defined for task lms or interpolate"
 
         N = _assembleMatrix(vals, colInd, rowPtr, (self.Nu * self.Nv, self.nCtlu * self.nCtlv))
 
-        self.coef = numpy.zeros((self.nCtlu, self.nCtlv, self.nDim))
+        self.coef = np.zeros((self.nCtlu, self.nCtlv, self.nDim))
         if self.interp:
             # Factorize once for efficiency
             solve = linalg.dsolve.factorized(N)
@@ -420,20 +421,20 @@ MUST be defined for task lms or interpolate"
     def calcParameterization(self):
         """Compute a spatial parameterization"""
 
-        u = numpy.zeros(self.Nu, "d")
-        U = numpy.zeros((self.Nu, self.Nv), "d")
+        u = np.zeros(self.Nu, "d")
+        U = np.zeros((self.Nu, self.Nv), "d")
         singularSounter = 0
         # loop over each v, and average the 'u' parameter
         for j in range(self.Nv):
-            temp = numpy.zeros(self.Nu, "d")
+            temp = np.zeros(self.Nu, "d")
 
             for i in range(self.Nu - 1):
-                temp[i + 1] = temp[i] + numpy.linalg.norm(self.X[i, j] - self.X[i + 1, j])
+                temp[i + 1] = temp[i] + np.linalg.norm(self.X[i, j] - self.X[i + 1, j])
 
             if temp[-1] == 0:  # We have a singular point
                 singularSounter += 1
                 temp[:] = 0.0
-                U[:, j] = numpy.linspace(0, 1, self.Nu)
+                U[:, j] = np.linspace(0, 1, self.Nu)
             else:
                 temp = temp / temp[-1]
                 U[:, j] = temp.copy()
@@ -442,19 +443,19 @@ MUST be defined for task lms or interpolate"
 
         u = u / (self.Nv - singularSounter)  # divide by the number of 'j's we had
 
-        v = numpy.zeros(self.Nv, "d")
-        V = numpy.zeros((self.Nu, self.Nv), "d")
+        v = np.zeros(self.Nv, "d")
+        V = np.zeros((self.Nu, self.Nv), "d")
         singularSounter = 0
         # loop over each v, and average the 'u' parameter
         for i in range(self.Nu):
-            temp = numpy.zeros(self.Nv, "d")
+            temp = np.zeros(self.Nv, "d")
             for j in range(self.Nv - 1):
-                temp[j + 1] = temp[j] + numpy.linalg.norm(self.X[i, j] - self.X[i, j + 1])
+                temp[j + 1] = temp[j] + np.linalg.norm(self.X[i, j] - self.X[i, j + 1])
 
             if temp[-1] == 0:  # We have a singular point
                 singularSounter += 1
                 temp[:] = 0.0
-                V[i, :] = numpy.linspace(0, 1, self.Nv)
+                V[i, :] = np.linspace(0, 1, self.Nv)
             else:
                 temp = temp / temp[-1]
                 V[i, :] = temp.copy()
@@ -469,8 +470,8 @@ MUST be defined for task lms or interpolate"
         """Determine the knots depending on if it is inerpolated or
         an LMS fit"""
         if self.interp:
-            self.tu = libspline.knots_interp(self.u, numpy.array([], "d"), self.ku)
-            self.tv = libspline.knots_interp(self.v, numpy.array([], "d"), self.kv)
+            self.tu = libspline.knots_interp(self.u, np.array([], "d"), self.ku)
+            self.tv = libspline.knots_interp(self.v, np.array([], "d"), self.kv)
         else:
             self.tu = libspline.knots_lms(self.u, self.nCtlu, self.ku)
             self.tv = libspline.knots_lms(self.v, self.nCtlv, self.kv)
@@ -560,28 +561,28 @@ MUST be defined for task lms or interpolate"
             raise Error("No original data for this surface")
 
         if edge == 0:
-            if numpy.mod(self.Nu, 2) == 1:  # Its odd
+            if np.mod(self.Nu, 2) == 1:  # Its odd
                 mid = (self.Nu - 1) // 2
                 return self.X[0, 0], self.X[mid, 0], self.X[-1, 0]
             else:
                 Xmid = 0.5 * (self.X[self.Nu // 2, 0] + self.X[self.Nu // 2 - 1, 0])
                 return self.X[0, 0], Xmid, self.X[-1, 0]
         elif edge == 1:
-            if numpy.mod(self.Nu, 2) == 1:  # Its odd
+            if np.mod(self.Nu, 2) == 1:  # Its odd
                 mid = (self.Nu - 1) // 2
                 return self.X[0, -1], self.X[mid, -1], self.X[-1, -1]
             else:
                 Xmid = 0.5 * (self.X[self.Nu // 2, -1] + self.X[self.Nu // 2 - 1, -1])
                 return self.X[0, -1], Xmid, self.X[-1, -1]
         elif edge == 2:
-            if numpy.mod(self.Nv, 2) == 1:  # Its odd
+            if np.mod(self.Nv, 2) == 1:  # Its odd
                 mid = (self.Nv - 1) // 2
                 return self.X[0, 0], self.X[0, mid], self.X[0, -1]
             else:
                 Xmid = 0.5 * (self.X[0, self.Nv // 2] + self.X[0, self.Nv // 2 - 1])
                 return self.X[0, 0], Xmid, self.X[0, -1]
         elif edge == 3:
-            if numpy.mod(self.Nv, 2) == 1:  # Its odd
+            if np.mod(self.Nv, 2) == 1:  # Its odd
                 mid = (self.Nv - 1) // 2
                 return self.X[-1, 0], self.X[-1, mid], self.X[-1, -1]
             else:
@@ -660,7 +661,7 @@ MUST be defined for task lms or interpolate"
             # so we know how big to make the new coef:
             actualR, tNew, coefNew, breakPt = libspline.insertknot(s, r, self.tu, self.ku, self.coef[:, 0].T)
 
-            newCoef = numpy.zeros((self.nCtlu + actualR, self.nCtlv, self.nDim))
+            newCoef = np.zeros((self.nCtlu + actualR, self.nCtlv, self.nDim))
 
             for j in range(self.nCtlv):
                 actualR, tNew, coefSlice, breakPt = libspline.insertknot(s, r, self.tu, self.ku, self.coef[:, j].T)
@@ -672,7 +673,7 @@ MUST be defined for task lms or interpolate"
         elif direction == "v":
             actualR, tNew, coefNew, breakPt = libspline.insertknot(s, r, self.tv, self.kv, self.coef[0, :].T)
 
-            newCoef = numpy.zeros((self.nCtlu, self.nCtlv + actualR, self.nDim))
+            newCoef = np.zeros((self.nCtlu, self.nCtlv + actualR, self.nDim))
 
             for i in range(self.nCtlu):
                 actualR, tNew, coefSlice, breakPt = libspline.insertknot(s, r, self.tv, self.kv, self.coef[i, :].T)
@@ -722,8 +723,8 @@ MUST be defined for task lms or interpolate"
 
             tt = self.tu[breakPt]
             # Process knot vectors:
-            t1 = numpy.hstack((self.tu[0 : breakPt + self.ku - 1].copy(), tt)) / tt
-            t2 = (numpy.hstack((tt, self.tu[breakPt:].copy())) - tt) / (1.0 - tt)
+            t1 = np.hstack((self.tu[0 : breakPt + self.ku - 1].copy(), tt)) / tt
+            t2 = (np.hstack((tt, self.tu[breakPt:].copy())) - tt) / (1.0 - tt)
 
             coef1 = self.coef[0:breakPt, :, :].copy()
             coef2 = self.coef[breakPt - 1 :, :, :].copy()
@@ -741,8 +742,8 @@ MUST be defined for task lms or interpolate"
 
             tt = self.tv[breakPt]
             # Process knot vectors:
-            t1 = numpy.hstack((self.tv[0 : breakPt + self.kv - 1].copy(), tt)) / tt
-            t2 = (numpy.hstack((tt, self.tv[breakPt:].copy())) - tt) / (1.0 - tt)
+            t1 = np.hstack((self.tv[0 : breakPt + self.kv - 1].copy(), tt)) / tt
+            t2 = (np.hstack((tt, self.tv[breakPt:].copy())) - tt) / (1.0 - tt)
 
             coef1 = self.coef[:, 0:breakPt, :].copy()
             coef2 = self.coef[:, breakPt - 1 :, :].copy()
@@ -804,13 +805,13 @@ MUST be defined for task lms or interpolate"
             u,v are a 1D list, return is (N,nDim) etc.
         """
 
-        u = numpy.array(u).T
-        v = numpy.array(v).T
+        u = np.array(u).T
+        v = np.array(v).T
         if not u.shape == v.shape:
             raise Error("u and v must have the same shape")
 
         vals = libspline.eval_surface(
-            numpy.atleast_2d(u), numpy.atleast_2d(v), self.tu, self.tv, self.ku, self.kv, self.coef.T
+            np.atleast_2d(u), np.atleast_2d(v), self.tu, self.tv, self.ku, self.kv, self.coef.T
         )
         return vals.squeeze().T
 
@@ -830,11 +831,11 @@ MUST be defined for task lms or interpolate"
             Spline derivative evaluation at u,vall points u,v. Shape
             depend on the input.
         """
-        u = numpy.array(u)
-        v = numpy.array(v)
+        u = np.array(u)
+        v = np.array(v)
         if not u.shape == v.shape:
             raise Error("u and v must have the same shape")
-        if not numpy.ndim(u) == 0:
+        if not np.ndim(u) == 0:
             raise Error("getDerivative only accepts scalar arguments")
 
         deriv = libspline.eval_surface_deriv(u, v, self.tu, self.tv, self.ku, self.kv, self.coef.T)
@@ -859,11 +860,11 @@ MUST be defined for task lms or interpolate"
             Spline derivative evaluation at u,vall points u,v. Shape
             depend on the input.
         """
-        u = numpy.array(u)
-        v = numpy.array(v)
+        u = np.array(u)
+        v = np.array(v)
         if not u.shape == v.shape:
             raise Error("u and v must have the same shape")
-        if not numpy.ndim(u) == 0:
+        if not np.ndim(u) == 0:
             raise Error("getSecondDerivative only accepts scalar arguments")
 
         deriv = libspline.eval_surface_deriv2(u, v, self.tu, self.tv, self.ku, self.kv, self.coef.T)
@@ -886,8 +887,8 @@ MUST be defined for task lms or interpolate"
         cy = self.coef[:, :, 1].flatten()
         cz = self.coef[:, :, 2].flatten()
 
-        Xmin = numpy.array([min(cx), min(cy), min(cz)])
-        Xmax = numpy.array([max(cx), max(cy), max(cz)])
+        Xmin = np.array([min(cx), min(cy), min(cz)])
+        Xmax = np.array([max(cx), max(cy), max(cz)])
 
         return Xmin, Xmax
 
@@ -923,23 +924,23 @@ MUST be defined for task lms or interpolate"
             This is simply ||surface(u,v) - X0||_2.
         """
 
-        x0 = numpy.atleast_2d(x0)
+        x0 = np.atleast_2d(x0)
         if "u" in kwargs and "v" in kwargs:
-            u = numpy.atleast_1d(kwargs["u"])
-            v = numpy.atleast_1d(kwargs["v"])
+            u = np.atleast_1d(kwargs["u"])
+            v = np.atleast_1d(kwargs["v"])
         else:
-            u = -1 * numpy.ones(len(x0))
-            v = -1 * numpy.ones(len(x0))
+            u = -1 * np.ones(len(x0))
+            v = -1 * np.ones(len(x0))
 
         if not len(x0) == len(u) == len(v):
             raise Error("The length of x0 and u, v must be the same")
 
         # If necessary get brute-force starting point
-        if numpy.any(u < 0) or numpy.any(u > 1) or numpy.any(v < 0):
+        if np.any(u < 0) or np.any(u > 1) or np.any(v < 0):
             self.computeData()
             u, v = libspline.point_surface_start(x0.T, self.udata, self.vdata, self.data.T)
 
-        D = numpy.zeros_like(x0)
+        D = np.zeros_like(x0)
         for i in range(len(x0)):
             u[i], v[i], D[i] = libspline.point_surface(
                 x0[i], self.tu, self.tv, self.ku, self.kv, self.coef.T, nIter, eps, u[i], v[i]
@@ -991,7 +992,7 @@ MUST be defined for task lms or interpolate"
         eps = checkInput(eps, "eps", float, 0)
 
         # If necessary get brute-force starting point
-        if numpy.any(u < 0) or numpy.any(u > 1) or numpy.any(v < 0):
+        if np.any(u < 0) or np.any(u > 1) or np.any(v < 0):
             self.computeData()
             inCurve.computeData()
             s, u, v = libspline.curve_surface_start(inCurve.data.T, inCurve.sdata, self.data.T, self.udata, self.vdata)
@@ -1013,13 +1014,13 @@ MUST be defined for task lms or interpolate"
             self.udata = self.edgeCurves[0].sdata
             self.edgeCurves[2].calcInterpolatedGrevillePoints()
             self.vdata = self.edgeCurves[2].sdata
-            [V, U] = numpy.meshgrid(self.vdata, self.udata)
+            [V, U] = np.meshgrid(self.vdata, self.udata)
             self.data = self.getValue(U, V)
 
     def writeDirections(self, handle, isurf):
         """Write out and indication of the surface direction"""
         if self.nCtlu >= 3 and self.nCtlv >= 3:
-            data = numpy.zeros((4, self.nDim))
+            data = np.zeros((4, self.nDim))
             data[0] = self.coef[1, 2]
             data[1] = self.coef[1, 1]
             data[2] = self.coef[2, 1]
@@ -1071,7 +1072,7 @@ MUST be defined for task lms or interpolate"
         paraEntries = 13 + (len(self.tu)) + (len(self.tv)) + self.nCtlu * self.nCtlv + 3 * self.nCtlu * self.nCtlv + 1
 
         paraLines = (paraEntries - 10) // 3 + 2
-        if numpy.mod(paraEntries - 10, 3) != 0:
+        if np.mod(paraEntries - 10, 3) != 0:
             paraLines += 1
 
         handle.write("     128%8d       0       0       1       0       0       000000001D%7d\n" % (Pcount, Dcount))
@@ -1099,8 +1100,8 @@ MUST be defined for task lms or interpolate"
 
         for i in range(len(self.tu)):
             pos_counter += 1
-            handle.write("%20.12g," % (numpy.real(self.tu[i])))
-            if numpy.mod(pos_counter, 3) == 0:
+            handle.write("%20.12g," % (np.real(self.tu[i])))
+            if np.mod(pos_counter, 3) == 0:
                 handle.write("  %7dP%7d\n" % (Pcount, counter))
                 counter += 1
                 pos_counter = 0
@@ -1109,8 +1110,8 @@ MUST be defined for task lms or interpolate"
 
         for i in range(len(self.tv)):
             pos_counter += 1
-            handle.write("%20.12g," % (numpy.real(self.tv[i])))
-            if numpy.mod(pos_counter, 3) == 0:
+            handle.write("%20.12g," % (np.real(self.tv[i])))
+            if np.mod(pos_counter, 3) == 0:
                 handle.write("  %7dP%7d\n" % (Pcount, counter))
                 counter += 1
                 pos_counter = 0
@@ -1120,7 +1121,7 @@ MUST be defined for task lms or interpolate"
         for i in range(self.nCtlu * self.nCtlv):
             pos_counter += 1
             handle.write("%20.12g," % (1.0))
-            if numpy.mod(pos_counter, 3) == 0:
+            if np.mod(pos_counter, 3) == 0:
                 handle.write("  %7dP%7d\n" % (Pcount, counter))
                 counter += 1
                 pos_counter = 0
@@ -1131,8 +1132,8 @@ MUST be defined for task lms or interpolate"
             for i in range(self.nCtlu):
                 for idim in range(3):
                     pos_counter += 1
-                    handle.write("%20.12g," % (numpy.real(self.coef[i, j, idim])))
-                    if numpy.mod(pos_counter, 3) == 0:
+                    handle.write("%20.12g," % (np.real(self.coef[i, j, idim])))
+                    if np.mod(pos_counter, 3) == 0:
                         handle.write("  %7dP%7d\n" % (Pcount, counter))
                         counter += 1
                         pos_counter = 0
@@ -1145,15 +1146,15 @@ MUST be defined for task lms or interpolate"
         for i in range(4):
             pos_counter += 1
             if i == 0:
-                handle.write("%20.12g," % (numpy.real(self.umin)))
+                handle.write("%20.12g," % (np.real(self.umin)))
             if i == 1:
-                handle.write("%20.12g," % (numpy.real(self.umax)))
+                handle.write("%20.12g," % (np.real(self.umax)))
             if i == 2:
-                handle.write("%20.12g," % (numpy.real(self.vmin)))
+                handle.write("%20.12g," % (np.real(self.vmin)))
             if i == 3:
                 # semi-colon for the last entity
-                handle.write("%20.12g;" % (numpy.real(self.vmax)))
-            if numpy.mod(pos_counter, 3) == 0:
+                handle.write("%20.12g;" % (np.real(self.vmax)))
+            if np.mod(pos_counter, 3) == 0:
                 handle.write("  %7dP%7d\n" % (Pcount, counter))
                 counter += 1
                 pos_counter = 0

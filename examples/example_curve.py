@@ -2,7 +2,7 @@
 # pySpline curve class
 
 # External modules
-import numpy
+import numpy as np
 
 # First party modules
 from pyspline import pySpline
@@ -10,17 +10,17 @@ from pyspline import pySpline
 # Get some Helix-like data
 
 n = 100
-theta = numpy.linspace(0.0000, 2 * numpy.pi, n)
-x = numpy.cos(theta)
-y = numpy.sin(theta)
-z = numpy.linspace(0, 1, n)
+theta = np.linspace(0.0000, 2 * np.pi, n)
+x = np.cos(theta)
+y = np.sin(theta)
+z = np.linspace(0, 1, n)
 print("Helix Data")
 curve = pySpline.Curve(x=x, y=y, z=z, k=4, Nctl=16, niter=100)
 curve.writeTecplot("helix.dat")
 
 # Load naca0012 data
 print("Naca 0012 data")
-x, y = numpy.loadtxt("naca0012", unpack=True)
+x, y = np.loadtxt("naca0012", unpack=True)
 curve = pySpline.Curve(x=x, y=y, k=4, Nctl=11, niter=500)
 curve.writeTecplot("naca_data.dat")
 

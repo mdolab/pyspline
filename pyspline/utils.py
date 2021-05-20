@@ -1,5 +1,5 @@
 # External modules
-import numpy
+import numpy as np
 from scipy import sparse
 
 
@@ -34,7 +34,7 @@ def writeTecplot1D(handle, name, data):
     name : str
         Name of the zone to use
     data : array of size (N, ndim)
-        1D aray of data to write to file
+        1D array of data to write to file
     """
     nx = data.shape[0]
     ndim = data.shape[1]
@@ -55,8 +55,8 @@ def writeTecplot2D(handle, name, data):
         Open file handle
     name : str
         Name of the zone to use
-    data : 2D numpy array of sive (nx, ny, ndim)
-        2D aray of data to write to file
+    data : 2D np array of size (nx, ny, ndim)
+        2D array of data to write to file
     """
     nx = data.shape[0]
     ny = data.shape[1]
@@ -79,8 +79,8 @@ def writeTecplot3D(handle, name, data):
         Open file handle
     name : str
         Name of the zone to use
-    data : 3D numpy array of sive (nx, ny, nz, ndim)
-        3D aray of data to write to file
+    data : 3D np array of size (nx, ny, nz, ndim)
+        3D array of data to write to file
     """
     nx = data.shape[0]
     ny = data.shape[1]
@@ -187,17 +187,17 @@ def checkInput(inputVal, inputName, dataType, dataRank, dataShape=None):
     """
 
     # Check the data rank:
-    rank = numpy.ndim(inputVal)
+    rank = np.ndim(inputVal)
     if rank != dataRank:
         raise Error("'%s' must have rank %d. Input was of rank %d." % (inputName, dataRank, rank))
 
     # Check the data type
-    inputVal = numpy.array(inputVal)
+    inputVal = np.array(inputVal)
     tmp = inputVal.astype(dataType)
 
     # Check if the values are the same:
     diff = (tmp - inputVal).flatten()
-    if numpy.dot(diff, diff) > 10 * numpy.finfo(1.0).eps:
+    if np.dot(diff, diff) > 10 * np.finfo(1.0).eps:
         raise Error("'%s' could not be safely cast to required type without losing information" % inputName)
 
     # Finally check that the shape is correct:

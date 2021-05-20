@@ -1,5 +1,5 @@
 # External modules
-import numpy
+import numpy as np
 from scipy.sparse import linalg
 
 # Local modules
@@ -14,7 +14,7 @@ class Curve(object):
 
     * **Creation**: Create an instance of the spline class
       directly by supplying the required information. kwargs MUST
-      contain the folloiwng information: ``k, t, coef``.
+      contain the following information: ``k, t, coef``.
 
 
     * **LMS/Interpolation**: Create an instance of the spline class by
@@ -23,7 +23,7 @@ class Curve(object):
 
       1. ``k`` Spline Order
 
-      2. ``X`` real arry size (N, nDim) of data to fit. **OR**
+      2. ``X`` real array size (N, nDim) of data to fit. **OR**
           1. ``x`` (1D) and ``s`` for 1D
           2. ``x`` (1D) and ``y`` (1D) for 2D spatial curve
           3. ``x`` (1D) and ``y``` (1D) and ``z`` 1D for 3D spatial curve
@@ -97,7 +97,7 @@ class Curve(object):
             self.X = None
             self.N = None
             self.k = checkInput(kwargs["k"], "k", int, 0)
-            self.coef = numpy.atleast_2d(kwargs["coef"])
+            self.coef = np.atleast_2d(kwargs["coef"])
             self.nCtl = self.coef.shape[0]
             self.nDim = self.coef.shape[1]
             self.t = checkInput(kwargs["t"], "t", float, 1, (self.nCtl + self.k,))
@@ -113,15 +113,15 @@ class Curve(object):
             self.k = 4
             self.origData = True
             if "X" in kwargs:
-                self.X = numpy.atleast_2d(kwargs["X"])
-                if numpy.ndim(kwargs["X"]) == 1:
-                    self.X = numpy.transpose(self.X)
+                self.X = np.atleast_2d(kwargs["X"])
+                if np.ndim(kwargs["X"]) == 1:
+                    self.X = np.transpose(self.X)
             elif "x" in kwargs and "y" in kwargs and "z" in kwargs:
-                self.X = numpy.vstack([kwargs["x"], kwargs["y"], kwargs["z"]]).T
+                self.X = np.vstack([kwargs["x"], kwargs["y"], kwargs["z"]]).T
             elif "x" in kwargs and "y" in kwargs:
-                self.X = numpy.vstack([kwargs["x"], kwargs["y"]]).T
+                self.X = np.vstack([kwargs["x"], kwargs["y"]]).T
             elif "x" in kwargs:
-                self.X = numpy.transpose(numpy.atleast_2d(kwargs["x"]))
+                self.X = np.transpose(np.atleast_2d(kwargs["x"]))
             # enf if
 
             self.nDim = self.X.shape[1]
@@ -138,11 +138,11 @@ class Curve(object):
             # Now we have the data we need to generate the local
             # interpolation
 
-            T = numpy.zeros((self.N, self.nDim))
+            T = np.zeros((self.N, self.nDim))
             # Compute tangents
-            qq = numpy.zeros_like(self.X)
-            T = numpy.zeros_like(self.X)
-            deltaS = numpy.zeros(self.N)
+            qq = np.zeros_like(self.X)
+            T = np.zeros_like(self.X)
+            deltaS = np.zeros(self.N)
             for i in range(1, self.N):
                 deltaS[i] = self.s[i] - self.s[i - 1]
                 qq[i, :] = self.X[i] - self.X[i - 1]
@@ -156,11 +156,11 @@ class Curve(object):
             T[-1] = 2 * qq[-1] / deltaS[-1] - T[-2]
             # Normalize
             for i in range(self.N):
-                T[i] = T[i] / numpy.linalg.norm(T[i])
+                T[i] = T[i] / np.linalg.norm(T[i])
 
             # Final coefficients and t
-            self.coef = numpy.zeros((2 * (self.N - 1) + 2, self.nDim))
-            self.t = numpy.zeros(len(self.coef) + self.k)
+            self.coef = np.zeros((2 * (self.N - 1) + 2, self.nDim))
+            self.t = np.zeros(len(self.coef) + self.k)
             self.nCtl = len(self.coef)
             # End Pts
             self.coef[0] = self.X[0].copy()
@@ -174,31 +174,31 @@ class Curve(object):
 
             # Knots
             self.t[-4:] = 1.0
-            u = numpy.zeros(self.N)
+            u = np.zeros(self.N)
             for i in range(0, self.N - 1):
-                u[i + 1] = u[i] + numpy.linalg.norm(self.coef[2 * i + 2] - self.coef[2 * i + 1])
+                u[i + 1] = u[i] + np.linalg.norm(self.coef[2 * i + 2] - self.coef[2 * i + 1])
 
             for i in range(1, self.N - 1):
                 self.t[2 * i + 2] = u[i] / u[self.N - 1]
                 self.t[2 * i + 3] = u[i] / u[self.N - 1]
 
         else:  # lms or interpolate function
-            assert "k" in kwargs and (
-                "X" in kwargs or "x" in kwargs
-            ), "Error: At least spline order, k and X (or x=, y=) \
-MUST be defined for (interpolation) spline creation.\
-nCtl=<number of control points> must be specified for a LMS fit"
+            if not ("k" in kwargs and ("X" in kwargs or "x" in kwargs)):
+                raise ValueError(
+                    "At least spline order, k and X (or x=, y=) MUST be defined for (interpolation) spline creation. "
+                    + "nCtl=<number of control points> must be specified for a LMS fit"
+                )
             self.origData = True
             if "X" in kwargs:
-                self.X = numpy.atleast_2d(kwargs["X"])
-                if numpy.ndim(kwargs["X"]) == 1:
-                    self.X = numpy.transpose(self.X)
+                self.X = np.atleast_2d(kwargs["X"])
+                if np.ndim(kwargs["X"]) == 1:
+                    self.X = np.transpose(self.X)
             elif "x" in kwargs and "y" in kwargs and "z" in kwargs:
-                self.X = numpy.vstack([kwargs["x"], kwargs["y"], kwargs["z"]]).T
+                self.X = np.vstack([kwargs["x"], kwargs["y"], kwargs["z"]]).T
             elif "x" in kwargs and "y" in kwargs:
-                self.X = numpy.vstack([kwargs["x"], kwargs["y"]]).T
+                self.X = np.vstack([kwargs["x"], kwargs["y"]]).T
             elif "x" in kwargs:
-                self.X = numpy.transpose(numpy.atleast_2d(kwargs["x"]))
+                self.X = np.transpose(np.atleast_2d(kwargs["x"]))
             # enf if
 
             self.nDim = self.X.shape[1]
@@ -221,20 +221,20 @@ nCtl=<number of control points> must be specified for a LMS fit"
             if "weights" in kwargs:
                 self.weights = checkInput(kwargs["weights"], "weights", float, 1, (self.N,))
             else:
-                self.weights = numpy.ones(self.N)
+                self.weights = np.ones(self.N)
 
             if "deriv" in kwargs and "derivPtr" in kwargs:
                 self.deriv = checkInput(kwargs["deriv"], "deriv", float, 2)
                 self.derivPtr = checkInput(kwargs["derivPtr"], "derivPtr", int, 1, (len(self.deriv),))
             else:
                 self.deriv = None
-                self.derivPtr = numpy.array([])
+                self.derivPtr = np.array([])
 
             if "derivWeights" in kwargs and self.deriv is not None:
                 self.derivWeights = checkInput(kwargs["derivWeights"], "derivWeights", float, 1, (len(self.derivPtr),))
             else:
                 if self.deriv is not None:
-                    self.derivWeights = numpy.ones(len(self.deriv))
+                    self.derivWeights = np.ones(len(self.deriv))
                 else:
                     self.derivWeights = None
 
@@ -269,37 +269,35 @@ nCtl=<number of control points> must be specified for a LMS fit"
         # Do the separation between the constrained and unconstrained:
         # u -> unconstrained
         # s -> constrained
-        suSelect = numpy.where(self.weights > 0.0)
-        scSelect = numpy.where(self.weights <= 0.0)
+        suSelect = np.where(self.weights > 0.0)
+        scSelect = np.where(self.weights <= 0.0)
         S = self.X[suSelect]
         su = self.s[suSelect]
         T = self.X[scSelect]
         sc = self.s[scSelect]
-        weights = self.weights[numpy.where(self.weights > 0.0)]
+        weights = self.weights[np.where(self.weights > 0.0)]
 
         nu = len(S)
         nc = len(T)
 
         # And the derivative info
         if self.deriv is not None:
-            sduSelect = numpy.where(self.derivWeights > 0.0)
-            sdcSelect = numpy.where(self.derivWeights <= 0.0)
-            S = numpy.vstack((S, self.deriv[sduSelect]))
+            sduSelect = np.where(self.derivWeights > 0.0)
+            sdcSelect = np.where(self.derivWeights <= 0.0)
+            S = np.vstack((S, self.deriv[sduSelect]))
             sdu = self.s[self.derivPtr][sduSelect]
-            T = numpy.vstack((T, self.deriv[sdcSelect]))
+            T = np.vstack((T, self.deriv[sdcSelect]))
             sdc = self.s[self.derivPtr][sdcSelect]
-            weights = numpy.append(weights, self.derivWeights[numpy.where(self.derivWeights > 0.0)])
+            weights = np.append(weights, self.derivWeights[np.where(self.derivWeights > 0.0)])
             ndu = len(sdu)
             ndc = len(sdc)
         else:
-            sdu = numpy.array([], "d")
-            sdc = numpy.array([], "d")
+            sdu = np.array([], "d")
+            sdc = np.array([], "d")
             ndu = 0
             ndc = 0
 
-        W = _assembleMatrix(
-            weights, numpy.arange(len(weights)), numpy.arange(len(weights) + 1), (len(weights), len(weights))
-        )
+        W = _assembleMatrix(weights, np.arange(len(weights)), np.arange(len(weights) + 1), (len(weights), len(weights)))
 
         if self.interp:
             self.nCtl = nu + nc + ndu + ndc
@@ -318,12 +316,12 @@ nCtl=<number of control points> must be specified for a LMS fit"
                 self.t = libspline.knots_lms(self.s, self.nCtl, self.k)
 
         self.calcGrevillePoints()
-        self.coef = numpy.zeros((self.nCtl, self.nDim), "d")
+        self.coef = np.zeros((self.nCtl, self.nDim), "d")
 
         # Get the 'N' jacobian
-        nVals = numpy.zeros((nu + ndu) * self.k)  # |
-        nRowPtr = numpy.zeros(nu + ndu + 1, "intc")  # | -> CSR formulation
-        nColInd = numpy.zeros((nu + ndu) * self.k, "intc")  # |
+        nVals = np.zeros((nu + ndu) * self.k)  # |
+        nRowPtr = np.zeros(nu + ndu + 1, "intc")  # | -> CSR formulation
+        nColInd = np.zeros((nu + ndu) * self.k, "intc")  # |
         libspline.curve_jacobian_wrap(su, sdu, self.t, self.k, self.nCtl, nVals, nRowPtr, nColInd)
         N = _assembleMatrix(nVals, nColInd, nRowPtr, (nu + ndu, self.nCtl)).tocsc()
 
@@ -361,9 +359,9 @@ nCtl=<number of control points> must be specified for a LMS fit"
                 # constraints --only works with scipy Sparse
                 # matrices
 
-                mVals = numpy.zeros((nc + ndc) * self.k)  # |
-                mRowPtr = numpy.zeros(nc + ndc + 1, "intc")  # | -> CSR
-                mColInd = numpy.zeros((nc + ndc) * self.k, "intc")  # |
+                mVals = np.zeros((nc + ndc) * self.k)  # |
+                mRowPtr = np.zeros(nc + ndc + 1, "intc")  # | -> CSR
+                mColInd = np.zeros((nc + ndc) * self.k, "intc")  # |
 
                 libspline.curve_jacobian_wrap(sc, sdc, self.t, self.k, self.nCtl, mVals, mRowPtr, mColInd)
                 M = _assembleMatrix(mVals, mColInd, mRowPtr, (nc + ndc, self.nCtl))
@@ -393,7 +391,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
                 # Factorize once for efficiency
                 solve = linalg.dsolve.factorized(J)
                 for idim in range(self.nDim):
-                    rhs = numpy.hstack((N.transpose() * W * S[:, idim], T[:, idim]))
+                    rhs = np.hstack((N.transpose() * W * S[:, idim], T[:, idim]))
                     self.coef[:, idim] = solve(rhs)[0 : self.nCtl]
 
             # end if (constr - not constrained
@@ -405,20 +403,20 @@ nCtl=<number of control points> must be specified for a LMS fit"
         # Check the RMS
         rms = 0.0
         for idim in range(self.nDim):
-            rms += numpy.linalg.norm(N * self.coef[:, idim] - S[:, idim]) ** 2
+            rms += np.linalg.norm(N * self.coef[:, idim] - S[:, idim]) ** 2
 
-        rms = numpy.sqrt(rms / self.N)
+        rms = np.sqrt(rms / self.N)
 
     def _getParameterization(self):
         """Compute a parametrization for the curve based on an
         arc-length formulation
         """
-        self.s = numpy.zeros(self.N, "d")
+        self.s = np.zeros(self.N, "d")
         for i in range(self.N - 1):
             dist = 0
             for idim in range(self.nDim):
                 dist += (self.X[i + 1, idim] - self.X[i, idim]) ** 2
-            self.s[i + 1] = self.s[i] + numpy.sqrt(dist)
+            self.s[i + 1] = self.s[i] + np.sqrt(dist)
 
         self.length = self.s[-1]
         self.s = self.s / self.s[-1]
@@ -502,8 +500,8 @@ nCtl=<number of control points> must be specified for a LMS fit"
 
         # Process knot vectors:
         uu = self.t[breakPt]
-        t1 = numpy.hstack((self.t[0 : breakPt + self.k - 1].copy(), uu)) / uu
-        t2 = (numpy.hstack((uu, self.t[breakPt:].copy())) - uu) / (1.0 - uu)
+        t1 = np.hstack((self.t[0 : breakPt + self.k - 1].copy(), uu)) / uu
+        t2 = (np.hstack((uu, self.t[breakPt:].copy())) - uu) / (1.0 - uu)
 
         coef1 = self.coef[0:breakPt, :].copy()
         coef2 = self.coef[breakPt - 1 :, :].copy()
@@ -537,13 +535,13 @@ nCtl=<number of control points> must be specified for a LMS fit"
         points = self.getValue(self.gpts)
         length = 0
         for i in range(len(points) - 1):
-            length += numpy.linalg.norm(points[i] - points[i + 1])
+            length += np.linalg.norm(points[i] - points[i + 1])
 
         return length
 
     def calcGrevillePoints(self):
         """Calculate the Greville points"""
-        self.gpts = numpy.zeros(self.nCtl)
+        self.gpts = np.zeros(self.nCtl)
         for i in range(self.nCtl):
             for n in range(self.k - 1):  # degree loop
                 self.gpts[i] += self.t[i + n + 1]
@@ -561,7 +559,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
                 s.append((self.gpts[i + 1] - self.gpts[i]) * (j + 1) / (N + 1) + self.gpts[i])
             s.append(self.gpts[i + 1])
 
-        self.sdata = numpy.array(s)
+        self.sdata = np.array(s)
 
     def __call__(self, s):
         """
@@ -587,11 +585,11 @@ nCtl=<number of control points> must be specified for a LMS fit"
             array of size (N, 3) (or size (N) if ndim=1)
         """
 
-        s = numpy.array(s).T
-        if self.coef.dtype == numpy.dtype("d"):
-            vals = libspline.eval_curve(numpy.atleast_1d(s), self.t, self.k, self.coef.T)
+        s = np.array(s).T
+        if self.coef.dtype == np.dtype("d"):
+            vals = libspline.eval_curve(np.atleast_1d(s), self.t, self.k, self.coef.T)
         else:
-            vals = libspline.eval_curve_c(numpy.atleast_1d(s).astype("D"), self.t, self.k, self.coef.T)
+            vals = libspline.eval_curve_c(np.atleast_1d(s).astype("D"), self.t, self.k, self.coef.T)
 
         return vals.squeeze().T
 
@@ -609,7 +607,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
         ds : array
             The first derivative. This is an array of size nDim
         """
-        if self.coef.dtype == numpy.dtype("d"):
+        if self.coef.dtype == np.dtype("d"):
             ds = libspline.eval_curve_deriv(s, self.t, self.k, self.coef.T).squeeze()
         else:
             ds = libspline.eval_curve_deriv_c(s, self.t, self.k, self.coef.T).squeeze()
@@ -632,7 +630,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
             The second derivative. This is an array of size nDim
 
         """
-        if self.coef.dtype == numpy.dtype("d"):
+        if self.coef.dtype == np.dtype("d"):
             d2s = libspline.eval_curve_deriv2(s, self.t, self.k, self.coef.T).squeeze()
         else:
             d2s = libspline.eval_curve_deriv2_c(s, self.t, self.k, self.coef.T).squeeze()
@@ -663,21 +661,21 @@ nCtl=<number of control points> must be specified for a LMS fit"
             Physical distances between the points and the curve.
             This is simply ||curve(s) - X0||_2.
         """
-        x0 = numpy.atleast_2d(x0)
+        x0 = np.atleast_2d(x0)
         if "s" in kwargs:
-            s = numpy.atleast_1d(kwargs["s"])
+            s = np.atleast_1d(kwargs["s"])
         else:
-            s = -1 * numpy.ones(len(x0))
+            s = -1 * np.ones(len(x0))
 
         if len(x0) != len(s):
             raise Error("projectPoint: The length of x0 and s must be the same")
 
         # If necessary get brute-force starting point
-        if numpy.any(s < 0) or numpy.any(s > 1):
+        if np.any(s < 0) or np.any(s > 1):
             self.computeData()
             s = libspline.point_curve_start(x0.T, self.sdata, self.data.T)
 
-        D = numpy.zeros_like(x0)
+        D = np.zeros_like(x0)
         for i in range(len(x0)):
             s[i], D[i] = libspline.point_curve(x0[i], self.t, self.k, self.coef.T, nIter, eps, s[i])
         return s.squeeze(), D.squeeze()
@@ -708,7 +706,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
             Parametric position on curve2 (inCurve)
         D : float
             Minimum distance between this curve and inCurve. It
-            is equilivent to ||self(s) - inCurve(t)||_2.
+            is equivalent to ||self(s) - inCurve(t)||_2.
         """
         s = -1
         t = -1
@@ -756,7 +754,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
             Parametric position)s_ on curve2 (inCurve)
         D : float
             Minimum distance(s) between this curve and inCurve. It
-            is equilivent to ||self(s) - inCurve(t)||_2.
+            is equivalent to ||self(s) - inCurve(t)||_2.
         """
         s = -1
         t = -1
@@ -787,7 +785,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
                     inCurve.sdata[j],
                 )
 
-                if numpy.linalg.norm(Diff) < eps:
+                if np.linalg.norm(Diff) < eps:
                     # Its a solution. Check it it is already in list:
                     if len(uSol) == 0:
                         uSol.append(s)
@@ -802,7 +800,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
                             tSol.append(t)
                             diff.append(Diff)
 
-        return numpy.array(uSol), numpy.array(tSol), numpy.array(diff)
+        return np.array(uSol), np.array(tSol), np.array(diff)
 
     def computeData(self):
         """
@@ -857,7 +855,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
         paraEntries = 6 + len(self.t) + self.nCtl + 3 * self.nCtl + 5
 
         paraLines = (paraEntries - 11) // 3 + 2
-        if numpy.mod(paraEntries - 11, 3) != 0:
+        if np.mod(paraEntries - 11, 3) != 0:
             paraLines += 1
         if twoD:
             handle.write("     126%8d       0       0       1       0       0       001010501D%7d\n" % (Pcount, Dcount))
@@ -890,8 +888,8 @@ nCtl=<number of control points> must be specified for a LMS fit"
 
         for i in range(len(self.t)):
             pos_counter += 1
-            handle.write("%20.12g," % (numpy.real(self.t[i])))
-            if numpy.mod(pos_counter, 3) == 0:
+            handle.write("%20.12g," % (np.real(self.t[i])))
+            if np.mod(pos_counter, 3) == 0:
                 handle.write("  %7dP%7d\n" % (Pcount, counter))
                 counter += 1
                 pos_counter = 0
@@ -899,7 +897,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
         for i in range(self.nCtl):
             pos_counter += 1
             handle.write("%20.12g," % (1.0))
-            if numpy.mod(pos_counter, 3) == 0:
+            if np.mod(pos_counter, 3) == 0:
                 handle.write("  %7dP%7d\n" % (Pcount, counter))
                 counter += 1
                 pos_counter = 0
@@ -907,8 +905,8 @@ nCtl=<number of control points> must be specified for a LMS fit"
         for i in range(self.nCtl):
             for idim in range(3):
                 pos_counter += 1
-                handle.write("%20.12g," % (numpy.real(self.coef[i, idim])))
-                if numpy.mod(pos_counter, 3) == 0:
+                handle.write("%20.12g," % (np.real(self.coef[i, idim])))
+                if np.mod(pos_counter, 3) == 0:
                     handle.write("  %7dP%7d\n" % (Pcount, counter))
                     counter += 1
                     pos_counter = 0
@@ -920,7 +918,7 @@ nCtl=<number of control points> must be specified for a LMS fit"
             counter += 1
 
         # Ouput the ranges
-        handle.write("%20.12g,%20.12g,0.0,0.0,0.0;         " % (numpy.min(self.t), numpy.max(self.t)))
+        handle.write("%20.12g,%20.12g,0.0,0.0,0.0;         " % (np.min(self.t), np.max(self.t)))
         handle.write("  %7dP%7d\n" % (Pcount, counter))
         counter += 1
         Pcount += 2
