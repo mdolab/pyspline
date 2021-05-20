@@ -10,6 +10,7 @@ Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
 import numpy as np
 
 # Local modules
+from . import libspline  # noqa: F401
 from .pyCurve import Curve
 from .pySurface import Surface
 from .pyVolume import Volume
