@@ -10,9 +10,6 @@ Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
 import numpy as np
 from scipy import sparse
 
-# Local modules
-from . import libspline  # noqa: F401
-
 
 class Error(Exception):
     """
