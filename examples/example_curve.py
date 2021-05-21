@@ -5,7 +5,7 @@
 import numpy as np
 
 # First party modules
-from pyspline import pySpline
+from pyspline import Curve
 
 # Get some Helix-like data
 
@@ -15,13 +15,13 @@ x = np.cos(theta)
 y = np.sin(theta)
 z = np.linspace(0, 1, n)
 print("Helix Data")
-curve = pySpline.Curve(x=x, y=y, z=z, k=4, Nctl=16, niter=100)
+curve = Curve(x=x, y=y, z=z, k=4, Nctl=16, niter=100)
 curve.writeTecplot("helix.dat")
 
 # Load naca0012 data
 print("Naca 0012 data")
 x, y = np.loadtxt("naca0012", unpack=True)
-curve = pySpline.Curve(x=x, y=y, k=4, Nctl=11, niter=500)
+curve = Curve(x=x, y=y, k=4, Nctl=11, niter=500)
 curve.writeTecplot("naca_data.dat")
 
 # Projection Tests
@@ -29,7 +29,7 @@ print("Projection Tests")
 x = [0, 2, 3, 5]
 y = [-2, 5, 3, 0]
 z = [0, 0, 0, 0]
-curve1 = pySpline.Curve(x=x, y=y, z=z, k=4)
+curve1 = Curve(x=x, y=y, z=z, k=4)
 
 curve1.writeTecplot("curve1.dat")
 
@@ -37,7 +37,7 @@ x = [-2, 5, 2, 1]
 y = [5, 1, 4, 2]
 z = [3, 0, 1, 4]
 
-curve2 = pySpline.Curve(x=x, y=y, z=z, k=4)
+curve2 = Curve(x=x, y=y, z=z, k=4)
 curve2.writeTecplot("curve2.dat")
 
 # Get the minimum distance distance between a point and each curve

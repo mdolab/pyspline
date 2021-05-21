@@ -8,7 +8,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 
 # First party modules
-from pyspline import pySpline
+from pyspline import Curve
 
 baseDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -108,7 +108,7 @@ class Test(unittest.TestCase):
         coef[0] = [0, 0.6]
         coef[1] = [1.1, 1.4]
         coef[2] = [2.6, 5.1]
-        curve = pySpline.Curve(t=t, k=k, coef=coef)
+        curve = Curve(t=t, k=k, coef=coef)
         run_curve_test(curve, handler, "2D k={}".format(k))
         io_test(curve)
 
@@ -120,7 +120,7 @@ class Test(unittest.TestCase):
         coef[1] = [0.71, 1.5]
         coef[2] = [2.5, 5.9]
         coef[3] = [4, -2]
-        curve = pySpline.Curve(t=t, k=k, coef=coef)
+        curve = Curve(t=t, k=k, coef=coef)
         run_curve_test(curve, handler, "2D k={}".format(k))
         io_test(curve)
 
@@ -133,7 +133,7 @@ class Test(unittest.TestCase):
         coef[2] = [1.6, 5.2]
         coef[3] = [4.2, -2.24]
         coef[4] = [2.9, 6.2]
-        curve = pySpline.Curve(t=t, k=k, coef=coef)
+        curve = Curve(t=t, k=k, coef=coef)
         run_curve_test(curve, handler, "2D k={}".format(k))
         io_test(curve)
 
@@ -150,7 +150,7 @@ class Test(unittest.TestCase):
         for k in [2, 3, 4]:
             test_name = "LMS test k={}".format(k)
             # print('--------- Test helix data with k=%d-------'%(k))
-            curve = pySpline.Curve(x=x, y=y, z=z, k=k, nCtl=16, niter=50)
+            curve = Curve(x=x, y=y, z=z, k=k, nCtl=16, niter=50)
             run_curve_test(curve, handler, test_name)
             run_project_test(curve, handler, test_name)
 
@@ -160,6 +160,6 @@ class Test(unittest.TestCase):
         for k in [2, 3, 4]:
             test_name = "interpolation test k={}".format(k)
             # print('--------- Test helix data with k=%d-------'%(k))
-            curve = pySpline.Curve(x=x, y=y, z=z, k=k)
+            curve = Curve(x=x, y=y, z=z, k=k)
             run_curve_test(curve, handler, test_name)
             run_project_test(curve, handler, test_name)

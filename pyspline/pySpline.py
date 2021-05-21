@@ -12,9 +12,6 @@ from scipy import sparse
 
 # Local modules
 from . import libspline  # noqa: F401
-from .pyCurve import Curve
-from .pySurface import Surface
-from .pyVolume import Volume
 
 
 class Error(Exception):
@@ -243,6 +240,8 @@ def trilinearVolume(*args):
         The extreme upper corner of the box. In this case, by
         construction, the box will be coordinate axis aligned.
     """
+    from .pyVolume import Volume
+
     tu = [0, 0, 1, 1]
     tv = [0, 0, 1, 1]
     tw = [0, 0, 1, 1]
@@ -304,6 +303,8 @@ def bilinearSurface(*args):
           +----------+
           0          1
     """
+    from .pySurface import Surface
+
     if len(args) == 1:
         # One argument passed in ... assume its X
         if len(args[0]) != 4:
@@ -334,6 +335,7 @@ def line(*args, **kwargs):
     3. ``x```, dir=direction. A point and a displacement vector
     4. ``x1``, dir=direction, length=length. As 3. but with a specific length
     """
+    from .pyCurve import Curve
 
     if len(args) == 2:
         # Its a two-point type

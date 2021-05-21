@@ -7,7 +7,7 @@ from baseclasses import BaseRegTest
 import numpy as np
 
 # First party modules
-from pyspline import pySpline
+from pyspline import Volume
 
 baseDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -2187,9 +2187,7 @@ class Test(unittest.TestCase):
                                 test_name = "volume with ku={}, kv={}, kw={}, nCtlu={}, nCtlv={}, nCtlw={}".format(
                                     ku, kv, kw, nCtlu, nCtlv, nCtlw
                                 )
-                                volume = pySpline.Volume(
-                                    X=X, ku=ku, kv=kv, kw=kw, nCtlu=nCtlu, nCtlv=nCtlv, nCtlw=nCtlw
-                                )
+                                volume = Volume(X=X, ku=ku, kv=kv, kw=kw, nCtlu=nCtlu, nCtlv=nCtlv, nCtlw=nCtlw)
                                 volume.recompute()
                                 run_volume_test(volume, handler, test_name)
                                 run_project_test(volume, handler, test_name)
