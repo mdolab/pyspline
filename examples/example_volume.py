@@ -6,7 +6,7 @@ import time
 import numpy as np
 
 # First party modules
-from pyspline import pySpline
+from pyspline import Volume
 
 X = np.zeros((2, 2, 2, 3))
 X[0, 0, 0, :] = [0, 0, 0]
@@ -19,7 +19,7 @@ X[1, 0, 1, :] = [1.2, -0.2, 1.8]
 X[1, 1, 1, :] = [1.2, 1.0, 2]
 X[0, 1, 1, :] = [-0.2, 1.3, 2.1]
 
-vol = pySpline.Volume(X=X, ku=2, kv=2, kw=2, Nctlu=2, Nctlv=2, Nctlw=2)
+vol = Volume(X=X, ku=2, kv=2, kw=2, Nctlu=2, Nctlv=2, Nctlw=2)
 vol.writeTecplot("vol.dat", orig=True)
 
 # Generate random data

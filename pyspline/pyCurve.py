@@ -76,13 +76,13 @@ class Curve(object):
     >>> y = [0, 0.25, 1.0]
     >>> s = [0., 0.5, 1.0]
     >>> # Spatial interpolated seg
-    >>> line_seg = pySpline.Curve(x=x, y=y, k=2)
+    >>> line_seg = Curve(x=x, y=y, k=2)
     >>> # With explicit parameter values
-    >>> line_seg = pySpline.Curve(x=x, y=y, k=2, s=s)
+    >>> line_seg = Curve(x=x, y=y, k=2, s=s)
     >>> #LMS parabolic curve
-    >>> parabola = pySpline.Curve(x=x, y=y, k=3)
+    >>> parabola = Curve(x=x, y=y, k=3)
     >>> #LMS parabolic curve with parameter values
-    >>> parabola = pySpline.Curve(x=x, y=y, k=3, s=s)
+    >>> parabola = Curve(x=x, y=y, k=3, s=s)
     """
 
     def __init__(self, **kwargs):
