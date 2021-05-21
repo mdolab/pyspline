@@ -12,9 +12,9 @@ from scipy import sparse
 
 # Local modules
 from . import libspline  # noqa: F401
+from .pyCurve import Curve
 from .pySurface import Surface
 from .pyVolume import Volume
-from .pyCurve import Curve
 
 
 class Error(Exception):
