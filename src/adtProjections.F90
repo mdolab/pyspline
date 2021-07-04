@@ -1287,7 +1287,7 @@ contains
     do i=1, nSearchPts
        coor(1:3) = searchPts(:, i)
        coor(4) = 1e20
-       call minDistanceTreeSearchSinglePoint(ADT, coor, intInfo, uvw, dummy, &
+       call minDistTreeSearchSinglePoint(ADT, coor, intInfo, uvw, dummy, &
             nInterpol, BB, frontLeaves, frontLeavesNew)
        faceID(i) = intInfo(3)
        uv(:, i) = uvw(1:2)
@@ -1302,7 +1302,7 @@ contains
 
   end subroutine searchQuads
 
-  subroutine minDistanceTreeSearchSinglePoint(ADT, coor, intInfo, &
+  subroutine minDistTreeSearchSinglePoint(ADT, coor, intInfo, &
        uvw, arrDonor, nInterpol, BB, frontLeaves, frontLeavesNew)
     !
     !        This routine performs the actual minimum distance search for
@@ -1987,6 +1987,6 @@ contains
        enddo
 
     endif
-  end subroutine minDistanceTreeSearchSinglePoint
+  end subroutine minDistTreeSearchSinglePoint
 
 end module ADTProjections
