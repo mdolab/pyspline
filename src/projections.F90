@@ -45,8 +45,8 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
   implicit none
 
   ! Input
-  real(kind=realType), intent(in)          :: x0(ndim)
   integer            , intent(in)          :: k, nctl, ndim, niter
+  real(kind=realType), intent(in)          :: x0(ndim)
   real(kind=realType), intent(in)          :: t(nctl+k)
   real(kind=realType), intent(in)          :: coef(ndim, nctl)
   real(kind=realType), intent(in)          :: eps
@@ -213,8 +213,8 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
   implicit none
 
   ! Input
-  real(kind=realType), intent(in)     :: x0(ndim)
   integer            , intent(in)     :: ku, kv, nctlu, nctlv, ndim, niter
+  real(kind=realType), intent(in)     :: x0(ndim)
   real(kind=realType), intent(in)     :: tu(nctlu+ku), tv(nctlv+kv)
   real(kind=realType), intent(in)     :: coef(ndim, nctlv, nctlu)
   real(kind=realType), intent(in)     :: eps
@@ -417,8 +417,8 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   use precision
   implicit none
   ! Input
-  real(kind=realType), intent(in)          :: x0(ndim)
   integer            , intent(in)          :: ku, kv, kw, nctlu, nctlv, nctlw, ndim, niter
+  real(kind=realType), intent(in)          :: x0(ndim)
   real(kind=realType), intent(in)          :: tu(nctlu+ku), tv(nctlv+kv), tw(nctlw+kw)
   real(kind=realType), intent(in)          :: coef(ndim, nctlw, nctlv, nctlu)
   real(kind=realType), intent(in)          :: eps
@@ -1511,9 +1511,9 @@ function dotproduct(x1, x2, n)
   use precision 
   implicit none
 
-  real(kind=realType), intent(in) :: x1(n), x2(n)
   integer, intent(in) :: n
   integer :: i
+  real(kind=realType), intent(in) :: x1(n), x2(n)
 
   real(kind=realType) ::  dotproduct 
   dotproduct = 0.0

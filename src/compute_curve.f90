@@ -3,8 +3,8 @@ subroutine curve_jacobian_wrap(s, sd, t, k, nctl, n, nd, vals, row_ptr, col_ind)
   use precision
   implicit none
   ! Input
-  real(kind=realType)  , intent(in)      :: t(nctl+k), s(n), sd(nd)
   integer              , intent(in)      :: k, nctl, n, nd
+  real(kind=realType)  , intent(in)      :: t(nctl+k), s(n), sd(nd)
   ! Output
   real(kind=realType)  , intent(inout)   :: vals((n+nd)*k)
   integer              , intent(inout)   :: row_ptr(n+nd+1)
@@ -91,8 +91,8 @@ subroutine poly_length(X, n, ndim, length)
   implicit none
 
   !Input
-  real(kind=realType) , intent(in)    :: X(ndim, n)
   integer             , intent(in)    :: n, ndim
+  real(kind=realType) , intent(in)    :: X(ndim, n)
   
   ! Ouput
   real(kind=realType), intent(out)   :: length
@@ -176,10 +176,10 @@ function compute_rms_curve(t, k, s, coef, nctl, ndim, n, X)
   use precision
   implicit none
   ! Input/Output
+  integer           , intent(in)      :: k, nctl, ndim, n
   real(kind=realType)  , intent(in)      :: t(k+nctl)
   real(kind=realType)  , intent(in)      :: s(n)
   real(kind=realType)  , intent(in)      :: coef(ndim, nctl)
-  integer           , intent(in)      :: k, nctl, ndim, n
   real(kind=realType)  , intent(in)      :: X(ndim, n)
   real(kind=realType)                   :: compute_rms_curve 
 

@@ -51,10 +51,10 @@ subroutine surface_para_corr(tu, tv, ku, kv, u, v, coef, nctlu, nctlv, ndim, nu,
   implicit none
 
   ! Input/Output
+  integer              , intent(in)      :: ku, kv, nctlu, nctlv, ndim, nu, nv
   real(kind=realType)  , intent(in)      :: tu(ku+nctlu), tv(kv+nctlv)
   real(kind=realType)  , intent(inout)   :: u(nv, nu), v(nv, nu)
   real(kind=realType)  , intent(in)      :: coef(ndim, nctlv, nctlu)
-  integer              , intent(in)      :: ku, kv, nctlu, nctlv, ndim, nu, nv
   real(kind=realType)  , intent(in)      :: X(ndim, nv, nu)
   real(kind=realType)  , intent(out)     :: rms
 
@@ -132,10 +132,10 @@ function compute_rms_surface(tu, tv, ku, kv, u, v, coef, nctlu, nctlv, ndim, nu,
   implicit none
 
   ! Input/Output
+  integer              , intent(in)      :: ku, kv, nctlu, nctlv, ndim, nu, nv
   real(kind=realType)  , intent(in)      :: tu(ku+nctlu), tv(kv+nctlv)
   real(kind=realType)  , intent(inout)   :: u(nv, nu), v(nv, nu)
   real(kind=realType)  , intent(in)      :: coef(ndim, nctlv, nctlu)
-  integer              , intent(in)      :: ku, kv, nctlu, nctlv, ndim, nu, nv
   real(kind=realType)  , intent(in)      :: X(ndim, nv, nu)
  
   ! Working
