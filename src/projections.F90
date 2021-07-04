@@ -1498,7 +1498,7 @@ subroutine point_plane(pt, p0, v1, v2, n, sol, n_sol, best_sol)
 
   ! Now post-process to get the closest one
   best_sol = 1
-  D0 = norm(p0(:, ind(1)) + sol(2, ind(1))*v1(:, ind(1)) + sol(3, ind(1))*v2(:, ind(1)))
+  D0 = norm(p0(:, ind(1)) + sol(2, ind(1))*v1(:, ind(1)) + sol(3, ind(1))*v2(:, ind(1)), 3)
 
   do i=1, n_sol
      D = norm(p0(:, ind(i)) + sol(2, ind(i))*v1(:, ind(i)) + sol(3, ind(i))*v2(:, ind(i)), 3)
