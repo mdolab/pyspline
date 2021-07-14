@@ -24,7 +24,6 @@ module. The documentation for this package is summarized below:
 .. toctree::
    :caption: API Reference
 
-   API/pySpline
    API/curve
    API/surface
    API/volume
