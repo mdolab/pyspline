@@ -128,7 +128,7 @@ subroutine curve_para_corr(t, k, s, coef, nctl, ndim, length, n, X)
   integer                               :: i, j, max_inner_iter
   real(kind=realType)                   :: D(ndim), D2(ndim)
   real(kind=realType)                   :: val(ndim), deriv(ndim)
-  real(kind=realType)                   :: c, s_tilde, norm
+  real(kind=realType)                   :: c, s_tilde
 
   max_inner_iter = 10
   do i=2, n-1
@@ -136,14 +136,14 @@ subroutine curve_para_corr(t, k, s, coef, nctl, ndim, length, n, X)
      call eval_curve_deriv(s(i), t, k, coef, nctl, ndim, deriv)
           
      D = X(:, i)-val
-     c = dot_product(D, deriv)/norm(deriv, ndim)
+     c = dot_product(D, deriv)/NORM2(deriv)
 
      inner_loop: do j=1, max_inner_iter
 
         s_tilde = s(i)+ c*(t(nctl+k)-t(1))/length
         call eval_curve(s_tilde, t, k, coef, nctl, ndim, 1, val)
         D2 = X(:, i)-val
-        if (norm(D, ndim) .ge. norm(D2, ndim)) then
+        if (NORM2(D) .ge. NORM2(D2)) then
            s(i) = s_tilde
            exit inner_loop
         else
@@ -153,23 +153,6 @@ subroutine curve_para_corr(t, k, s, coef, nctl, ndim, length, n, X)
   end do
 
 end subroutine curve_para_corr
-
-function norm(X, n)
-  ! Compute the L2 nomr of X
-  use precision
-  implicit none
-  integer, intent(in) :: n
-  real(kind=realType), intent(in) :: X(n)
-
-  real(kind=realType) :: norm
-
-  integer            :: i
-  norm = 0.0
-  do i=1, n
-     norm = norm + X(i)**2
-  end do
-  norm = sqrt(norm)
-end function norm
 
 function compute_rms_curve(t, k, s, coef, nctl, ndim, n, X)
   ! Compute the rms
