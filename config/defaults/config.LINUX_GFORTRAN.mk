@@ -5,7 +5,7 @@ RM       = /bin/rm -rf
 
 # Fortran compiler and flags
 FF90        = gfortran
-FF90_FLAGS  = -fdefault-real-8 -O2 -fPIC -std=f95
+FF90_FLAGS  = -fdefault-real-8 -O2 -fPIC -std=f2008
 
 # C compiler and flags
 CC       = gcc
