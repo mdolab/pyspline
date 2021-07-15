@@ -56,7 +56,7 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
 
   ! Working
   real(kind=realType)   :: val(ndim), deriv(ndim), deriv2(ndim), step, c, dist, p_diff
-  real(kind=realType)   :: grad, temp(1), hessian,  update, R(ndim), nDist, fval, nfval, pgrad, newPt
+  real(kind=realType)   :: grad, hessian,  update, R(ndim), nDist, fval, nfval, pgrad, newPt
   integer               :: m, ii, NLSFail
   logical               :: flag, cflag
 
@@ -108,8 +108,7 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
 
      ! Check that this is the descent direction
      if (pgrad >= 0.0) then
-        temp(1) = grad
-        update = -grad/NORM2(temp)
+        update = -grad/ABS(grad)
         pgrad = update*grad !dot_product(update, grad)
      end if
 
@@ -167,8 +166,7 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
      else
         NLSFail = 0
         ! Check if there has been no change in the coordinates
-        temp(1) = s-newpt
-        p_diff = NORM2(temp)
+        p_diff = ABS(s-newpt)
         if (p_diff < eps) then
            exit Iteration_loop
         end if
