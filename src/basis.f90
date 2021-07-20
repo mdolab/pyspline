@@ -22,8 +22,8 @@ subroutine basis(t, nctl, k, u, ind, B)
   implicit none
 
   ! Input
-  real(kind=realType), intent(in)  :: t(nctl+k), u
   integer,             intent(in)  :: nctl, k, ind
+  real(kind=realType), intent(in)  :: t(nctl+k), u
 
   ! Output
   real(kind=realType), intent(out) :: B(0:k-1)
@@ -79,8 +79,8 @@ subroutine derivBasis(t, nctl, ku, u, ind, n, Bd)
   implicit none
   
   ! Input
-  real(kind=realType), intent(in)  :: t(nctl+ku), u
   integer,             intent(in)  :: nctl, ku, ind, n
+  real(kind=realType), intent(in)  :: t(nctl+ku), u
   
   ! Output
   real(kind=realType), intent(out) :: Bd(0:n,0:n)
@@ -200,9 +200,9 @@ subroutine basis_c(t, nctl, k, u, ind, B)
   implicit none
 
   ! Input
+  integer,             intent(in)  :: nctl, k, ind
   real(kind=realType), intent(in)  :: t(nctl+k)
   complex(kind=realType), intent(in) :: u
-  integer,             intent(in)  :: nctl, k, ind
 
   ! Output
   complex(kind=realType), intent(out) :: B(0:k-1)

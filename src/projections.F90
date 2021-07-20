@@ -45,8 +45,8 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
   implicit none
 
   ! Input
-  real(kind=realType), intent(in)          :: x0(ndim)
   integer            , intent(in)          :: k, nctl, ndim, niter
+  real(kind=realType), intent(in)          :: x0(ndim)
   real(kind=realType), intent(in)          :: t(nctl+k)
   real(kind=realType), intent(in)          :: coef(ndim, nctl)
   real(kind=realType), intent(in)          :: eps
@@ -60,9 +60,6 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
   integer               :: m, ii, NLSFail
   logical               :: flag, cflag
 
-  ! Functions
-  real(kind=realType)   :: norm
-
   NLSFail = 0
   iteration_loop: do ii=1, Niter
 
@@ -73,7 +70,7 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
      
      ! Distance is R, "function value" fval is what we minimize
      R = val - x0
-     nDist = norm(R, nDim)
+     nDist = NORM2(R)
      fval = 0.5*nDist**2
 
      ! Calculate the Gradient
@@ -111,7 +108,7 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
 
      ! Check that this is the descent direction
      if (pgrad >= 0.0) then
-        update = -grad/norm(grad, 1)
+        update = -grad/ABS(grad)
         pgrad = update*grad !dot_product(update, grad)
      end if
 
@@ -135,7 +132,7 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
 
         ! Distance is R, "function value" fval is what we minimize
         R = val - x0
-        nDist = norm(R, nDim)
+        nDist = NORM2(R)
         nfVal = 0.5*nDist**2
         
         ! Check if the new point satisfies the wolfe condition
@@ -169,7 +166,7 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
      else
         NLSFail = 0
         ! Check if there has been no change in the coordinates
-        p_diff = norm(s-newpt, 1)
+        p_diff = ABS(s-newpt)
         if (p_diff < eps) then
            exit Iteration_loop
         end if
@@ -213,8 +210,8 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
   implicit none
 
   ! Input
-  real(kind=realType), intent(in)     :: x0(ndim)
   integer            , intent(in)     :: ku, kv, nctlu, nctlv, ndim, niter
+  real(kind=realType), intent(in)     :: x0(ndim)
   real(kind=realType), intent(in)     :: tu(nctlu+ku), tv(nctlv+kv)
   real(kind=realType), intent(in)     :: coef(ndim, nctlv, nctlu)
   real(kind=realType), intent(in)     :: eps
@@ -230,9 +227,6 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
   real(kind=realType)   :: grad(2), hessian(2, 2)
   integer               :: i, j, m, NLSFail, ii
   logical               :: flag, cflag
-
-  ! Functions     
-  real(kind=realType)                      :: norm
 
   NLSFail = 0
 
@@ -252,7 +246,7 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
         
      ! Distance is R, "function value" fval is what we minimize
      R = val - X0
-     nDist = norm(R, nDim)
+     nDist = NORM2(R)
      fval = 0.5*nDist**2
      
      ! Calculate the Gradient
@@ -289,7 +283,7 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
         end if
      end do
 
-     if ( norm(grad,2) < eps) then
+     if ( NORM2(grad) < eps) then
         exit iteration_loop
      end if
         
@@ -301,7 +295,7 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
      !Check that this is a descent direction - 
      !otherwise use the negative gradient    
      if ( pgrad >= 0.0 ) then
-        update = -grad/norm(grad, 2)
+        update = -grad/NORM2(grad)
         pgrad = dot_product(update, grad)
      end if
         
@@ -329,7 +323,7 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
         ! Check if the new function value is lower, 
         ! otherwise adjust the step size
         R = val - X0
-        ndist = norm(R, nDim)
+        ndist = NORM2(R)
         nfval = 0.5*ndist**2
 
         ! Check if the new point satisfies the wolfe condition
@@ -362,7 +356,7 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
      else
         NLSFail = 0
         ! Check if there has been no change in the coordinates
-        p_diff = norm(pt-newpt, nDim)
+        p_diff = NORM2(pt-newpt)
         if (p_diff < eps) then
            exit Iteration_loop
         end if
@@ -417,8 +411,8 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   use precision
   implicit none
   ! Input
-  real(kind=realType), intent(in)          :: x0(ndim)
   integer            , intent(in)          :: ku, kv, kw, nctlu, nctlv, nctlw, ndim, niter
+  real(kind=realType), intent(in)          :: x0(ndim)
   real(kind=realType), intent(in)          :: tu(nctlu+ku), tv(nctlv+kv), tw(nctlw+kw)
   real(kind=realType), intent(in)          :: coef(ndim, nctlw, nctlv, nctlu)
   real(kind=realType), intent(in)          :: eps
@@ -434,9 +428,6 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
   real(kind=realType)   :: grad(3), hessian(3, 3)
   integer               :: i, j, m, NLSFail, ii
   logical               :: flag, cflag
-
-  ! Functions     
-  real(kind=realType)   :: norm
 
   NLSFail = 0
   ! Set lower and upper bounds for u, v, w based on knot vector
@@ -461,7 +452,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
         
      ! Distance is R, "function value" fval is what we minimize
      R = val - X0
-     nDist = norm(R, nDim)
+     nDist = NORM2(R)
      fval = 0.5*nDist**2
      ! Calculate the Gradient
      do i=1,3
@@ -497,7 +488,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
         end if
      end do
 
-     if (norm(grad,3) < eps) then
+     if (NORM2(grad) < eps) then
         exit iteration_loop
      end if
         
@@ -510,7 +501,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
      !Check that this is a descent direction - 
      !otherwise use the negative gradient    
      if ( pgrad >= 0.0 ) then
-        update = -grad/norm(grad, 3)
+        update = -grad/NORM2(grad)
         pgrad = dot_product(update, grad)
      end if
         
@@ -539,7 +530,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
         ! Check if the new function value is lower, 
         ! otherwise adjust the step size
         R = val - X0
-        ndist = norm(R, nDim)
+        ndist = NORM2(R)
         nfval = 0.5*ndist**2
         
         ! Check if the new point satisfies the wolfe condition
@@ -572,7 +563,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
      else
         NLSFail = 0
         ! Check if there has been no change in the coordinates
-        p_diff = norm(pt-newpt, 3)
+        p_diff = NORM2(pt-newpt)
         if (p_diff < eps) then
            exit Iteration_loop
         end if
@@ -648,9 +639,6 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter,&
   real(kind=realType) :: hessian(2, 2), grad(2), newpt(2), c
   real(kind=realType) :: pgrad, update(2), step, p_diff
   logical :: flag, cflag
-
-  ! Functions 
-  real(kind=realType)                 :: norm
   
   NLSFail = 0
 
@@ -674,7 +662,7 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter,&
 
      ! Distance is R, "function value" fval is what we minimize
      R = val1-val2
-     nDist = norm(R, nDim)
+     nDist = NORM2(R)
      fval = 0.5*nDist**2
 
      ! Calculate the Gradient
@@ -709,7 +697,7 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter,&
      end do
 
      ! Zero-cosine check...slightly modifed from The NURBS Book
-     if (norm(grad,2) < eps) then
+     if (NORM2(grad) < eps) then
         exit iteration_loop
      end if
 
@@ -722,7 +710,7 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter,&
      !Check that this is a descent direction - 
      !otherwise use the negative gradient    
      if ( pgrad >= 0.0 ) then
-        update = -grad/norm(grad, 2)
+        update = -grad/NORM2(grad)
         pgrad = dot_product(update, grad)
      end if
      
@@ -750,7 +738,7 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter,&
         ! Check if the new function value is lower, 
         ! otherwise adjust the step size
         R = val1 - val2
-        ndist = norm(R, ndim)
+        ndist = NORM2(R)
         nfval = 0.5*ndist**2
      
         ! Check if the new point satisfies the wolfe condition
@@ -783,7 +771,7 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter,&
      else
         NLSFail = 0
         ! Check if there has been no change in the coordinates
-        p_diff = norm(pt-newpt, 2)
+        p_diff = NORM2(pt-newpt)
         if (p_diff < eps) then
            exit Iteration_loop
         end if
@@ -853,9 +841,6 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
   integer              :: NLSFail
   logical              :: flag, cflag
 
-  ! Functions     
-  real(kind=realType)  :: norm
-
   NLSFail = 0
 
   ! Set lower and upper bounds of u,v, s based on knot vector
@@ -886,7 +871,7 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
 
      ! Distance is R, "function value" fval is what we minimize
      R = val_s - val_c
-     nDist = norm(R, nDim)
+     nDist = NORM2(R)
      fVal = 0.5*nDist**2
 
      ! Calculate the gradient
@@ -929,7 +914,7 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
         end if
      end do
 
-     if (norm(grad,3) < eps) then
+     if (NORM2(grad) < eps) then
         exit iteration_loop
      end if
 
@@ -942,7 +927,7 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
      !Check that this is a descent direction - 
      !otherwise use the negative gradient    
      if ( pgrad >= 0.0 ) then
-        update = -grad/norm(grad, 3)
+        update = -grad/NORM2(grad)
         pgrad = dot_product(update, grad)
      end if
      
@@ -971,7 +956,7 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
 
         ! Distance is R, "function value" fval is what we minimize
         R = val_s - val_c
-        nDist = norm(R, nDim)
+        nDist = NORM2(R)
         nfVal = 0.5*nDist**2
 
         ! Check if the new point satisfies the wolfe condition
@@ -1005,7 +990,7 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
      else
         NLSFail = 0
         ! Check if there has been no change in the coordinates
-        p_diff = norm(pt-newpt, 2)
+        p_diff = NORM2(pt-newpt)
         if (p_diff < eps) then
            exit Iteration_loop
         end if
@@ -1057,15 +1042,15 @@ subroutine point_curve_start(x0, uu, data, nu, ndim, N, u)
   real(kind=realType)  , intent(out) :: u(N)
 
   ! Working
-  real(kind=realType)  :: D, norm
+  real(kind=realType)  :: D
   integer              :: ipt, i
 
   do ipt=1,N
      D = 1e20
      do i=1,nu
-        if (norm(X0(:, ipt)-data(:, i), ndim) < D) then
+        if (NORM2(X0(:, ipt)-data(:, i)) < D) then
            u(ipt) = uu(i)
-           D = norm(X0(:, ipt)-data(:, i), ndim)
+           D = NORM2(X0(:, ipt)-data(:, i))
         end if
      end do
   end do
@@ -1108,17 +1093,17 @@ subroutine point_surface_start(x0, uu, vv, data, nu, nv, ndim, N, u, v)
   real(kind=realType)  , intent(out) :: u(N), v(N)
 
   ! Working
-  real(kind=realType)  :: D, norm
+  real(kind=realType)  :: D
   integer              :: ipt, i, j
   
   do ipt=1,N
      D = 1e20
      do i=1,nu
         do j=1,nv
-           if (norm(X0(:, ipt)-data(:, j, i), ndim) < D) then
+           if (NORM2(X0(:, ipt)-data(:, j, i)) < D) then
               u(ipt) = uu(i)
               v(ipt) = vv(j)
-              D = norm(X0(:, ipt)-data(:, j, i), ndim)
+              D = NORM2(X0(:, ipt)-data(:, j, i))
            end if
         end do
      end do
@@ -1165,7 +1150,7 @@ subroutine point_volume_start(x0, uu, vv, ww, data, nu, nv, nw, ndim, N, u, v, w
   real(kind=realType)  , intent(out) :: u(N), v(N), w(N)
 
   ! Working
-  real(kind=realType)  :: D, norm
+  real(kind=realType)  :: D
   integer              :: ipt, i, j, k
 
   do ipt=1,N
@@ -1173,11 +1158,11 @@ subroutine point_volume_start(x0, uu, vv, ww, data, nu, nv, nw, ndim, N, u, v, w
      do i=1,nu
         do j=1,nv
            do k=1,nw
-              if (norm(X0(:, ipt)-data(:,k, j, i), ndim) < D) then
+              if (NORM2(X0(:, ipt)-data(:,k, j, i)) < D) then
                  u(ipt) = uu(i)
                  v(ipt) = vv(j)
                  w(ipt) = ww(k)
-                 D = norm(X0(:, ipt)-data(:,k, j, i), ndim)
+                 D = NORM2(X0(:, ipt)-data(:,k, j, i))
               end if
            end do
         end do
@@ -1220,16 +1205,16 @@ subroutine curve_curve_start(data1, uu1, data2, uu2, nu1, nu2, ndim, s1, s2)
   real(kind=realType)  , intent(out) :: s1, s2
 
   ! Working
-  real(kind=realType)  :: D, norm
+  real(kind=realType)  :: D
   integer              :: i, j
 
   D = 1e20
   do i=1,nu1
      do j=1,nu2
-        if (norm(data1(:,i) - data2(:,j), ndim) < D) then
+        if (NORM2(data1(:,i) - data2(:,j)) < D) then
            s1 = uu1(i)
            s2 = uu2(j)
-           D = norm(data1(:,i) - data2(:,j), ndim)
+           D = NORM2(data1(:,i) - data2(:,j))
         end if
      end do
   end do
@@ -1274,18 +1259,18 @@ subroutine curve_surface_start(data1, uu1, data2, uu2, vv2, nu1, nu2, nv2, ndim,
   real(kind=realType)  , intent(out) :: s, u, v
 
   ! Working
-  real(kind=realType)  :: D, norm
+  real(kind=realType)  :: D
   integer              :: i, j, k
 
   D = 1e20
   do i=1,nu1
      do j=1,nu2
         do k=1,nv2
-           if (norm(data1(:,i) - data2(:, k, j), ndim) < D) then
+           if (NORM2(data1(:,i) - data2(:, k, j)) < D) then
               s = uu1(i)
               u = uu2(j)
               v = vv2(k)
-              D = norm(data1(:,i) - data2(:, k, j), ndim)
+              D = NORM2(data1(:,i) - data2(:, k, j))
            end if
         end do
      end do
@@ -1465,9 +1450,9 @@ subroutine point_plane(pt, p0, v1, v2, n, sol, n_sol, best_sol)
   integer, intent(out) :: n_sol, best_sol
   real(kind=realType), intent(out) :: sol(6, n)
 
-  ! Worling 
+  ! Working 
   integer :: i, ind(n)
-  real(kind=realType) :: A(2, 2), rhs(2), x(2), norm, r(3), D, D0
+  real(kind=realType) :: A(2, 2), rhs(2), x(2), r(3), D, D0
   
 
   n_sol = 0
@@ -1496,10 +1481,10 @@ subroutine point_plane(pt, p0, v1, v2, n, sol, n_sol, best_sol)
 
   ! Now post-process to get the closest one
   best_sol = 1
-  D0 = norm(p0(:, ind(1)) + sol(2, ind(1))*v1(:, ind(1)) + sol(3, ind(1))*v2(:, ind(1)))
+  D0 = NORM2(p0(:, ind(1)) + sol(2, ind(1))*v1(:, ind(1)) + sol(3, ind(1))*v2(:, ind(1)))
 
   do i=1, n_sol
-     D = norm(p0(:, ind(i)) + sol(2, ind(i))*v1(:, ind(i)) + sol(3, ind(i))*v2(:, ind(i)), 3)
+     D = NORM2(p0(:, ind(i)) + sol(2, ind(i))*v1(:, ind(i)) + sol(3, ind(i))*v2(:, ind(i)))
      if (D<D0) then
         D0 = D
         best_sol = i
@@ -1511,9 +1496,9 @@ function dotproduct(x1, x2, n)
   use precision 
   implicit none
 
-  real(kind=realType), intent(in) :: x1(n), x2(n)
   integer, intent(in) :: n
   integer :: i
+  real(kind=realType), intent(in) :: x1(n), x2(n)
 
   real(kind=realType) ::  dotproduct 
   dotproduct = 0.0

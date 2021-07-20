@@ -51,10 +51,10 @@ subroutine surface_para_corr(tu, tv, ku, kv, u, v, coef, nctlu, nctlv, ndim, nu,
   implicit none
 
   ! Input/Output
+  integer              , intent(in)      :: ku, kv, nctlu, nctlv, ndim, nu, nv
   real(kind=realType)  , intent(in)      :: tu(ku+nctlu), tv(kv+nctlv)
   real(kind=realType)  , intent(inout)   :: u(nv, nu), v(nv, nu)
   real(kind=realType)  , intent(in)      :: coef(ndim, nctlv, nctlu)
-  integer              , intent(in)      :: ku, kv, nctlu, nctlv, ndim, nu, nv
   real(kind=realType)  , intent(in)      :: X(ndim, nv, nu)
   real(kind=realType)  , intent(out)     :: rms
 
@@ -64,9 +64,6 @@ subroutine surface_para_corr(tu, tv, ku, kv, u, v, coef, nctlu, nctlv, ndim, nu,
   real(kind=realType)                   :: val(ndim), deriv(ndim, 2), deriv2(ndim, 2, 2)
   real(kind=realType)                   :: u_tilde, v_tilde
   real(kind=realType)                   :: A(2, 2), ki(2), delta(2)
-
-  !Functions
-  real(kind=realType)                   :: norm
 
   max_inner_iter = 10
   rms = 0.0
@@ -79,10 +76,10 @@ subroutine surface_para_corr(tu, tv, ku, kv, u, v, coef, nctlu, nctlv, ndim, nu,
 
         D = val-X(:, j, i)
 
-        A(1, 1) = norm(deriv(:, i), ndim)**2 + dot_product(D, deriv2(:, 1, 1))
+        A(1, 1) = NORM2(deriv(:, i))**2 + dot_product(D, deriv2(:, 1, 1))
         A(1, 2) = dot_product(deriv(:, 1), deriv(:, 2)) + dot_product(D, deriv2(:, 1, 2))
         A(2, 1) = A(1, 2)
-        A(2, 2) = norm(deriv(:, 2), ndim)**2 + dot_product(D, deriv2(:, 2, 2))
+        A(2, 2) = NORM2(deriv(:, 2))**2 + dot_product(D, deriv2(:, 2, 2))
         
         ki(1) = -dot_product(D, deriv(:, 1))
         ki(2) = -dot_product(D, deriv(:, 2))
@@ -101,7 +98,7 @@ subroutine surface_para_corr(tu, tv, ku, kv, u, v, coef, nctlu, nctlv, ndim, nu,
 
            call eval_surface(u_tilde, v_tilde, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, val)
            D2 = val-X(i, j, :)
-           if (norm(D, ndim) .ge. norm(D2, ndim)) then
+           if (NORM2(D) .ge. NORM2(D2)) then
               u(j, i) = u_tilde
               v(j, i) = v_tilde
               exit inner_loop
@@ -132,10 +129,10 @@ function compute_rms_surface(tu, tv, ku, kv, u, v, coef, nctlu, nctlv, ndim, nu,
   implicit none
 
   ! Input/Output
+  integer              , intent(in)      :: ku, kv, nctlu, nctlv, ndim, nu, nv
   real(kind=realType)  , intent(in)      :: tu(ku+nctlu), tv(kv+nctlv)
   real(kind=realType)  , intent(inout)   :: u(nv, nu), v(nv, nu)
   real(kind=realType)  , intent(in)      :: coef(ndim, nctlv, nctlu)
-  integer              , intent(in)      :: ku, kv, nctlu, nctlv, ndim, nu, nv
   real(kind=realType)  , intent(in)      :: X(ndim, nv, nu)
  
   ! Working
