@@ -1,11 +1,3 @@
-"""
-pySpline
---------
-
-Contains classes for working with B-spline :class:`Curve`, :class:`Surface` and
-:class:`Volume`
-"""
-
 # External modules
 import numpy as np
 from scipy import sparse
