@@ -1,6 +1,7 @@
 # External modules
 import numpy as np
 from scipy import sparse
+from . import libspline
 
 
 class Error(Exception):
@@ -345,3 +346,54 @@ def line(*args, **kwargs):
             return Curve(coef=[args[0], x2], k=2, t=[0, 0, 1, 1])
         else:
             Error("Error: dir must be specified if only 1 argument is given")
+
+
+def plane_line(pts_T, vec_T, p0, v1, v2):
+    """Check a plane against multiple lines
+    Python wrapper for libspline function
+
+    Args:
+        pts_T ([real]): [description]
+        vec_T ([real]): [description]
+        p0 ([real]): [description]
+        v1 ([real]): [description]
+        v2 ([real]): [description]
+
+    Returns:
+        [int]: [description]
+        [real]: [description]
+    """
+    return libspline.plane_line(pts_T, vec_T, p0, v1, v2)
+
+
+def tfi2d(e0, e1, e2, e3):
+    """[summary]
+
+    Args:
+        e0 ([type]): [description]
+        e1 ([type]): [description]
+        e2 ([type]): [description]
+        e3 ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    return libspline.tfi2d(e0, e1, e2, e3)
+
+
+def line_plane(pt, upVec, p0, v1, v2):
+    """[summary]
+
+    Args:
+        pt ([type]): [description]
+        upVec ([type]): [description]
+        p0 ([type]): [description]
+        v1 ([type]): [description]
+        v2 ([type]): [description]
+
+    Returns:
+        [type]: [description]
+        [type]: [description]
+        [type]: [description]
+    """
+    return libspline.line_plane(pt, upVec, p0, v1, v2)
