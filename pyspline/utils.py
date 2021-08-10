@@ -352,9 +352,7 @@ def line(*args, **kwargs):
 
 def plane_line(pts_T, vec_T, p0, v1, v2):
     """
-    Python wrapper for libspline function plane_line
-
-    libspline plane_line checks a plane against multiple lines]
+    Check a plane against multiple lines
 
     Parameters
     ----------
@@ -382,9 +380,7 @@ def plane_line(pts_T, vec_T, p0, v1, v2):
 
 def tfi2d(e0, e1, e2, e3):
     """
-    Python wrapper for libspline function tfi2d
-
-    libspline tfi2d performs a simple 2D transfinite interpolation in 3D.
+    Perform a simple 2D transfinite interpolation in 3D.
 
     Parameters
     ----------
@@ -400,28 +396,33 @@ def tfi2d(e0, e1, e2, e3):
     Returns
     -------
     vector, 3 x Nu x Nv
-        [description]
     """
     return libspline.tfi2d(e0, e1, e2, e3)
 
 
 def line_plane(pt, upVec, p0, v1, v2):
-    """
-    Python wrapper for libspline function line_plane
+    r"""
+    Check a line against multiple planes.
+    Solve for the scalars: alpha, beta, gamma such that
 
-    libspline line_plane checks a line against multiple planes
-    Solve for the scalars: alpha, beta, gamma such that:
-        ia + alpha*vc = p0 + beta*v1 + gamma*v2
-        ia - p0 = [ - vc ; v1 ; v2 ][ alpha ]
-                                    [ beta  ]
-                                    [ gamma ]
-    alpha >= 0: The point lies above the initial point
-    alpha  < 0: The point lies below the initial point
+    .. math::
 
-    The domain of the triangle is defined by:
-       beta + gamma = 1
+        ia + \alpha*vc &= p_0 + \beta*v_1 + \gamma*v_2 \\
+        ia - p_0 &= \begin{bmatrix}-v_c & v_1 & v_2\end{bmatrix}\begin{bmatrix}\alpha\\\beta\\\gamma\end{bmatrix}\\
+        \alpha &\ge 0: \text{The point lies above the initial point}\\
+        \alpha  &< 0: \text{The point lies below the initial point}
+
+    The domain of the triangle is defined by
+
+    .. math::
+
+       \beta + \gamma = 1
+
     and
-       0 < beta, gamma < 1
+
+    .. math::
+
+       0 < \beta, \gamma < 1
 
     Parameters
     ----------
@@ -439,7 +440,7 @@ def line_plane(pt, upVec, p0, v1, v2):
     Returns
     -------
     sol
-        Solution vector - parametric positions + physical coordiantes
+        Solution vector---parametric positions + physical coordinates
     nsol
         Number of solutions
     """
