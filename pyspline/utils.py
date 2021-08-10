@@ -350,15 +350,15 @@ def line(*args, **kwargs):
             Error("Error: dir must be specified if only 1 argument is given")
 
 
-def plane_line(pts_T, vec_T, p0, v1, v2):
+def plane_line(ia, vc, p0, v1, v2):
     """
     Check a plane against multiple lines
 
     Parameters
     ----------
-    pt : vector
+    ia : vector
         initial point
-    upVec : vector
+    vc : vector
         search vector from initial point
     p0 : vector
         vector to triangle origins
@@ -371,11 +371,11 @@ def plane_line(pts_T, vec_T, p0, v1, v2):
     -------
     sol
         Solution vector - parametric positions + physical coordiantes
-    nsol
+    nSol
         Number of solutions
     """
 
-    return libspline.plane_line(pts_T, vec_T, p0, v1, v2)
+    return libspline.plane_line(ia, vc, p0, v1, v2)
 
 
 def tfi2d(e0, e1, e2, e3):
@@ -400,15 +400,15 @@ def tfi2d(e0, e1, e2, e3):
     return libspline.tfi2d(e0, e1, e2, e3)
 
 
-def line_plane(pt, upVec, p0, v1, v2):
+def line_plane(ia, vc, p0, v1, v2):
     r"""
     Check a line against multiple planes.
     Solve for the scalars :math:`\alpha, \beta, \gamma` such that
 
     .. math::
 
-        ia + \alpha \times v_c &= p_0 + \beta \times v_1 + \gamma \times v_2 \\
-        ia - p_0 &= \begin{bmatrix}-v_c & v_1 & v_2\end{bmatrix}\begin{bmatrix}\alpha\\\beta\\\gamma\end{bmatrix}\\
+        i_a + \alpha \times v_c &= p_0 + \beta \times v_1 + \gamma \times v_2 \\
+        i_a - p_0 &= \begin{bmatrix}-v_c & v_1 & v_2\end{bmatrix}\begin{bmatrix}\alpha\\\beta\\\gamma\end{bmatrix}\\
         \alpha &\ge 0: \text{The point lies above the initial point}\\
         \alpha  &< 0: \text{The point lies below the initial point}
 
@@ -426,9 +426,9 @@ def line_plane(pt, upVec, p0, v1, v2):
 
     Parameters
     ----------
-    pt : vector
+    ia : vector
         initial point
-    upVec : vector
+    vc : vector
         search vector from initial point
     p0 : vector
         vector to triangle origins
@@ -441,8 +441,8 @@ def line_plane(pt, upVec, p0, v1, v2):
     -------
     sol
         Solution vector---parametric positions + physical coordinates
-    nsol
+    nSol
         Number of solutions
     """
 
-    return libspline.line_plane(pt, upVec, p0, v1, v2)
+    return libspline.line_plane(ia, vc, p0, v1, v2)
