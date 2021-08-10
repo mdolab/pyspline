@@ -403,11 +403,11 @@ def tfi2d(e0, e1, e2, e3):
 def line_plane(pt, upVec, p0, v1, v2):
     r"""
     Check a line against multiple planes.
-    Solve for the scalars: alpha, beta, gamma such that
+    Solve for the scalars :math:`\alpha, \beta, \gamma` such that
 
     .. math::
 
-        ia + \alpha*vc &= p_0 + \beta*v_1 + \gamma*v_2 \\
+        ia + \alpha \times v_c &= p_0 + \beta \times v_1 + \gamma \times v_2 \\
         ia - p_0 &= \begin{bmatrix}-v_c & v_1 & v_2\end{bmatrix}\begin{bmatrix}\alpha\\\beta\\\gamma\end{bmatrix}\\
         \alpha &\ge 0: \text{The point lies above the initial point}\\
         \alpha  &< 0: \text{The point lies below the initial point}
