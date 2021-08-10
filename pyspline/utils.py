@@ -349,51 +349,97 @@ def line(*args, **kwargs):
 
 
 def plane_line(pts_T, vec_T, p0, v1, v2):
-    """Check a plane against multiple lines
-    Python wrapper for libspline function
-
-    Args:
-        pts_T ([real]): [description]
-        vec_T ([real]): [description]
-        p0 ([real]): [description]
-        v1 ([real]): [description]
-        v2 ([real]): [description]
-
-    Returns:
-        [int]: [description]
-        [real]: [description]
     """
+    Python wrapper for libspline function plane_line
+
+    libspline plane_line checks a plane against multiple lines]
+
+    Parameters
+    ----------
+    pt : vector
+        initial point
+    upVec : vector
+        search vector from initial point
+    p0 : vector
+        vector to triangle origins
+    v1 : vector
+        vector along first triangle direction
+    v2 : vector
+        vector along second triangle direction
+
+    Returns
+    -------
+    sol
+        Solution vector - parametric positions + physical coordiantes
+    nsol
+        Number of solutions
+    """
+
     return libspline.plane_line(pts_T, vec_T, p0, v1, v2)
 
 
 def tfi2d(e0, e1, e2, e3):
-    """[summary]
+    """
+    Python wrapper for libspline function tfi2d
 
-    Args:
-        e0 ([type]): [description]
-        e1 ([type]): [description]
-        e2 ([type]): [description]
-        e3 ([type]): [description]
+    libspline tfi2d performs a simple 2D transfinite interpolation in 3D.
 
-    Returns:
-        [type]: [description]
+    Parameters
+    ----------
+    e0 : vector, 3 x Nu
+        coordinates along 0th edge
+    e1 : vector, 3 x Nu
+        coordinates along 1st edge
+    e2 : vector, 3 x Nv
+        coordinates along 2nd edge
+    e3 : vector, 3 x Nv
+        coordinates along 3rd edge
+
+    Returns
+    -------
+    vector, 3 x Nu x Nv
+        [description]
     """
     return libspline.tfi2d(e0, e1, e2, e3)
 
 
 def line_plane(pt, upVec, p0, v1, v2):
-    """[summary]
-
-    Args:
-        pt ([type]): [description]
-        upVec ([type]): [description]
-        p0 ([type]): [description]
-        v1 ([type]): [description]
-        v2 ([type]): [description]
-
-    Returns:
-        [type]: [description]
-        [type]: [description]
-        [type]: [description]
     """
+    Python wrapper for libspline function line_plane
+
+    libspline line_plane checks a line against multiple planes
+    Solve for the scalars: alpha, beta, gamma such that:
+        ia + alpha*vc = p0 + beta*v1 + gamma*v2
+        ia - p0 = [ - vc ; v1 ; v2 ][ alpha ]
+                                    [ beta  ]
+                                    [ gamma ]
+    alpha >= 0: The point lies above the initial point
+    alpha  < 0: The point lies below the initial point
+
+    The domain of the triangle is defined by:
+       beta + gamma = 1
+    and
+       0 < beta, gamma < 1
+
+    Parameters
+    ----------
+    pt : vector
+        initial point
+    upVec : vector
+        search vector from initial point
+    p0 : vector
+        vector to triangle origins
+    v1 : vector
+        vector along first triangle direction
+    v2 : vector
+        vector along second triangle direction
+
+    Returns
+    -------
+    sol
+        Solution vector - parametric positions + physical coordiantes
+    nsol
+        Number of solutions
+    """
+
     return libspline.line_plane(pt, upVec, p0, v1, v2)
