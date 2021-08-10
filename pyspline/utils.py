@@ -356,22 +356,22 @@ def plane_line(ia, vc, p0, v1, v2):
 
     Parameters
     ----------
-    ia : vector
+    ia : ndarray[3, n]
         initial point
-    vc : vector
+    vc : ndarray[3, n]
         search vector from initial point
-    p0 : vector
+    p0 : ndarray[3]
         vector to triangle origins
-    v1 : vector
+    v1 : ndarray[3]
         vector along first triangle direction
-    v2 : vector
+    v2 : ndarray[3]
         vector along second triangle direction
 
     Returns
     -------
-    sol
+    sol : ndarray[6, n]
         Solution vector - parametric positions + physical coordiantes
-    nSol
+    nSol : int
         Number of solutions
     """
 
@@ -384,18 +384,19 @@ def tfi2d(e0, e1, e2, e3):
 
     Parameters
     ----------
-    e0 : vector, 3 x Nu
+    e0 : ndarray[3, Nu]
         coordinates along 0th edge
-    e1 : vector, 3 x Nu
+    e1 : ndarray[3, Nu]
         coordinates along 1st edge
-    e2 : vector, 3 x Nv
+    e2 : ndarray[3, Nv]
         coordinates along 2nd edge
-    e3 : vector, 3 x Nv
+    e3 : ndarray[3, Nv]
         coordinates along 3rd edge
 
     Returns
     -------
-    vector, 3 x Nu x Nv
+    X : ndarray[3 x Nu x Nv]
+        evaluated points
     """
     return libspline.tfi2d(e0, e1, e2, e3)
 
@@ -426,23 +427,24 @@ def line_plane(ia, vc, p0, v1, v2):
 
     Parameters
     ----------
-    ia : vector
+    ia : ndarray[3]
         initial point
-    vc : vector
+    vc : ndarray[3]
         search vector from initial point
-    p0 : vector
+    p0 : ndarray[3, n]
         vector to triangle origins
-    v1 : vector
+    v1 : ndarray[3, n]
         vector along first triangle direction
-    v2 : vector
+    v2 : ndarray[3, n]
         vector along second triangle direction
 
     Returns
     -------
-    sol
+    sol : real ndarray[6, n]
         Solution vector---parametric positions + physical coordinates
-    nSol
+    nSol : int
         Number of solutions
+    pid : int ndarray[n]
     """
 
     return libspline.line_plane(ia, vc, p0, v1, v2)
