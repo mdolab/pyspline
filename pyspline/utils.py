@@ -1,6 +1,8 @@
 # External modules
 import numpy as np
 from scipy import sparse
+
+# Local modules
 from . import libspline
 
 
