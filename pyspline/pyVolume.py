@@ -925,7 +925,7 @@ class Volume(object):
         s : float
             Parametric position along 'direction' to insert
         r : int
-        Desired number of times to insert.
+            Desired number of times to insert.
 
         Returns
         -------

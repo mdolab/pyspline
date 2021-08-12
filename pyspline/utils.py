@@ -2,6 +2,9 @@
 import numpy as np
 from scipy import sparse
 
+# Local modules
+from . import libspline
+
 
 class Error(Exception):
     """
@@ -345,3 +348,103 @@ def line(*args, **kwargs):
             return Curve(coef=[args[0], x2], k=2, t=[0, 0, 1, 1])
         else:
             Error("Error: dir must be specified if only 1 argument is given")
+
+
+def plane_line(ia, vc, p0, v1, v2):
+    """
+    Check a plane against multiple lines
+
+    Parameters
+    ----------
+    ia : ndarray[3, n]
+        initial point
+    vc : ndarray[3, n]
+        search vector from initial point
+    p0 : ndarray[3]
+        vector to triangle origins
+    v1 : ndarray[3]
+        vector along first triangle direction
+    v2 : ndarray[3]
+        vector along second triangle direction
+
+    Returns
+    -------
+    sol : ndarray[6, n]
+        Solution vector - parametric positions + physical coordiantes
+    nSol : int
+        Number of solutions
+    """
+
+    return libspline.plane_line(ia, vc, p0, v1, v2)
+
+
+def tfi2d(e0, e1, e2, e3):
+    """
+    Perform a simple 2D transfinite interpolation in 3D.
+
+    Parameters
+    ----------
+    e0 : ndarray[3, Nu]
+        coordinates along 0th edge
+    e1 : ndarray[3, Nu]
+        coordinates along 1st edge
+    e2 : ndarray[3, Nv]
+        coordinates along 2nd edge
+    e3 : ndarray[3, Nv]
+        coordinates along 3rd edge
+
+    Returns
+    -------
+    X : ndarray[3 x Nu x Nv]
+        evaluated points
+    """
+    return libspline.tfi2d(e0, e1, e2, e3)
+
+
+def line_plane(ia, vc, p0, v1, v2):
+    r"""
+    Check a line against multiple planes.
+    Solve for the scalars :math:`\alpha, \beta, \gamma` such that
+
+    .. math::
+
+        i_a + \alpha \times v_c &= p_0 + \beta \times v_1 + \gamma \times v_2 \\
+        i_a - p_0 &= \begin{bmatrix}-v_c & v_1 & v_2\end{bmatrix}\begin{bmatrix}\alpha\\\beta\\\gamma\end{bmatrix}\\
+        \alpha &\ge 0: \text{The point lies above the initial point}\\
+        \alpha  &< 0: \text{The point lies below the initial point}
+
+    The domain of the triangle is defined by
+
+    .. math::
+
+       \beta + \gamma = 1
+
+    and
+
+    .. math::
+
+       0 < \beta, \gamma < 1
+
+    Parameters
+    ----------
+    ia : ndarray[3]
+        initial point
+    vc : ndarray[3]
+        search vector from initial point
+    p0 : ndarray[3, n]
+        vector to triangle origins
+    v1 : ndarray[3, n]
+        vector along first triangle direction
+    v2 : ndarray[3, n]
+        vector along second triangle direction
+
+    Returns
+    -------
+    sol : real ndarray[6, n]
+        Solution vector---parametric positions + physical coordinates
+    nSol : int
+        Number of solutions
+    pid : int ndarray[n]
+    """
+
+    return libspline.line_plane(ia, vc, p0, v1, v2)

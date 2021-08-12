@@ -1327,7 +1327,7 @@ subroutine line_plane(ia, vc, p0, v1, v2, n, sol, pid, n_sol)
   ! Check a line against multiple planes
   !
   ! ia:   The initial point
-  ! vc:   The serach vector from the initial point
+  ! vc:   The search vector from the initial point
   ! p0:   Vectors to the triangle origins
   ! v1:   Vector along the first triangle direction
   ! v2:   Vector along the second triangle direction
