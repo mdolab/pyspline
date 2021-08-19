@@ -402,7 +402,7 @@ def tfi2d(e0, e1, e2, e3):
 
 
 def line_plane(ia, vc, p0, v1, v2):
-    r"""
+    """
     Check a line against multiple planes.
     Solve for the scalars :math:`\alpha, \beta, \gamma` such that
 
@@ -448,3 +448,24 @@ def line_plane(ia, vc, p0, v1, v2):
     """
 
     return libspline.line_plane(ia, vc, p0, v1, v2)
+
+
+def searchQuads(pts0, conn, points):
+    """[summary]
+
+    Parameters
+    ----------
+    pts0 : [type]
+        [description]
+    conn : [type]
+        [description]
+    points : [type]
+        [description]
+
+    Returns
+    -------
+    [type]
+        [description]
+    """
+
+    return libspline.adtprojections.searchquads(pts0, conn, points)
