@@ -448,3 +448,28 @@ def line_plane(ia, vc, p0, v1, v2):
     """
 
     return libspline.line_plane(ia, vc, p0, v1, v2)
+
+
+def searchQuads(pts, conn, searchPts):
+    """
+    This routine searches for the closest point on a set of quads for each searchPt.
+    An ADT tree is built and used for the search and subsequently destroyed.
+
+    Parameters
+    ----------
+    pts : ndarray[3, nPts]
+        points defining the quad elements
+    conn : ndarray[4, nConn]
+        local connectivity of the quad elements
+    searchPts : ndarray[3, nSearchPts]
+        set of points to search for
+
+    Returns
+    -------
+    faceID : ndarray[nSearchPts]
+        index of the quad elements, one for each search point
+    uv : ndarray[2, nSearchPts]
+        parametric ``u`` and ``v`` weights of the projected point on the closest quad
+    """
+
+    return libspline.adtprojections.searchquads(pts, conn, searchPts)
