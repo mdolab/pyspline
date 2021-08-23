@@ -1,3 +1,3 @@
 #!/bin/bash
 set -e
-testflo . -v
+testflo -v --coverage --coverpkg pyspline
