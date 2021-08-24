@@ -10,3 +10,8 @@ doc/_build/*
 *.a
 *.mod
 *.so
+*.out
+*.egg-info
+config.mk
+config/config.mk
+src/f2py/libspline-f2pywrappers2.f90
