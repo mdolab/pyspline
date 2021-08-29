@@ -335,7 +335,7 @@ class Curve(object):
 
         # If we do NOT have an interpolation:
         length = libspline.poly_length(self.X.T)
-        for i in range(nIter):
+        for _i in range(nIter):
             su = self.s[suSelect]
             sc = self.s[scSelect]
             if self.deriv is not None:
@@ -894,7 +894,7 @@ class Curve(object):
                 counter += 1
                 pos_counter = 0
 
-        for i in range(self.nCtl):
+        for _i in range(self.nCtl):
             pos_counter += 1
             handle.write("%20.12g," % (1.0))
             if np.mod(pos_counter, 3) == 0:
