@@ -273,7 +273,7 @@ class Surface(object):
                 ind[-1] = 3 * N - 3
                 ii = 1
                 jj = 1
-                for i in range(N - 1):
+                for _i in range(N - 1):
                     ind[ii] = jj
                     ind[ii + 1] = jj + 1
                     ii += 2
@@ -635,7 +635,7 @@ class Surface(object):
         s : float
             Parametric position along 'direction' to insert
         r : int
-        Desired number of times to insert.
+            Desired number of times to insert.
 
         Returns
         -------
@@ -1118,7 +1118,7 @@ class Surface(object):
             # end if
         # end for
 
-        for i in range(self.nCtlu * self.nCtlv):
+        for _i in range(self.nCtlu * self.nCtlv):
             pos_counter += 1
             handle.write("%20.12g," % (1.0))
             if np.mod(pos_counter, 3) == 0:
@@ -1160,7 +1160,7 @@ class Surface(object):
                 pos_counter = 0
             else:  # We have to close it up anyway
                 if i == 3:
-                    for j in range(3 - pos_counter):
+                    for _j in range(3 - pos_counter):
                         handle.write("%21s" % (" "))
                     # end for
                     pos_counter = 0
