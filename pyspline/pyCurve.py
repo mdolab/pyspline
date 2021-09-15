@@ -80,7 +80,7 @@ class Curve(object):
     >>> # With explicit parameter values
     >>> line_seg = Curve(x=x, y=y, k=2, s=s)
     >>> #Interpolate parabolic curve
-    >>> parabola = Curve(x=x, y=y, k=3, nCtl=2)
+    >>> parabola = Curve(x=x, y=y, k=3)
     >>> #Interpolate parabolic curve with parameter values
     >>> parabola = Curve(x=x, y=y, k=3, s=s)
     """
