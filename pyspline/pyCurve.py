@@ -32,8 +32,8 @@ class Curve(object):
 
     Parameters
     ----------
-    k : int
-        Order for spline, must be 2, 3, or 4. A spline with order :math:`n` has at most :math:`C^{n-2}` continuity. The :math:`n-1` derivative will be piecewise constant.
+    k : {2, 3, 4}
+        Order for spline. A spline with order :math:`n` has at most :math:`C^{n-2}` continuity. The :math:`n-1` derivative will be piecewise constant.
     nCtl : int
         Number of control points. If this is specified then LMS will be used instead of interpolation.
     t : array, list
