@@ -32,10 +32,10 @@ class Curve(object):
 
     Parameters
     ----------
-    k : int
-        Order for spline
+    k : {2, 3, 4}
+        Order for spline. A spline with order :math:`n` has at most :math:`C^{n-2}` continuity. The :math:`n-1` derivative will be piecewise constant.
     nCtl : int
-        Number of control points. Used only by LMS initialization.
+        Number of control points. If this is specified then LMS will be used instead of interpolation.
     t : array, list
         Knot vector. Used only for creation. Must be size ``nCtl + k``
     coef : array, size (nCtl, nDim)
@@ -75,13 +75,13 @@ class Curve(object):
     >>> x = [0, 0.5, 1.0]
     >>> y = [0, 0.25, 1.0]
     >>> s = [0., 0.5, 1.0]
-    >>> # Spatial interpolated seg
+    >>> # Spatial interpolated seg (k=2 makes this a straight line)
     >>> line_seg = Curve(x=x, y=y, k=2)
     >>> # With explicit parameter values
     >>> line_seg = Curve(x=x, y=y, k=2, s=s)
-    >>> #LMS parabolic curve
+    >>> #Interpolate parabolic curve
     >>> parabola = Curve(x=x, y=y, k=3)
-    >>> #LMS parabolic curve with parameter values
+    >>> #Interpolate parabolic curve with parameter values
     >>> parabola = Curve(x=x, y=y, k=3, s=s)
     """
 
