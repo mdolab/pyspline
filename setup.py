@@ -25,5 +25,9 @@ setup(
     packages=["pyspline"],
     package_data={"pyspline": ["*.so"]},
     install_requires=["numpy>=1.16", "scipy>=1.2"],
+    extra_requires={
+        "docs": ["sphinx-mdolab-theme"],
+        "testing": ["parameterized", "testflo>=1.4.5", "baseclasses>=1.6.1]
+    }
     classifiers=["Operating System :: Linux", "Programming Language :: Python, Fortran"],
 )
