@@ -11,6 +11,9 @@ this_directory = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
+with open("doc/requirements.txt") as f:
+    docs_require = f.read().splitlines()
+
 setup(
     name="pyspline",
     version=__version__,
@@ -26,8 +29,8 @@ setup(
     package_data={"pyspline": ["*.so"]},
     install_requires=["numpy>=1.16", "scipy>=1.2"],
     extra_requires={
-        "docs": ["sphinx-mdolab-theme"],
-        "testing": ["parameterized", "testflo>=1.4.5", "baseclasses>=1.6.1]
-    }
+        "docs": docs_require,
+        "testing": ["parameterized", "testflo>=1.4.5", "baseclasses>=1.6.1"],
+    },
     classifiers=["Operating System :: Linux", "Programming Language :: Python, Fortran"],
 )
