@@ -38,7 +38,7 @@ def writeTecplot1D(handle, name, data, solutionTime=None):
     data : array of size (N, ndim)
         1D array of data to write to file
     SolutionTime : float
-        Solution time to write to the file. This could be a fictitious time to 
+        Solution time to write to the file. This could be a fictitious time to
         make visualization easier in tecplot.
     """
     nx = data.shape[0]
@@ -64,7 +64,7 @@ def writeTecplot2D(handle, name, data, solutionTime=None):
     data : 2D np array of size (nx, ny, ndim)
         2D array of data to write to file
     SolutionTime : float
-        Solution time to write to the file. This could be a fictitious time to 
+        Solution time to write to the file. This could be a fictitious time to
         make visualization easier in tecplot.
     """
     nx = data.shape[0]
@@ -92,7 +92,7 @@ def writeTecplot3D(handle, name, data, solutionTime=None):
     data : 3D np array of size (nx, ny, nz, ndim)
         3D array of data to write to file
     SolutionTime : float
-        Solution time to write to the file. This could be a fictitious time to 
+        Solution time to write to the file. This could be a fictitious time to
         make visualization easier in tecplot.
     """
     nx = data.shape[0]
