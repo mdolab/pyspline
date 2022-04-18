@@ -1001,7 +1001,7 @@ class Surface(object):
             inCurve.t, inCurve.k, inCurve.coef.T, self.tu, self.tv, self.ku, self.kv, self.coef.T, nIter, eps, u, v, s
         )
 
-    def computeData(self):
+    def computeData(self, recompute=False):
         """
         Compute discrete data that is used for the Tecplot
         Visualization as well as the data for doing the brute-force
@@ -1009,7 +1009,7 @@ class Surface(object):
         """
 
         # We will base the data on interpolated greville points
-        if self.data is None:
+        if self.data is None or recompute:
             self.edgeCurves[0].calcInterpolatedGrevillePoints()
             self.udata = self.edgeCurves[0].sdata
             self.edgeCurves[2].calcInterpolatedGrevillePoints()

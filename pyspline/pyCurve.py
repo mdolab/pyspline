@@ -802,7 +802,7 @@ class Curve(object):
 
         return np.array(uSol), np.array(tSol), np.array(diff)
 
-    def computeData(self):
+    def computeData(self, recompute=False):
         """
         Compute discrete data that is used for the Tecplot
         Visualization as well as the data for doing the brute-force
@@ -810,7 +810,7 @@ class Curve(object):
         """
         # We will base the data on interpolated greville points
 
-        if self.data is None:
+        if self.data is None or recompute:
             self.calcInterpolatedGrevillePoints()
             self.data = self.getValue(self.sdata)
 
