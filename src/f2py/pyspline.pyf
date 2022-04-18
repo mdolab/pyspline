@@ -541,6 +541,11 @@
        integer intent(in) :: nctl
        integer intent(out) :: ind
      end subroutine findspan
+
+     subroutine version(ver) ! in :test:version.f90
+        character(len=256) intent(out) :: ver
+     end subroutine version
+     
      module adtprojections ! in :test:adtProjections.F90
        subroutine searchquads(pts,conn,searchpts,npts,nconn,nsearchpts,faceid,uv) ! in :test:adtProjections.F90:adtmodule
          real(kind=realtype), target,dimension(3,npts),intent(in) :: pts
