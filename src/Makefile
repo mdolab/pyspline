@@ -32,6 +32,8 @@ OBJS =  evaluations.o\
 	tfi2d.o\
 	version.o
 
+.PHONY: version
+
 default: version
 	$(MAKE) $(MODS)
 	cp -f *.mod ../mod
