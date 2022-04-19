@@ -894,6 +894,11 @@ class Volume(object):
         Compute discrete data that is used for the Tecplot
         Visualization as well as the data for doing the brute-force
         checks
+
+        Parameters
+        ----------
+        recompute : bool
+            If True, recompute the data even if it has already been computed.
         """
         # Only recompute if it doesn't exist already
         if self.data is None or recompute:
