@@ -1,3 +1,4 @@
+# Local modules
 from .libspline import version
 
 
