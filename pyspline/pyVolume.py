@@ -889,14 +889,19 @@ class Volume(object):
 
         return u.squeeze(), v.squeeze(), w.squeeze(), D.squeeze()
 
-    def computeData(self):
+    def computeData(self, recompute=False):
         """
         Compute discrete data that is used for the Tecplot
         Visualization as well as the data for doing the brute-force
         checks
+
+        Parameters
+        ----------
+        recompute : bool
+            If True, recompute the data even if it has already been computed.
         """
         # Only recompute if it doesn't exist already
-        if self.data is None:
+        if self.data is None or recompute:
             self.edgeCurves[0].calcInterpolatedGrevillePoints()
             self.udata = self.edgeCurves[0].sdata
             self.edgeCurves[2].calcInterpolatedGrevillePoints()

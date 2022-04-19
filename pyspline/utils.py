@@ -27,9 +27,8 @@ class Error(Exception):
         Exception.__init__()
 
 
-def writeTecplot1D(handle, name, data):
+def writeTecplot1D(handle, name, data, solutionTime=None):
     """A Generic function to write a 1D data zone to a tecplot file.
-
     Parameters
     ----------
     handle : file handle
@@ -38,10 +37,15 @@ def writeTecplot1D(handle, name, data):
         Name of the zone to use
     data : array of size (N, ndim)
         1D array of data to write to file
+    SolutionTime : float
+        Solution time to write to the file. This could be a fictitious time to
+        make visualization easier in tecplot.
     """
     nx = data.shape[0]
     ndim = data.shape[1]
     handle.write('Zone T="%s" I=%d\n' % (name, nx))
+    if solutionTime is not None:
+        handle.write("SOLUTIONTIME=%f\n" % (solutionTime))
     handle.write("DATAPACKING=POINT\n")
     for i in range(nx):
         for idim in range(ndim):
@@ -49,9 +53,8 @@ def writeTecplot1D(handle, name, data):
         handle.write("\n")
 
 
-def writeTecplot2D(handle, name, data):
+def writeTecplot2D(handle, name, data, solutionTime=None):
     """A Generic function to write a 2D data zone to a tecplot file.
-
     Parameters
     ----------
     handle : file handle
@@ -60,11 +63,16 @@ def writeTecplot2D(handle, name, data):
         Name of the zone to use
     data : 2D np array of size (nx, ny, ndim)
         2D array of data to write to file
+    SolutionTime : float
+        Solution time to write to the file. This could be a fictitious time to
+        make visualization easier in tecplot.
     """
     nx = data.shape[0]
     ny = data.shape[1]
     ndim = data.shape[2]
     handle.write('Zone T="%s" I=%d J=%d\n' % (name, nx, ny))
+    if solutionTime is not None:
+        handle.write("SOLUTIONTIME=%f\n" % (solutionTime))
     handle.write("DATAPACKING=POINT\n")
     for j in range(ny):
         for i in range(nx):
@@ -73,9 +81,8 @@ def writeTecplot2D(handle, name, data):
             handle.write("\n")
 
 
-def writeTecplot3D(handle, name, data):
+def writeTecplot3D(handle, name, data, solutionTime=None):
     """A Generic function to write a 3D data zone to a tecplot file.
-
     Parameters
     ----------
     handle : file handle
@@ -84,12 +91,17 @@ def writeTecplot3D(handle, name, data):
         Name of the zone to use
     data : 3D np array of size (nx, ny, nz, ndim)
         3D array of data to write to file
+    SolutionTime : float
+        Solution time to write to the file. This could be a fictitious time to
+        make visualization easier in tecplot.
     """
     nx = data.shape[0]
     ny = data.shape[1]
     nz = data.shape[2]
     ndim = data.shape[3]
     handle.write('Zone T="%s" I=%d J=%d K=%d\n' % (name, nx, ny, nz))
+    if solutionTime is not None:
+        handle.write("SOLUTIONTIME=%f\n" % (solutionTime))
     handle.write("DATAPACKING=POINT\n")
     for k in range(nz):
         for j in range(ny):
