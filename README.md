@@ -1,8 +1,8 @@
 pySpline
 ====================================================
-[![Build Status](https://dev.azure.com/mdolab/Public/_apis/build/status/mdolab.pyspline?branchName=master)](https://dev.azure.com/mdolab/Public/_build/latest?definitionId=20&branchName=master)
+[![Build Status](https://dev.azure.com/mdolab/Public/_apis/build/status/mdolab.pyspline?branchName=main)](https://dev.azure.com/mdolab/Public/_build/latest?definitionId=20&branchName=main)
 [![Documentation Status](https://readthedocs.com/projects/mdolab-pyspline/badge/?version=latest)](https://mdolab-pyspline.readthedocs-hosted.com/en/latest/?badge=latest)
-[![codecov](https://codecov.io/gh/mdolab/pyspline/branch/master/graph/badge.svg?token=J1DDOBHVRT)](https://codecov.io/gh/mdolab/pyspline)
+[![codecov](https://codecov.io/gh/mdolab/pyspline/branch/main/graph/badge.svg?token=J1DDOBHVRT)](https://codecov.io/gh/mdolab/pyspline)
 
 ``pySpline`` is a package containing code for wiking with b-spline
 ``curve``, ``surface``, and ``volume`` objects. The
