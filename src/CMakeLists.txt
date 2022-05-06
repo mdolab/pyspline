@@ -51,5 +51,5 @@ add_test(NAME test_import
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_custom_target(check
-	COMMAND ${CMAKE_CTEST_COMMAND}
+	COMMAND ${CMAKE_CTEST_COMMAND} "--output-on-failure"
 	DEPENDS spline)
