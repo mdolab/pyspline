@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
-cp $CONFIG_FILE config/config.mk
-make
+mkdir build/
+cd build/
+cmake ../
+make check
 pip install .
