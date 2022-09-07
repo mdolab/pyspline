@@ -424,10 +424,10 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
     ! Working
     real(kind=realType) :: val(ndim), deriv(ndim, 3), deriv2(ndim, 3, 3)
     real(kind=realType) :: R(nDim), low(3), high(3), pt(3), newpt(3), update(3)
-    real(kind=realType) :: step, dist, nDist, pgrad, fval, nfval, c, p_diff
+    real(kind=realType) :: step, dist, nDist, pgrad, fval, nfval
     real(kind=realType) :: grad(3), hessian(3, 3)
     integer :: i, j, m, NLSFail, ii
-    logical :: flag, cflag
+    logical :: flag
 
     NLSFail = 0
     ! Set lower and upper bounds for u, v, w based on knot vector
@@ -488,7 +488,25 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
             end if
         end do
 
-        if (NORM2(grad) < eps) then
+        ! for convergence, we used to check if ||grad||_2 was less than eps.
+        ! This tells us that the search cannot make much more progress;
+        ! we found a direct projection so R is very small.
+        ! However, this approach has a pitfall when the b-spline volume itself
+        ! is very small in size in one or more directions.
+        ! When the volume is small, its derivative will also be small.
+        ! As a result, the gradient vector, which is R dot deriv, will appear small.
+        ! The default tolerances for the newton convergence here is 1e-12
+        ! and the default projection tolerance we use in pygeo is 1e-10.
+        ! If the FFD derivative is on the order of 1e-2 or less,
+        ! the newton will quit when eps is about 1e-12, but R can still be above 1e-10.
+        ! The newton solver quits successfully in this case,
+        ! however, the higher level point embedding routine thinks
+        ! we are not inside the b-spline volume since we could not reach the
+        ! 1e-10 tolerance. instead, we just check if we are within the
+        ! specified tolerance in physical coordinates.
+        ! if the point is physically outside the b-spline volume, the line search fail
+        ! check below will catch that case and terminate early.
+        if (NORM2(R) < eps) then
             exit iteration_loop
         end if
 
@@ -511,14 +529,11 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
 
             newpt = pt + step * update
 
-            cflag = .False. ! Check if the constraints are applied
             ! Check if the new point exceeds the bounds
             do i = 1, 3
                 if (newpt(i) > high(i)) then
-                    cflag = .True.
                     newpt(i) = high(i)
                 else if (newpt(i) < low(i)) then
-                    cflag = .True.
                     newpt(i) = low(i)
                 end if
             end do
@@ -540,33 +555,23 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
             end if
 
             ! Calculate the new step length
-            if (cflag) then
-                ! If the constraints are applied - and the new point
-                ! doesn't satisfy the Wolfe conditions, it doesn't make
-                ! sense to apply a quadratic approximation
-                step = 0.25 * step
-            else
-                ! c = nfval - fval - pgrad * step is always positive since
-                ! nfval - fval > pgrad * wolfe * step > pgrad * step
-                c = ((nfval - fval) - pgrad * step)
-                step = -step * step * pgrad / (2.0 * c)
-                ! This update is always less than the original step length
-            end if
+            step = step * 0.5
         end do lineloop
 
         if (m == nLine + 1) then
             dist = ndist
             nLSFail = nLSFail + 1
-            if (NLSFail > LSFailMax) then ! There is nothing more we can do...
+            ! check if the line search failed in the last LSFailMax many (default 2) iterations.
+            ! if so, we quit. This condition also catches points that are outside the volume, since the
+            ! line search will fail for those points as well for most of the cases when the search point
+            ! gets stuck at the volume boundaries.
+            if (NLSFail > LSFailMax) then
+                ! There is nothing more we can do...
                 exit Iteration_loop
             end if
         else
+            ! reset the line search fail counter.
             NLSFail = 0
-            ! Check if there has been no change in the coordinates
-            p_diff = NORM2(pt - newpt)
-            if (p_diff < eps) then
-                exit Iteration_loop
-            end if
         end if
         pt = newpt
 
