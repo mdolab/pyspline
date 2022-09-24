@@ -422,14 +422,13 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
     real(kind=realType), intent(out) :: diff(ndim)
 
     ! Working
-    real(kind=realType) :: val(ndim), deriv(ndim, 3), deriv2(ndim, 3, 3)
+    real(kind=realType) :: val(ndim), old_val(ndim), deriv(ndim, 3), deriv2(ndim, 3, 3)
     real(kind=realType) :: R(nDim), low(3), high(3), pt(3), newpt(3), update(3)
-    real(kind=realType) :: step, dist, nDist, pgrad, fval, nfval
+    real(kind=realType) :: step, quad_step, dist, nDist, pgrad, fval, nfval, c, val_diff
     real(kind=realType) :: grad(3), hessian(3, 3)
-    integer :: i, j, m, NLSFail, ii
-    logical :: flag
+    integer :: i, j, m, ii
+    logical :: flag, cflag
 
-    NLSFail = 0
     ! Set lower and upper bounds for u, v, w based on knot vector
     low(1) = tu(1)
     low(2) = tv(1)
@@ -449,6 +448,9 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
                                nctlu, nctlv, nctlw, ndim, deriv)
         call eval_volume_deriv2(pt(1), pt(2), pt(3), tu, tv, tw, ku, kv, kw, coef, &
                                 nctlu, nctlv, nctlw, ndim, deriv2)
+
+        ! also copy the current "val" as the "old_val" to check the change later on
+        old_val = val
 
         ! Distance is R, "function value" fval is what we minimize
         R = val - X0
@@ -506,7 +508,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
         ! specified tolerance in physical coordinates.
         ! if the point is physically outside the b-spline volume, the line search fail
         ! check below will catch that case and terminate early.
-        if (NORM2(R) < eps) then
+        if (nDist .lt. eps) then
             exit iteration_loop
         end if
 
@@ -529,11 +531,14 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
 
             newpt = pt + step * update
 
+            cflag = .False. ! Check if the constraints are applied
             ! Check if the new point exceeds the bounds
             do i = 1, 3
                 if (newpt(i) > high(i)) then
+                    cflag = .true.
                     newpt(i) = high(i)
                 else if (newpt(i) < low(i)) then
+                    cflag = .true.
                     newpt(i) = low(i)
                 end if
             end do
@@ -555,25 +560,38 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
             end if
 
             ! Calculate the new step length
-            step = step * 0.5
+            if (cflag) then
+                ! If the constraints are applied - and the new point
+                ! doesn't satisfy the Wolfe conditions, it doesn't make
+                ! sense to apply a quadratic approximation
+                step = 0.1 * step
+            else
+                c = ((nfval - fval) - pgrad * step)
+                quad_step = -step * step * pgrad / (2.0 * c)
+                ! This update is always less than the original step length
+                ! however, it might be too small... in that case,
+                ! just backtrack since the quad. approx is probably not too good.
+                if (quad_step .lt. eps) then
+                    step = 0.1 * step
+                else
+                    step = quad_step
+                end if
+            end if
+
         end do lineloop
 
-        if (m == nLine + 1) then
-            dist = ndist
-            nLSFail = nLSFail + 1
-            ! check if the line search failed in the last LSFailMax many (default 2) iterations.
-            ! if so, we quit. This condition also catches points that are outside the volume, since the
-            ! line search will fail for those points as well for most of the cases when the search point
-            ! gets stuck at the volume boundaries.
-            if (NLSFail > LSFailMax) then
-                ! There is nothing more we can do...
-                exit Iteration_loop
-            end if
-        else
-            ! reset the line search fail counter.
-            NLSFail = 0
-        end if
+        ! update the point
         pt = newpt
+
+        ! Check if there has been no change in the coordinates; we want to try to catch cases
+        ! where the point we want to project is outside the volume here
+        ! without running through all of the iterations.
+        ! we can test this by checking if the point stopped changing despite taking steps that
+        ! are larger than epsilon.
+        val_diff = NORM2(val - old_val)
+        if ((val_diff .lt. eps) .and. (step .gt. eps)) then
+            exit Iteration_loop
+        end if
 
     end do iteration_loop
 
