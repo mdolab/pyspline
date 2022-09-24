@@ -520,9 +520,17 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
 
         !Check that this is a descent direction -
         !otherwise use the negative gradient
-        if (pgrad >= 0.0) then
-            update = -grad / NORM2(grad)
+        if (pgrad .gt. 0.0) then
+            update = -grad / (NORM2(grad) + eps)
             pgrad = dot_product(update, grad)
+        else if (pgrad .eq. 0.0) then
+            ! this is an edge case. pgrad is *exactly* zero. realistically, this happens
+            ! when we are at a bound where the gradient is pointing exactly away from the bound
+            ! but the update direction is either perpendicular to the gradient, or we are at a
+            ! corner and the update is actually zero. Either way, we can quit now because this
+            ! point is outside the volume, or even if it is inside the volume, this solver
+            ! wont be able to find a projection.
+            exit iteration_loop
         end if
 
         step = 1.0
@@ -571,7 +579,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
                 ! This update is always less than the original step length
                 ! however, it might be too small... in that case,
                 ! just backtrack since the quad. approx is probably not too good.
-                if (quad_step .lt. eps) then
+                if ((quad_step .lt. eps) .or. (quad_step .ne. quad_step)) then
                     step = 0.1 * step
                 else
                     step = quad_step
