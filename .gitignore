@@ -15,3 +15,4 @@ doc/_build/*
 config.mk
 config/config.mk
 src/f2py/libspline-f2pywrappers2.f90
+*.DS_Store
