@@ -22,39 +22,20 @@ def run_volume_test(volume, handler, test_name):
         # Value
         handler.root_add_val("{} evaluate point {}".format(test_name, pt), volume(pt[0], pt[1], pt[2]), tol=1e-10)
 
-    # Get value corner
-    for i in range(8):
-        handler.root_add_val("{} getOrigValueCorner({})".format(test_name, i), volume.getOrigValueCorner(i))
-
     # Get Value edge
     for i in range(12):
         handler.root_add_val("{} getValueEdge({}, 0.25)".format(test_name, i), volume.getValueEdge(i, 0.25))
         handler.root_add_val("{} getValueEdge({}, 0.75)".format(test_name, i), volume.getValueEdge(i, 0.75))
 
-    if volume.origData:
-        for i in range(8):
-            handler.root_add_val("{} getOrigValueCorner({})".format(test_name, i), volume.getOrigValueCorner(i))
-
-        for i in range(6):
-            handler.root_add_val("{} getOrigValuesFace({})".format(test_name, i), volume.getOrigValuesFace(i))
-
-        for i in range(12):
-            handler.root_add_val("{} getMidPointEdge({})".format(test_name, i), volume.getMidPointEdge(i))
-
-        for i in range(6):
-            handler.root_add_val("{} getMidPointFace({})".format(test_name, i), volume.getMidPointFace(i))
-
     # Test get bounds
     handler.root_add_val("{} bounds".format(test_name), volume.getBounds())
 
 
-def run_project_test(volume, handler, test_name):
+def run_project_test(volume, handler, test_name, pts):
     # Run a bunch of point projections: Tolerance for projections is
     # 1e-10, so only enforce that things match to 1e-8 or 100*eps
     eps = 1e-8
 
-    # print('------------- These points should be fully inside of domain')
-    pts = [[0, 0, 0], [0.025, 0.09, 0.3], [0.2, 0.3, 0.1]]
     for pt in pts:
         u, v, w, D = volume.projectPoint(pt)
         handler.root_add_val("{} project point u for pt={}".format(test_name, pt), u, tol=eps)
@@ -2177,18 +2158,53 @@ class Test(unittest.TestCase):
         X[:, :, :, 1] = data[1 * nval : 2 * nval].reshape((9, 7, 11), order="f")
         X[:, :, :, 2] = data[2 * nval : 3 * nval].reshape((9, 7, 11), order="f")
 
-        # Testing Volume with ku, kv, kw, nCtlu, nCtlv, nCtlw
+        def uniformKnots(N, k):
+            """Simple function to generate N uniform knots of
+            order k"""
+
+            knots = np.zeros(N + k)
+            knots[0 : k - 1] = 0.0
+            knots[-k:] = 1.0
+            knots[k - 1 : -k + 1] = np.linspace(0, 1, N - k + 2)
+
+            return knots
+
+        # Testing Volume with ku, kv, kw
         for ku in [2, 4]:
             for kv in [3, 4]:
                 for kw in [2, 4]:
-                    for nCtlu in [4, 6]:
-                        for nCtlv in [8]:
-                            for nCtlw in [5, 7]:
-                                test_name = "volume with ku={}, kv={}, kw={}, nCtlu={}, nCtlv={}, nCtlw={}".format(
-                                    ku, kv, kw, nCtlu, nCtlv, nCtlw
-                                )
-                                volume = Volume(X=X, ku=ku, kv=kv, kw=kw, nCtlu=nCtlu, nCtlv=nCtlv, nCtlw=nCtlw)
-                                volume.recompute()
-                                run_volume_test(volume, handler, test_name)
-                                run_project_test(volume, handler, test_name)
-                                io_test(volume, handler)
+
+                    # get the knot vectors to initialize the volume using X
+                    tu = uniformKnots(X.shape[0], ku)
+                    tv = uniformKnots(X.shape[1], kv)
+                    tw = uniformKnots(X.shape[2], kw)
+
+                    volume = Volume(coef=X, ku=ku, kv=kv, kw=kw, tu=tu, tv=tv, tw=tw)
+
+                    # generate test points that are inside the volume by interpolating X
+                    n_interp = 5
+                    test_pts = np.zeros((n_interp**3, 3))
+                    ipt = 0
+                    for ifrac in np.linspace(0.0, 1.0, n_interp):
+                        for jfrac in np.linspace(0.0, 1.0, n_interp):
+                            for kfrac in np.linspace(0.0, 1.0, n_interp):
+                                test_pts[ipt, :] = volume.getValue(ifrac, jfrac, kfrac)
+                                ipt += 1
+
+                    test_name = f"volume with ku={ku}, kv={kv}, kw={kw}"
+                    io_test(volume, handler)
+                    run_volume_test(volume, handler, test_name)
+
+                    test_name = f"points inside volume with ku={ku}, kv={kv}, kw={kw}"
+                    run_project_test(volume, handler, test_name, pts=test_pts)
+
+                    # also test a few points outside
+                    test_name = f"points outside volume with ku={ku}, kv={kv}, kw={kw}"
+                    test_pts_outside = np.array(
+                        [
+                            [1.0, 1.0, 1.0],
+                            [0.15, 0.017, 0.39],
+                            [-0.120510712442222084, 0.0551918480620798083, -0.1],
+                        ]
+                    )
+                    run_project_test(volume, handler, test_name, pts=test_pts_outside)
