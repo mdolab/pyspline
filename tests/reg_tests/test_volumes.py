@@ -2202,9 +2202,9 @@ class Test(unittest.TestCase):
                     test_name = f"points outside volume with ku={ku}, kv={kv}, kw={kw}"
                     test_pts_outside = np.array(
                         [
-                            [1.0, 1.0, 1.0],
-                            [0.15, 0.017, 0.39],
-                            [-0.120510712442222084, 0.0551918480620798083, -0.1],
+                            [0.16, -0.013, 0.39],  # face
+                            [-0.059, 0.22, 0.51],  # edge
+                            [1.0, 1.0, 1.0],  # corner
                         ]
                     )
                     run_project_test(volume, handler, test_name, pts=test_pts_outside)

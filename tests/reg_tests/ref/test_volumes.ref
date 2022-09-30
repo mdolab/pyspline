@@ -133,9 +133,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[ 0.14925838 -0.0716586   0.41697942]": {
         "__ndarray__": [
-            2.7755575615628914e-17,
-            -1.3877787807814457e-17,
-            -5.551115123125783e-17
+            -8.326672684688674e-17,
+            0.0,
+            -1.1102230246251565e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -199,9 +199,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.02613094  0.01028125  0.73198769]": {
         "__ndarray__": [
-            3.469446951953614e-18,
-            1.3877787807814457e-17,
-            0.0
+            2.7755575615628914e-17,
+            -8.673617379884035e-18,
+            -2.220446049250313e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -210,9 +210,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.04615     0.20333744  0.37498661]": {
         "__ndarray__": [
-            1.2490009027033011e-15,
-            3.3306690738754696e-16,
-            -1.609823385706477e-15
+            7.979727989493313e-16,
+            -9.159339953157541e-16,
+            -9.992007221626409e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -254,9 +254,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.0647      0.23143787  0.12109033]": {
         "__ndarray__": [
-            8.187894806610529e-16,
-            2.498001805406602e-16,
-            -6.38378239159465e-16
+            5.412337245047638e-16,
+            -5.828670879282072e-16,
+            -5.134781488891349e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -441,9 +441,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.13935661 -0.00355063  0.65722615]": {
         "__ndarray__": [
-            -1.5421802723736278e-11,
-            4.8569067604559146e-11,
-            -6.537748120649667e-11
+            -8.831102515927114e-12,
+            4.156429237248127e-11,
+            -9.035849846128485e-11
         ],
         "dtype": "float64",
         "shape": [
@@ -452,9 +452,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.16175626  0.17837684  0.33747813]": {
         "__ndarray__": [
-            2.220446049250313e-16,
-            8.326672684688674e-17,
-            -1.6653345369377348e-16
+            1.3877787807814457e-16,
+            -1.6653345369377348e-16,
+            -1.1102230246251565e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -496,9 +496,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.18954987  0.21322465  0.10676961]": {
         "__ndarray__": [
-            2.0539125955565396e-15,
-            9.71445146547012e-16,
-            -1.7208456881689926e-15
+            1.27675647831893e-15,
+            -1.304512053934559e-15,
+            -1.4432899320127035e-15
         ],
         "dtype": "float64",
         "shape": [
@@ -551,9 +551,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.21369652  0.09552092  0.50411803]": {
         "__ndarray__": [
-            5.511091583088046e-12,
-            -1.4807512160874836e-10,
-            1.3520595754101805e-10
+            0.0,
+            0.0,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -683,9 +683,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.25583807 -0.02924375  0.58987967]": {
         "__ndarray__": [
-            -1.854144615620612e-11,
-            6.53723949972651e-11,
-            -7.791844947035997e-11
+            0.0,
+            2.0816681711721685e-17,
+            1.1102230246251565e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -738,9 +738,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.31352349  0.18733602  0.09211297]": {
         "__ndarray__": [
-            -1.942890293094024e-15,
-            1.915134717478395e-15,
-            -5.204170427930421e-15
+            2.831068712794149e-15,
+            -2.4424906541753444e-15,
+            -3.774758283725532e-15
         ],
         "dtype": "float64",
         "shape": [
@@ -749,9 +749,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.31745954  0.05028125  0.33423177]": {
         "__ndarray__": [
-            0.0,
-            -2.0816681711721685e-16,
-            -2.220446049250313e-16
+            1.6653345369377348e-16,
+            -1.6653345369377348e-16,
+            -1.1102230246251565e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -760,9 +760,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.32030468  0.05305937  0.21698578]": {
         "__ndarray__": [
-            -3.7810865549658956e-11,
-            -3.951331623008869e-11,
-            -1.1668674360088005e-10
+            5.551115123125783e-17,
+            2.0816681711721685e-17,
+            5.551115123125783e-17
         ],
         "dtype": "float64",
         "shape": [
@@ -804,9 +804,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.33641359 -0.02229375  0.36431901]": {
         "__ndarray__": [
-            0.0,
-            -4.5102810375396984e-17,
-            -1.6653345369377348e-16
+            1.1102230246251565e-16,
+            -2.0816681711721685e-17,
+            -5.551115123125783e-17
         ],
         "dtype": "float64",
         "shape": [
@@ -815,9 +815,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.33995756 -0.1004501   0.26216241]": {
         "__ndarray__": [
-            7.526995693396543e-11,
-            -1.7487072900834733e-10,
-            -6.381783990150325e-11
+            5.551115123125783e-17,
+            -1.3877787807814457e-17,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -826,9 +826,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.34543509  0.07839766  0.10462091]": {
         "__ndarray__": [
-            -8.326672684688674e-16,
-            -9.992007221626409e-16,
-            -1.3461454173580023e-15
+            7.771561172376096e-16,
+            -6.38378239159465e-16,
+            -1.1379786002407855e-15
         ],
         "dtype": "float64",
         "shape": [
@@ -837,9 +837,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.34567604 -0.19167538  0.14627413]": {
         "__ndarray__": [
-            0.0,
-            0.0,
-            0.0
+            1.1102230246251565e-16,
+            2.7755575615628914e-17,
+            -2.7755575615628914e-17
         ],
         "dtype": "float64",
         "shape": [
@@ -849,8 +849,8 @@
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.34567605 -0.19167538  0.45372591]": {
         "__ndarray__": [
             0.0,
-            0.0,
-            1.1102230246251565e-16
+            2.7755575615628914e-17,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -859,9 +859,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.34616667 -0.09416621  0.39900825]": {
         "__ndarray__": [
-            3.83026943495679e-15,
-            -3.7261860263981816e-14,
-            -3.097522238704187e-14
+            2.8699265186560297e-14,
+            -2.974009927214638e-14,
+            -2.1649348980190553e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -881,9 +881,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.35720052 -0.00132875  0.1152522 ]": {
         "__ndarray__": [
-            -1.0935696792557792e-14,
-            -2.0258534433326147e-14,
-            -2.8102520310824275e-14
+            1.587618925213974e-14,
+            -1.4058415889750542e-14,
+            -2.4466539905176887e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -892,9 +892,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.3588229  -0.08134696  0.12732608]": {
         "__ndarray__": [
-            -4.5630166312093934e-14,
-            -1.4500900480385326e-13,
-            -2.0944357359553578e-13
+            1.238453783969362e-13,
+            -1.0660916593963066e-13,
+            -1.8665624601510444e-13
         ],
         "dtype": "float64",
         "shape": [
@@ -925,8 +925,8 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.38474959  0.11909454  0.        ]": {
         "__ndarray__": [
-            -2.2407242727950916e-11,
-            -1.0934568528409017e-10,
+            0.0,
+            0.0,
             0.0
         ],
         "dtype": "float64",
@@ -947,9 +947,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.396784   -0.04252188  0.        ]": {
         "__ndarray__": [
-            7.920575306741284e-11,
-            -1.853556752529073e-10,
-            -4.101044369703343e-36
+            0.0,
+            0.0,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -991,9 +991,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-2.55281424e-01  1.39734991e-01  2.52781250e-27]": {
         "__ndarray__": [
-            -2.4271251675145322e-11,
-            -2.2474971883568173e-10,
-            7.712646661302277e-36
+            0.0,
+            -2.7755575615628914e-17,
+            3.587324068671532e-43
         ],
         "dtype": "float64",
         "shape": [
@@ -1013,9 +1013,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[-2.68616753e-01 -2.09781250e-02 -3.41125000e-26]": {
         "__ndarray__": [
-            3.551120508760164e-11,
-            -2.2625549003785217e-10,
-            -1.1358082151294626e-35
+            0.0,
+            0.0,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -1059,7 +1059,7 @@
         "__ndarray__": [
             0.0,
             0.0,
-            0.0
+            4.422266107652271e-19
         ],
         "dtype": "float64",
         "shape": [
@@ -1156,9 +1156,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[0.0604     0.24226736 0.13553365]": {
         "__ndarray__": [
-            2.636779683484747e-16,
-            2.7755575615628914e-17,
-            -2.220446049250313e-16
+            1.942890293094024e-16,
+            -1.942890293094024e-16,
+            -1.942890293094024e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -1200,9 +1200,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[0.08237853 0.01260312 0.81257147]": {
         "__ndarray__": [
-            -4.50284254327471e-11,
-            -1.2349908942721477e-10,
-            8.333100876001254e-11
+            -1.3877787807814457e-17,
+            -1.734723475976807e-17,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -1233,8 +1233,8 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[0.13518693 0.12646632 0.        ]": {
         "__ndarray__": [
-            -3.3556574186022203e-11,
-            -1.1412257250320579e-10,
+            5.084266341270904e-13,
+            1.7290613385512188e-12,
             0.0
         ],
         "dtype": "float64",
@@ -1255,9 +1255,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=2 project point D for pt=[0.14282466 0.14970832 0.68752944]": {
         "__ndarray__": [
-            -1.7985612998927536e-14,
-            -4.082845173059013e-14,
-            3.7192471324942744e-14
+            -7.022160630754115e-15,
+            -5.734301922188934e-14,
+            -8.026912468039882e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -1386,7 +1386,7 @@
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[ 0.11643182 -0.05628376  0.        ]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[ 0.12645627 -0.04017791  0.62066316]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[ 0.14607337 -0.07715005  0.2073087 ]": 1.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[ 0.14925838 -0.0716586   0.41697942]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[ 0.14925838 -0.0716586   0.41697942]": 0.9999999999999999,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[ 0.16040075 -0.20365334  0.46514449]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[ 0.16887564 -0.21212822  0.23091485]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[ 1.40138403e-01 -1.83391005e-01 -5.61000000e-18]": 1.0,
@@ -1424,7 +1424,7 @@
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.19997939  0.08290822  0.2475365 ]": 0.24999999999999994,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.20628334 -0.17699697  0.33326578]": 0.25,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.21268075  0.0059      0.27026684]": 0.25,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.21369652  0.09552092  0.50411803]": 0.25000000015747215,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.21369652  0.09552092  0.50411803]": 0.25,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.21568566 -0.16793876  0.16356786]": 0.2500000000000001,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.2157204   0.0096      0.40981672]": 0.25000000000001404,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.21598964 -0.07116362  0.2952582 ]": 0.25000000000000017,
@@ -1436,37 +1436,37 @@
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.23185821 -0.05652071  0.14464639]": 0.25000000000019884,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.23789474  0.032675    0.54471945]": 0.25,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.25133918 -0.13299008  0.        ]": 0.25,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.25583807 -0.02924375  0.58987967]": 0.24999999992148952,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.25583807 -0.02924375  0.58987967]": 0.25,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.27103124 -0.11329803  0.65907619]": 0.25,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.27706092  0.15087348  0.29996313]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.28490712  0.15871966  0.1925007 ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.28912953  0.16294207  0.40678617]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.31352349  0.18733602  0.09211297]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.31745954  0.05028125  0.33423177]": 0.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.31352349  0.18733602  0.09211297]": 1.3565691384793007e-14,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.31745954  0.05028125  0.33423177]": 3.456677036918694e-16,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.32030468  0.05305937  0.21698578]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.33200338 -0.20534804  0.3       ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.33461717  0.06809074  0.44912728]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.33501553 -0.0237875   0.23806719]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.33641359 -0.02229375  0.36431901]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.33995756 -0.1004501   0.26216241]": 1.8033852879848758e-10,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.34543509  0.07839766  0.10462091]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.34567604 -0.19167538  0.14627413]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.34567605 -0.19167538  0.45372591]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.34616667 -0.09416621  0.39900825]": 0.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.33641359 -0.02229375  0.36431901]": 1.936774516691501e-16,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.33995756 -0.1004501   0.26216241]": 1.0733742821074391e-16,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.34543509  0.07839766  0.10462091]": 3.2171280924745137e-15,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.34567604 -0.19167538  0.14627413]": 1.0425228368451572e-17,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.34567605 -0.19167538  0.45372591]": 3.589360057992007e-17,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.34616667 -0.09416621  0.39900825]": 5.144983601047355e-14,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.35314092  0.22835314  0.        ]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.35720052 -0.00132875  0.1152522 ]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.3588229  -0.08134696  0.12732608]": 0.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.35720052 -0.00132875  0.1152522 ]": 5.376782772388843e-14,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.3588229  -0.08134696  0.12732608]": 3.3515174986762853e-13,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.3736373  -0.06598011  0.5305992 ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.3820034  -0.15534805  0.60000002]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.38474959  0.11909454  0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.39598646  0.03864736  0.        ]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.396784   -0.04252188  0.        ]": 1.3465693731367972e-10,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.396784   -0.04252188  0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-1.24599968e-01  1.48291490e-01 -9.94437500e-28]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-1.38547905e-01  6.68988785e-02  3.07630000e-26]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-1.38857618e-01 -1.57439375e-02  1.60843750e-26]": 0.49999999999342754,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-2.55281424e-01  1.39734991e-01  2.52781250e-27]": 0.25000000005616985,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-2.55281424e-01  1.39734991e-01  2.52781250e-27]": 0.24999999999999994,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-2.67968480e-01  5.99094256e-02 -1.69612500e-26]": 0.25,
-    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-2.68616753e-01 -2.09781250e-02 -3.41125000e-26]": 0.25000000004004835,
+    "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-2.68616753e-01 -2.09781250e-02 -3.41125000e-26]": 0.25,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-3.58300394e-01  4.04250000e-04  4.86825856e-01]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-3.82003397e-01 -1.55348048e-01  8.54000000e-26]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point u for pt=[-9.47187500e-03  5.86795375e-02  5.15250000e-26]": 0.75,
@@ -1518,11 +1518,11 @@
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[ 6.01718750e-03  1.43700129e-01 -8.52500000e-27]": 0.7499999999999999,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.00123     0.07314142  0.67709813]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.02613094  0.01028125  0.73198769]": 0.25000000000000006,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.04615     0.20333744  0.37498661]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.04615     0.20333744  0.37498661]": 0.9999999999999978,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.0503      0.21246401  0.24629784]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.052       0.20430841  0.5033931 ]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.0577     -0.0769      0.81079432]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.0647      0.23143787  0.12109033]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.0647      0.23143787  0.12109033]": 0.9999999999999987,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.07895781  0.10369214  0.4227265 ]": 0.7499999999986926,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.07905313  0.10346959  0.27961114]": 0.7499999999999999,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.0803    -0.1671239  0.3723163]": 0.0,
@@ -1540,16 +1540,16 @@
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.11840733  0.05714083  0.60829072]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.11881805 -0.12996602  0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.13935661 -0.00355063  0.65722615]": 0.25000000022818925,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.16175626  0.17837684  0.33747813]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.16175626  0.17837684  0.33747813]": 0.9999999999999996,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.16205505 -0.0867      0.72971098]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.1679401   0.18823786  0.21947936]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.17056687  0.18362524  0.45508963]": 1.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.18954987  0.21322465  0.10676961]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.18954987  0.21322465  0.10676961]": 0.9999999999999963,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.19822565  0.08048442  0.37722506]": 0.7499999999997262,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.19997939  0.08290822  0.2475365 ]": 0.75,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.20628334 -0.17699697  0.33326578]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.21268075  0.0059      0.27026684]": 0.5,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.21369652  0.09552092  0.50411803]": 0.7499999993524751,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.21369652  0.09552092  0.50411803]": 0.75,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.21568566 -0.16793876  0.16356786]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.2157204   0.0096      0.40981672]": 0.4999999999999705,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.21598964 -0.07116362  0.2952582 ]": 0.24999999999999994,
@@ -1561,19 +1561,19 @@
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.23185821 -0.05652071  0.14464639]": 0.24999999999964617,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.23789474  0.032675    0.54471945]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.25133918 -0.13299008  0.        ]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.25583807 -0.02924375  0.58987967]": 0.2500000003108448,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.25583807 -0.02924375  0.58987967]": 0.2500000000000001,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.27103124 -0.11329803  0.65907619]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.27706092  0.15087348  0.29996313]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.28490712  0.15871966  0.1925007 ]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.28912953  0.16294207  0.40678617]": 1.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.31352349  0.18733602  0.09211297]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.31352349  0.18733602  0.09211297]": 0.9999999999999905,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.31745954  0.05028125  0.33423177]": 0.7499999999999993,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.32030468  0.05305937  0.21698578]": 0.7499999997980803,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.32030468  0.05305937  0.21698578]": 0.7500000000000001,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.33200338 -0.20534804  0.3       ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.33461717  0.06809074  0.44912728]": 0.7500000000001333,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.33501553 -0.0237875   0.23806719]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.33641359 -0.02229375  0.36431901]": 0.4999999999999999,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.33995756 -0.1004501   0.26216241]": 0.2499999993037525,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.33995756 -0.1004501   0.26216241]": 0.24999999999999992,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.34543509  0.07839766  0.10462091]": 0.7499999999999953,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.34567604 -0.19167538  0.14627413]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.34567605 -0.19167538  0.45372591]": 0.0,
@@ -1583,15 +1583,15 @@
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.3588229  -0.08134696  0.12732608]": 0.24999999999937436,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.3736373  -0.06598011  0.5305992 ]": 0.25000000007201456,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.3820034  -0.15534805  0.60000002]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.38474959  0.11909454  0.        ]": 0.749999999656693,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.38474959  0.11909454  0.        ]": 0.75,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.39598646  0.03864736  0.        ]": 0.5,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.396784   -0.04252188  0.        ]": 0.2499999993872034,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.396784   -0.04252188  0.        ]": 0.25,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-1.24599968e-01  1.48291490e-01 -9.94437500e-28]": 0.75,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-1.38547905e-01  6.68988785e-02  3.07630000e-26]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-1.38857618e-01 -1.57439375e-02  1.60843750e-26]": 0.25000000017756613,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-2.55281424e-01  1.39734991e-01  2.52781250e-27]": 0.7499999992781524,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-2.55281424e-01  1.39734991e-01  2.52781250e-27]": 0.75,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-2.67968480e-01  5.99094256e-02 -1.69612500e-26]": 0.5,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-2.68616753e-01 -2.09781250e-02 -3.41125000e-26]": 0.24999999929513464,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-2.68616753e-01 -2.09781250e-02 -3.41125000e-26]": 0.25,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-3.58300394e-01  4.04250000e-04  4.86825856e-01]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-3.82003397e-01 -1.55348048e-01  8.54000000e-26]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[-9.47187500e-03  5.86795375e-02  5.15250000e-26]": 0.5,
@@ -1604,14 +1604,14 @@
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.03924219 0.11986565 0.47058937]": 0.7499999999969118,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.04114375 0.11496292 0.31327081]": 0.7499999999999998,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.0505     0.25625529 0.        ]": 1.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.0604     0.24226736 0.13553365]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.0604     0.24226736 0.13553365]": 0.9999999999999997,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.0666     0.22499157 0.55169656]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.0675     0.23160248 0.2731388 ]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.06955    0.22579525 0.41249318]": 1.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.08237853 0.01260312 0.81257147]": 0.24999999957583732,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.08237853 0.01260312 0.81257147]": 0.24999999999999994,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.11260748 0.08118717 0.75005045]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.11739082 0.0359616  0.        ]": 0.5,
-    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.13518693 0.12646632 0.        ]": 0.7499999996780453,
+    "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.13518693 0.12646632 0.        ]": 0.7500000000048779,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.13898107 0.04472513 0.57048036]": 0.49999999999998085,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.14282466 0.14970832 0.68752944]": 0.7499999999998511,
     "points inside volume with ku=2, kv=3, kw=2 project point v for pt=[0.14315787 0.02035625 0.19045055]": 0.4999999999999997,
@@ -1642,7 +1642,7 @@
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[ 1.40138403e-01 -1.83391005e-01 -5.61000000e-18]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[ 6.01718750e-03  1.43700129e-01 -8.52500000e-27]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.00123     0.07314142  0.67709813]": 1.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.02613094  0.01028125  0.73198769]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.02613094  0.01028125  0.73198769]": 0.9999999999999999,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.04615     0.20333744  0.37498661]": 0.7499999999999961,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.0503      0.21246401  0.24629784]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.052       0.20430841  0.5033931 ]": 1.0,
@@ -1664,7 +1664,7 @@
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.10792318 -0.13970182  0.55683957]": 0.75,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.11840733  0.05714083  0.60829072]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.11881805 -0.12996602  0.        ]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.13935661 -0.00355063  0.65722615]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.13935661 -0.00355063  0.65722615]": 0.9999999999596528,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.16175626  0.17837684  0.33747813]": 0.7499999999999993,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.16205505 -0.0867      0.72971098]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.1679401   0.18823786  0.21947936]": 0.5,
@@ -1693,12 +1693,12 @@
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.28912953  0.16294207  0.40678617]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.31352349  0.18733602  0.09211297]": 0.24999999999998646,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.31745954  0.05028125  0.33423177]": 0.7499999999999994,
-    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.32030468  0.05305937  0.21698578]": 0.49999999971143544,
+    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.32030468  0.05305937  0.21698578]": 0.5000000000000002,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.33200338 -0.20534804  0.3       ]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.33461717  0.06809074  0.44912728]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.33501553 -0.0237875   0.23806719]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.33641359 -0.02229375  0.36431901]": 0.7499999999999998,
-    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.33995756 -0.1004501   0.26216241]": 0.4999999997110574,
+    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.33995756 -0.1004501   0.26216241]": 0.49999999999999994,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.34543509  0.07839766  0.10462091]": 0.24999999999999648,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.34567604 -0.19167538  0.14627413]": 0.25,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.34567605 -0.19167538  0.45372591]": 0.7500000000000001,
@@ -1720,7 +1720,7 @@
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-3.58300394e-01  4.04250000e-04  4.86825856e-01]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-3.82003397e-01 -1.55348048e-01  8.54000000e-26]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-9.47187500e-03  5.86795375e-02  5.15250000e-26]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-9.766875e-03 -2.783750e-02  9.984375e-26]": 0.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[-9.766875e-03 -2.783750e-02  9.984375e-26]": 6.059714616746143e-19,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.020175   0.0348175  0.16987672]": 0.24999999999998412,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.02347625 0.04303387 0.5135157 ]": 0.7499999999999388,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.02571594 0.13639578 0.6237426 ]": 1.0,
@@ -1733,12 +1733,12 @@
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.0666     0.22499157 0.55169656]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.0675     0.23160248 0.2731388 ]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.06955    0.22579525 0.41249318]": 0.75,
-    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.08237853 0.01260312 0.81257147]": 0.9999999999696129,
+    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.08237853 0.01260312 0.81257147]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.11260748 0.08118717 0.75005045]": 1.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.11739082 0.0359616  0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.13518693 0.12646632 0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.13898107 0.04472513 0.57048036]": 0.7499999999999888,
-    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.14282466 0.14970832 0.68752944]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.14282466 0.14970832 0.68752944]": 0.9999999999998221,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.14315787 0.02035625 0.19045055]": 0.25,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.15025611 0.023425   0.38257485]": 0.5,
     "points inside volume with ku=2, kv=3, kw=2 project point w for pt=[0.15277064 0.11662301 0.17359906]": 0.24999999999998596,
@@ -1839,9 +1839,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[ 0.11643182 -0.05628376  0.        ]": {
         "__ndarray__": [
-            4.2099657093785936e-13,
-            -5.307469741477888e-12,
-            0.0
+            -2.531351517287561e-11,
+            1.948905620219321e-11,
+            4.658111230776054e-36
         ],
         "dtype": "float64",
         "shape": [
@@ -1872,9 +1872,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[ 0.14857579 -0.07788895  0.24931761]": {
         "__ndarray__": [
-            8.796297024105115e-12,
-            -3.8269012958558335e-11,
-            1.182695330559369e-10
+            2.7755575615628914e-17,
+            1.3877787807814457e-17,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -1883,9 +1883,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[ 0.14859511 -0.07097792  0.41682238]": {
         "__ndarray__": [
-            5.551115123125783e-17,
-            1.3877787807814457e-17,
-            5.551115123125783e-17
+            -2.7755575615628914e-17,
+            0.0,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -1949,9 +1949,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[-0.02613094  0.01028125  0.73198769]": {
         "__ndarray__": [
-            -2.5891060129179522e-11,
-            -2.6917674686433024e-11,
-            1.1391554366468881e-11
+            -2.0905003422777568e-11,
+            -3.246854174410174e-11,
+            -7.2375438975313955e-12
         ],
         "dtype": "float64",
         "shape": [
@@ -2191,9 +2191,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[-0.13935661 -0.00355063  0.65722615]": {
         "__ndarray__": [
-            -4.921840712768244e-12,
-            3.1821597006737035e-11,
-            -3.863009911952986e-11
+            2.0874968420514506e-13,
+            2.636869325320368e-11,
+            -5.8076987663469026e-11
         ],
         "dtype": "float64",
         "shape": [
@@ -2378,9 +2378,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[-0.221789   -0.06450101  0.41605304]": {
         "__ndarray__": [
-            -5.2485793489154275e-14,
-            -1.3839500379031477e-10,
-            -2.0835111413930463e-11
+            5.551115123125783e-17,
+            1.3877787807814457e-17,
+            -1.1102230246251565e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -2433,9 +2433,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[-0.25583807 -0.02924375  0.58987967]": {
         "__ndarray__": [
-            -1.854277842383567e-11,
-            6.536746838259333e-11,
-            -7.791467471207625e-11
+            0.0,
+            6.245004513516506e-17,
+            -1.1102230246251565e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -2576,9 +2576,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[-0.34062314 -0.09978928  0.26221957]": {
         "__ndarray__": [
-            -1.4372392165284964e-12,
-            -1.1855247339376263e-10,
-            1.6935286506480907e-11
+            -6.407097075111778e-13,
+            -8.906361759208892e-12,
+            -9.633849273882333e-12
         ],
         "dtype": "float64",
         "shape": [
@@ -2642,9 +2642,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[-0.3535061  -0.08672707  0.15385613]": {
         "__ndarray__": [
-            1.114720538097913e-10,
-            -2.5039956219607973e-10,
-            -1.0546660766941329e-10
+            5.551115123125783e-17,
+            0.0,
+            2.7755575615628914e-17
         ],
         "dtype": "float64",
         "shape": [
@@ -2697,9 +2697,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[-0.396784   -0.04252188  0.        ]": {
         "__ndarray__": [
-            7.920575306741284e-11,
-            -1.853556752529073e-10,
-            -4.101044369703343e-36
+            0.0,
+            0.0,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -2741,9 +2741,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[-2.55281424e-01  1.39734991e-01  2.52781250e-27]": {
         "__ndarray__": [
-            5.29468691112811e-11,
-            -3.044772767246684e-10,
-            2.1962951445778227e-35
+            0.0,
+            0.0,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -2763,9 +2763,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[-2.68616753e-01 -2.09781250e-02 -3.41125000e-26]": {
         "__ndarray__": [
-            3.551120508760164e-11,
-            -2.2625549003785217e-10,
-            -1.1358082151294626e-35
+            0.0,
+            0.0,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -2809,7 +2809,7 @@
         "__ndarray__": [
             0.0,
             0.0,
-            0.0
+            4.422265596349712e-19
         ],
         "dtype": "float64",
         "shape": [
@@ -2950,9 +2950,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[0.08237853 0.01260312 0.81257147]": {
         "__ndarray__": [
-            6.646641570462464e-11,
-            1.5102728442850655e-10,
-            -1.3778211904735826e-10
+            -1.3877787807814457e-17,
+            -1.734723475976807e-17,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -2983,8 +2983,8 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[0.13518693 0.12646632 0.        ]": {
         "__ndarray__": [
-            -3.855402108676742e-11,
-            -1.3111836616452877e-10,
+            0.0,
+            0.0,
             0.0
         ],
         "dtype": "float64",
@@ -3005,9 +3005,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[0.14282466 0.14970832 0.68752944]": {
         "__ndarray__": [
-            -1.7985612998927536e-14,
-            -4.082845173059013e-14,
-            3.7192471324942744e-14
+            -7.049916206369744e-15,
+            -5.731526364627371e-14,
+            -8.026912468039882e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -3038,9 +3038,9 @@
     },
     "points inside volume with ku=2, kv=3, kw=4 project point D for pt=[0.1548752  0.11606269 0.20854392]": {
         "__ndarray__": [
-            -1.3528289599662457e-11,
-            -4.7151393900435323e-11,
-            -9.763087560621386e-11
+            0.0,
+            0.0,
+            -2.7755575615628914e-17
         ],
         "dtype": "float64",
         "shape": [
@@ -3132,11 +3132,11 @@
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.0401     -0.0834      0.90010089]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.04191667 -0.17559989  0.4164912 ]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.04656667 -0.1804746   0.24829413]": 0.75,
-    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.11643182 -0.05628376  0.        ]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.11643182 -0.05628376  0.        ]": 0.9999999999515663,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.12663254 -0.16988514  0.64676731]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.13265287 -0.04808801  0.58062605]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.14857579 -0.07788895  0.24931761]": 1.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.14859511 -0.07097792  0.41682238]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.14859511 -0.07097792  0.41682238]": 0.9999999999999999,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.15946561 -0.20271819  0.46492319]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.16980702 -0.2130596   0.27786623]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[ 1.40138403e-01 -1.83391005e-01 -5.61000000e-18]": 1.0,
@@ -3181,12 +3181,12 @@
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.21665077 -0.07051476  0.29526041]": 0.25000000000000006,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.21935686  0.24712625  0.        ]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.22051038 -0.16285868  0.46783626]": 0.25,
-    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.221789   -0.06450101  0.41605304]": 0.24999999999660777,
+    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.221789   -0.06450101  0.41605304]": 0.25000000000000006,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.22659576  0.01916458  0.15947287]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.22706326 -0.06107153  0.17447074]": 0.2500000000000001,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.23789474  0.032675    0.54471945]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.25133918 -0.13299008  0.        ]": 0.25,
-    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.25583807 -0.02924375  0.58987967]": 0.24999999992148916,
+    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.25583807 -0.02924375  0.58987967]": 0.2499999999999999,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.27103124 -0.11329803  0.65907619]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.27707418  0.15088673  0.2783042 ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.28546088  0.15927342  0.19270384]": 0.0,
@@ -3205,18 +3205,18 @@
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.34326053 -0.09711815  0.37184533]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.35136928 -0.00723333  0.13932615]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.35314092  0.22835314  0.        ]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.3535061  -0.08672707  0.15385613]": 2.7010961460680223e-10,
+    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.3535061  -0.08672707  0.15385613]": 7.171133091328586e-17,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.3736373  -0.06598011  0.5305992 ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.3820034  -0.15534805  0.60000002]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.38474959  0.11909454  0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.39598646  0.03864736  0.        ]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.396784   -0.04252188  0.        ]": 1.3465693731367972e-10,
+    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.396784   -0.04252188  0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-1.24599968e-01  1.48291490e-01 -9.94437500e-28]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-1.38547905e-01  6.68988785e-02  3.07630000e-26]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-1.38857618e-01 -1.57439375e-02  1.60843750e-26]": 0.49999999999342754,
-    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-2.55281424e-01  1.39734991e-01  2.52781250e-27]": 0.25000000024404445,
+    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-2.55281424e-01  1.39734991e-01  2.52781250e-27]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-2.67968480e-01  5.99094256e-02 -1.69612500e-26]": 0.25,
-    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-2.68616753e-01 -2.09781250e-02 -3.41125000e-26]": 0.25000000004004835,
+    "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-2.68616753e-01 -2.09781250e-02 -3.41125000e-26]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-3.58300394e-01  4.04250000e-04  4.86825856e-01]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-3.82003397e-01 -1.55348048e-01  8.54000000e-26]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point u for pt=[-9.47187500e-03  5.86795375e-02  5.15250000e-26]": 0.75,
@@ -3257,10 +3257,10 @@
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.0401     -0.0834      0.90010089]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.04191667 -0.17559989  0.4164912 ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.04656667 -0.1804746   0.24829413]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.11643182 -0.05628376  0.        ]": 0.24999999998559516,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.11643182 -0.05628376  0.        ]": 0.25000000003594125,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.12663254 -0.16988514  0.64676731]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.13265287 -0.04808801  0.58062605]": 0.25,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.14857579 -0.07788895  0.24931761]": 0.2499999999043675,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.14857579 -0.07788895  0.24931761]": 0.25000000000000006,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.14859511 -0.07097792  0.41682238]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.15946561 -0.20271819  0.46492319]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.16980702 -0.2130596   0.27786623]": 0.0,
@@ -3306,12 +3306,12 @@
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.21665077 -0.07051476  0.29526041]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.21935686  0.24712625  0.        ]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.22051038 -0.16285868  0.46783626]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.221789   -0.06450101  0.41605304]": 0.24999999954999164,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.221789   -0.06450101  0.41605304]": 0.25000000000000006,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.22659576  0.01916458  0.15947287]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.22706326 -0.06107153  0.17447074]": 0.24999999999999994,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.23789474  0.032675    0.54471945]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.25133918 -0.13299008  0.        ]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.25583807 -0.02924375  0.58987967]": 0.25000000031082487,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.25583807 -0.02924375  0.58987967]": 0.25000000000000033,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.27103124 -0.11329803  0.65907619]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.27707418  0.15088673  0.2783042 ]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.28546088  0.15927342  0.19270384]": 1.0,
@@ -3324,24 +3324,24 @@
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.33461717  0.06809074  0.44912728]": 0.7500000000001333,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.33564455 -0.02315417  0.23816493]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.33916461  0.07206324  0.12655865]": 0.7499999999597136,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.34062314 -0.09978928  0.26221957]": 0.24999999960674574,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.34062314 -0.09978928  0.26221957]": 0.24999999996867714,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.34117733 -0.1961741   0.17665075]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.34117733 -0.1961741   0.42334926]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.34326053 -0.09711815  0.37184533]": 0.24999999998010203,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.35136928 -0.00723333  0.13932615]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.35314092  0.22835314  0.        ]": 1.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.3535061  -0.08672707  0.15385613]": 0.2499999989944298,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.3535061  -0.08672707  0.15385613]": 0.24999999999999997,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.3736373  -0.06598011  0.5305992 ]": 0.25000000007143197,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.3820034  -0.15534805  0.60000002]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.38474959  0.11909454  0.        ]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.39598646  0.03864736  0.        ]": 0.5,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.396784   -0.04252188  0.        ]": 0.2499999993872034,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.396784   -0.04252188  0.        ]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-1.24599968e-01  1.48291490e-01 -9.94437500e-28]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-1.38547905e-01  6.68988785e-02  3.07630000e-26]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-1.38857618e-01 -1.57439375e-02  1.60843750e-26]": 0.25000000017756613,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-2.55281424e-01  1.39734991e-01  2.52781250e-27]": 0.7499999989970751,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-2.55281424e-01  1.39734991e-01  2.52781250e-27]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-2.67968480e-01  5.99094256e-02 -1.69612500e-26]": 0.5,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-2.68616753e-01 -2.09781250e-02 -3.41125000e-26]": 0.24999999929513464,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-2.68616753e-01 -2.09781250e-02 -3.41125000e-26]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-3.58300394e-01  4.04250000e-04  4.86825856e-01]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-3.82003397e-01 -1.55348048e-01  8.54000000e-26]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[-9.47187500e-03  5.86795375e-02  5.15250000e-26]": 0.5,
@@ -3358,15 +3358,15 @@
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.0666     0.22499157 0.55169656]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.06736667 0.23172708 0.27318817]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.06953333 0.22660573 0.38458107]": 1.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.08237853 0.01260312 0.81257147]": 0.2500000005509431,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.08237853 0.01260312 0.81257147]": 0.24999999999999994,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.11260748 0.08118717 0.75005045]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.11739082 0.0359616  0.        ]": 0.5,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.13518693 0.12646632 0.        ]": 0.749999999630098,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.13518693 0.12646632 0.        ]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.14238912 0.03931622 0.53339173]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.14282466 0.14970832 0.68752944]": 0.7499999999998511,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.14589245 0.01965208 0.22892776]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.14978653 0.02389401 0.38246415]": 0.5,
-    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.1548752  0.11606269 0.20854392]": 0.749999999872629,
+    "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.1548752  0.11606269 0.20854392]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.15705645 0.1262449  0.4861432 ]": 0.7499999999999999,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.15925366 0.11788277 0.34810314]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point v for pt=[0.1851211  0.24567474 0.        ]": 1.0,
@@ -3385,14 +3385,14 @@
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[ 0.11643182 -0.05628376  0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[ 0.12663254 -0.16988514  0.64676731]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[ 0.13265287 -0.04808801  0.58062605]": 0.7499999999999999,
-    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[ 0.14857579 -0.07788895  0.24931761]": 0.25000000016432583,
+    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[ 0.14857579 -0.07788895  0.24931761]": 0.24999999999999994,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[ 0.14859511 -0.07097792  0.41682238]": 0.5000000000000001,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[ 0.15946561 -0.20271819  0.46492319]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[ 0.16980702 -0.2130596   0.27786623]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[ 1.40138403e-01 -1.83391005e-01 -5.61000000e-18]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[ 6.01718750e-03  1.43700129e-01 -8.52500000e-27]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.00123     0.07314142  0.67709813]": 1.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.02613094  0.01028125  0.73198769]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.02613094  0.01028125  0.73198769]": 0.9999999999886017,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.0462      0.20443786  0.34916442]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.05056667  0.21272095  0.24639556]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.052       0.20430841  0.5033931 ]": 1.0,
@@ -3414,7 +3414,7 @@
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.10088711  0.03238206  0.18112403]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.11840733  0.05714083  0.60829072]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.11881805 -0.12996602  0.        ]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.13935661 -0.00355063  0.65722615]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.13935661 -0.00355063  0.65722615]": 0.9999999999869131,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.16183655  0.17922853  0.3137462 ]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.16205505 -0.0867      0.72971098]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.16835051  0.18864     0.21962881]": 0.5,
@@ -3431,7 +3431,7 @@
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.21665077 -0.07051476  0.29526041]": 0.49999999999999983,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.21935686  0.24712625  0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.22051038 -0.16285868  0.46783626]": 0.75,
-    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.221789   -0.06450101  0.41605304]": 0.7499999998244689,
+    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.221789   -0.06450101  0.41605304]": 0.7499999999999998,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.22659576  0.01916458  0.15947287]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.22706326 -0.06107153  0.17447074]": 0.2499999999999999,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.23789474  0.032675    0.54471945]": 1.0,
@@ -3449,13 +3449,13 @@
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.33461717  0.06809074  0.44912728]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.33564455 -0.02315417  0.23816493]": 0.5,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.33916461  0.07206324  0.12655865]": 0.2499999997645399,
-    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.34062314 -0.09978928  0.26221957]": 0.4999999999474243,
+    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.34062314 -0.09978928  0.26221957]": 0.4999999999707735,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.34117733 -0.1961741   0.17665075]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.34117733 -0.1961741   0.42334926]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.34326053 -0.09711815  0.37184533]": 0.7500000001618001,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.35136928 -0.00723333  0.13932615]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.35314092  0.22835314  0.        ]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.3535061  -0.08672707  0.15385613]": 0.24999999955647928,
+    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.3535061  -0.08672707  0.15385613]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.3736373  -0.06598011  0.5305992 ]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.3820034  -0.15534805  0.60000002]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.38474959  0.11909454  0.        ]": 0.0,
@@ -3470,7 +3470,7 @@
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-3.58300394e-01  4.04250000e-04  4.86825856e-01]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-3.82003397e-01 -1.55348048e-01  8.54000000e-26]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-9.47187500e-03  5.86795375e-02  5.15250000e-26]": 0.0,
-    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-9.766875e-03 -2.783750e-02  9.984375e-26]": 0.0,
+    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[-9.766875e-03 -2.783750e-02  9.984375e-26]": 2.5248807983840543e-19,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.02380625 0.03235671 0.20439084]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.02571594 0.13639578 0.6237426 ]": 1.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.02637958 0.03904295 0.4797713 ]": 0.75,
@@ -3488,10 +3488,10 @@
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.11739082 0.0359616  0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.13518693 0.12646632 0.        ]": 0.0,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.14238912 0.03931622 0.53339173]": 0.75,
-    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.14282466 0.14970832 0.68752944]": 1.0,
+    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.14282466 0.14970832 0.68752944]": 0.999999999999926,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.14589245 0.01965208 0.22892776]": 0.25,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.14978653 0.02389401 0.38246415]": 0.5,
-    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.1548752  0.11606269 0.20854392]": 0.24999999980682577,
+    "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.1548752  0.11606269 0.20854392]": 0.24999999999999992,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.15705645 0.1262449  0.4861432 ]": 0.75,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.15925366 0.11788277 0.34810314]": 0.5000000000000001,
     "points inside volume with ku=2, kv=3, kw=4 project point w for pt=[0.1851211  0.24567474 0.        ]": 0.0,
@@ -3699,9 +3699,9 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.04615     0.20333744  0.37498661]": {
         "__ndarray__": [
-            6.800116025829084e-16,
-            1.942890293094024e-16,
-            -8.326672684688674e-16
+            4.3021142204224816e-16,
+            -4.718447854656915e-16,
+            -4.996003610813204e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -3743,9 +3743,9 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.0647      0.23143787  0.12109033]": {
         "__ndarray__": [
-            3.469446951953614e-16,
-            5.551115123125783e-17,
-            -1.942890293094024e-16
+            2.3592239273284576e-16,
+            -2.7755575615628914e-16,
+            -1.5265566588595902e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -3941,9 +3941,9 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.16175626  0.17837684  0.33747813]": {
         "__ndarray__": [
-            2.7755575615628914e-17,
-            2.7755575615628914e-17,
-            -5.551115123125783e-17
+            0.0,
+            -5.551115123125783e-17,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -3985,9 +3985,9 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.18954987  0.21322465  0.10676961]": {
         "__ndarray__": [
-            1.1102230246251565e-15,
-            4.996003610813204e-16,
-            -9.298117831235686e-16
+            6.661338147750939e-16,
+            -8.049116928532385e-16,
+            -7.632783294297951e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -4227,9 +4227,9 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.31352349  0.18733602  0.09211297]": {
         "__ndarray__": [
-            -1.3877787807814457e-15,
-            1.3877787807814457e-15,
-            -3.733124920302089e-15
+            1.9984014443252818e-15,
+            -1.7763568394002505e-15,
+            -2.67841304690819e-15
         ],
         "dtype": "float64",
         "shape": [
@@ -4282,9 +4282,9 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.33616424 -0.022275    0.36444396]": {
         "__ndarray__": [
-            -1.1102230246251565e-16,
-            -2.2724877535296173e-15,
-            -1.9984014443252818e-15
+            1.7763568394002505e-15,
+            -1.7763568394002505e-15,
+            -1.3322676295501878e-15
         ],
         "dtype": "float64",
         "shape": [
@@ -4315,9 +4315,9 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.34493004 -0.08458386  0.39434917]": {
         "__ndarray__": [
-            -3.7192471324942744e-15,
-            -1.2656542480726785e-13,
-            6.827871601444713e-15
+            2.90878432451791e-14,
+            -1.1669831767591177e-13,
+            1.915134717478395e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -4326,9 +4326,9 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.34567604 -0.19167538  0.14627413]": {
         "__ndarray__": [
-            0.0,
-            0.0,
-            0.0
+            1.1102230246251565e-16,
+            2.7755575615628914e-17,
+            -2.7755575615628914e-17
         ],
         "dtype": "float64",
         "shape": [
@@ -4370,9 +4370,9 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.35692524 -0.00133667  0.11529097]": {
         "__ndarray__": [
-            -1.0880185641326534e-14,
-            -2.0119106033944512e-14,
-            -2.7908231281514873e-14
+            1.5709655798445965e-14,
+            -1.3987725908104487e-14,
+            -2.4313884239290928e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -4381,9 +4381,9 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.35867746 -0.07067161  0.12570603]": {
         "__ndarray__": [
-            -2.298161660974074e-14,
-            -2.2265522758857514e-13,
-            -9.001133172148457e-14
+            7.260858581048524e-14,
+            -2.0093648966934552e-13,
+            -7.713274463583275e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -4645,8 +4645,8 @@
     },
     "points inside volume with ku=2, kv=4, kw=2 project point D for pt=[0.0604     0.24226736 0.13553365]": {
         "__ndarray__": [
-            5.551115123125783e-17,
             2.7755575615628914e-17,
+            -5.551115123125783e-17,
             -2.7755575615628914e-17
         ],
         "dtype": "float64",
@@ -4940,21 +4940,21 @@
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.27706092  0.15087348  0.29996313]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.28490712  0.15871966  0.1925007 ]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.28912953  0.16294207  0.40678617]": 0.0,
-    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.31352349  0.18733602  0.09211297]": 0.0,
+    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.31352349  0.18733602  0.09211297]": 9.802567085363123e-15,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.32005096  0.04059583  0.33821291]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.32233429  0.04280833  0.21977633]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.33200338 -0.20534804  0.3       ]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.33475044 -0.02378333  0.23814921]": 0.0,
-    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.33616424 -0.022275    0.36444396]": 0.0,
+    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.33616424 -0.022275    0.36444396]": 3.60226292245806e-15,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.33783404  0.05905135  0.4541136 ]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.33936682 -0.09022509  0.25892763]": 0.0,
-    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.34493004 -0.08458386  0.39434917]": 0.0,
-    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.34567604 -0.19167538  0.14627413]": 0.0,
+    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.34493004 -0.08458386  0.39434917]": 6.795953277115847e-14,
+    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.34567604 -0.19167538  0.14627413]": 1.0425228368451572e-17,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.34567605 -0.19167538  0.45372591]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.34707458  0.06776528  0.10602897]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.35314092  0.22835314  0.        ]": 0.0,
-    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.35692524 -0.00133667  0.11529097]": 0.0,
-    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.35867746 -0.07067161  0.12570603]": 0.0,
+    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.35692524 -0.00133667  0.11529097]": 5.317254951217036e-14,
+    "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.35867746 -0.07067161  0.12570603]": 1.8943258070292666e-13,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.37165005 -0.05713663  0.52471803]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.3820034  -0.15534805  0.60000002]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.38632113  0.10836796  0.        ]": 0.0,
@@ -5017,11 +5017,11 @@
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[ 1.40138403e-01 -1.83391005e-01 -5.61000000e-18]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.00117667  0.07315523  0.67714026]": 0.5,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.02282333  0.01865833  0.72465733]": 0.25,
-    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.04615     0.20333744  0.37498661]": 1.0,
+    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.04615     0.20333744  0.37498661]": 0.999999999999999,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.0503      0.21246401  0.24629784]": 1.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.052       0.20430841  0.5033931 ]": 1.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.0577     -0.0769      0.81079432]": 0.0,
-    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.0647      0.23143787  0.12109033]": 1.0,
+    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.0647      0.23143787  0.12109033]": 0.9999999999999996,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.0803    -0.1671239  0.3723163]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.08055833  0.09282852  0.28301669]": 0.75,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.08117083  0.09406385  0.42763749]": 0.750000000000066,
@@ -5039,11 +5039,11 @@
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.11829179  0.05715443  0.6083728 ]": 0.5,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.11881805 -0.12996602  0.        ]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.13659296  0.00454     0.65067904]": 0.25,
-    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.16175626  0.17837684  0.33747813]": 1.0,
+    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.16175626  0.17837684  0.33747813]": 0.9999999999999999,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.16205505 -0.0867      0.72971098]": 0.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.1679401   0.18823786  0.21947936]": 1.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.17056687  0.18362524  0.45508963]": 1.0,
-    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.18954987  0.21322465  0.10676961]": 1.0,
+    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.18954987  0.21322465  0.10676961]": 0.9999999999999982,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.20061293  0.07102365  0.38154736]": 0.7500000000000686,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.20173829  0.07263508  0.25055168]": 0.75,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.20628334 -0.17699697  0.33326578]": 0.0,
@@ -5065,7 +5065,7 @@
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.27706092  0.15087348  0.29996313]": 1.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.28490712  0.15871966  0.1925007 ]": 1.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.28912953  0.16294207  0.40678617]": 1.0,
-    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.31352349  0.18733602  0.09211297]": 1.0,
+    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.31352349  0.18733602  0.09211297]": 0.9999999999999942,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.32005096  0.04059583  0.33821291]": 0.7500000000000228,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.32233429  0.04280833  0.21977633]": 0.75,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.33200338 -0.20534804  0.3       ]": 0.0,
@@ -5103,7 +5103,7 @@
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[0.03710417 0.10962028 0.47630528]": 0.7500000000000916,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[0.039825   0.10353371 0.31720965]": 0.75,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[0.0505     0.25625529 0.        ]": 1.0,
-    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[0.0604     0.24226736 0.13553365]": 1.0,
+    "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[0.0604     0.24226736 0.13553365]": 0.9999999999999999,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[0.0666     0.22499157 0.55169656]": 1.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[0.0675     0.23160248 0.2731388 ]": 1.0,
     "points inside volume with ku=2, kv=4, kw=2 project point v for pt=[0.06955    0.22579525 0.41249318]": 1.0,
@@ -7133,9 +7133,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.0011166   0.12284108  0.15096362]": {
         "__ndarray__": [
-            1.2454054844693307e-10,
-            -6.13449846476044e-11,
-            -4.22334944794045e-11
+            0.0,
+            0.0,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -7166,9 +7166,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.00802862 -0.05218519  0.17958639]": {
         "__ndarray__": [
-            1.9460217118294487e-10,
-            -5.692746968266604e-11,
-            -4.567013434098044e-11
+            8.673617379884035e-18,
+            0.0,
+            2.7755575615628914e-17
         ],
         "dtype": "float64",
         "shape": [
@@ -7188,9 +7188,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.01566734 -0.03492207  0.54298182]": {
         "__ndarray__": [
-            1.4238902418250987e-10,
-            -7.216300473844584e-11,
-            1.1037615266218381e-11
+            -2.0816681711721685e-17,
+            0.0,
+            -2.220446049250313e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -7276,9 +7276,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.06468464  0.23112662  0.12109814]": {
         "__ndarray__": [
-            1.2906342661267445e-15,
-            4.996003610813204e-16,
-            -1.2212453270876722e-15
+            8.049116928532385e-16,
+            -9.159339953157541e-16,
+            -9.992007221626409e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -7496,9 +7496,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.13950352 -0.00405323  0.65755259]": {
         "__ndarray__": [
-            -9.39077426931334e-11,
-            -1.5636671905211452e-10,
-            4.657396690532778e-11
+            -2.7755575615628914e-17,
+            -1.6479873021779667e-17,
+            1.1102230246251565e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -7771,9 +7771,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.31352349  0.18733602  0.09211297]": {
         "__ndarray__": [
-            -2.7755575615628914e-16,
-            2.220446049250313e-16,
-            -5.828670879282072e-16
+            3.885780586188048e-16,
+            -4.718447854656915e-16,
+            -3.608224830031759e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -7793,9 +7793,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.32030468  0.05305937  0.21698578]": {
         "__ndarray__": [
-            -3.7810865549658956e-11,
-            -3.951331623008869e-11,
-            -1.1668674360088005e-10
+            5.551115123125783e-17,
+            2.0816681711721685e-17,
+            5.551115123125783e-17
         ],
         "dtype": "float64",
         "shape": [
@@ -7892,9 +7892,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.34616667 -0.09416621  0.39900825]": {
         "__ndarray__": [
-            2.1649348980190553e-15,
-            -1.955380302121057e-14,
-            -1.7208456881689926e-14
+            1.8818280267396403e-14,
+            -1.4516166046973922e-14,
+            -1.0880185641326534e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -7914,9 +7914,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.35720052 -0.00132875  0.1152522 ]": {
         "__ndarray__": [
-            -3.1086244689504383e-15,
-            -4.505510547980762e-15,
-            -7.965850201685498e-15
+            5.9396931817445875e-15,
+            -2.4496463885137487e-15,
+            -6.800116025829084e-15
         ],
         "dtype": "float64",
         "shape": [
@@ -7925,9 +7925,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.3588229  -0.08134696  0.12732608]": {
         "__ndarray__": [
-            -2.0372592501871623e-14,
-            -5.4040105723629495e-14,
-            -9.328648964412878e-14
+            6.838973831690964e-14,
+            -3.3958946765721976e-14,
+            -8.132383655379272e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -7936,9 +7936,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.3736373  -0.06598011  0.5305992 ]": {
         "__ndarray__": [
-            2.0446921933370277e-11,
-            1.1962053569902764e-10,
-            -8.4957152424181e-11
+            -5.551115123125783e-17,
+            -2.7755575615628914e-17,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -7958,8 +7958,8 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.38474959  0.11909454  0.        ]": {
         "__ndarray__": [
-            -2.2407242727950916e-11,
-            -1.0934568528409017e-10,
+            0.0,
+            0.0,
             0.0
         ],
         "dtype": "float64",
@@ -8189,9 +8189,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[0.04122594 0.22041504 0.40331194]": {
         "__ndarray__": [
-            1.1629586182948515e-11,
-            2.3518131886390847e-12,
-            -2.7110536038321698e-12
+            9.81328213134347e-12,
+            -3.2661373605691324e-12,
+            2.569056078982612e-13
         ],
         "dtype": "float64",
         "shape": [
@@ -8200,9 +8200,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[0.08237853 0.01260312 0.81257147]": {
         "__ndarray__": [
-            -4.4287740141868426e-11,
-            -1.208345316167092e-10,
-            8.22595325189468e-11
+            0.0,
+            -8.673617379884035e-18,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -8233,8 +8233,8 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[0.13518693 0.12646632 0.        ]": {
         "__ndarray__": [
-            -3.366434908613769e-11,
-            -1.1448911263478578e-10,
+            5.030975636088897e-13,
+            1.7109924588254444e-12,
             0.0
         ],
         "dtype": "float64",
@@ -8255,9 +8255,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=2 project point D for pt=[0.14282466 0.14970832 0.68752944]": {
         "__ndarray__": [
-            -1.7957857423311907e-14,
-            -4.0772940579358874e-14,
-            3.7192471324942744e-14
+            -7.022160630754115e-15,
+            -5.723199691942682e-14,
+            -8.026912468039882e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -8386,12 +8386,12 @@
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[ 0.16040075 -0.20365334  0.46514449]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[ 0.16887564 -0.21212822  0.23091485]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[ 1.40138403e-01 -1.83391005e-01 -5.61000000e-18]": 1.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.0011166   0.12284108  0.15096362]": 0.7500000003684407,
+    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.0011166   0.12284108  0.15096362]": 0.75,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.00331787  0.1322203   0.60859576]": 0.7500000000819358,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.00545194  0.04068882  0.50016362]": 0.7500000000444433,
-    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.00802862 -0.05218519  0.17958639]": 0.7500000004997838,
+    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.00802862 -0.05218519  0.17958639]": 0.75,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.01046641  0.03580448  0.16504285]": 0.7500000000878513,
-    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.01566734 -0.03492207  0.54298182]": 0.7500000003588615,
+    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.01566734 -0.03492207  0.54298182]": 0.7499999999999999,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.01946288 -0.14203716  0.        ]": 0.7500000000286722,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.02105699 -0.13951626  0.60479929]": 0.7500000000248362,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.02977437  0.06961382  0.66003018]": 0.7500000000265954,
@@ -8419,7 +8419,7 @@
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.11886776 -0.13084217  0.        ]": 0.5,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.13346281  0.18459882  0.34666004]": 0.24999999998042002,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.13915205  0.1944027   0.22604332]": 0.24999999993510288,
-    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.13950352 -0.00405323  0.65755259]": 0.4999999998285495,
+    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.13950352 -0.00405323  0.65755259]": 0.5,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.14154363  0.18868831  0.46691392]": 0.24999999992802027,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.15900151  0.21803174  0.11027261]": 0.24999999999438016,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.16225292 -0.08743333  0.73016317]": 0.5,
@@ -8444,7 +8444,7 @@
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.27706092  0.15087348  0.29996313]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.28490712  0.15871966  0.1925007 ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.28912953  0.16294207  0.40678617]": 0.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.31352349  0.18733602  0.09211297]": 0.0,
+    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.31352349  0.18733602  0.09211297]": 8.983083259803402e-16,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.31745954  0.05028125  0.33423177]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.32030468  0.05305937  0.21698578]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.33200338 -0.20534804  0.3       ]": 0.0,
@@ -8455,10 +8455,10 @@
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.34543509  0.07839766  0.10462091]": 2.896798300756238e-16,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.34567604 -0.19167538  0.14627413]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.34567605 -0.19167538  0.45372591]": 0.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.34616667 -0.09416621  0.39900825]": 0.0,
+    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.34616667 -0.09416621  0.39900825]": 1.541325186785024e-14,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.35314092  0.22835314  0.        ]": 0.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.35720052 -0.00132875  0.1152522 ]": 0.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.3588229  -0.08134696  0.12732608]": 0.0,
+    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.35720052 -0.00132875  0.1152522 ]": 7.92449804773065e-15,
+    "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.3588229  -0.08134696  0.12732608]": 7.803313498048123e-14,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.3736373  -0.06598011  0.5305992 ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.3820034  -0.15534805  0.60000002]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.38474959  0.11909454  0.        ]": 0.0,
@@ -8511,12 +8511,12 @@
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[ 0.16040075 -0.20365334  0.46514449]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[ 0.16887564 -0.21212822  0.23091485]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[ 1.40138403e-01 -1.83391005e-01 -5.61000000e-18]": 0.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.0011166   0.12284108  0.15096362]": 0.7499999997943887,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.0011166   0.12284108  0.15096362]": 0.75,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.00331787  0.1322203   0.60859576]": 0.7499999999434753,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.00545194  0.04068882  0.50016362]": 0.4999999999697795,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.00802862 -0.05218519  0.17958639]": 0.2499999998679998,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.00802862 -0.05218519  0.17958639]": 0.25,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.01046641  0.03580448  0.16504285]": 0.4999999999628735,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.01566734 -0.03492207  0.54298182]": 0.24999999980531337,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.01566734 -0.03492207  0.54298182]": 0.2500000000000001,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.01946288 -0.14203716  0.        ]": 2.7435160113573147e-12,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.02105699 -0.13951626  0.60479929]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.02977437  0.06961382  0.66003018]": 0.4999999999881363,
@@ -8524,7 +8524,7 @@
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.05028669  0.21224579  0.2462989 ]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.05200092  0.20430841  0.5033931 ]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.05366969  0.0074649   0.71337284]": 0.24999999999706357,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.06468464  0.23112662  0.12109814]": 1.0,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.06468464  0.23112662  0.12109814]": 0.9999999999999978,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.07900561  0.10339     0.42283298]": 0.7499999999986605,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.07908837  0.10308919  0.27968289]": 0.7499999999999996,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.08042057 -0.16795141  0.37254519]": 0.0,
@@ -8544,7 +8544,7 @@
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.11886776 -0.13084217  0.        ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.13346281  0.18459882  0.34666004]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.13915205  0.1944027   0.22604332]": 1.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.13950352 -0.00405323  0.65755259]": 0.2499999994312024,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.13950352 -0.00405323  0.65755259]": 0.24999999999999994,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.14154363  0.18868831  0.46691392]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.15900151  0.21803174  0.11027261]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.16225292 -0.08743333  0.73016317]": 0.0,
@@ -8569,9 +8569,9 @@
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.27706092  0.15087348  0.29996313]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.28490712  0.15871966  0.1925007 ]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.28912953  0.16294207  0.40678617]": 1.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.31352349  0.18733602  0.09211297]": 1.0,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.31352349  0.18733602  0.09211297]": 0.9999999999999984,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.31745954  0.05028125  0.33423177]": 0.7499999999999996,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.32030468  0.05305937  0.21698578]": 0.7499999997980803,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.32030468  0.05305937  0.21698578]": 0.7500000000000001,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.33200338 -0.20534804  0.3       ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.33461717  0.06809074  0.44912728]": 0.7500000000001333,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.33501553 -0.0237875   0.23806719]": 0.5,
@@ -8584,9 +8584,9 @@
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.35314092  0.22835314  0.        ]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.35720052 -0.00132875  0.1152522 ]": 0.4999999999999784,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.3588229  -0.08134696  0.12732608]": 0.24999999999975567,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.3736373  -0.06598011  0.5305992 ]": 0.2500000004567706,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.3736373  -0.06598011  0.5305992 ]": 0.24999999999999992,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.3820034  -0.15534805  0.60000002]": 0.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.38474959  0.11909454  0.        ]": 0.749999999656693,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.38474959  0.11909454  0.        ]": 0.75,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.39598646  0.03864736  0.        ]": 0.5,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.396784   -0.04252188  0.        ]": 0.2500000000770665,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[-1.24606390e-01  1.47723470e-01 -3.40733333e-27]": 0.7499999999999999,
@@ -8607,11 +8607,11 @@
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.02977755 0.23996753 0.1319955 ]": 0.999999999975336,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.03755624 0.21992851 0.53987227]": 0.999999999980979,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.03867707 0.22715451 0.2665676 ]": 0.999999999987768,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.04122594 0.22041504 0.40331194]": 1.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.08237853 0.01260312 0.81257147]": 0.24999999958433622,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.04122594 0.22041504 0.40331194]": 0.9999999999904993,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.08237853 0.01260312 0.81257147]": 0.24999999999999997,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.11260748 0.08118717 0.75005045]": 0.5,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.11739082 0.0359616  0.        ]": 0.5,
-    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.13518693 0.12646632 0.        ]": 0.7499999996770114,
+    "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.13518693 0.12646632 0.        ]": 0.7500000000048269,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.13898107 0.04472513 0.57048036]": 0.49999999999998135,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.14282466 0.14970832 0.68752944]": 0.7499999999998513,
     "points inside volume with ku=4, kv=3, kw=2 project point v for pt=[0.14315787 0.02035625 0.19045055]": 0.4999999999999997,
@@ -8636,12 +8636,12 @@
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[ 0.16040075 -0.20365334  0.46514449]": 0.5,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[ 0.16887564 -0.21212822  0.23091485]": 0.24999999999999997,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[ 1.40138403e-01 -1.83391005e-01 -5.61000000e-18]": 0.0,
-    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.0011166   0.12284108  0.15096362]": 0.24999999987807747,
+    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.0011166   0.12284108  0.15096362]": 0.25,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.00331787  0.1322203   0.60859576]": 0.9999999999670866,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.00545194  0.04068882  0.50016362]": 0.7499999999810867,
-    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.00802862 -0.05218519  0.17958639]": 0.24999999988006466,
+    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.00802862 -0.05218519  0.17958639]": 0.25000000000000006,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.01046641  0.03580448  0.16504285]": 0.24999999997454525,
-    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.01566734 -0.03492207  0.54298182]": 0.7499999998701374,
+    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.01566734 -0.03492207  0.54298182]": 0.7499999999999998,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.01946288 -0.14203716  0.        ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.02105699 -0.13951626  0.60479929]": 0.7499999999958101,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.02977437  0.06961382  0.66003018]": 0.9999999999924505,
@@ -8669,7 +8669,7 @@
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.11886776 -0.13084217  0.        ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.13346281  0.18459882  0.34666004]": 0.7500000000027669,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.13915205  0.1944027   0.22604332]": 0.5000000000081564,
-    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.13950352 -0.00405323  0.65755259]": 0.9999999999492869,
+    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.13950352 -0.00405323  0.65755259]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.14154363  0.18868831  0.46691392]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.15900151  0.21803174  0.11027261]": 0.2500000000000544,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.16225292 -0.08743333  0.73016317]": 1.0,
@@ -8696,7 +8696,7 @@
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.28912953  0.16294207  0.40678617]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.31352349  0.18733602  0.09211297]": 0.24999999999999847,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.31745954  0.05028125  0.33423177]": 0.7499999999999992,
-    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.32030468  0.05305937  0.21698578]": 0.49999999971143544,
+    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.32030468  0.05305937  0.21698578]": 0.5000000000000002,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.33200338 -0.20534804  0.3       ]": 0.5,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.33461717  0.06809074  0.44912728]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.33501553 -0.0237875   0.23806719]": 0.5,
@@ -8733,12 +8733,12 @@
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.03755624 0.21992851 0.53987227]": 0.9999999999748064,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.03867707 0.22715451 0.2665676 ]": 0.49999999998460076,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.04122594 0.22041504 0.40331194]": 0.7499999999881991,
-    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.08237853 0.01260312 0.81257147]": 0.9999999999710208,
+    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.08237853 0.01260312 0.81257147]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.11260748 0.08118717 0.75005045]": 1.0,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.11739082 0.0359616  0.        ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.13518693 0.12646632 0.        ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.13898107 0.04472513 0.57048036]": 0.7499999999999892,
-    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.14282466 0.14970832 0.68752944]": 1.0,
+    "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.14282466 0.14970832 0.68752944]": 0.9999999999998224,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.14315787 0.02035625 0.19045055]": 0.25000000000000006,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.15025611 0.023425   0.38257485]": 0.5,
     "points inside volume with ku=4, kv=3, kw=2 project point w for pt=[0.15277064 0.11662301 0.17359906]": 0.24999999999998612,
@@ -8784,9 +8784,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[ 0.11643182 -0.05628376  0.        ]": {
         "__ndarray__": [
-            4.054812041687228e-13,
-            -5.111758238918185e-12,
-            0.0
+            -2.437915147535108e-11,
+            1.876965249891782e-11,
+            4.4861729936691276e-36
         ],
         "dtype": "float64",
         "shape": [
@@ -8817,9 +8817,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[ 0.14857579 -0.07788895  0.24931761]": {
         "__ndarray__": [
-            8.365225179218783e-12,
-            -3.620255484282353e-11,
-            1.1275885780648309e-10
+            2.7755575615628914e-17,
+            1.3877787807814457e-17,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -9136,8 +9136,8 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[-0.09332051  0.11818157  0.56252073]": {
         "__ndarray__": [
-            -1.3877787807814457e-17,
-            -2.7755575615628914e-17,
+            0.0,
+            -6.938893903907228e-17,
             -1.1102230246251565e-16
         ],
         "dtype": "float64",
@@ -9224,9 +9224,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[-0.13950352 -0.00405323  0.65755259]": {
         "__ndarray__": [
-            -8.2203049922569e-11,
-            -1.7458225490263324e-10,
-            6.25201002080189e-11
+            0.0,
+            0.0,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -9675,9 +9675,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[-0.3736373  -0.06598011  0.5305992 ]": {
         "__ndarray__": [
-            2.0523138744010794e-11,
-            1.2006648453244395e-10,
-            -8.52737880308041e-11
+            -5.551115123125783e-17,
+            1.3877787807814457e-17,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -9917,9 +9917,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[0.03755624 0.21992851 0.53987227]": {
         "__ndarray__": [
-            2.2150066503190402e-11,
-            3.591987818296616e-12,
-            -5.347278175804604e-12
+            1.6894208254569776e-11,
+            -7.378181399175787e-12,
+            3.120836922221315e-12
         ],
         "dtype": "float64",
         "shape": [
@@ -9928,9 +9928,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[0.03850784 0.22731128 0.2666288 ]": {
         "__ndarray__": [
-            1.645785591142257e-11,
-            3.0298541453532835e-12,
-            -3.4041103269544237e-12
+            1.4438686357642894e-11,
+            -4.3117731607367205e-12,
+            -9.479084184249587e-13
         ],
         "dtype": "float64",
         "shape": [
@@ -9939,9 +9939,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[0.04120098 0.22132148 0.37591144]": {
         "__ndarray__": [
-            1.6899530386194073e-11,
-            3.4188485376063227e-12,
-            -3.0795921368564905e-12
+            1.4527240521644558e-11,
+            -4.314854029630055e-12,
+            6.849520950424903e-13
         ],
         "dtype": "float64",
         "shape": [
@@ -9950,9 +9950,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[0.08237853 0.01260312 0.81257147]": {
         "__ndarray__": [
-            6.543077191167868e-11,
-            1.486740539707876e-10,
-            -1.356352807846406e-10
+            -1.3877787807814457e-17,
+            -2.2551405187698492e-17,
+            0.0
         ],
         "dtype": "float64",
         "shape": [
@@ -9983,8 +9983,8 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[0.13518693 0.12646632 0.        ]": {
         "__ndarray__": [
-            -3.86878862279616e-11,
-            -1.3157369638250316e-10,
+            0.0,
+            0.0,
             0.0
         ],
         "dtype": "float64",
@@ -10005,9 +10005,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[0.14282466 0.14970832 0.68752944]": {
         "__ndarray__": [
-            -1.7957857423311907e-14,
-            -4.0772940579358874e-14,
-            3.7192471324942744e-14
+            -6.994405055138486e-15,
+            -5.725975249504245e-14,
+            -8.026912468039882e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -10038,9 +10038,9 @@
     },
     "points inside volume with ku=4, kv=3, kw=4 project point D for pt=[0.1548752  0.11606269 0.20854392]": {
         "__ndarray__": [
-            -1.3481632477052585e-11,
-            -4.700193012574516e-11,
-            -9.725634186885657e-11
+            5.551115123125783e-17,
+            1.3877787807814457e-17,
+            2.7755575615628914e-17
         ],
         "dtype": "float64",
         "shape": [
@@ -10127,7 +10127,7 @@
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[ 0.012003   -0.1724389   0.40542254]": 0.7500000000232155,
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[ 0.01538816 -0.17607305  0.24153139]": 0.7500000000249012,
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[ 0.0401     -0.0834      0.90010089]": 1.0,
-    "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[ 0.11643182 -0.05628376  0.        ]": 1.0,
+    "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[ 0.11643182 -0.05628376  0.        ]": 0.9999999999792685,
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[ 0.12663254 -0.16988514  0.64676731]": 1.0,
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[ 0.13265287 -0.04808801  0.58062605]": 1.0,
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[ 0.14857579 -0.07788895  0.24931761]": 1.0,
@@ -10167,7 +10167,7 @@
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[-0.11850688  0.05676534  0.6085192 ]": 0.5,
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[-0.11886776 -0.13084217  0.        ]": 0.5,
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[-0.13353981  0.18553707  0.32241641]": 0.249999999925892,
-    "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[-0.13950352 -0.00405323  0.65755259]": 0.4999999998724266,
+    "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[-0.13950352 -0.00405323  0.65755259]": 0.5,
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[-0.13952846  0.19476898  0.22617993]": 0.249999999929578,
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[-0.14154363  0.18868831  0.46691392]": 0.249999999930192,
     "points inside volume with ku=4, kv=3, kw=4 project point u for pt=[-0.15429767  0.21255949  0.1329819 ]": 0.24999999994014124,
@@ -10252,10 +10252,10 @@
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.012003   -0.1724389   0.40542254]": 7.198053616005918e-13,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.01538816 -0.17607305  0.24153139]": 1.0969518871875309e-12,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.0401     -0.0834      0.90010089]": 0.0,
-    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.11643182 -0.05628376  0.        ]": 0.24999999998612632,
+    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.11643182 -0.05628376  0.        ]": 0.25000000003461453,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.12663254 -0.16988514  0.64676731]": 0.0,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.13265287 -0.04808801  0.58062605]": 0.25000000000000006,
-    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.14857579 -0.07788895  0.24931761]": 0.24999999990955155,
+    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.14857579 -0.07788895  0.24931761]": 0.25000000000000006,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.14859511 -0.07097792  0.41682238]": 0.25,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.15946561 -0.20271819  0.46492319]": 0.0,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.16980702 -0.2130596   0.27786623]": 0.0,
@@ -10292,7 +10292,7 @@
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.11850688  0.05676534  0.6085192 ]": 0.5,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.11886776 -0.13084217  0.        ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.13353981  0.18553707  0.32241641]": 1.0,
-    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.13950352 -0.00405323  0.65755259]": 0.2499999993551609,
+    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.13950352 -0.00405323  0.65755259]": 0.25,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.13952846  0.19476898  0.22617993]": 1.0,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.14154363  0.18868831  0.46691392]": 1.0,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.15429767  0.21255949  0.1329819 ]": 1.0,
@@ -10333,7 +10333,7 @@
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.35136928 -0.00723333  0.13932615]": 0.5,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.35314092  0.22835314  0.        ]": 1.0,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.3535061  -0.08672707  0.15385613]": 0.24999999999999997,
-    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.3736373  -0.06598011  0.5305992 ]": 0.2500000004584735,
+    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.3736373  -0.06598011  0.5305992 ]": 0.2500000000000001,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.3820034  -0.15534805  0.60000002]": 0.0,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.38474959  0.11909454  0.        ]": 0.75,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.39598646  0.03864736  0.        ]": 0.5,
@@ -10355,18 +10355,18 @@
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.0116011  0.11457746 0.42820496]": 0.7499999999111705,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.01739932 0.25686119 0.        ]": 0.9999999999931269,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.03189879 0.23703804 0.15870895]": 0.9999999999900904,
-    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.03755624 0.21992851 0.53987227]": 1.0,
-    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.03850784 0.22731128 0.2666288 ]": 1.0,
-    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.04120098 0.22132148 0.37591144]": 1.0,
-    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.08237853 0.01260312 0.81257147]": 0.2500000005423586,
+    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.03755624 0.21992851 0.53987227]": 0.9999999999780999,
+    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.03850784 0.22731128 0.2666288 ]": 0.9999999999886382,
+    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.04120098 0.22132148 0.37591144]": 0.9999999999872218,
+    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.08237853 0.01260312 0.81257147]": 0.24999999999999992,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.11260748 0.08118717 0.75005045]": 0.5,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.11739082 0.0359616  0.        ]": 0.5,
-    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.13518693 0.12646632 0.        ]": 0.7499999996288135,
+    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.13518693 0.12646632 0.        ]": 0.75,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.14238912 0.03931622 0.53339173]": 0.5,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.14282466 0.14970832 0.68752944]": 0.7499999999998513,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.14589245 0.01965208 0.22892776]": 0.5,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.14978653 0.02389401 0.38246415]": 0.5,
-    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.1548752  0.11606269 0.20854392]": 0.7499999998730348,
+    "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.1548752  0.11606269 0.20854392]": 0.75,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.15705645 0.1262449  0.4861432 ]": 0.7499999999999999,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.15925366 0.11788277 0.34810314]": 0.7499999999999999,
     "points inside volume with ku=4, kv=3, kw=4 project point v for pt=[0.1851211  0.24567474 0.        ]": 1.0,
@@ -10380,7 +10380,7 @@
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[ 0.11643182 -0.05628376  0.        ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[ 0.12663254 -0.16988514  0.64676731]": 0.75,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[ 0.13265287 -0.04808801  0.58062605]": 0.7499999999999998,
-    "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[ 0.14857579 -0.07788895  0.24931761]": 0.25000000015675755,
+    "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[ 0.14857579 -0.07788895  0.24931761]": 0.24999999999999994,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[ 0.14859511 -0.07097792  0.41682238]": 0.5000000000000001,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[ 0.15946561 -0.20271819  0.46492319]": 0.5,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[ 0.16980702 -0.2130596   0.27786623]": 0.25,
@@ -10409,7 +10409,7 @@
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.09127525  0.11469106  0.16584778]": 0.2500000000000001,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.09231465 -0.05654528  0.33245864]": 0.4999999999999999,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.09282982  0.02812857  0.42922762]": 0.75,
-    "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.09332051  0.11818157  0.56252073]": 1.0,
+    "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.09332051  0.11818157  0.56252073]": 0.9999999999999999,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.09972609 -0.05172684  0.19742985]": 0.24999999999999992,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.1005202  -0.14794445  0.52091332]": 0.75,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.10063519 -0.04596785  0.46625778]": 0.7499999999999999,
@@ -10417,7 +10417,7 @@
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.11850688  0.05676534  0.6085192 ]": 1.0,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.11886776 -0.13084217  0.        ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.13353981  0.18553707  0.32241641]": 0.7500000000151893,
-    "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.13950352 -0.00405323  0.65755259]": 0.999999999972986,
+    "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.13950352 -0.00405323  0.65755259]": 1.0,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.13952846  0.19476898  0.22617993]": 0.500000000011811,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.14154363  0.18868831  0.46691392]": 1.0,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.15429767  0.21255949  0.1329819 ]": 0.25000000000756456,
@@ -10488,10 +10488,10 @@
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.11739082 0.0359616  0.        ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.13518693 0.12646632 0.        ]": 0.0,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.14238912 0.03931622 0.53339173]": 0.75,
-    "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.14282466 0.14970832 0.68752944]": 1.0,
+    "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.14282466 0.14970832 0.68752944]": 0.999999999999926,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.14589245 0.01965208 0.22892776]": 0.25,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.14978653 0.02389401 0.38246415]": 0.5,
-    "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.1548752  0.11606269 0.20854392]": 0.24999999980755477,
+    "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.1548752  0.11606269 0.20854392]": 0.24999999999999994,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.15705645 0.1262449  0.4861432 ]": 0.7499999999999999,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.15925366 0.11788277 0.34810314]": 0.49999999999999983,
     "points inside volume with ku=4, kv=3, kw=4 project point w for pt=[0.1851211  0.24567474 0.        ]": 0.0,
@@ -10732,9 +10732,9 @@
     },
     "points inside volume with ku=4, kv=4, kw=2 project point D for pt=[-0.04614516  0.20322907  0.37498657]": {
         "__ndarray__": [
-            6.938893903907228e-18,
-            0.0,
-            -1.6653345369377348e-16
+            -2.7755575615628914e-17,
+            -5.551115123125783e-17,
+            -5.551115123125783e-17
         ],
         "dtype": "float64",
         "shape": [
@@ -10776,9 +10776,9 @@
     },
     "points inside volume with ku=4, kv=4, kw=2 project point D for pt=[-0.06468464  0.23112662  0.12109814]": {
         "__ndarray__": [
-            6.522560269672795e-16,
-            2.498001805406602e-16,
-            -5.689893001203927e-16
+            4.3021142204224816e-16,
+            -4.163336342344337e-16,
+            -4.718447854656915e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -11271,9 +11271,9 @@
     },
     "points inside volume with ku=4, kv=4, kw=2 project point D for pt=[-0.31352349  0.18733602  0.09211297]": {
         "__ndarray__": [
-            -1.1102230246251565e-16,
-            1.3877787807814457e-16,
-            -3.3306690738754696e-16
+            2.220446049250313e-16,
+            -2.7755575615628914e-16,
+            -2.0816681711721685e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -11326,9 +11326,9 @@
     },
     "points inside volume with ku=4, kv=4, kw=2 project point D for pt=[-0.33616424 -0.022275    0.36444396]": {
         "__ndarray__": [
-            0.0,
-            -3.8163916471489756e-16,
-            -4.996003610813204e-16
+            4.440892098500626e-16,
+            -2.5326962749261384e-16,
+            -3.3306690738754696e-16
         ],
         "dtype": "float64",
         "shape": [
@@ -11359,9 +11359,9 @@
     },
     "points inside volume with ku=4, kv=4, kw=2 project point D for pt=[-0.34493004 -0.08458386  0.39434917]": {
         "__ndarray__": [
-            -3.774758283725532e-15,
-            -1.1197986982125485e-13,
-            9.547918011776346e-15
+            2.4646951146678475e-14,
+            -1.0344503031944896e-13,
+            2.0039525594484076e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -11414,9 +11414,9 @@
     },
     "points inside volume with ku=4, kv=4, kw=2 project point D for pt=[-0.35692524 -0.00133667  0.11529097]": {
         "__ndarray__": [
-            -2.942091015256665e-15,
-            -4.464961386729804e-15,
-            -7.924216838262055e-15
+            5.88418203051333e-15,
+            -2.4409727711338647e-15,
+            -6.7307270867900115e-15
         ],
         "dtype": "float64",
         "shape": [
@@ -11425,9 +11425,9 @@
     },
     "points inside volume with ku=4, kv=4, kw=2 project point D for pt=[-0.35867746 -0.07067161  0.12570603]": {
         "__ndarray__": [
-            -1.587618925213974e-14,
-            -1.847827446610495e-13,
-            -6.078471059822732e-14
+            5.551115123125783e-14,
+            -1.6858736628933002e-13,
+            -5.1236792586450974e-14
         ],
         "dtype": "float64",
         "shape": [
@@ -11689,9 +11689,9 @@
     },
     "points inside volume with ku=4, kv=4, kw=2 project point D for pt=[0.04122594 0.22041504 0.40331194]": {
         "__ndarray__": [
-            1.170718383347591e-11,
-            2.3689661343695434e-12,
-            -2.7858826356919053e-12
+            9.899275843494593e-12,
+            -3.2229774404868294e-12,
+            1.684763439868675e-13
         ],
         "dtype": "float64",
         "shape": [
@@ -11944,21 +11944,21 @@
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.27706092  0.15087348  0.29996313]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.28490712  0.15871966  0.1925007 ]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.28912953  0.16294207  0.40678617]": 0.0,
-    "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.31352349  0.18733602  0.09211297]": 0.0,
+    "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.31352349  0.18733602  0.09211297]": 5.310726519192974e-16,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.32005096  0.04059583  0.33821291]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.32233429  0.04280833  0.21977633]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.33200338 -0.20534804  0.3       ]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.33475044 -0.02378333  0.23814921]": 0.0,
-    "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.33616424 -0.022275    0.36444396]": 0.0,
+    "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.33616424 -0.022275    0.36444396]": 4.160271387701007e-16,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.33783404  0.05905135  0.4541136 ]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.33936682 -0.09022509  0.25892763]": 0.0,
-    "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.34493004 -0.08458386  0.39434917]": 0.0,
+    "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.34493004 -0.08458386  0.39434917]": 2.6107306063939907e-14,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.34567604 -0.19167538  0.14627413]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.34567605 -0.19167538  0.45372591]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.34707458  0.06776528  0.10602897]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.35314092  0.22835314  0.        ]": 0.0,
-    "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.35692524 -0.00133667  0.11529097]": 0.0,
-    "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.35867746 -0.07067161  0.12570603]": 0.0,
+    "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.35692524 -0.00133667  0.11529097]": 7.794951742227288e-15,
+    "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.35867746 -0.07067161  0.12570603]": 6.287597762076135e-14,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.37165005 -0.05713663  0.52471803]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.3820034  -0.15534805  0.60000002]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.38632113  0.10836796  0.        ]": 0.0,
@@ -12020,11 +12020,11 @@
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.01946288 -0.14203716  0.        ]": 2.4649360602041856e-12,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.02105699 -0.13951626  0.60479929]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.02970625  0.06962884  0.66008261]": 0.4999999999851713,
-    "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.04614516  0.20322907  0.37498657]": 1.0,
+    "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.04614516  0.20322907  0.37498657]": 0.9999999999999999,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.05028669  0.21224579  0.2462989 ]": 1.0,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.05050029  0.01574727  0.7062459 ]": 0.24999999999355335,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.05200092  0.20430841  0.5033931 ]": 1.0,
-    "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.06468464  0.23112662  0.12109814]": 1.0,
+    "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.06468464  0.23112662  0.12109814]": 0.9999999999999991,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.08042057 -0.16795141  0.37254519]": 0.0,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.08059403  0.09242743  0.28309422]": 0.75,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.0812216   0.09374082  0.42775269]": 0.7500000000000662,
@@ -12069,7 +12069,7 @@
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.27706092  0.15087348  0.29996313]": 1.0,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.28490712  0.15871966  0.1925007 ]": 1.0,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.28912953  0.16294207  0.40678617]": 1.0,
-    "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.31352349  0.18733602  0.09211297]": 1.0,
+    "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.31352349  0.18733602  0.09211297]": 0.9999999999999992,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.32005096  0.04059583  0.33821291]": 0.7500000000000228,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.32233429  0.04280833  0.21977633]": 0.75,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.33200338 -0.20534804  0.3       ]": 0.0,
@@ -12107,7 +12107,7 @@
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[0.02977755 0.23996753 0.1319955 ]": 0.9999999999793411,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[0.03755624 0.21992851 0.53987227]": 0.9999999999846618,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[0.03867707 0.22715451 0.2665676 ]": 0.9999999999898465,
-    "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[0.04122594 0.22041504 0.40331194]": 1.0,
+    "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[0.04122594 0.22041504 0.40331194]": 0.9999999999921193,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[0.08641049 0.02175    0.80423533]": 0.25,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[0.11260567 0.08118289 0.75005045]": 0.5,
     "points inside volume with ku=4, kv=4, kw=2 project point v for pt=[0.11784602 0.03591547 0.        ]": 0.5,
@@ -13417,9 +13417,9 @@
     },
     "points inside volume with ku=4, kv=4, kw=4 project point D for pt=[0.03755624 0.21992851 0.53987227]": {
         "__ndarray__": [
-            2.2214008410514907e-11,
-            3.601563491884008e-12,
-            -5.403344438548174e-12
+            1.7105393490535192e-11,
+            -7.061184970069689e-12,
+            2.827404976812886e-12
         ],
         "dtype": "float64",
         "shape": [
@@ -13439,9 +13439,9 @@
     },
     "points inside volume with ku=4, kv=4, kw=4 project point D for pt=[0.04120098 0.22132148 0.37591144]": {
         "__ndarray__": [
-            1.6992914020352856e-11,
-            3.440220330830357e-12,
-            -3.1635249975181523e-12
+            1.4643911083744854e-11,
+            -4.217626248248507e-12,
+            5.641598299632733e-13
         ],
         "dtype": "float64",
         "shape": [
@@ -13855,9 +13855,9 @@
     "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.01001608 0.10173208 0.30876023]": 0.7499999999846287,
     "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.01739932 0.25686119 0.        ]": 0.9999999999940994,
     "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.03189879 0.23703804 0.15870895]": 0.9999999999916941,
-    "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.03755624 0.21992851 0.53987227]": 1.0,
+    "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.03755624 0.21992851 0.53987227]": 0.9999999999822612,
     "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.03850784 0.22731128 0.2666288 ]": 0.9999999999905582,
-    "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.04120098 0.22132148 0.37591144]": 1.0,
+    "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.04120098 0.22132148 0.37591144]": 0.999999999989456,
     "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.08641049 0.02175    0.80423533]": 0.25,
     "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.11260567 0.08118289 0.75005045]": 0.5,
     "points inside volume with ku=4, kv=4, kw=4 project point v for pt=[0.11784602 0.03591547 0.        ]": 0.5,
@@ -13999,22 +13999,22 @@
     "points inside volume with ku=4, kv=4, kw=4 project point w for pt=[0.1851211  0.24567474 0.30000001]": 0.5,
     "points inside volume with ku=4, kv=4, kw=4 project point w for pt=[0.1851211  0.24567474 0.42000002]": 0.75,
     "points inside volume with ku=4, kv=4, kw=4 project point w for pt=[0.1851211  0.24567474 0.60000002]": 1.0,
-    "points outside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.12051071  0.05519185 -0.1       ]": {
+    "points outside volume with ku=2, kv=3, kw=2 project point D for pt=[ 0.16  -0.013  0.39 ]": {
         "__ndarray__": [
-            2.1094237467877974e-15,
-            -1.5404344466674047e-15,
-            0.1
+            -0.01105797921361179,
+            0.0001860686463371966,
+            -5.522164282023567e-05
         ],
         "dtype": "float64",
         "shape": [
             3
         ]
     },
-    "points outside volume with ku=2, kv=3, kw=2 project point D for pt=[0.15  0.017 0.39 ]": {
+    "points outside volume with ku=2, kv=3, kw=2 project point D for pt=[-0.059  0.22   0.51 ]": {
         "__ndarray__": [
-            -0.0002584313803113414,
-            9.364097688709105e-06,
-            -9.53056043750955e-06
+            0.0056866380080097395,
+            -0.01592069285412978,
+            -0.007141940152714188
         ],
         "dtype": "float64",
         "shape": [
@@ -14032,31 +14032,31 @@
             3
         ]
     },
-    "points outside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.12051071  0.05519185 -0.1       ]": 0.5364579267241364,
-    "points outside volume with ku=2, kv=3, kw=2 project point u for pt=[0.15  0.017 0.39 ]": 1.0,
+    "points outside volume with ku=2, kv=3, kw=2 project point u for pt=[ 0.16  -0.013  0.39 ]": 1.0,
+    "points outside volume with ku=2, kv=3, kw=2 project point u for pt=[-0.059  0.22   0.51 ]": 0.49723085507790193,
     "points outside volume with ku=2, kv=3, kw=2 project point u for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.12051071  0.05519185 -0.1       ]": 0.466722194172396,
-    "points outside volume with ku=2, kv=3, kw=2 project point v for pt=[0.15  0.017 0.39 ]": 0.4819714465856073,
+    "points outside volume with ku=2, kv=3, kw=2 project point v for pt=[ 0.16  -0.013  0.39 ]": 0.4054924859624016,
+    "points outside volume with ku=2, kv=3, kw=2 project point v for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=2, kv=3, kw=2 project point v for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.12051071  0.05519185 -0.1       ]": 0.0,
-    "points outside volume with ku=2, kv=3, kw=2 project point w for pt=[0.15  0.017 0.39 ]": 0.5064516879867297,
+    "points outside volume with ku=2, kv=3, kw=2 project point w for pt=[ 0.16  -0.013  0.39 ]": 0.4928903221782774,
+    "points outside volume with ku=2, kv=3, kw=2 project point w for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=2, kv=3, kw=2 project point w for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=3, kw=4 project point D for pt=[-0.12051071  0.05519185 -0.1       ]": {
+    "points outside volume with ku=2, kv=3, kw=4 project point D for pt=[ 0.16  -0.013  0.39 ]": {
         "__ndarray__": [
-            2.1094237467877974e-15,
-            -1.5404344466674047e-15,
-            0.1
+            -0.011497036081992651,
+            0.00013398216598226043,
+            -0.0002605924608478638
         ],
         "dtype": "float64",
         "shape": [
             3
         ]
     },
-    "points outside volume with ku=2, kv=3, kw=4 project point D for pt=[0.15  0.017 0.39 ]": {
+    "points outside volume with ku=2, kv=3, kw=4 project point D for pt=[-0.059  0.22   0.51 ]": {
         "__ndarray__": [
-            -0.0006728579527938428,
-            2.9429673316656857e-05,
-            -1.3661761553929175e-05
+            0.0056866380080097395,
+            -0.01592069285412978,
+            -0.007141940152714188
         ],
         "dtype": "float64",
         "shape": [
@@ -14074,31 +14074,31 @@
             3
         ]
     },
-    "points outside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.12051071  0.05519185 -0.1       ]": 0.5364579267241364,
-    "points outside volume with ku=2, kv=3, kw=4 project point u for pt=[0.15  0.017 0.39 ]": 1.0,
+    "points outside volume with ku=2, kv=3, kw=4 project point u for pt=[ 0.16  -0.013  0.39 ]": 1.0,
+    "points outside volume with ku=2, kv=3, kw=4 project point u for pt=[-0.059  0.22   0.51 ]": 0.49723085507790193,
     "points outside volume with ku=2, kv=3, kw=4 project point u for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.12051071  0.05519185 -0.1       ]": 0.466722194172396,
-    "points outside volume with ku=2, kv=3, kw=4 project point v for pt=[0.15  0.017 0.39 ]": 0.4809838628551926,
+    "points outside volume with ku=2, kv=3, kw=4 project point v for pt=[ 0.16  -0.013  0.39 ]": 0.40424222236008484,
+    "points outside volume with ku=2, kv=3, kw=4 project point v for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=2, kv=3, kw=4 project point v for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.12051071  0.05519185 -0.1       ]": 0.0,
-    "points outside volume with ku=2, kv=3, kw=4 project point w for pt=[0.15  0.017 0.39 ]": 0.5079861909076366,
+    "points outside volume with ku=2, kv=3, kw=4 project point w for pt=[ 0.16  -0.013  0.39 ]": 0.49068255705679875,
+    "points outside volume with ku=2, kv=3, kw=4 project point w for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=2, kv=3, kw=4 project point w for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.12051071  0.05519185 -0.1       ]": {
+    "points outside volume with ku=2, kv=4, kw=2 project point D for pt=[ 0.16  -0.013  0.39 ]": {
         "__ndarray__": [
-            5.134781488891349e-16,
-            -5.551115123125783e-16,
-            0.1
+            -0.01079065386265865,
+            0.00015145512703594252,
+            -5.9610288711653414e-05
         ],
         "dtype": "float64",
         "shape": [
             3
         ]
     },
-    "points outside volume with ku=2, kv=4, kw=2 project point D for pt=[0.15  0.017 0.39 ]": {
+    "points outside volume with ku=2, kv=4, kw=2 project point D for pt=[-0.059  0.22   0.51 ]": {
         "__ndarray__": [
-            -3.575469312672164e-05,
-            1.2827967004261365e-06,
-            -1.338616191115527e-06
+            0.0056866380080097395,
+            -0.01592069285412978,
+            -0.007141940152714188
         ],
         "dtype": "float64",
         "shape": [
@@ -14116,31 +14116,31 @@
             3
         ]
     },
-    "points outside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.12051071  0.05519185 -0.1       ]": 0.5357234932088529,
-    "points outside volume with ku=2, kv=4, kw=2 project point u for pt=[0.15  0.017 0.39 ]": 1.0,
+    "points outside volume with ku=2, kv=4, kw=2 project point u for pt=[ 0.16  -0.013  0.39 ]": 1.0,
+    "points outside volume with ku=2, kv=4, kw=2 project point u for pt=[-0.059  0.22   0.51 ]": 0.49723085507790193,
     "points outside volume with ku=2, kv=4, kw=2 project point u for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.12051071  0.05519185 -0.1       ]": 0.4585661928810036,
-    "points outside volume with ku=2, kv=4, kw=2 project point v for pt=[0.15  0.017 0.39 ]": 0.47752990497457615,
+    "points outside volume with ku=2, kv=4, kw=2 project point v for pt=[ 0.16  -0.013  0.39 ]": 0.3838668042516104,
+    "points outside volume with ku=2, kv=4, kw=2 project point v for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=2, kv=4, kw=2 project point v for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=4, kw=2 project point w for pt=[-0.12051071  0.05519185 -0.1       ]": 0.0,
-    "points outside volume with ku=2, kv=4, kw=2 project point w for pt=[0.15  0.017 0.39 ]": 0.5064697731604323,
+    "points outside volume with ku=2, kv=4, kw=2 project point w for pt=[ 0.16  -0.013  0.39 ]": 0.49287318555981957,
+    "points outside volume with ku=2, kv=4, kw=2 project point w for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=2, kv=4, kw=2 project point w for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=4, kw=4 project point D for pt=[-0.12051071  0.05519185 -0.1       ]": {
+    "points outside volume with ku=2, kv=4, kw=4 project point D for pt=[ 0.16  -0.013  0.39 ]": {
         "__ndarray__": [
-            5.134781488891349e-16,
-            -5.551115123125783e-16,
-            0.1
+            -0.011228128915070884,
+            9.922061036457541e-05,
+            -0.00025985487929197637
         ],
         "dtype": "float64",
         "shape": [
             3
         ]
     },
-    "points outside volume with ku=2, kv=4, kw=4 project point D for pt=[0.15  0.017 0.39 ]": {
+    "points outside volume with ku=2, kv=4, kw=4 project point D for pt=[-0.059  0.22   0.51 ]": {
         "__ndarray__": [
-            -0.00044978369881587543,
-            1.9500530343330436e-05,
-            -9.38906233205472e-06
+            0.0056866380080097395,
+            -0.01592069285412978,
+            -0.007141940152714188
         ],
         "dtype": "float64",
         "shape": [
@@ -14158,31 +14158,31 @@
             3
         ]
     },
-    "points outside volume with ku=2, kv=4, kw=4 project point u for pt=[-0.12051071  0.05519185 -0.1       ]": 0.5357234932088529,
-    "points outside volume with ku=2, kv=4, kw=4 project point u for pt=[0.15  0.017 0.39 ]": 1.0,
+    "points outside volume with ku=2, kv=4, kw=4 project point u for pt=[ 0.16  -0.013  0.39 ]": 1.0,
+    "points outside volume with ku=2, kv=4, kw=4 project point u for pt=[-0.059  0.22   0.51 ]": 0.49723085507790193,
     "points outside volume with ku=2, kv=4, kw=4 project point u for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=4, kw=4 project point v for pt=[-0.12051071  0.05519185 -0.1       ]": 0.4585661928810036,
-    "points outside volume with ku=2, kv=4, kw=4 project point v for pt=[0.15  0.017 0.39 ]": 0.4762917554986265,
+    "points outside volume with ku=2, kv=4, kw=4 project point v for pt=[ 0.16  -0.013  0.39 ]": 0.38238409552800956,
+    "points outside volume with ku=2, kv=4, kw=4 project point v for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=2, kv=4, kw=4 project point v for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=2, kv=4, kw=4 project point w for pt=[-0.12051071  0.05519185 -0.1       ]": 0.0,
-    "points outside volume with ku=2, kv=4, kw=4 project point w for pt=[0.15  0.017 0.39 ]": 0.5080011754351198,
+    "points outside volume with ku=2, kv=4, kw=4 project point w for pt=[ 0.16  -0.013  0.39 ]": 0.49066904185425253,
+    "points outside volume with ku=2, kv=4, kw=4 project point w for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=2, kv=4, kw=4 project point w for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.12051071  0.05519185 -0.1       ]": {
+    "points outside volume with ku=4, kv=3, kw=2 project point D for pt=[ 0.16  -0.013  0.39 ]": {
         "__ndarray__": [
-            2.0816681711721685e-16,
-            -1.0408340855860843e-16,
-            0.1
+            -0.01105797921361179,
+            0.0001860686463371966,
+            -5.522164282023567e-05
         ],
         "dtype": "float64",
         "shape": [
             3
         ]
     },
-    "points outside volume with ku=4, kv=3, kw=2 project point D for pt=[0.15  0.017 0.39 ]": {
+    "points outside volume with ku=4, kv=3, kw=2 project point D for pt=[-0.059  0.22   0.51 ]": {
         "__ndarray__": [
-            -0.0002584313803113414,
-            9.364097688709105e-06,
-            -9.53056043750955e-06
+            0.005686708710812241,
+            -0.01592052996592261,
+            -0.007141559707255163
         ],
         "dtype": "float64",
         "shape": [
@@ -14200,31 +14200,31 @@
             3
         ]
     },
-    "points outside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.12051071  0.05519185 -0.1       ]": 0.5485844317001819,
-    "points outside volume with ku=4, kv=3, kw=2 project point u for pt=[0.15  0.017 0.39 ]": 1.0,
+    "points outside volume with ku=4, kv=3, kw=2 project point u for pt=[ 0.16  -0.013  0.39 ]": 1.0,
+    "points outside volume with ku=4, kv=3, kw=2 project point u for pt=[-0.059  0.22   0.51 ]": 0.49631043215484916,
     "points outside volume with ku=4, kv=3, kw=2 project point u for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.12051071  0.05519185 -0.1       ]": 0.4674911927651657,
-    "points outside volume with ku=4, kv=3, kw=2 project point v for pt=[0.15  0.017 0.39 ]": 0.4819714465856073,
+    "points outside volume with ku=4, kv=3, kw=2 project point v for pt=[ 0.16  -0.013  0.39 ]": 0.4054924859624016,
+    "points outside volume with ku=4, kv=3, kw=2 project point v for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=4, kv=3, kw=2 project point v for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.12051071  0.05519185 -0.1       ]": 0.0,
-    "points outside volume with ku=4, kv=3, kw=2 project point w for pt=[0.15  0.017 0.39 ]": 0.5064516879867297,
+    "points outside volume with ku=4, kv=3, kw=2 project point w for pt=[ 0.16  -0.013  0.39 ]": 0.4928903221782774,
+    "points outside volume with ku=4, kv=3, kw=2 project point w for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=4, kv=3, kw=2 project point w for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=3, kw=4 project point D for pt=[-0.12051071  0.05519185 -0.1       ]": {
+    "points outside volume with ku=4, kv=3, kw=4 project point D for pt=[ 0.16  -0.013  0.39 ]": {
         "__ndarray__": [
-            2.0816681711721685e-16,
-            -1.0408340855860843e-16,
-            0.1
+            -0.011497036081992651,
+            0.00013398216598226043,
+            -0.0002605924608478638
         ],
         "dtype": "float64",
         "shape": [
             3
         ]
     },
-    "points outside volume with ku=4, kv=3, kw=4 project point D for pt=[0.15  0.017 0.39 ]": {
+    "points outside volume with ku=4, kv=3, kw=4 project point D for pt=[-0.059  0.22   0.51 ]": {
         "__ndarray__": [
-            -0.0006728579527938428,
-            2.9429673316656857e-05,
-            -1.3661761553929175e-05
+            0.005686708710812241,
+            -0.01592052996592261,
+            -0.007141559707255163
         ],
         "dtype": "float64",
         "shape": [
@@ -14242,31 +14242,31 @@
             3
         ]
     },
-    "points outside volume with ku=4, kv=3, kw=4 project point u for pt=[-0.12051071  0.05519185 -0.1       ]": 0.5485844317001819,
-    "points outside volume with ku=4, kv=3, kw=4 project point u for pt=[0.15  0.017 0.39 ]": 1.0,
+    "points outside volume with ku=4, kv=3, kw=4 project point u for pt=[ 0.16  -0.013  0.39 ]": 1.0,
+    "points outside volume with ku=4, kv=3, kw=4 project point u for pt=[-0.059  0.22   0.51 ]": 0.49631043215484916,
     "points outside volume with ku=4, kv=3, kw=4 project point u for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.12051071  0.05519185 -0.1       ]": 0.4674911927651657,
-    "points outside volume with ku=4, kv=3, kw=4 project point v for pt=[0.15  0.017 0.39 ]": 0.4809838628551926,
+    "points outside volume with ku=4, kv=3, kw=4 project point v for pt=[ 0.16  -0.013  0.39 ]": 0.40424222236008484,
+    "points outside volume with ku=4, kv=3, kw=4 project point v for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=4, kv=3, kw=4 project point v for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.12051071  0.05519185 -0.1       ]": 0.0,
-    "points outside volume with ku=4, kv=3, kw=4 project point w for pt=[0.15  0.017 0.39 ]": 0.5079861909076366,
+    "points outside volume with ku=4, kv=3, kw=4 project point w for pt=[ 0.16  -0.013  0.39 ]": 0.49068255705679875,
+    "points outside volume with ku=4, kv=3, kw=4 project point w for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=4, kv=3, kw=4 project point w for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=4, kw=2 project point D for pt=[-0.12051071  0.05519185 -0.1       ]": {
+    "points outside volume with ku=4, kv=4, kw=2 project point D for pt=[ 0.16  -0.013  0.39 ]": {
         "__ndarray__": [
-            8.326672684688674e-17,
-            -9.020562075079397e-17,
-            0.1
+            -0.01079065386265865,
+            0.00015145512703594252,
+            -5.9610288711653414e-05
         ],
         "dtype": "float64",
         "shape": [
             3
         ]
     },
-    "points outside volume with ku=4, kv=4, kw=2 project point D for pt=[0.15  0.017 0.39 ]": {
+    "points outside volume with ku=4, kv=4, kw=2 project point D for pt=[-0.059  0.22   0.51 ]": {
         "__ndarray__": [
-            -3.575469312672164e-05,
-            1.2827967004261365e-06,
-            -1.338616191115527e-06
+            0.005686708710812241,
+            -0.01592052996592261,
+            -0.007141559707255163
         ],
         "dtype": "float64",
         "shape": [
@@ -14284,31 +14284,31 @@
             3
         ]
     },
-    "points outside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.12051071  0.05519185 -0.1       ]": 0.5476056221951625,
-    "points outside volume with ku=4, kv=4, kw=2 project point u for pt=[0.15  0.017 0.39 ]": 1.0,
+    "points outside volume with ku=4, kv=4, kw=2 project point u for pt=[ 0.16  -0.013  0.39 ]": 1.0,
+    "points outside volume with ku=4, kv=4, kw=2 project point u for pt=[-0.059  0.22   0.51 ]": 0.49631043215484916,
     "points outside volume with ku=4, kv=4, kw=2 project point u for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.12051071  0.05519185 -0.1       ]": 0.45953973945446747,
-    "points outside volume with ku=4, kv=4, kw=2 project point v for pt=[0.15  0.017 0.39 ]": 0.47752990497457615,
+    "points outside volume with ku=4, kv=4, kw=2 project point v for pt=[ 0.16  -0.013  0.39 ]": 0.3838668042516104,
+    "points outside volume with ku=4, kv=4, kw=2 project point v for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=4, kv=4, kw=2 project point v for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=4, kw=2 project point w for pt=[-0.12051071  0.05519185 -0.1       ]": 0.0,
-    "points outside volume with ku=4, kv=4, kw=2 project point w for pt=[0.15  0.017 0.39 ]": 0.5064697731604323,
+    "points outside volume with ku=4, kv=4, kw=2 project point w for pt=[ 0.16  -0.013  0.39 ]": 0.49287318555981957,
+    "points outside volume with ku=4, kv=4, kw=2 project point w for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=4, kv=4, kw=2 project point w for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=4, kw=4 project point D for pt=[-0.12051071  0.05519185 -0.1       ]": {
+    "points outside volume with ku=4, kv=4, kw=4 project point D for pt=[ 0.16  -0.013  0.39 ]": {
         "__ndarray__": [
-            8.326672684688674e-17,
-            -9.020562075079397e-17,
-            0.1
+            -0.011228128915070884,
+            9.922061036457541e-05,
+            -0.00025985487929197637
         ],
         "dtype": "float64",
         "shape": [
             3
         ]
     },
-    "points outside volume with ku=4, kv=4, kw=4 project point D for pt=[0.15  0.017 0.39 ]": {
+    "points outside volume with ku=4, kv=4, kw=4 project point D for pt=[-0.059  0.22   0.51 ]": {
         "__ndarray__": [
-            -0.00044978369881587543,
-            1.9500530343330436e-05,
-            -9.38906233205472e-06
+            0.005686708710812241,
+            -0.01592052996592261,
+            -0.007141559707255163
         ],
         "dtype": "float64",
         "shape": [
@@ -14326,14 +14326,14 @@
             3
         ]
     },
-    "points outside volume with ku=4, kv=4, kw=4 project point u for pt=[-0.12051071  0.05519185 -0.1       ]": 0.5476056221951625,
-    "points outside volume with ku=4, kv=4, kw=4 project point u for pt=[0.15  0.017 0.39 ]": 1.0,
+    "points outside volume with ku=4, kv=4, kw=4 project point u for pt=[ 0.16  -0.013  0.39 ]": 1.0,
+    "points outside volume with ku=4, kv=4, kw=4 project point u for pt=[-0.059  0.22   0.51 ]": 0.49631043215484916,
     "points outside volume with ku=4, kv=4, kw=4 project point u for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=4, kw=4 project point v for pt=[-0.12051071  0.05519185 -0.1       ]": 0.45953973945446747,
-    "points outside volume with ku=4, kv=4, kw=4 project point v for pt=[0.15  0.017 0.39 ]": 0.4762917554986265,
+    "points outside volume with ku=4, kv=4, kw=4 project point v for pt=[ 0.16  -0.013  0.39 ]": 0.38238409552800956,
+    "points outside volume with ku=4, kv=4, kw=4 project point v for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=4, kv=4, kw=4 project point v for pt=[1. 1. 1.]": 1.0,
-    "points outside volume with ku=4, kv=4, kw=4 project point w for pt=[-0.12051071  0.05519185 -0.1       ]": 0.0,
-    "points outside volume with ku=4, kv=4, kw=4 project point w for pt=[0.15  0.017 0.39 ]": 0.5080011754351198,
+    "points outside volume with ku=4, kv=4, kw=4 project point w for pt=[ 0.16  -0.013  0.39 ]": 0.49066904185425253,
+    "points outside volume with ku=4, kv=4, kw=4 project point w for pt=[-0.059  0.22   0.51 ]": 1.0,
     "points outside volume with ku=4, kv=4, kw=4 project point w for pt=[1. 1. 1.]": 1.0,
     "volume with ku=2, kv=3, kw=2 bounds": [
         {
