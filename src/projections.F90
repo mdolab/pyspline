@@ -422,14 +422,13 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
     real(kind=realType), intent(out) :: diff(ndim)
 
     ! Working
-    real(kind=realType) :: val(ndim), deriv(ndim, 3), deriv2(ndim, 3, 3)
+    real(kind=realType) :: val(ndim), old_val(ndim), deriv(ndim, 3), deriv2(ndim, 3, 3)
     real(kind=realType) :: R(nDim), low(3), high(3), pt(3), newpt(3), update(3)
-    real(kind=realType) :: step, dist, nDist, pgrad, fval, nfval, c, p_diff
+    real(kind=realType) :: step, quad_step, dist, nDist, pgrad, fval, nfval, c, cos_angle
     real(kind=realType) :: grad(3), hessian(3, 3)
-    integer :: i, j, m, NLSFail, ii
-    logical :: flag, cflag
+    integer :: i, j, m, ii
+    logical :: flag(3), cflag, exit_early
 
-    NLSFail = 0
     ! Set lower and upper bounds for u, v, w based on knot vector
     low(1) = tu(1)
     low(2) = tv(1)
@@ -450,6 +449,9 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
         call eval_volume_deriv2(pt(1), pt(2), pt(3), tu, tv, tw, ku, kv, kw, coef, &
                                 nctlu, nctlv, nctlw, ndim, deriv2)
 
+        ! also copy the current "val" as the "old_val" to check the change later on
+        old_val = val
+
         ! Distance is R, "function value" fval is what we minimize
         R = val - X0
         nDist = NORM2(R)
@@ -458,6 +460,18 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
         do i = 1, 3
             grad(i) = dot_product(R, deriv(:, i))
         end do
+
+        ! Check if we are converged already. Previous implementations were checking
+        ! the eps on the gradient vector; however, this is not the physical distance
+        ! between the search point and current iterate, and therefore, could
+        ! prematurely trigger the convergence check when the parametric derivatives
+        ! are small. Instead, we simply check if the new distance is less than the
+        ! convergence tolerance, eps. For the cases where the point is outside the volume
+        ! instead of iterating until we run out, we have the bounds-based check following
+        ! the hessian computation below.
+        if (nDist .lt. eps) then
+            exit iteration_loop
+        end if
 
         ! Calculate the Hessian
         do j = 1, 3
@@ -469,18 +483,21 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
 
         ! Bounds Checking
         do i = 1, 3
-            flag = .False.
+            flag(i) = .False.
             if (pt(i) < low(i) + eps .and. grad(i) >= 0.0) then
-                flag = .True.
+                flag(i) = .True.
                 pt(i) = low(i)
             end if
 
             if (pt(i) > high(i) - eps .and. grad(i) <= 0.0) then
-                flag = .True.
+                flag(i) = .True.
                 pt(i) = high(i)
             end if
 
-            if (flag) then
+            if (flag(i)) then
+                ! we cancel out the rows and columns for this parameter,
+                ! and set the diagonal to one and rhs to zero to fix it
+                ! at the current value.
                 grad(i) = 0.0
                 hessian(:, i) = 0.0
                 hessian(i, :) = 0.0
@@ -488,7 +505,70 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
             end if
         end do
 
-        if (NORM2(grad) < eps) then
+        ! Convergence check for points outside the volume:
+        ! Check if we are at a bound with any of the variable and if the residual
+        ! is perpendicular to this bound. The bound can be a face if only a single
+        ! parameter is at the bound, or it can be an edge if two variables at bounds,
+        ! or finally, it can be a corner when all 3 are at bounds. In these cases,
+        ! if the derivative is perpendicular to these bounds, the newton search
+        ! cannot make any more progress and most likely the point is outside the volume,
+        ! so we can quit early.
+
+        ! To check this, we start with a flag exit_early equals True.
+        ! We set this flag to false as soon as there is a single variable
+        ! that is not at a bound AND derivative wrt that variable is not orthogonal to
+        ! the residual direction. This means there is progress to be made in that variable.
+
+        ! Here is what would happen in the 4 cases when we are:
+        ! 1- fully inside the domain:
+        !     Fully inside the domain, at least one direction will not be orthogonal
+        !     to the residual, because the 3 derivative directions span the 3d volume.
+        ! 2- on a face:
+        !     There are 2 parameters for the derivative to be not perpendicular to the residual.
+        !     There is a chance when both of these derivatives are perpendicular. If this happens,
+        !     that means the point is outside the volume, and we cannot make any more progress
+        !     towards the point by varying the remaining two variables that are not at bounds.
+        ! 3- on an edge:
+        !     The edge case is similar to the face case. Now there is only one possible direction
+        !     left
+        ! 4- at a corner:
+        !     The corner case is trivial, we are completely stuck and the descent direction is
+        !     pointing outside on all 3 parameters so we can quit.
+
+        exit_early = .True.
+        ! loop over parameters
+        parameter_loop: do i = 1, 3
+            ! The flag variable has the value for the check if this parameter is at a bound
+            ! and the descent direction is pointing out. If this is not the case, then we
+            ! need to check if the derivative w.r.t. this parameter is perpendicular to the
+            ! residual or not.
+            if (.not. flag(i)) then
+                ! get the angle between the derivative w.r.t. this parameter and the residual.
+                ! for this, we need the dot product of these vectors. This is actually already
+                ! computed; that is what the entries of "grad" are. To have the check act
+                ! independently of the vector sizes, we normalize w.r.t. both vectors.
+
+                cos_angle = grad(i) / (NORM2(R) * NORM2(deriv(:, i)))
+
+                ! we dont need to take the arccos; just check the value of the cosine
+                if (abs(cos_angle) .gt. eps) then
+                    ! we can get more reduction with this parameter, dont exit
+                    exit_early = .False.
+
+                    ! since this is set to false already, we can just quit this inner loop.
+                    ! we won't exit the outer iteration loop
+                    exit parameter_loop
+
+                    ! here, we dont check anything else, since this test needs to be
+                    ! triggered at least once to prevent a premature exit. if this test
+                    ! fails for every parameter that we can move, then we can safely quit
+                    ! early.
+                end if
+            end if
+        end do parameter_loop
+
+        if (exit_early) then
+            ! this point is outside the volume or the newton got stuck at a domain bound
             exit iteration_loop
         end if
 
@@ -500,9 +580,17 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
 
         !Check that this is a descent direction -
         !otherwise use the negative gradient
-        if (pgrad >= 0.0) then
-            update = -grad / NORM2(grad)
+        if (pgrad .gt. 0.0) then
+            update = -grad / (NORM2(grad) + eps)
             pgrad = dot_product(update, grad)
+        else if (pgrad .eq. 0.0) then
+            ! this is an edge case. pgrad is *exactly* zero. realistically, this happens
+            ! when we are at a bound where the gradient is pointing exactly away from the bound
+            ! but the update direction is either perpendicular to the gradient, or we are at a
+            ! corner and the update is actually zero. Either way, we can quit now because this
+            ! point is outside the volume, or even if it is inside the volume, this solver
+            ! wont be able to find a projection.
+            exit iteration_loop
         end if
 
         step = 1.0
@@ -515,10 +603,10 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
             ! Check if the new point exceeds the bounds
             do i = 1, 3
                 if (newpt(i) > high(i)) then
-                    cflag = .True.
+                    cflag = .true.
                     newpt(i) = high(i)
                 else if (newpt(i) < low(i)) then
-                    cflag = .True.
+                    cflag = .true.
                     newpt(i) = low(i)
                 end if
             end do
@@ -544,30 +632,24 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
                 ! If the constraints are applied - and the new point
                 ! doesn't satisfy the Wolfe conditions, it doesn't make
                 ! sense to apply a quadratic approximation
-                step = 0.25 * step
+                step = 0.1 * step
             else
-                ! c = nfval - fval - pgrad * step is always positive since
-                ! nfval - fval > pgrad * wolfe * step > pgrad * step
                 c = ((nfval - fval) - pgrad * step)
-                step = -step * step * pgrad / (2.0 * c)
+                quad_step = -step * step * pgrad / (2.0 * c)
                 ! This update is always less than the original step length
+                ! however, it might be too small... in that case,
+                ! just backtrack since the quad. approx is probably not too good.
+                ! the .ne. condition is for nan checking
+                if ((quad_step .lt. 0.1) .or. (quad_step .ne. quad_step)) then
+                    step = 0.1 * step
+                else
+                    step = quad_step
+                end if
             end if
+
         end do lineloop
 
-        if (m == nLine + 1) then
-            dist = ndist
-            nLSFail = nLSFail + 1
-            if (NLSFail > LSFailMax) then ! There is nothing more we can do...
-                exit Iteration_loop
-            end if
-        else
-            NLSFail = 0
-            ! Check if there has been no change in the coordinates
-            p_diff = NORM2(pt - newpt)
-            if (p_diff < eps) then
-                exit Iteration_loop
-            end if
-        end if
+        ! update the point
         pt = newpt
 
     end do iteration_loop

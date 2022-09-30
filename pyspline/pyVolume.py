@@ -43,7 +43,7 @@ class Volume(object):
     nCtlu : int
        Number of control points in u
     nCtlv : int
-       Number of control points in u
+       Number of control points in v
     nCtlw : int
        Number of control points in w
     coef : array, size (nCtlu, nCtl, nDim)
