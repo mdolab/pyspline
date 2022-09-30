@@ -639,7 +639,8 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
                 ! This update is always less than the original step length
                 ! however, it might be too small... in that case,
                 ! just backtrack since the quad. approx is probably not too good.
-                if ((quad_step .lt. eps) .or. (quad_step .ne. quad_step)) then
+                ! the .ne. condition is for nan checking
+                if ((quad_step .lt. 0.1) .or. (quad_step .ne. quad_step)) then
                     step = 0.1 * step
                 else
                     step = quad_step
