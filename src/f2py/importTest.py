@@ -1,14 +1,26 @@
-#! /usr/bin/env python
-# Standard Python modules
+#!/usr/bin/env python
 import sys
+import os
+import argparse
 
-print("Testing if module pyspline can be imported...")
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "name",
+    type=str,
+    help="Library name (example: libpackage.so). Note: This script must be run in the same dir as the library.",
+)
+args = parser.parse_args()
+
+# Only get the filename without the extension
+name = os.path.splitext(args.name)[0]
+print(f"Testing if module {name} can be imported...")
+
 try:
-    # External modules
-    import libspline  # noqa: F401
-except ImportError:
-    print("Error importing libspline.so")
+    import_cmd = f"import {name}"
+    exec(import_cmd)
+except ImportError as e:
+    print(f"Error: {e}")
+    print(f"Error: library {args.name} was not imported correctly")
     sys.exit(1)
-# end try
 
-print("Module libspline was successfully imported.")
+print(f"Module {name} was successfully imported")

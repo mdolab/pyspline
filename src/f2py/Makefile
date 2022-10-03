@@ -47,7 +47,7 @@ all:
 	$(FF90) $(FF90_ALL_FLAGS) -I./ -c libspline-f2pywrappers2.f90
 
 	$(FF90) $(SO_LINKER_FLAGS) $(PYTHON_OBJECTS) $(LINKER_ALL_FLAGS) -o libspline.so
-	$(PYTHON) importTest.py
+	$(PYTHON) importTest.py libspline.so
 	mv libspline.so ../../pyspline
 
 # Clean up temporary files
