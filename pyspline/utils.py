@@ -114,11 +114,11 @@ def writeTecplot3D(handle, name, data, solutionTime=None):
 def _writeHeader(f, ndim):
     """Write tecplot zone header depending on spatial dimension"""
     if ndim == 1:
-        f.write('VARIABLES = "X"\n')
+        f.write('VARIABLES = "CoordinateX"\n')
     elif ndim == 2:
-        f.write('VARIABLES = "X", "Y"\n')
+        f.write('VARIABLES = "CoordinateX", "CoordinateY"\n')
     else:
-        f.write('VARIABLES = "X", "Y", "Z"\n')
+        f.write('VARIABLES = "CoordinateX", "CoordinateY", "CoordinateZ"\n')
 
 
 def openTecplot(fileName, ndim):
