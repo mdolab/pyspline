@@ -11,6 +11,9 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+# Make sure the executing directory is always in the PATH before importing
+sys.path.insert(0, os.getcwd())
+
 # Only get the filename without the extension
 name = os.path.splitext(args.name)[0]
 print(f"Testing if module {name} can be imported...")
