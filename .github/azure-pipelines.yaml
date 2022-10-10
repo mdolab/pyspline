@@ -19,3 +19,4 @@ extends:
     INTEL_CONFIG: config/defaults/config.LINUX_INTEL.mk
     ISORT: true
     COVERAGE: true
+    FPRETTIFY: true
