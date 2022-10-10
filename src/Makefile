@@ -29,31 +29,13 @@ OBJS =  evaluations.o\
 	eval_surface.o\
 	eval_volume.o\
 	projections.o\
-	tfi2d.o\
-	version.o
+	tfi2d.o
 
-.PHONY: version
-
-default: version
+default:
 	$(MAKE) $(MODS)
 	cp -f *.mod ../mod
+	$(FF90) $(FF90_ALL_FLAGS) -cpp -DGITVERSION=\"$(GIT_VERSION)\" -c version.f90 -o $(OBJDIR)/version.o
 	$(MAKE) $(OBJS)
-
-version:
-	@echo "Making auto-generated version file"
-	@echo GIT_VERSION is $(GIT_VERSION)
-	@echo "subroutine version(ver)" > version.f90
-	@echo "  ! Automatically generated version function" >> version.f90
-	@echo "  !" >> version.f90
-	@echo "  ! Desricption of Arguments" >> version.f90
-	@echo "  ! Output" >> version.f90
-	@echo "  ! ver    - string, contains git tag and commit hash" >> version.f90
-	@echo "  use precision" >> version.f90
-	@echo "  implicit none" >> version.f90
-	@echo "  character(len=256), intent(out) :: ver" >> version.f90
-	@echo "  " >> version.f90
-	@echo "  ver = '$(GIT_VERSION)'" >> version.f90
-	@echo "end subroutine version" >> version.f90
 
 clean:
 	@echo "        Making clean in src... "
