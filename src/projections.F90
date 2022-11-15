@@ -476,8 +476,26 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
         ! Calculate the Hessian
         do j = 1, 3
             do i = 1, 3
-                hessian(i, j) = dot_product(deriv(:, i), deriv(:, j)) + &
-                                dot_product(R, deriv2(:, i, j))
+                ! TODO clean up this routine
+                ! 3 ways of doing the hessian. Second term causes problems, so we either:
+                ! omit it, only add the diagonal, keep adding it. Needs further investigation
+                ! just not adding them at all seems to be the most robust...
+
+                hessian(i, j) = dot_product(deriv(:, i), deriv(:, j))
+
+                ! if (i .eq. j) then
+                !     hessian(i, j) = hessian(i, j) + dot_product(R, deriv2(:, i, j))
+                ! end if
+
+                ! hessian(i, j) = dot_product(deriv(:, i), deriv(:, j)) + &
+                !                 dot_product(R, deriv2(:, i, j))
+
+                ! The hessian gets terribly ill conditioned when the second derivatives are included.
+                ! In one case, this shows up as a 2x2 sub block getting almost zero determinant.
+                ! This is solving an optimization problem, so check if there are any features that
+                ! would cause the optimization problem to be non-convex!
+
+                ! write(*,*) i, j, dot_product(deriv(:, i), deriv(:, j)), dot_product(R, deriv2(:, i, j))
             end do
         end do
 
@@ -578,6 +596,10 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
         update = -update
         pgrad = dot_product(update, grad)
 
+        ! TODO remove these debug lines
+        ! write(*,*) "ii", ii, "hessian", hessian, "grad", grad
+        ! write(*,*) "ii", ii, "pt", pt, "update", update
+
         !Check that this is a descent direction -
         !otherwise use the negative gradient
         if (pgrad .gt. 0.0) then
@@ -647,10 +669,16 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
                 end if
             end if
 
+            ! TODO remove these debug lines
+            ! write(*,*) "ii", ii, "ls step", step
+
         end do lineloop
 
         ! update the point
         pt = newpt
+
+        ! TODO remove these debug lines
+        ! write(*,*) "ii", ii, "pt", pt, "update", update, "step", step
 
     end do iteration_loop
 
