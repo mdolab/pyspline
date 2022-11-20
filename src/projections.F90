@@ -596,10 +596,6 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
         update = -update
         pgrad = dot_product(update, grad)
 
-        ! TODO remove these debug lines
-        ! write(*,*) "ii", ii, "hessian", hessian, "grad", grad
-        ! write(*,*) "ii", ii, "pt", pt, "update", update
-
         !Check that this is a descent direction -
         !otherwise use the negative gradient
         if (pgrad .gt. 0.0) then
@@ -669,16 +665,10 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
                 end if
             end if
 
-            ! TODO remove these debug lines
-            ! write(*,*) "ii", ii, "ls step", step
-
         end do lineloop
 
         ! update the point
         pt = newpt
-
-        ! TODO remove these debug lines
-        ! write(*,*) "ii", ii, "pt", pt, "update", update, "step", step
 
     end do iteration_loop
 
