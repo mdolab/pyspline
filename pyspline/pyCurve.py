@@ -327,7 +327,7 @@ class Curve(object):
 
         if self.interp:
             # Factorize once for efficiency
-            solve = linalg.dsolve.factorized(N)
+            solve = linalg.factorized(N)
             for idim in range(self.nDim):
                 self.coef[:, idim] = solve(S[:, idim])
 
@@ -350,7 +350,7 @@ class Curve(object):
                 # LMS
 
                 # Factorize once for efficiency
-                solve = linalg.dsolve.factorized(NTWN)
+                solve = linalg.factorized(NTWN)
                 for idim in range(self.nDim):
                     self.coef[:, idim] = solve(N.transpose() * W * S[:, idim])
 
@@ -389,7 +389,7 @@ class Curve(object):
                 J = _assembleMatrix(jVal, jColInd, jRowPtr, (self.nCtl + nc + ndc, self.nCtl + nc + ndc))
 
                 # Factorize once for efficiency
-                solve = linalg.dsolve.factorized(J)
+                solve = linalg.factorized(J)
                 for idim in range(self.nDim):
                     rhs = np.hstack((N.transpose() * W * S[:, idim], T[:, idim]))
                     self.coef[:, idim] = solve(rhs)[0 : self.nCtl]

@@ -407,11 +407,11 @@ class Surface(object):
         self.coef = np.zeros((self.nCtlu, self.nCtlv, self.nDim))
         if self.interp:
             # Factorize once for efficiency
-            solve = linalg.dsolve.factorized(N)
+            solve = linalg.factorized(N)
             for idim in range(self.nDim):
                 self.coef[:, :, idim] = solve(self.X[:, :, idim].flatten()).reshape([self.nCtlu, self.nCtlv])
         else:
-            solve = linalg.dsolve.factorized(N.transpose() * N)
+            solve = linalg.factorized(N.transpose() * N)
             for idim in range(self.nDim):
                 rhs = N.transpose() * self.X[:, :, idim].flatten()
                 self.coef[:, :, idim] = solve(rhs).reshape([self.nCtlu, self.nCtlv])
