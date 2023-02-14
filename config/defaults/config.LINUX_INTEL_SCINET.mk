@@ -9,7 +9,7 @@ FF90_FLAGS  = -r8 -O2 -fPIC
 
 # C compiler and flags
 CC       = icc
-CC_FLAGS   = -O2 -fPIC
+CC_FLAGS   = -O2 -fPIC -std=c99
 
 # Define potentially different python, python-config and f2py executables:
 PYTHON = python
