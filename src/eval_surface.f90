@@ -56,7 +56,8 @@ subroutine eval_surface(u, v, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, &
             do i = 1, ku
                 do j = 1, kv
                     do idim = 1, ndim
-                    val(idim, jj, ii) = val(idim, jj, ii) + basisu(i) * basisv(j) * coef(idim, istartv + j, istartu + i)
+                        val(idim, jj, ii) = val(idim, jj, ii) + basisu(i) &
+                                            * basisv(j) * coef(idim, istartv + j, istartu + i)
                     end do
                 end do
             end do
