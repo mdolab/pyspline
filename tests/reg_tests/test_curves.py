@@ -97,7 +97,6 @@ class Test(unittest.TestCase):
             self.regression_test(handler)
 
     def regression_test(self, handler):
-
         # print('+--------------------------------------+')
         # print('           Create Tests   ')
         # print('+--------------------------------------+')
