@@ -72,7 +72,6 @@ class Surface(object):
     """
 
     def __init__(self, recompute=True, **kwargs):
-
         self.name = None
         self.edgeCurves = [None, None, None, None]
         self.data = None
@@ -734,7 +733,6 @@ class Surface(object):
                 Surface(tu=t2, tv=self.tv, ku=self.ku, kv=self.kv, coef=coef2),
             )
         elif direction == "v":
-
             r, breakPt = self.insertKnot(direction, s, self.kv - 1)
             # Break point is now at the right so we need to adjust the
             # counter to the left

@@ -153,7 +153,6 @@ class Test(unittest.TestCase):
             self.regression_test(handler)
 
     def regression_test(self, handler, solve=False):
-
         # Create a generic surface
         nu = 10
         nv = 10
