@@ -66,7 +66,6 @@ class Test(unittest.TestCase):
             self.regression_test(handler)
 
     def regression_test(self, handler, solve=False):
-
         # Define raw data for a volume:
         data = np.array(
             [
@@ -2173,7 +2172,6 @@ class Test(unittest.TestCase):
         for ku in [2, 4]:
             for kv in [3, 4]:
                 for kw in [2, 4]:
-
                     # get the knot vectors to initialize the volume using X
                     tu = uniformKnots(X.shape[0], ku)
                     tv = uniformKnots(X.shape[1], kv)
