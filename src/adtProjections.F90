@@ -356,11 +356,10 @@ contains
         !
         !       Local variables
         !
-        integer :: ierr, len, i2
+        integer :: len, i2
         logical :: firstTime
 
         character(len=len_trim(errorMessage)) :: message
-        character(len=8) :: integerString
 
         ! Copy the errorMessage into message. It is not possible to work
         ! with errorMessage directly, because it is modified in this
@@ -1193,7 +1192,7 @@ contains
         integer, intent(out) :: faceID(nSearchPts)
 
         ! Working Variables
-        integer :: ierr, ll, nNPE, intInfo(3)
+        integer :: ierr, nNPE, intInfo(3)
         integer :: i, j, mm
         real(kind=realType), dimension(3) :: xMin, xMax
         real(kind=realType) :: uvw(5), coor(4)
@@ -1230,9 +1229,12 @@ contains
         ! Allocate the memory for the bounding box coordinates, the
         ! corresponding element type and the index in the connectivity.
 
-        allocate (ADT%xBBox(6, nConn))
-        allocate (ADT%elementType(nConn))
-        allocate (ADT%elementID(nConn))
+        allocate (ADT%xBBox(6, nConn), &
+                  ADT%elementType(nConn), &
+                  ADT%elementID(nConn), stat=ierr)
+        if (ierr /= 0) &
+            call adtTerminate(ADT, "searchQuads", &
+                              "Memory allocation failure for xBBox, elementType, or elementID.")
 
         ! All quads
         ADT%elementType = adtQuadrilateral
@@ -1279,7 +1281,10 @@ contains
 
         ! Allocate the (pointer) memory that may be resized as necessary for
         ! the singlePoint search routine.
-        allocate (BB(10), frontLeaves(25), frontLeavesNew(25), stack(100))
+        allocate (BB(10), frontLeaves(25), frontLeavesNew(25), stack(100), stat=ierr)
+        if (ierr /= 0) &
+            call adtTerminate(ADT, "searchQuads", &
+                              "Memory allocation failure for arrays used in minDistanceTreeSearchSinglePoint.")
 
         ! Now do the searches
         do i = 1, nSearchPts
@@ -1371,9 +1376,8 @@ contains
         !
         !       Local variables.
         !
-        integer :: ierr
 
-        integer :: ii, kk, ll, mm, nn, activeLeaf
+        integer :: ii, kk, ll, mm, activeLeaf
         integer :: nBB, nFrontLeaves, nFrontLeavesNew
         integer :: nAllocBB, nAllocFront, nNodeElement
         integer :: i, kkk
@@ -1387,7 +1391,6 @@ contains
         real(kind=realType), dimension(2) :: dd
         real(kind=realType), dimension(3) :: x1, x21, x41, x3142, xf
         real(kind=realType), dimension(3) :: vf, vt, a, b, norm, an, bn
-        real(kind=realType), dimension(3) :: chi
         real(kind=realType), dimension(8) :: weight
 
         real(kind=realType), dimension(:, :), pointer :: xBBox
