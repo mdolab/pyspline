@@ -30,20 +30,7 @@ subroutine para3d(X, n, m, l, ndim, S, u, v, w)
     ! Working
     integer :: i, j, k
 
-    real(kind=realType) DELI, DELJ, DELK
-
-    DELI(K, J, I) = SQRT((X(1, K, J, I) - X(1, K, J, I - 1))**2 + &
-                         (X(2, K, J, I) - X(2, K, J, I - 1))**2 + &
-                         (X(3, K, J, I) - X(3, K, J, I - 1))**2)
-
-    DELJ(K, J, I) = SQRT((X(1, K, J, I) - X(1, K, J - 1, I))**2 + &
-                         (X(2, K, J, I) - X(2, K, J - 1, I))**2 + &
-                         (X(3, K, J, I) - X(3, K, J - 1, I))**2)
-
-    DELK(K, J, I) = SQRT((X(1, K, J, I) - X(1, K - 1, J, I))**2 + &
-                         (X(2, K, J, I) - X(2, K - 1, J, I))**2 + &
-                         (X(3, K, J, I) - X(3, K - 1, J, I))**2)
-
+    ! Initialize output
     u(:) = 0.0
     v(:) = 0.0
     w(:) = 0.0
@@ -206,5 +193,29 @@ subroutine para3d(X, n, m, l, ndim, S, u, v, w)
     end do
     w = w / (n * m)
 
-end subroutine para3d
+contains
+    pure real(kind=realType) function DELI(kk, jj, ii)
+        integer, intent(in) :: kk, jj, ii
 
+        DELI = SQRT((X(1, kk, jj, ii) - X(1, kk, jj, ii - 1))**2 + &
+                    (X(2, kk, jj, ii) - X(2, kk, jj, ii - 1))**2 + &
+                    (X(3, kk, jj, ii) - X(3, kk, jj, ii - 1))**2)
+    end function DELI
+
+    pure real(kind=realType) function DELJ(kk, jj, ii)
+        integer, intent(in) :: kk, jj, ii
+
+        DELJ = SQRT((X(1, kk, jj, ii) - X(1, kk, jj - 1, ii))**2 + &
+                    (X(2, kk, jj, ii) - X(2, kk, jj - 1, ii))**2 + &
+                    (X(3, kk, jj, ii) - X(3, kk, jj - 1, ii))**2)
+    end function DELJ
+
+    pure real(kind=realType) function DELK(kk, jj, ii)
+        integer, intent(in) :: kk, jj, ii
+
+        DELK = SQRT((X(1, kk, jj, ii) - X(1, kk - 1, jj, ii))**2 + &
+                    (X(2, kk, jj, ii) - X(2, kk - 1, jj, ii))**2 + &
+                    (X(3, kk, jj, ii) - X(3, kk - 1, jj, ii))**2)
+    end function DELK
+
+end subroutine para3d

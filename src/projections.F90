@@ -476,8 +476,26 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
         ! Calculate the Hessian
         do j = 1, 3
             do i = 1, 3
-                hessian(i, j) = dot_product(deriv(:, i), deriv(:, j)) + &
-                                dot_product(R, deriv2(:, i, j))
+                ! TODO clean up this routine
+                ! 3 ways of doing the hessian. Second term causes problems, so we either:
+                ! omit it, only add the diagonal, keep adding it. Needs further investigation
+                ! just not adding them at all seems to be the most robust...
+
+                hessian(i, j) = dot_product(deriv(:, i), deriv(:, j))
+
+                ! if (i .eq. j) then
+                !     hessian(i, j) = hessian(i, j) + dot_product(R, deriv2(:, i, j))
+                ! end if
+
+                ! hessian(i, j) = dot_product(deriv(:, i), deriv(:, j)) + &
+                !                 dot_product(R, deriv2(:, i, j))
+
+                ! The hessian gets terribly ill conditioned when the second derivatives are included.
+                ! In one case, this shows up as a 2x2 sub block getting almost zero determinant.
+                ! This is solving an optimization problem, so check if there are any features that
+                ! would cause the optimization problem to be non-convex!
+
+                ! write(*,*) i, j, dot_product(deriv(:, i), deriv(:, j)), dot_product(R, deriv2(:, i, j))
             end do
         end do
 
@@ -1390,10 +1408,18 @@ subroutine solve_3by3(A, b, x)
     real(kind=realType), intent(out) :: x(3)
     real(kind=realType) :: idet
 
-  idet = 1/(A(1,1)*(A(3,3)*A(2,2)-A(3,2)*A(2,3))-A(2,1)*(A(3,3)*A(1,2)-A(3,2)*A(1,3))+A(3,1)*(A(2,3)*A(1,2)-A(2,2)*A(1,3)))
-  x(1) = idet*( b(1)*(A(3,3)*A(2,2)-A(3,2)*A(2,3)) - b(2)*(A(3,3)*A(1,2)-A(3,2)*A(1,3)) + b(3)*(A(2,3)*A(1,2)-A(2,2)*A(1,3)))
-  x(2) = idet*(-b(1)*(A(3,3)*A(2,1)-A(3,1)*A(2,3)) + b(2)*(A(3,3)*A(1,1)-A(3,1)*A(1,3)) - b(3)*(A(2,3)*A(1,1)-A(2,1)*A(1,3)))
-  x(3) = idet*( b(1)*(A(3,2)*A(2,1)-A(3,1)*A(2,2)) - b(2)*(A(3,2)*A(1,1)-A(3,1)*A(1,2)) + b(3)*(A(2,2)*A(1,1)-A(2,1)*A(1,2)))
+    idet = 1 / (A(1, 1) * (A(3, 3) * A(2, 2) - A(3, 2) * A(2, 3)) &
+                - A(2, 1) * (A(3, 3) * A(1, 2) - A(3, 2) * A(1, 3)) &
+                + A(3, 1) * (A(2, 3) * A(1, 2) - A(2, 2) * A(1, 3)))
+    x(1) = idet * (b(1) * (A(3, 3) * A(2, 2) - A(3, 2) * A(2, 3)) &
+                   - b(2) * (A(3, 3) * A(1, 2) - A(3, 2) * A(1, 3)) &
+                   + b(3) * (A(2, 3) * A(1, 2) - A(2, 2) * A(1, 3)))
+    x(2) = idet * (-b(1) * (A(3, 3) * A(2, 1) - A(3, 1) * A(2, 3)) &
+                   + b(2) * (A(3, 3) * A(1, 1) - A(3, 1) * A(1, 3)) &
+                   - b(3) * (A(2, 3) * A(1, 1) - A(2, 1) * A(1, 3)))
+    x(3) = idet * (b(1) * (A(3, 2) * A(2, 1) - A(3, 1) * A(2, 2)) &
+                   - b(2) * (A(3, 2) * A(1, 1) - A(3, 1) * A(1, 2)) &
+                   + b(3) * (A(2, 2) * A(1, 1) - A(2, 1) * A(1, 2)))
 
     ! | a11 a12 a13 |-1             |   a33a22-a32a23  -(a33a12-a32a13)   a23a12-a22a13  |
     ! | a21 a22 a23 |    =  1/DET * | -(a33a21-a31a23)   a33a11-a31a13  -(a23a11-a21a13) |
