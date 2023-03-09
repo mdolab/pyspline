@@ -29,6 +29,7 @@ class Error(Exception):
 
 def writeTecplot1D(handle, name, data, solutionTime=None):
     """A Generic function to write a 1D data zone to a tecplot file.
+
     Parameters
     ----------
     handle : file handle
@@ -55,6 +56,7 @@ def writeTecplot1D(handle, name, data, solutionTime=None):
 
 def writeTecplot2D(handle, name, data, solutionTime=None):
     """A Generic function to write a 2D data zone to a tecplot file.
+
     Parameters
     ----------
     handle : file handle
@@ -83,6 +85,7 @@ def writeTecplot2D(handle, name, data, solutionTime=None):
 
 def writeTecplot3D(handle, name, data, solutionTime=None):
     """A Generic function to write a 3D data zone to a tecplot file.
+
     Parameters
     ----------
     handle : file handle
@@ -454,9 +457,10 @@ def line_plane(ia, vc, p0, v1, v2):
     -------
     sol : real ndarray[6, n]
         Solution vector---parametric positions + physical coordinates
+    pid : int ndarray[n]
+        Id for a given solution
     nSol : int
         Number of solutions
-    pid : int ndarray[n]
     """
 
     return libspline.line_plane(ia, vc, p0, v1, v2)
