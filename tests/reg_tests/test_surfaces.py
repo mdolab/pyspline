@@ -64,8 +64,20 @@ def run_surface_test(surface, handler, test_name):
 
     surf2 = surface.windowSurface([0.25, 0.25], [0.75, 0.5])
     # these values should be the same
-    assert_allclose(surface(0.25, 0.25), surf2(0, 0), err_msg="surface coordinates do not match after windowing!")
-    assert_allclose(surface(0.75, 0.5), surf2(1, 1), err_msg="surface coordinates do not match after windowing!")
+    assert_allclose(
+        surface(0.25, 0.25),
+        surf2(0, 0),
+        rtol=1e-7,
+        atol=1e-15,
+        err_msg="surface coordinates do not match after windowing!",
+    )
+    assert_allclose(
+        surface(0.75, 0.5),
+        surf2(1, 1),
+        rtol=1e-7,
+        atol=1e-15,
+        err_msg="surface coordinates do not match after windowing!",
+    )
 
     # Test get bounds
     handler.root_add_val("{} bounds".format(test_name), surface.getBounds())
