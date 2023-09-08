@@ -330,7 +330,7 @@
        real(kind=realtype) intent(in,out) :: v
        real(kind=realtype) dimension(ndim),intent(out),depend(ndim) :: diff
      end subroutine point_surface
-     subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,niter,eps,u,v,w,diff) ! in :test:projections.F90
+     subroutine point_volume(x0,tu,tv,tw,ku,kv,kw,coef,nctlu,nctlv,nctlw,ndim,niter,eps,umin,umax,vmin,vmax,wmin,wmax,u,v,w,diff) ! in :test:projections.F90
        real(kind=realtype) dimension(ndim),intent(in) :: x0
        real(kind=realtype) dimension(nctlu+ku),intent(in),depend(ku,nctlu) :: tu
        real(kind=realtype) dimension(nctlv+kv),intent(in),depend(kv,nctlv) :: tv
@@ -345,6 +345,12 @@
        integer, optional,intent(in),check(len(x0)>=ndim),depend(x0) :: ndim=len(x0)
        integer intent(in) :: niter
        real(kind=realtype) intent(in) :: eps
+       real(kind=realtype) intent(in) :: umin
+       real(kind=realtype) intent(in) :: umax
+       real(kind=realtype) intent(in) :: vmin
+       real(kind=realtype) intent(in) :: vmax
+       real(kind=realtype) intent(in) :: wmin
+       real(kind=realtype) intent(in) :: wmax
        real(kind=realtype) intent(in,out) :: u
        real(kind=realtype) intent(in,out) :: v
        real(kind=realtype) intent(in,out) :: w
@@ -407,11 +413,17 @@
        real(kind=realtype) dimension(n),intent(out),depend(n) :: u
        real(kind=realtype) dimension(n),intent(out),depend(n) :: v
      end subroutine point_surface_start
-     subroutine point_volume_start(x0,uu,vv,ww,data,nu,nv,nw,ndim,n,u,v,w) ! in :test:projections.F90
+     subroutine point_volume_start(x0,uu,vv,ww,data,umin,umax,vmin,vmax,wmin,wmax,nu,nv,nw,ndim,n,u,v,w) ! in :test:projections.F90
        real(kind=realtype) dimension(ndim,n),intent(in) :: x0
        real(kind=realtype) dimension(nu),intent(in) :: uu
        real(kind=realtype) dimension(nv),intent(in) :: vv
        real(kind=realtype) dimension(nw),intent(in) :: ww
+       real(kind=realtype) intent(in) :: umin
+       real(kind=realtype) intent(in) :: umax
+       real(kind=realtype) intent(in) :: vmin
+       real(kind=realtype) intent(in) :: vmax
+       real(kind=realtype) intent(in) :: wmin
+       real(kind=realtype) intent(in) :: wmax
        real(kind=realtype) dimension(ndim,nw,nv,nu),intent(in),depend(ndim,nw,nv,nu) :: data
        integer optional,intent(in),check(len(uu)>=nu),depend(uu) :: nu=len(uu)
        integer optional,intent(in),check(len(vv)>=nv),depend(vv) :: nv=len(vv)

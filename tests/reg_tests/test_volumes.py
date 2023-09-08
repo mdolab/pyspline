@@ -31,13 +31,13 @@ def run_volume_test(volume, handler, test_name):
     handler.root_add_val("{} bounds".format(test_name), volume.getBounds())
 
 
-def run_project_test(volume, handler, test_name, pts):
+def run_project_test(volume, handler, test_name, pts, volBounds=None):
     # Run a bunch of point projections: Tolerance for projections is
     # 1e-10, so only enforce that things match to 1e-8 or 100*eps
     eps = 1e-8
 
     for pt in pts:
-        u, v, w, D = volume.projectPoint(pt)
+        u, v, w, D = volume.projectPoint(pt, volBounds=volBounds)
         handler.root_add_val("{} project point u for pt={}".format(test_name, pt), u, tol=eps)
         handler.root_add_val("{} project point v for pt={}".format(test_name, pt), v, tol=eps)
         handler.root_add_val("{} project point w for pt={}".format(test_name, pt), w, tol=eps)
@@ -2206,3 +2206,15 @@ class Test(unittest.TestCase):
                         ]
                     )
                     run_project_test(volume, handler, test_name, pts=test_pts_outside)
+
+                    # test the volume bounds
+                    test_name = f"volume bounds with ku={ku}, kv={kv}, kw={kw}"
+                    volBounds = [[0.0, 0.5], [0.5, 1.0], [0.25, 0.75]]
+                    test_pts_outside = np.array(
+                        [
+                            [0.16, -0.013, 0.39],  # face
+                            [-0.059, 0.22, 0.51],  # edge
+                            [1.0, 1.0, 1.0],  # corner
+                        ]
+                    )
+                    run_project_test(volume, handler, test_name, pts=test_pts_outside, volBounds=volBounds)

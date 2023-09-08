@@ -815,7 +815,7 @@ class Volume(object):
 
         return Xmin, Xmax
 
-    def projectPoint(self, x0, nIter=25, eps=1e-10, **kwargs):
+    def projectPoint(self, x0, nIter=25, eps=1e-10, volBounds=None, **kwargs):
         """
         Project a point x0 or points x0 onto the volume and return
         parametric positions
@@ -830,6 +830,11 @@ class Volume(object):
             Maximum number of Newton iterations to perform
         eps : float
             Tolerance for the Newton iteration
+        volBounds : list of lists
+            Optional input to prescribe bounds to the parametric coordinates during the projection.
+            The value is a list, that should contain 3 lists with 2 float entries each.
+            First list contains the min and max bounds for the u parameter, second v, third w.
+            E.g. ``volBounds = [[0.0, 0.5], [0.5, 1.0], [0.25, 0.75]]``
         u : float or array of len(X0)
             Optional initial guess for u position.
         v : float or array of len(X0)
@@ -865,10 +870,28 @@ class Volume(object):
         if not len(x0) == len(u) == len(v) == len(w):
             raise Error("The length of x0 and u, v, w must be the same")
 
+        # get the bounds for the projection if we have custom bounds
+        if volBounds is None:
+            umin = self.tu[0]
+            umax = self.tu[-1]
+            vmin = self.tv[0]
+            vmax = self.tv[-1]
+            wmin = self.tw[0]
+            wmax = self.tw[-1]
+        else:
+            umin = volBounds[0][0]
+            umax = volBounds[0][1]
+            vmin = volBounds[1][0]
+            vmax = volBounds[1][1]
+            wmin = volBounds[2][0]
+            wmax = volBounds[2][1]
+
         # If necessary get brute-force starting point
         if np.any(u < 0) or np.any(u > 1) or np.any(v < 0) or np.any(v > 1):
             self.computeData()
-            u, v, w = libspline.point_volume_start(x0.real.T, self.udata, self.vdata, self.wdata, self.data.T)
+            u, v, w = libspline.point_volume_start(
+                x0.real.T, self.udata, self.vdata, self.wdata, self.data.T, umin, umax, vmin, vmax, wmin, wmax
+            )
         D = np.zeros_like(x0)
         for i in range(len(x0)):
             u[i], v[i], w[i], D[i] = libspline.point_volume(
@@ -882,6 +905,12 @@ class Volume(object):
                 self.coef.T,
                 nIter,
                 eps,
+                umin,
+                umax,
+                vmin,
+                vmax,
+                wmin,
+                wmax,
                 u[i],
                 v[i],
                 w[i],
