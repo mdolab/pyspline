@@ -832,7 +832,7 @@ class Volume(object):
             Tolerance for the Newton iteration
         volBounds : list of lists
             Optional input to prescribe bounds to the parametric coordinates during the projection.
-            The value is a list, that should contain 3 lists with 2 float entries each.
+            The value is a list that must contain 3 lists with 2 float entries each.
             First list contains the min and max bounds for the u parameter, second v, third w.
             E.g. ``volBounds = [[0.0, 0.5], [0.5, 1.0], [0.25, 0.75]]``
         u : float or array of len(X0)
