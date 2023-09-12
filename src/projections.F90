@@ -377,7 +377,7 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
 end subroutine point_surface
 
 subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, ndim, &
-                        niter, eps, u, v, w, Diff)
+                        niter, eps, umin, umax, vmin, vmax, wmin, wmax, u, v, w, Diff)
 
     !***DESCRIPTION
     !
@@ -401,6 +401,12 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
     !     ndim    - Integer, Spatial Dimension
     !     Niter   - Integer, Maximum number of Netwton iterations
     !     eps     - Real - Eculdian Distance Convergence Measure
+    !     umin    - Real, lower bound for u
+    !     umax    - Real, upper bound for u
+    !     vmin    - Real, lower bound for v
+    !     vmax    - Real, upper bound for v
+    !     wmin    - Real, lower bound for w
+    !     wmax    - Real, upper bound for w
     !
     !     Ouput
     !     u       - Real, u parameters where V(u, v, w) is closest to x0
@@ -416,6 +422,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
     real(kind=realType), intent(in) :: tu(nctlu + ku), tv(nctlv + kv), tw(nctlw + kw)
     real(kind=realType), intent(in) :: coef(ndim, nctlw, nctlv, nctlu)
     real(kind=realType), intent(in) :: eps
+    real(kind=realType), intent(in) :: umin, umax, vmin, vmax, wmin, wmax
 
     ! Output
     real(kind=realType), intent(inout) :: u, v, w
@@ -430,12 +437,12 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
     logical :: flag(3), cflag, exit_early
 
     ! Set lower and upper bounds for u, v, w based on knot vector
-    low(1) = tu(1)
-    low(2) = tv(1)
-    low(3) = tw(1)
-    high(1) = tu(Nctlu + ku)
-    high(2) = tv(Nctlv + kv)
-    high(3) = tw(Nctlw + kw)
+    low(1) = umin
+    low(2) = vmin
+    low(3) = wmin
+    high(1) = umax
+    high(2) = vmax
+    high(3) = wmax
 
     pt(1) = u
     pt(2) = v
@@ -1211,7 +1218,7 @@ subroutine point_surface_start(x0, uu, vv, data, nu, nv, ndim, N, u, v)
 
 end subroutine point_surface_start
 
-subroutine point_volume_start(x0, uu, vv, ww, data, nu, nv, nw, ndim, N, u, v, w)
+subroutine point_volume_start(x0, uu, vv, ww, data, umin, umax, vmin, vmax, wmin, wmax, nu, nv, nw, ndim, N, u, v, w)
 
     !***DESCRIPTION
     !
@@ -1227,6 +1234,12 @@ subroutine point_volume_start(x0, uu, vv, ww, data, nu, nv, nw, ndim, N, u, v, w
     !     vv      - Real, array size(nv) v-parameter values defining data
     !     ww      - Real, array size(nw) w-parameter values defining data
     !     data    - Real, array size(ndim, nw, nv, nu) - Data to compare against
+    !     umin    - Real, lower bound for u
+    !     umax    - Real, upper bound for u
+    !     vmin    - Real, lower bound for v
+    !     vmax    - Real, upper bound for v
+    !     wmin    - Real, lower bound for w
+    !     wmax    - Real, upper bound for w
     !     nu      - Integer, number of uu data
     !     nv      - Integer, number of vv data
     !     nw      - Integer, number of ww data
@@ -1244,6 +1257,7 @@ subroutine point_volume_start(x0, uu, vv, ww, data, nu, nv, nw, ndim, N, u, v, w
     ! Input
     integer, intent(in) :: nu, nv, nw, ndim, N
     real(kind=realType), intent(in) :: x0(ndim, N), uu(nu), vv(nv), ww(nw)
+    real(kind=realType), intent(in) :: umin, umax, vmin, vmax, wmin, wmax
     real(kind=realType), intent(in) :: data(ndim, nw, nv, nu)
 
     ! Output
@@ -1258,11 +1272,16 @@ subroutine point_volume_start(x0, uu, vv, ww, data, nu, nv, nw, ndim, N, u, v, w
         do i = 1, nu
             do j = 1, nv
                 do k = 1, nw
-                    if (NORM2(X0(:, ipt) - data(:, k, j, i)) < D) then
+                    if ((umin .lt. uu(i)) .and. (uu(i) .lt. umax) .and. &
+                        (vmin .lt. vv(j)) .and. (vv(j) .lt. vmax) .and. &
+                        (wmin .lt. ww(k)) .and. (ww(k) .lt. wmax) .and. &
+                        (NORM2(X0(:, ipt) - data(:, k, j, i)) < D)) then
+
                         u(ipt) = uu(i)
                         v(ipt) = vv(j)
                         w(ipt) = ww(k)
                         D = NORM2(X0(:, ipt) - data(:, k, j, i))
+
                     end if
                 end do
             end do
