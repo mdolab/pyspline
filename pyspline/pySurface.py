@@ -68,7 +68,7 @@ class Surface(object):
     Notes
     -----
     The orientation of the nodes, edges and faces is the same as the
-    **bottom** surface as described in :class:`Volume` documentation.
+    **bottom** surface as described in :class:`~pyspline.pyVolume.Volume` documentation.
     """
 
     def __init__(self, recompute=True, **kwargs):
