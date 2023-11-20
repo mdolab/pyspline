@@ -32,8 +32,8 @@ Once you have copied the config file, compile pySpline by running:
 If everything was successful, the following lines will be printed to
 the screen (near the end)::
 
-   Testing if module pyspline can be imported...
-   Module pyspline was successfully imported.
+   Testing if module libspline can be imported...
+   Module libspline was successfully imported.
 
 If you don't see this, it will be necessary to configure the build manually.
 To configure manually, open ``config/config.mk`` and modify options as necessary.
@@ -47,7 +47,7 @@ Lastly, to build and install the Python interface, type:
 Verification
 ------------
 To verify the library, pySpline contains a set of tests that can be run automatically to ensure it reproduces the expected reference results.
-To do so, testing dependencies need to installed first, by typing:
+To do so, testing dependencies need to be installed first, by typing:
 
 .. prompt:: bash
 
