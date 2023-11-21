@@ -595,7 +595,7 @@ class Curve(object):
 
     def getDerivative(self, s):
         """
-        Evaluate the derivatie of the spline at parametric position, s
+        Evaluate the derivative of the spline at parametric position, s
 
         Parameters
         ----------
@@ -616,7 +616,7 @@ class Curve(object):
 
     def getSecondDerivative(self, s):
         """
-        Evaluate the second derivatie of the spline at parametric
+        Evaluate the second derivative of the spline at parametric
         position, s
 
         Parameters
@@ -687,7 +687,7 @@ class Curve(object):
 
         Parameters
         ----------
-        inCurve : pySpline.curve objet
+        inCurve : pySpline.curve object
             Other curve to use
         nIter : int
             Maximum number of Newton iterations to perform.
@@ -735,7 +735,7 @@ class Curve(object):
 
         Parameters
         ----------
-        inCurve : pySpline.curve objet
+        inCurve : pySpline.curve object
             Other curve to use
         nIter : int
             Maximum number of Newton iterations to perform.

@@ -63,13 +63,13 @@ class Volume(object):
     z : array, size (Nu, Nv, Nw)
        Just z data to fit/interpolate
     u : array, size (Nu, Nv, Nw)
-       Explict u parameters to use. Optional.
+       Explicit u parameters to use. Optional.
     v : array, size (Nu, Nv, Nw)
-       Explict v parameters to use. Optional.
+       Explicit v parameters to use. Optional.
     w : array, size (Nu, Nv, Nw)
-       Explict w parameters to use. Optional.
+       Explicit w parameters to use. Optional.
     nIter : int
-       Number of Hoscheks parater corrections to run
+       Number of Hoscheks parameter corrections to run
     recompute : bool
        Specifies whether the actual fitting is completed.
 
@@ -323,7 +323,7 @@ class Volume(object):
         return
 
     def calcKnots(self):
-        """Determine the knots depending on if it is inerpolated or
+        """Determine the knots depending on if it is interpolated or
         an LMS fit"""
         if self.interp:
             self.tu = libspline.knots_interp(self.u, np.array([], "d"), self.ku)
@@ -680,7 +680,7 @@ class Volume(object):
 
     def __call__(self, u, v, w):
         """
-        Equivalant to getValue()
+        Equivalent to getValue()
         """
         return self.getValue(u, v, w)
 
@@ -1038,13 +1038,13 @@ class Volume(object):
         fileName : str
             Tecplot filename. Should end in .dat
         vols : bool
-            Flag specifiying whether the interpolated volume should
+            Flag specifying whether the interpolated volume should
             be used. This is usually True if you want to get an
             approximation of the entire volume.
         coef : bool
-            Flag specifiying if the control points are to be plotted
+            Flag specifying if the control points are to be plotted
         orig : bool
-            Flag specifiying if original data (used for fitting) is
+            Flag specifying if original data (used for fitting) is
             to be included. If on original data exists, this argument
             is ignored.
         """

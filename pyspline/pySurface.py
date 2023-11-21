@@ -56,19 +56,19 @@ class Surface(object):
     y : array, size (Nu, Nv)
        Just y data to fit/interpolate
     u : array, size (Nu, Nv)
-       Explict u parameters to use. Optional.
+       Explicit u parameters to use. Optional.
     v : array, size (Nu, Nv)
-       Explict v parameters to use. Optional.
+       Explicit v parameters to use. Optional.
     scaledParams : bool
        default is to use u,v for parameterization. If true use u,v as well.
        If false, use U,V.
     nIter : int
-       Number of Hoscheks parater corrections to run
+       Number of Hoscheks parameter corrections to run
 
     Notes
     -----
     The orientation of the nodes, edges and faces is the same as the
-    **bottom** surface as described in :class:`Volume` documentation.
+    **bottom** surface as described in :class:`~pyspline.pyVolume.Volume` documentation.
     """
 
     def __init__(self, recompute=True, **kwargs):
@@ -466,7 +466,7 @@ class Surface(object):
         return u, v, U, V
 
     def calcKnots(self):
-        """Determine the knots depending on if it is inerpolated or
+        """Determine the knots depending on if it is interpolated or
         an LMS fit"""
         if self.interp:
             self.tu = libspline.knots_interp(self.u, np.array([], "d"), self.ku)
@@ -814,7 +814,7 @@ class Surface(object):
         return vals.squeeze().T
 
     def getDerivative(self, u, v):
-        """Evaluate the first derivatvies of the spline surface
+        """Evaluate the first derivatives of the spline surface
 
         Parameters
         ----------
@@ -840,7 +840,7 @@ class Surface(object):
         return deriv.T
 
     def getSecondDerivative(self, u, v):
-        """Evaluate the second derivatvies of the spline surface
+        """Evaluate the second derivatives of the spline surface
 
         deriv = [ (d^2)/(du^2)    (d^2)/(dudv) ]
                 [ (d^2)/(dudv)    (d^2)/(dv^2) ]
