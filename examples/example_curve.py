@@ -15,7 +15,7 @@ x = np.cos(theta)
 y = np.sin(theta)
 z = np.linspace(0, 1, n)
 print("Helix Data")
-curve = Curve(x=x, y=y, z=z, k=4, tl=16, ter=100)
+curve = Curve(x=x, y=y, z=z, k=4, nCtl=16, nIter=100)
 curve.writeTecplot("helix.dat")
 
 # Load naca0012 data
