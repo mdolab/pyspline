@@ -952,7 +952,7 @@ class Surface(object):
 
         Parameters
         ----------
-        inCurve : pySpline.curve objet
+        inCurve : pySpline.curve object
            Curve to use
         nIter : int
             Maximum number of Newton iterations to perform.
