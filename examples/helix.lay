@@ -1,7 +1,7 @@
 #!MC 1200
 # Created by Tecplot 360 build 12.1.0.6714
 $!VarSet |LFDSFN1| = '"helix.dat"'
-$!VarSet |LFDSVL1| = '"X" "Y" "Z"'
+$!VarSet |LFDSVL1| = '"CoordinateX" "CoordinateY" "CoordinateZ"'
 $!SETSTYLEBASE FACTORY
 $!GLOBALLINKING 
   LINKCOLORMAPS = YES
