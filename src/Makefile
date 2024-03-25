@@ -9,6 +9,7 @@ RULES_FILE  = $(MAIN_DIR)/Rules.mk
 include ${COMMON_FILE}
 include ${RULES_FILE}
 vpath %.o $(OBJDIR)
+GIT_VERSION   = $(shell git describe --dirty --always --tags)
 
 # Name of files to be compiled:
 MODS = precision.o\
@@ -28,11 +29,12 @@ OBJS =  evaluations.o\
 	eval_surface.o\
 	eval_volume.o\
 	projections.o\
-	tfi2d.o\
+	tfi2d.o
 
 default:
 	$(MAKE) $(MODS)
 	cp -f *.mod ../mod
+	$(FF90) $(FF90_ALL_FLAGS) -cpp -DGITVERSION=\"$(GIT_VERSION)\" -c version.f90 -o $(OBJDIR)/version.o
 	$(MAKE) $(OBJS)
 
 clean:
