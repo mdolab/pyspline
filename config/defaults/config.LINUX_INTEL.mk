@@ -3,8 +3,10 @@ AR       = ar
 AR_FLAGS = -rvs
 RM       = /bin/rm -rf
 
-ICC_EXISTS := $(shell command -v icc;) # Note that ";" is there to avoid make shell optimization, otherwise the shell command may fail
-ifdef ICC_EXISTS
+# Note that ";" is there to avoid make shell optimization, otherwise the shell command may fail
+  ICC_EXISTS := $(shell command -v icc;)
+
+  ifdef ICC_EXISTS
   # icc only exists on older Intel versions
   # Assume that we want to use the old compilers
   FF90 = ifort
