@@ -136,7 +136,7 @@ subroutine point_curve(x0, t, k, coef, nctl, ndim, Niter, eps, s, Diff)
             nfVal = 0.5 * nDist**2
 
             ! Check if the new point satisfies the wolfe condition
-            if (nfval < fval + pgrad * wolfe * step) then
+            if (nfval <= fval + pgrad * wolfe * step) then
                 dist = ndist
                 exit lineloop
             end if
@@ -327,7 +327,7 @@ subroutine point_surface(x0, tu, tv, ku, kv, coef, nctlu, nctlv, ndim, niter, ep
             nfval = 0.5 * ndist**2
 
             ! Check if the new point satisfies the wolfe condition
-            if (nfval < fval + pgrad * wolfe * step) then
+            if (nfval <= fval + pgrad * wolfe * step) then
                 dist = ndist
                 exit lineloop
             end if
@@ -647,7 +647,7 @@ subroutine point_volume(x0, tu, tv, tw, ku, kv, kw, coef, nctlu, nctlv, nctlw, n
             nfval = 0.5 * ndist**2
 
             ! Check if the new point satisfies the wolfe condition
-            if (nfval < fval + pgrad * wolfe * step) then
+            if (nfval <= fval + pgrad * wolfe * step) then
                 dist = ndist
                 exit lineloop
             end if
@@ -849,7 +849,7 @@ subroutine curve_curve(t1, k1, coef1, t2, k2, coef2, n1, n2, ndim, Niter, &
             nfval = 0.5 * ndist**2
 
             ! Check if the new point satisfies the wolfe condition
-            if (nfval < fval + pgrad * wolfe * step) then
+            if (nfval <= fval + pgrad * wolfe * step) then
                 dist = ndist
                 exit lineloop
             end if
@@ -1067,7 +1067,7 @@ subroutine curve_surface(tc, kc, coefc, tu, tv, ku, kv, coefs, &
             nfVal = 0.5 * nDist**2
 
             ! Check if the new point satisfies the wolfe condition
-            if (nfval < fval + pgrad * wolfe * step) then
+            if (nfval <= fval + pgrad * wolfe * step) then
                 dist = ndist
                 exit lineloop
             end if
