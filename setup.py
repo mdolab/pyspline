@@ -27,7 +27,7 @@ setup(
     license="Apache License Version 2.0",
     packages=["pyspline"],
     package_data={"pyspline": ["*.so"]},
-    install_requires=["numpy>=1.16", "scipy>=1.2"],
+    install_requires=["numpy>=1.21", "scipy>=1.7"],
     extras_require={
         "docs": docs_require,
         "testing": ["parameterized", "testflo>=1.4.5", "mdolab-baseclasses>=1.6.1"],
