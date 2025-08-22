@@ -1,6 +1,11 @@
 # use glob syntax.
 syntax: glob
 doc/_build/*
+
+# Ignore ruff and pre-commit files
+ruff.toml
+.pre-commit-config.yaml
+
 *.o
 *.pyc
 *.~
