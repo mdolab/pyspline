@@ -9,7 +9,6 @@ from .utils import Error, _assembleMatrix, checkInput, closeTecplot, openTecplot
 
 
 class Surface(object):
-
     """
     Create an instance of a b-spline surface. There are two
     ways to initialize the class
@@ -467,7 +466,8 @@ class Surface(object):
 
     def calcKnots(self):
         """Determine the knots depending on if it is interpolated or
-        an LMS fit"""
+        an LMS fit
+        """
         if self.interp:
             self.tu = libspline.knots_interp(self.u, np.array([], "d"), self.ku)
             self.tv = libspline.knots_interp(self.v, np.array([], "d"), self.kv)
@@ -614,7 +614,8 @@ class Surface(object):
         a u, v point and add it to pyGeo's global dPt/dCoef
         matrix. vals, row_ptr, col_ind is the CSR data and
         lIndex in the local -> global mapping for this
-        surface"""
+        surface
+        """
         return libspline.getbasisptsurface(u, v, self.tu, self.tv, self.ku, self.kv, vals, colInd, istart, lIndex.T)
 
     def __call__(self, u, v):

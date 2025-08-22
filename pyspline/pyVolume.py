@@ -309,7 +309,8 @@ class Volume(object):
 
     def calcParameterization(self):
         """Compute distance based parametrization. Use the fortran
-        function for this"""
+        function for this
+        """
         S, u, v, w = libspline.para3d(self.X.T)
         S = S.T
         self.u = u
@@ -324,7 +325,8 @@ class Volume(object):
 
     def calcKnots(self):
         """Determine the knots depending on if it is interpolated or
-        an LMS fit"""
+        an LMS fit
+        """
         if self.interp:
             self.tu = libspline.knots_interp(self.u, np.array([], "d"), self.ku)
             self.tv = libspline.knots_interp(self.v, np.array([], "d"), self.kv)
@@ -672,7 +674,8 @@ class Volume(object):
         is to compute the basis function for a u, v, w point and add
         it to pyBlocks's global dPt/dCoef
         matrix. vals, rowPtr, colInd is the CSR data and lIndex in
-        the local -> global mapping for this volume"""
+        the local -> global mapping for this volume
+        """
 
         return libspline.getbasisptvolume(
             u, v, w, self.tu, self.tv, self.tw, self.ku, self.kv, self.kw, vals, colInd, istart, lIndex.T

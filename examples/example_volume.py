@@ -48,9 +48,9 @@ f.write('VARIABLES = "CoordinateX", "CoordinateY", "CoordinateZ"\n')
 f.write(f"Zone T=original_points I={N}  \n")
 f.write("DATAPACKING=POINT\n")
 for i in range(N):
-    f.write(f"{Y[i,0]} {Y[i,1]} {Y[i,2]}\n")
+    f.write(f"{Y[i, 0]} {Y[i, 1]} {Y[i, 2]}\n")
 
 f.write(f"Zone T=vol_point_proj I={N} \n")
 f.write("DATAPACKING=POINT\n")
 for i in range(N):
-    f.write(f"{coords[i,0]} {coords[i,1]} {coords[i,2]}\n")
+    f.write(f"{coords[i, 0]} {coords[i, 1]} {coords[i, 2]}\n")

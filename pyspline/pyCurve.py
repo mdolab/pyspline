@@ -74,14 +74,14 @@ class Curve(object):
     --------
     >>> x = [0, 0.5, 1.0]
     >>> y = [0, 0.25, 1.0]
-    >>> s = [0., 0.5, 1.0]
+    >>> s = [0.0, 0.5, 1.0]
     >>> # Spatial interpolated seg (k=2 makes this a straight line)
     >>> line_seg = Curve(x=x, y=y, k=2)
     >>> # With explicit parameter values
     >>> line_seg = Curve(x=x, y=y, k=2, s=s)
-    >>> #Interpolate parabolic curve
+    >>> # Interpolate parabolic curve
     >>> parabola = Curve(x=x, y=y, k=3)
-    >>> #Interpolate parabolic curve with parameter values
+    >>> # Interpolate parabolic curve with parameter values
     >>> parabola = Curve(x=x, y=y, k=3, s=s)
     """
 

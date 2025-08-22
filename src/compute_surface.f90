@@ -153,4 +153,3 @@ function compute_rms_surface(tu, tv, ku, kv, u, v, coef, nctlu, nctlv, ndim, nu,
     compute_rms_surface = sqrt(compute_rms_surface / (nu * nv))
 
 end function compute_rms_surface
-
