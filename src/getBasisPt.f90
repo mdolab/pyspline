@@ -80,4 +80,3 @@ subroutine getBasisPtVolume(u, v, w, tu, tv, tw, ku, kv, kw, vals, col_ind, ista
         end do
     end do
 end subroutine getBasisPtVolume
-

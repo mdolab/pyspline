@@ -109,4 +109,3 @@ subroutine insertKnot(u, r, t, k, coef, nctl, ndim, t_new, coef_new, ileft)
 
     call findSpan(u, k, t_new, nctl + r, ileft)
 end subroutine insertKnot
-

@@ -1632,4 +1632,3 @@ function dotproduct(x1, x2, n)
     end do
 
 end function dotproduct
-
