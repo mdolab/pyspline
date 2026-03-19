@@ -42,4 +42,3 @@ License
 -------
 
 Copyright 2019 MDO Lab. See the LICENSE file for details.
-
